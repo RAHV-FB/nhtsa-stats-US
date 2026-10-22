@@ -37,6 +37,7 @@ ANALYSES: dict[str, str] = {
     "ml": "nhtsa_stats.models.severity_ml",
     "policy": "nhtsa_stats.simulation.evidence",
     "figures": "nhtsa_stats.reporting.figures",
+    "report": "nhtsa_stats.reporting.render",
     "docs": "nhtsa_stats.reporting.docs_gen",
 }
 
