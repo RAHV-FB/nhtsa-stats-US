@@ -1,0 +1,33 @@
+{
+ "table": "vulnerable/fars_pedestrian_deaths_by_striking_vehicle.csv",
+ "description": "FARS pedestrian deaths by striking vehicle type and year (observed counts and shares)",
+ "population": "FARS pedestrians killed 2016-2024",
+ "unit": "person",
+ "outcome": "killed",
+ "method": "Census counts",
+ "inputs": [
+  "data/interim/FARS/person",
+  "data/interim/FARS/vehicle"
+ ],
+ "rows": 9,
+ "columns": [
+  "YEAR",
+  "deaths_car",
+  "deaths_large",
+  "deaths_motorcycle",
+  "deaths_other_unknown",
+  "deaths_pickup",
+  "deaths_suv",
+  "deaths_van",
+  "share_car",
+  "share_large",
+  "share_motorcycle",
+  "share_other_unknown",
+  "share_pickup",
+  "share_suv",
+  "share_van"
+ ],
+ "module": "nhtsa_stats.analysis.vulnerable",
+ "git_commit": "8211d77-dirty",
+ "generated_utc": "2026-10-22T16:59:27Z"
+}

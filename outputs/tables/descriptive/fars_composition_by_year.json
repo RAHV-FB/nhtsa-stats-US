@@ -1,0 +1,35 @@
+{
+ "table": "descriptive/fars_composition_by_year.csv",
+ "description": "Yearly composition of FARS fatal crashes and deaths",
+ "population": "FARS census",
+ "unit": "crash / person",
+ "outcome": "fatal",
+ "method": "Design-based (CRSS: Taylor linearisation, 25 strata/67 PSUs) or census counts (FARS)",
+ "inputs": [
+  "data/processed/crss_crash.parquet",
+  "data/processed/fars_crash.parquet",
+  "data/processed/fars_person.parquet"
+ ],
+ "rows": 9,
+ "columns": [
+  "YEAR",
+  "fatal_crashes",
+  "deaths",
+  "pct_crashes_speeding",
+  "pct_crashes_speeding_unknown",
+  "pct_crashes_driver_bac08_mi",
+  "pct_crashes_dark",
+  "pct_crashes_pedestrian",
+  "pct_crashes_motorcycle",
+  "pct_crashes_rural_road",
+  "pct_deaths_pedestrian",
+  "pct_deaths_cyclist",
+  "pct_deaths_motorcyclist",
+  "lpv_occupant_deaths",
+  "pct_lpv_deaths_unrestrained_of_known",
+  "pct_lpv_deaths_restraint_unknown"
+ ],
+ "module": "nhtsa_stats.analysis.descriptive",
+ "git_commit": "c7fbd45-dirty",
+ "generated_utc": "2026-10-22T16:46:00Z"
+}

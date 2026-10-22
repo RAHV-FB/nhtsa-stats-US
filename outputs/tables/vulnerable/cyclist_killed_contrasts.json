@@ -1,0 +1,39 @@
+{
+ "table": "vulnerable/cyclist_killed_contrasts.csv",
+ "description": "Crude and adjusted risk ratios of killed for struck cyclists",
+ "population": "CRSS pedestrians / pedalcyclists 2016-2024 with known injury severity",
+ "unit": "person",
+ "outcome": "killed",
+ "method": "Survey logistic regression; standardised margins; Taylor-linearised CIs (t, 42 df)",
+ "inputs": [
+  "data/interim/CRSS/person",
+  "data/interim/CRSS/vehicle",
+  "data/processed/crss_crash.parquet"
+ ],
+ "rows": 35,
+ "columns": [
+  "victim",
+  "outcome",
+  "factor",
+  "level",
+  "adj_rate",
+  "adj_rate_low",
+  "adj_rate_high",
+  "adj_rr",
+  "adj_rr_low",
+  "adj_rr_high",
+  "adj_rd",
+  "adj_rd_low",
+  "adj_rd_high",
+  "crude_rate",
+  "crude_rr",
+  "crude_rr_low",
+  "crude_rr_high",
+  "n",
+  "n_events",
+  "flag"
+ ],
+ "module": "nhtsa_stats.analysis.vulnerable",
+ "git_commit": "8211d77-dirty",
+ "generated_utc": "2026-10-22T16:59:22Z"
+}

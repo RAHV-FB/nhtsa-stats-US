@@ -1,0 +1,8 @@
+outcome,step,n_persons,n_events,weighted_persons_per_year,weighted_events_per_year,crude_rate
+killed,occupants (PER_TYP 1/2/9) with known outcome,1068206,8606,1.41008e+07,29319,0.00207924
+killed,  light passenger vehicle occupants,981365,7098,1.32003e+07,22916.2,0.00173603
+killed,    age unknown (excluded),32000,65,467969,223.173,0.000476897
+killed,    age < 8 (excluded),44519,122,577564,379.145,0.000656456
+killed,    LPV analysis population (age 8+),904846,6911,1.21548e+07,22313.8,0.00183581
+killed,  motorcycle riders (analysis population),29177,1396,107954,5057.97,0.0468528
+killed,"  other vehicle types (bus, truck, other, unknown; not modelled)",57664,112,792565,1344.86,0.00169685

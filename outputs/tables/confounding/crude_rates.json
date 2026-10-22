@@ -1,0 +1,30 @@
+{
+ "table": "confounding/crude_rates.csv",
+ "description": "Observed weighted fatal / KA shares by exposure level (crude numerators and denominators; flag: suppressed n<30, unstable RSE>30%)",
+ "population": "CRSS police-reported crashes 2016-2024 with known maximum severity (MAX_SEV 0-4)",
+ "unit": "crash",
+ "outcome": "fatal; ka",
+ "method": "Weighted proportions, Taylor-linearised SEs, logit CIs",
+ "inputs": [
+  "data/processed/crss_crash.parquet"
+ ],
+ "rows": 20,
+ "columns": [
+  "exposure",
+  "outcome",
+  "level",
+  "n",
+  "n_events",
+  "weighted_n_per_year",
+  "weighted_events_per_year",
+  "rate",
+  "se",
+  "ci_low",
+  "ci_high",
+  "rse",
+  "flag"
+ ],
+ "module": "nhtsa_stats.analysis.confounding",
+ "git_commit": "9074d23-dirty",
+ "generated_utc": "2026-10-22T17:07:57Z"
+}

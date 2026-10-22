@@ -1,0 +1,27 @@
+{
+ "table": "measurement/unknown_by_year.csv",
+ "description": "Weighted % unknown / yes by year and fatal status with coding-break flags (CRSS crashes)",
+ "population": "",
+ "unit": "",
+ "outcome": "",
+ "method": "See module docstring",
+ "inputs": [
+  "data/processed/*.parquet",
+  "data/interim/FARS/drugs"
+ ],
+ "rows": 108,
+ "columns": [
+  "YEAR",
+  "fatal",
+  "field",
+  "n",
+  "pct_unknown",
+  "pct_yes",
+  "change_pp_unknown",
+  "change_pp_yes",
+  "coding_break_flag"
+ ],
+ "module": "nhtsa_stats.analysis.measurement",
+ "git_commit": "8211d77-dirty",
+ "generated_utc": "2026-10-22T16:54:00Z"
+}

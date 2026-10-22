@@ -1,0 +1,4 @@
+driver_status,n_tested_with_police_report,bac08_prevalence,police_sensitivity_vs_bac08,police_specificity_vs_bac08,ppv,tp,fn,fp,tn
+killed,95900,0.357716,0.870544,0.904294,0.835146,29864,4441,5895,55700
+survived,54749,0.211401,0.981597,0.892831,0.710595,11361,213,4627,38548
+all,151318,0.304366,0.898906,0.899413,0.796338,41400,4656,10588,94674

@@ -1,0 +1,28 @@
+{
+ "table": "trends/prevalence_change.csv",
+ "description": "Weighted prevalence of each circumstance level among crashes, 2016-19 vs 2020-24",
+ "population": "CRSS police-reported crashes 2016-2024 with known maximum severity",
+ "unit": "crash",
+ "outcome": "",
+ "method": "Weighted means; difference with joint linearisation (shared PSUs)",
+ "inputs": [
+  "data/processed/crss_crash.parquet"
+ ],
+ "rows": 79,
+ "columns": [
+  "factor",
+  "level",
+  "n_P0",
+  "n_P1",
+  "share_P0",
+  "share_P1",
+  "change_pp",
+  "change_low",
+  "change_high",
+  "coding_drift_variable",
+  "flag"
+ ],
+ "module": "nhtsa_stats.analysis.trends",
+ "git_commit": "743b472-dirty",
+ "generated_utc": "2026-10-22T17:21:42Z"
+}

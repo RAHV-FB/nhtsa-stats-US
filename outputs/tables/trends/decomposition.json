@@ -1,0 +1,36 @@
+{
+ "table": "trends/decomposition.csv",
+ "description": "Oaxaca-Blinder-type decomposition of the change in the fatal (KA) share between 2016-19 and 2020-24 into composition and within-circumstance effects (both references and their average), plus sensitivity analyses",
+ "population": "CRSS police-reported crashes 2016-2024 with known maximum severity",
+ "unit": "crash",
+ "outcome": "fatal; ka; fatal_im (sensitivity)",
+ "method": "Survey-weighted (pseudo-ML) logistic models, ridge 0.01; predictive margins; Taylor linearisation with coefficient influence, summed within 67 PSUs / 25 strata; t with 42 df; separate period models; cross-period predictive margins",
+ "inputs": [
+  "data/processed/crss_crash.parquet"
+ ],
+ "rows": 160,
+ "columns": [
+  "analysis",
+  "outcome",
+  "quantity",
+  "label",
+  "units",
+  "estimate",
+  "se",
+  "low",
+  "high",
+  "covariates",
+  "n_P0",
+  "events_P0",
+  "n_P1",
+  "events_P1",
+  "converged"
+ ],
+ "module": "nhtsa_stats.analysis.trends",
+ "git_commit": "743b472-dirty",
+ "generated_utc": "2026-10-22T17:21:42Z",
+ "covariate_sets": {
+  "A": "pre-crash circumstances (PRE_CRASH without year)",
+  "B": "pre-crash circumstances + crash configuration (crash type, vehicles)"
+ }
+}

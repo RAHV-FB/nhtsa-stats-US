@@ -1,0 +1,67 @@
+{
+ "periods": {
+  "P0": [
+   2016,
+   2017,
+   2018,
+   2019
+  ],
+  "P1": [
+   2020,
+   2021,
+   2022,
+   2023,
+   2024
+  ]
+ },
+ "covariate_sets": {
+  "A": [
+   "region",
+   "urbanicity",
+   "tod",
+   "weekend",
+   "light",
+   "weather",
+   "surface",
+   "speed_limit",
+   "interstate",
+   "junction",
+   "work_zone",
+   "young_driver",
+   "older_driver",
+   "any_motorcycle",
+   "any_heavy_truck",
+   "speeding",
+   "alcohol_im"
+  ],
+  "B": [
+   "region",
+   "urbanicity",
+   "tod",
+   "weekend",
+   "light",
+   "weather",
+   "surface",
+   "speed_limit",
+   "interstate",
+   "junction",
+   "work_zone",
+   "young_driver",
+   "older_driver",
+   "any_motorcycle",
+   "any_heavy_truck",
+   "speeding",
+   "alcohol_im",
+   "crash_type",
+   "n_vehicles"
+  ]
+ },
+ "coding_drift_variables": [
+  "junction",
+  "weather",
+  "surface"
+ ],
+ "ridge": 0.01,
+ "design_df": 42,
+ "stochastic_components": "none (deterministic estimators)"
+}

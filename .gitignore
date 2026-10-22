@@ -19,3 +19,6 @@ outputs/cache/
 .DS_Store
 .idea/
 .vscode/
+
+# Run logs
+outputs/logs/
