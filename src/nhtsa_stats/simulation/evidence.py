@@ -202,10 +202,12 @@ def build_ledger() -> pd.DataFrame:
                 if r["ratio_of_rr_high"] < 1
                 else "multiplicative"
             )
+            explo = "" if str(r.get("prespecified", True)).lower() == "true" else " [exploratory]"
             parts.append(
-                f"{r['pair']}: IC {1000 * r['ic']:+.1f}/1000 ({add}); ratio of RRs {r['ratio_of_rr']:.2f} ({mul})"
+                f"{r['pair']}{explo}: IC {1000 * r['ic']:+.1f}/1000 ({add}); "
+                f"ratio of RRs {r['ratio_of_rr']:.2f} ({mul})"
             )
-        return "; ".join(parts) if parts else "none pre-specified"
+        return "; ".join(parts) if parts else "none estimated"
 
     def qba_text(var: str) -> str:
         if qba is None:
@@ -235,6 +237,13 @@ def build_ledger() -> pd.DataFrame:
         )
     )
     al = _row(freq, factor="alcohol_im", level="yes")
+    acs = _tab("measurement", "alcohol_coding_sensitivity")
+
+    def alcohol_rr(period: str, coding: str) -> str:
+        return _fmt_ci(
+            _row(acs, period=period, coding=coding), "adj_rr", "adj_rr_low", "adj_rr_high"
+        )
+
     dr = _row(freq, factor="drugs", level="yes")
     rows = [
         {
@@ -296,7 +305,13 @@ def build_ledger() -> pd.DataFrame:
                 "A_adj_rr_low",
                 "A_adj_rr_high",
             ),
-            "measurement_robustness": "ROBUST in direction and large in size. "
+            "measurement_robustness": "Large under every coding, but the size depends on the coding: imputed "
+            + alcohol_rr("2016-2018", "imputed (ALCHL_IM)")
+            + " in 2016-2018 vs "
+            + alcohol_rr("2019-2024", "imputed (ALCHL_IM)")
+            + " in 2019-2024 (coding break); police-reported complete case "
+            + alcohol_rr("2016-2024", "police, complete case")
+            + ". "
             + qba_text("alcohol_im"),
             "interactions": pairs_for("alcohol"),
             "most_affected": "see FARS profile (night/weekend, young adult men; measurement module)",
@@ -306,8 +321,10 @@ def build_ledger() -> pd.DataFrame:
             "evidence_intervention_changes_factor": NO_INTERVENTION_DATA,
             "assumptions_required": "checks/year -> coverage; detection probability; deterrence elasticity of impaired-driving "
             "prevalence; effects on crash occurrence and severity",
-            "numeric_estimate_possible": "Only conditional/hypothetical. Target association is the most robust in the data.",
-            "evidence_grade_target_association": "strong (large, robust to plausible differential ascertainment)",
+            "numeric_estimate_possible": "Only conditional/hypothetical. The direction of the target association is "
+            "among the most robust in the data; its size depends on alcohol coding.",
+            "evidence_grade_target_association": "strong in direction (large under every coding and robust to plausible "
+            "differential ascertainment); magnitude coding-dependent",
         },
         {
             "intervention": "Roadside drug testing",
@@ -385,7 +402,14 @@ def build_ledger() -> pd.DataFrame:
             + _fmt_ci(
                 _row(sev, factor="tod", level="00-05"), "crude_rr", "crude_rr_low", "crude_rr_high"
             )
-            + "; adjusted "
+            + "; adjusted, light not held fixed "
+            + _fmt_ci(
+                _row(sev, factor="tod", level="00-05"),
+                "Ax_adj_rr",
+                "Ax_adj_rr_low",
+                "Ax_adj_rr_high",
+            )
+            + "; adjusted, light held fixed "
             + _fmt_ci(
                 _row(sev, factor="tod", level="00-05"), "A_adj_rr", "A_adj_rr_low", "A_adj_rr_high"
             ),
