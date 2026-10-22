@@ -130,6 +130,47 @@ def harmonised_variables() -> str:
     return "\n".join(out)
 
 
+def processed_dictionary() -> str:
+    """Column-level dictionary of the analytic datasets, read from the Parquet files."""
+    import polars as pl  # noqa: PLC0415
+
+    out = [
+        "# Generated dictionary of the analytic datasets",
+        "",
+        "_Generated from `data/processed/*.parquet` by `nhtsa_stats.reporting.docs_gen`. Upper-case columns are raw "
+        "NHTSA fields carried through unchanged (meanings: `outputs/audit/codebook.csv`); lower-case columns are "
+        "harmonised (definitions: `docs/generated/harmonised_variables.md`). Do not edit by hand._",
+        "",
+    ]
+    for name in ("crss_crash", "crss_person", "fars_crash", "fars_person"):
+        path = config.PROCESSED_DIR / f"{name}.parquet"
+        if not path.exists():
+            continue
+        df = pl.read_parquet(path)
+        out += [f"## `{name}` — {df.height:,} rows × {df.width} columns", ""]
+        rows = []
+        for c in df.columns:
+            s = df[c]
+            info = h.REGISTRY.get(c)
+            if s.dtype == pl.Utf8 and s.n_unique() <= 15:
+                vals = ", ".join(str(v) for v in s.drop_nulls().unique().sort().to_list())
+            elif s.dtype.is_numeric() and s.null_count() < df.height:
+                vals = f"{s.min()} – {s.max()}"
+            else:
+                vals = f"{s.n_unique():,} distinct"
+            rows.append(
+                {
+                    "column": f"`{c}`",
+                    "type": str(s.dtype),
+                    "% null": round(100 * s.null_count() / df.height, 1),
+                    "values": vals[:120],
+                    "timing": info.timing if info else ("raw" if c.isupper() else ""),
+                }
+            )
+        out += [_md(pd.DataFrame(rows)), ""]
+    return "\n".join(out)
+
+
 def run() -> dict:
     main()
     return {"generated": [str(p) for p in GEN_DIR.glob("*.md")]}
@@ -139,6 +180,7 @@ def main() -> None:
     GEN_DIR.mkdir(parents=True, exist_ok=True)
     (GEN_DIR / "inventory_tables.md").write_text(inventory_tables())
     (GEN_DIR / "harmonised_variables.md").write_text(harmonised_variables())
+    (GEN_DIR / "processed_datasets.md").write_text(processed_dictionary())
 
 
 if __name__ == "__main__":

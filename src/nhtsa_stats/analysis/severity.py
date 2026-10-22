@@ -52,6 +52,9 @@ def observed_levels(df: pd.DataFrame, var: str, levels: Sequence | None = None) 
     present = set(pd.unique(df[var]))
     out = [lv for lv in levels if lv in present]
     if levels[0] not in present:
+        if var == "YEAR" and out:
+            # Year is a nuisance adjustment; in period-restricted fits use the first year present.
+            return out
         raise ValueError(f"reference level {levels[0]!r} of {var} not observed")
     return out
 

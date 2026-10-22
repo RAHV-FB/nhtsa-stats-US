@@ -1362,7 +1362,7 @@ requires-dist = [
     { name = "altair", marker = "extra == 'app'", specifier = ">=5" },
     { name = "matplotlib", specifier = ">=3.9" },
     { name = "numpy", specifier = ">=1.26" },
-    { name = "pandas", specifier = ">=2.2" },
+    { name = "pandas", specifier = ">=3.0" },
     { name = "polars", specifier = ">=1.20,<2" },
     { name = "pyarrow", specifier = ">=17" },
     { name = "scikit-learn", specifier = ">=1.5" },

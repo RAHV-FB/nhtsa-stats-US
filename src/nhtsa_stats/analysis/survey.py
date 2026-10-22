@@ -302,6 +302,58 @@ class ModelSpec:
     def columns(self) -> list[str]:
         return [*self.categorical, *self.numeric]
 
+    def _width(self, var: str) -> int:
+        return len(self.categorical[var]) - 1 if var in self.categorical else 1
+
+    def layout(self) -> list[tuple[str, tuple[str, ...], int, int]]:
+        """(kind, variables, start column, width) for every block of the design matrix."""
+        out, pos = [], 0
+        if self.intercept:
+            out.append(("intercept", (), 0, 1))
+            pos = 1
+        for v in [*self.categorical, *self.numeric]:
+            w = self._width(v)
+            out.append(("main", (v,), pos, w))
+            pos += w
+        for a, b in self.interactions:
+            w = self._width(a) * self._width(b)
+            out.append(("interaction", (a, b), pos, w))
+            pos += w
+        for i, term in enumerate(self.products):
+            out.append((f"product{i}", tuple(v for v, _ in term), pos, 1))
+            pos += 1
+        return out
+
+    def update_matrix(
+        self, x_base: np.ndarray, df_base: pd.DataFrame, df_new: pd.DataFrame
+    ) -> np.ndarray:
+        """Design matrix of ``df_new`` computed by recomputing only the blocks whose input
+        columns differ from ``df_base`` (whose matrix is ``x_base``).  Equivalent to
+        ``design_matrix(df_new)`` (tested) but much faster for counterfactual margins."""
+        changed = {c for c in self.columns() if c in df_new and not df_new[c].equals(df_base[c])}
+        x = x_base.copy()
+        if not changed:
+            return x
+        for kind, vars_, start, width in self.layout():
+            if not changed.intersection(vars_):
+                continue
+            if kind == "main":
+                block, _ = self._block(df_new, vars_[0])
+            elif kind == "interaction":
+                xa, _ = self._block(df_new, vars_[0])
+                xb, _ = self._block(df_new, vars_[1])
+                block = np.column_stack(
+                    [xa[:, i] * xb[:, j] for i in range(xa.shape[1]) for j in range(xb.shape[1])]
+                )
+            else:
+                term = self.products[int(kind.removeprefix("product"))]
+                col = np.ones(len(df_new))
+                for var, levels in term:
+                    col = col * df_new[var].isin(list(levels)).to_numpy(dtype=float)
+                block = col[:, None]
+            x[:, start : start + width] = block
+        return x
+
 
 # --------------------------------------------------------------------------------------
 # Survey-weighted logistic regression
@@ -386,6 +438,7 @@ class SurveyLogit:
         self._resid_w = w * (y - mu)
         self._w = w
         self._df_index = df.index
+        self._df_ref = df
         return self
 
     # ----------------------------------------------------------------------------------
@@ -443,14 +496,23 @@ class SurveyLogit:
         unconditional design-based standard errors.
         """
         d = np.ones(len(df), dtype=bool) if domain is None else np.asarray(domain, dtype=bool)
-        cf = df if setter is None else setter(df.copy())
-        xa, _ = self.spec.design_matrix(cf)
+        if setter is None:
+            cf = df
+            xa = self._x if df is self._df_ref else self.spec.design_matrix(df)[0]
+        else:
+            cf = setter(
+                df.copy(deep=False)
+            )  # copy-on-write (pandas >= 3): mutations never reach df
+            if df is self._df_ref:
+                xa = self.spec.update_matrix(self._x, df, cf)
+            else:
+                xa = self.spec.design_matrix(cf)[0]
         pa = _sigmoid(xa @ self.coef_)
         w = self._w * d
         big_w = w.sum()
         m = float((w * pa).sum() / big_w)
-        g = (xa * (w * pa * (1 - pa))[:, None]).sum(axis=0) / big_w
-        infl_beta = (self._x * self._resid_w[:, None]) @ (self._a_inv @ g)
+        g = xa.T @ (w * pa * (1 - pa)) / big_w
+        infl_beta = (self._x @ (self._a_inv @ g)) * self._resid_w
         z = w * (pa - m) / big_w + infl_beta
         return m, z
 

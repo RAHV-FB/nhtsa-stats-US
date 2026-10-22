@@ -8,7 +8,7 @@ requires-python = ">=3.11"
 dependencies = [
     "polars>=1.20,<2",
     "pyarrow>=17",
-    "pandas>=2.2",
+    "pandas>=3.0",  # copy-on-write semantics are relied upon (survey.margin_influence)
     "numpy>=1.26",
     "scipy>=1.13",
     "statsmodels>=0.14.4",

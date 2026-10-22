@@ -155,3 +155,31 @@ def test_proportion_table_flags_small_cells(rng):
 def test_logit_ci_bounds():
     lo, hi = logit_ci(0.01, 0.005, 40)
     assert 0 < lo < 0.01 < hi < 1
+
+
+def test_incremental_design_matrix_matches_full_rebuild(rng):
+    df, y, w, strata, clus = _sim_logit(rng)
+    df["c"] = rng.choice(["p", "q", "r"], len(df))
+    spec = ModelSpec(
+        categorical={"a": [0, 1], "b": [0, 1], "c": ["p", "q", "r"]},
+        numeric=["x"],
+        interactions=[("a", "c")],
+        products=[(("b", [1]), ("c", ["q", "r"]))],
+    )
+    x0, _ = spec.design_matrix(df)
+    for new in (df.assign(a=1), df.assign(c="r"), df.assign(b=0, c="q"), df):
+        np.testing.assert_array_equal(spec.update_matrix(x0, df, new), spec.design_matrix(new)[0])
+
+
+def test_fast_margins_equal_slow_margins(rng):
+    df, y, w, strata, clus = _sim_logit(rng)
+    spec = ModelSpec(
+        categorical={"a": [0, 1], "b": [0, 1]}, numeric=["x"], interactions=[("a", "b")]
+    )
+    m = SurveyLogit(spec).fit(df, y, SurveyDesign.from_arrays(w, strata, clus))
+    fast = m.margin_influence(df, lambda d: d.assign(a=1))
+    slow = m.margin_influence(
+        df.copy(), lambda d: d.assign(a=1)
+    )  # different object -> full rebuild
+    assert fast[0] == pytest.approx(slow[0])
+    np.testing.assert_allclose(fast[1], slow[1])
