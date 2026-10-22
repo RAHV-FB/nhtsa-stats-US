@@ -1,7 +1,7 @@
 {
  "table": "exposure/relative_involvement_ka.csv",
- "description": "Relative involvement ratios (QIE, C1), KA crashes only",
- "population": "CRSS two-vehicle crashes 2016-2024 (no non-motorist, both drivers present) with exactly one culpable and one non-culpable driver",
+ "description": "RIR among KA crashes only: selects on injury severity, so it mixes involvement with conditional severity (e.g. frailty); NOT a measure of involvement in severe crashes",
+ "population": "CRSS two-vehicle crashes 2016-2024 (no non-motorist, no hit-and-run vehicle, both drivers present) with exactly one culpable and one non-culpable driver",
  "unit": "driver",
  "outcome": "culpable (C1 action-based definition unless stated)",
  "method": "Quasi-induced exposure: RIR = odds of culpability within group (saturated survey logit, linearised CI); adjusted ratios from a multivariable survey logit",
@@ -28,6 +28,6 @@
   "flag"
  ],
  "module": "nhtsa_stats.analysis.exposure",
- "git_commit": "adf4c91-dirty",
- "generated_utc": "2026-10-22T17:38:27Z"
+ "git_commit": "ad92e63-dirty",
+ "generated_utc": "2026-10-22T18:31:58Z"
 }

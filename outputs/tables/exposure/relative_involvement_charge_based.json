@@ -1,7 +1,7 @@
 {
  "table": "exposure/relative_involvement_charge_based.csv",
- "description": "Sensitivity: RIR with culpability = moving violation charged (outcome-dependent definition)",
- "population": "CRSS two-vehicle crashes 2016-2024 (no non-motorist, both drivers present) with exactly one culpable and one non-culpable driver",
+ "description": "Sensitivity: RIR with culpability = moving violation charged (charged after the crash, so outcome-dependent); impairment/DWI charges (11-19) and outcome-defined charges (1, 9) excluded",
+ "population": "CRSS two-vehicle crashes 2016-2024 (no non-motorist, no hit-and-run vehicle, both drivers present) with exactly one culpable and one non-culpable driver",
  "unit": "driver",
  "outcome": "culpable (C1 action-based definition unless stated)",
  "method": "Quasi-induced exposure: RIR = odds of culpability within group (saturated survey logit, linearised CI); adjusted ratios from a multivariable survey logit",
@@ -28,6 +28,6 @@
   "flag"
  ],
  "module": "nhtsa_stats.analysis.exposure",
- "git_commit": "adf4c91-dirty",
- "generated_utc": "2026-10-22T17:38:28Z"
+ "git_commit": "ad92e63-dirty",
+ "generated_utc": "2026-10-22T18:31:58Z"
 }

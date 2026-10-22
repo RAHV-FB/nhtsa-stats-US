@@ -85,8 +85,14 @@ policy questions require data that do not exist in this repository.
   unmeasured confounding and correct measurement; they omit any effect on crash occurrence.
   Scaling to FARS deaths assumes the CRSS model fraction applies to the FARS census.
 * Quasi-induced exposure assumes non-culpable drivers represent drivers on the road and that
-  culpability is charged without bias by group; crash-level conditions cannot be assessed by
-  QIE at all.
+  police code pre-crash actions (speeding, critical event, driver errors) without bias by
+  group. The non-culpable pool is dominated by drivers struck from behind, so it reflects
+  congested traffic more than all driving; drivers less able to avoid others' errors may be
+  over-represented in it (pushing their ratio down); single-vehicle crashes, where young,
+  alcohol-involved and night-time crashes concentrate, are outside the design; and
+  hit-and-run crashes are excluded. The imputed alcohol field cannot support within-crash
+  contrasts after the 2019–2020 coding break, so alcohol is reported by coding period.
+  Crash-level conditions cannot be assessed by QIE at all.
 
 ## 5. Generalisation
 

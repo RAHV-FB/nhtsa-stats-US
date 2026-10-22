@@ -24,15 +24,29 @@ driver-factor "unknown" code; otherwise undetermined.  Charges are deliberately 
 violations are charged after the crash and dead drivers are almost never charged (outcome
 dependent).  The charge-based definition is reported only as a sensitivity analysis.
 Sample: crashes with exactly two in-transport vehicles, both with a driver present, no
-non-motorist, exactly one culpable and one non-culpable driver.
+non-motorist, no hit-and-run vehicle, exactly one culpable and one non-culpable driver.
+Hit-and-run crashes are excluded, as is usual in QIE: fleeing drivers are almost always coded
+culpable and have unknown age and sex, so keeping them inflates the culpable pool's
+'unknown' share and scales every known group's ratio down (by ~9%, ~17% at night).
+
+Alcohol: NHTSA's imputed V_ALCH_IM fills the police 'unknown' code, which rose from 8% to 33%
+of QIE drivers across the 2019-2020 coding break, almost without regard to culpability (both
+drivers share the crash-level predictors). The imputed contrast therefore weakens as the
+imputed share grows, so alcohol RIRs are reported by coding period (2016-2018, 2019,
+2020-2024) and the police-reported 'yes vs not yes' contrast is given alongside as an
+upper-bound sensitivity (police may look for alcohol more in the driver at fault).
 
 Assumptions (all untestable here): (1) non-culpable drivers represent the driving population
-at risk at the crash time and place; (2) police charge violations without bias by driver group
--- e.g. if police attribute errors more readily to young or drinking drivers, their RIR is
-inflated; (3) culpability is approximately binary.  Speeding defines culpability, so speeding
-itself cannot be studied with this sample.  Population: CRSS two-vehicle crashes
-with both drivers present.  Unit: driver.  Not justified: crash rates per mile/trip; effects
-of enforcement.
+at risk at the crash time and place -- the pool is dominated by drivers struck from behind,
+so it reflects congested traffic more than all driving, and drivers less able to avoid
+others' errors (possibly older drivers) are over-represented in it, pushing their RIR down;
+(2) police code pre-crash events, speeding and driver errors without bias by driver group --
+if errors are attributed more readily to young or drinking drivers, their RIR is inflated;
+(3) culpability is approximately binary.  Single-vehicle crashes are excluded, so groups
+whose crashes are mostly single-vehicle (young, alcohol-involved, night) are represented only
+by their multi-vehicle crashes.  Speeding defines culpability, so speeding itself cannot be
+studied with this sample.  Population: CRSS two-vehicle crashes with both drivers present.
+Unit: driver.  Not justified: crash rates per mile/trip; effects of enforcement.
 """
 
 from __future__ import annotations
@@ -54,6 +68,10 @@ log = logging.getLogger(__name__)
 MODULE = "exposure"
 POST_CRASH_VIOLATIONS = [7, 8]
 UNKNOWN_VIOLATIONS = [95, 97, 99]
+# Charges that cannot define culpability in the charge-based sensitivity: 1 manslaughter /
+# homicide and 9 serious violation resulting in death are defined by the outcome; 11-19
+# (impairment / DWI) would build the alcohol and drug exposures into culpability.
+CIRCULAR_VIOLATIONS = [1, 9, *range(11, 20)]
 # P_CRASH2 (critical pre-crash event) classes, verified by code-pair cross-tabs in the audit.
 PC2_CULPABLE = [6, 8, 9, *range(10, 18), 19, 20, 21, 50, 51, 52]
 PC2_NONCULPABLE = [53, 55, 56, *range(60, 79)]
@@ -65,7 +83,9 @@ DRF_UNKNOWN = [99, 999]
 
 def culpability(code: pl.Expr) -> pl.Expr:
     """Per-violation-row classification: 1 culpable, 0 none, null unknown/other."""
-    moving = (code.is_between(1, 69) & ~code.is_in(POST_CRASH_VIOLATIONS)) | (code == 98)
+    moving = (code.is_between(1, 69) & ~code.is_in(POST_CRASH_VIOLATIONS + CIRCULAR_VIOLATIONS)) | (
+        code == 98
+    )
     return (
         pl.when(moving)
         .then(pl.lit(1, dtype=pl.Int8))
@@ -123,6 +143,48 @@ def _driver_factor_flags(years) -> pl.DataFrame:
     )
 
 
+def culp_c1() -> pl.Expr:
+    """C1 action-based culpability from SPEEDREL, P_CRASH2 and the driver-error flags."""
+    culp = (
+        pl.col("SPEEDREL").is_between(2, 5)
+        | pl.col("P_CRASH2").is_in(PC2_CULPABLE)
+        | pl.col("error")
+    )
+    nonculp = (
+        ~culp
+        & (pl.col("SPEEDREL") == 0)
+        & pl.col("P_CRASH2").is_in(PC2_NONCULPABLE + PC2_NEUTRAL)
+        & ~pl.col("drf_unknown")
+    )
+    return (
+        pl.when(culp)
+        .then(pl.lit(1, dtype=pl.Int8))
+        .when(nonculp)
+        .then(pl.lit(0, dtype=pl.Int8))
+        .otherwise(pl.lit(None, dtype=pl.Int8))
+    )
+
+
+def qualifying_pairs(d: pl.DataFrame) -> pl.DataFrame:
+    """Crash keys with two drivers present, exactly one culpable and one non-culpable.
+
+    ``d`` holds one row per in-transport vehicle of the candidate crashes, with columns
+    YEAR, case_id, culpable (1/0/null), PER_TYP (null if no driver row) and DR_PRES.
+    """
+    agg = d.group_by(["YEAR", "case_id"]).agg(
+        pl.len().alias("n"),
+        pl.col("culpable").sum().alias("n_culp"),
+        pl.col("culpable").is_null().sum().alias("n_unk"),
+        (pl.col("PER_TYP").is_null() | (pl.col("DR_PRES") != 1)).sum().alias("no_driver"),
+    )
+    return agg.filter(
+        (pl.col("n") == 2)
+        & (pl.col("n_culp") == 1)
+        & (pl.col("n_unk") == 0)
+        & (pl.col("no_driver") == 0)
+    ).select(["YEAR", "case_id"])
+
+
 def build_drivers() -> pl.DataFrame:
     years = config.YEARS
     keys = ["YEAR", "CASENUM", "VEH_NO"]
@@ -165,30 +227,24 @@ def build_drivers() -> pl.DataFrame:
         .join(_driver_factor_flags(years), on=keys, how="left")
         .with_columns(pl.col("error").fill_null(False), pl.col("drf_unknown").fill_null(False))
     )
-    culp = (
-        pl.col("SPEEDREL").is_between(2, 5)
-        | pl.col("P_CRASH2").is_in(PC2_CULPABLE)
-        | pl.col("error")
-    )
-    nonculp = (
-        ~culp
-        & (pl.col("SPEEDREL") == 0)
-        & pl.col("P_CRASH2").is_in(PC2_NONCULPABLE + PC2_NEUTRAL)
-        & ~pl.col("drf_unknown")
-    )
     d = d.with_columns(
-        pl.when(culp)
-        .then(pl.lit(1, dtype=pl.Int8))
-        .when(nonculp)
-        .then(pl.lit(0, dtype=pl.Int8))
-        .otherwise(pl.lit(None, dtype=pl.Int8))
-        .alias("culp_c1"),
+        culp_c1().alias("culp_c1"),
         h.body_group().alias("body"),
         h.crss_alcohol("V_ALCH_IM").alias("alcohol_im"),
+        h.crss_alcohol("VEH_ALCH").alias("alcohol_police"),
         h.age_years().alias("age"),
         h.sex().alias("sex"),
     ).with_columns(h.age_band("age").alias("age_band"))
     return d.rename({"CASENUM": "case_id"})
+
+
+def candidate_crashes(crash: pl.DataFrame) -> pl.DataFrame:
+    """Two in-transport vehicles, no non-motorist, no hit-and-run vehicle."""
+    return crash.filter(
+        (pl.col("n_veh_in_transport") == 2)
+        & (pl.col("any_nonmotorist") == 0)
+        & (pl.col("hit_and_run").fill_null(0) == 0)
+    )
 
 
 def qualifying(drivers: pl.DataFrame, definition: str = "culp_c1") -> pd.DataFrame:
@@ -201,37 +257,28 @@ def qualifying(drivers: pl.DataFrame, definition: str = "culp_c1") -> pd.DataFra
             "PSUSTRAT",
             "PSU_VAR",
             "n_veh_in_transport",
-            "tod",
+            "night",
             "light",
             "region",
             "urbanicity",
             "kabco",
             "any_nonmotorist",
+            "hit_and_run",
         ],
     )
-    two = crash.filter((pl.col("n_veh_in_transport") == 2) & (pl.col("any_nonmotorist") == 0))
+    two = candidate_crashes(crash)
     d = drivers.join(two, on=["YEAR", "case_id"], how="inner").with_columns(
         pl.col(definition).alias("culpable")
     )
-    agg = d.group_by(["YEAR", "case_id"]).agg(
-        pl.len().alias("n"),
-        pl.col("culpable").sum().alias("n_culp"),
-        pl.col("culpable").is_null().sum().alias("n_unk"),
-        (pl.col("PER_TYP").is_null() | (pl.col("DR_PRES") != 1)).sum().alias("no_driver"),
-    )
-    ok = agg.filter(
-        (pl.col("n") == 2)
-        & (pl.col("n_culp") == 1)
-        & (pl.col("n_unk") == 0)
-        & (pl.col("no_driver") == 0)
-    )
-    d = d.join(ok.select(["YEAR", "case_id"]), on=["YEAR", "case_id"], how="semi").to_pandas()
-    d["night"] = np.where(
-        d["tod"].isin(["20-23", "00-05"]),
-        "night",
-        np.where(d["tod"] == "unknown", "unknown", "day"),
-    )
+    ok = qualifying_pairs(d)
+    d = d.join(ok, on=["YEAR", "case_id"], how="semi").to_pandas()
+    # Project night definition (21:00-05:59, harmonize.night); unknown hour kept separate.
+    d["night"] = d["night"].map({1: "night", 0: "day"}).fillna("unknown")
     d["alcohol_im"] = d["alcohol_im"].map({1: "yes", 0: "no"}).fillna("unknown")
+    d["alcohol_police"] = np.where(d["alcohol_police"] == 1, "yes", "not_yes")
+    d["period"] = pd.cut(
+        d["YEAR"], [2015, 2018, 2019, 2024], labels=["2016-2018", "2019", "2020-2024"]
+    ).astype(str)
     d["body_grp"] = np.select(
         [
             d["body"] == "car",
@@ -262,6 +309,7 @@ LEVELS = {
     ],
     "sex": ["male", "female", "unknown"],
     "alcohol_im": ["no", "yes", "unknown"],
+    "alcohol_police": ["not_yes", "yes"],
     "body_grp": ["car", "suv_van", "pickup", "motorcycle", "large", "other_unknown"],
     "night": ["day", "night", "unknown"],
     "YEAR": list(config.YEARS),
@@ -312,7 +360,9 @@ def rir_table(df: pd.DataFrame, design: SurveyDesign, var: str, adjust: list[str
                 "adj_rir_ratio_vs_ref": 1.0 if r is None else float(r.odds_ratio),
                 "adj_low": 1.0 if r is None else float(r.or_low),
                 "adj_high": 1.0 if r is None else float(r.or_high),
-                "flag": "few drivers" if n < config.MIN_CELL_N else "",
+                "flag": "few drivers"
+                if n < config.MIN_CELL_N
+                else ("RSE>30%" if odds.se > config.MAX_RSE else ""),
             }
         )
     return pd.DataFrame(rows)
@@ -338,7 +388,24 @@ def run() -> dict[str, pd.DataFrame]:
             [a for a in adjust if a != "night"],
         ).assign(stratum=night)
         res = pd.concat([res, sub], ignore_index=True)
-    # Same analysis restricted to KA crashes: does over-involvement differ for severe crashes?
+    # Alcohol by coding period (the 2019-2020 CRSS alcohol break), imputed and police-reported.
+    for period in ("2016-2018", "2019", "2020-2024"):
+        m = (df["period"] == period).to_numpy()
+        sub_df, sub_design = df.loc[m].reset_index(drop=True), design.subset(m)
+        for var in ("alcohol_im", "alcohol_police"):
+            adj = [a for a in adjust if a not in ("alcohol_im", "alcohol_police")]
+            res = pd.concat(
+                [res, rir_table(sub_df, sub_design, var, adj).assign(stratum=period)],
+                ignore_index=True,
+            )
+    adj = [a for a in adjust if a != "alcohol_im"]
+    res = pd.concat(
+        [res, rir_table(df, design, "alcohol_police", adj).assign(stratum="all")],
+        ignore_index=True,
+    )
+    # Restricted to KA crashes. This selects on an outcome that depends on the group (frailty)
+    # and on the role, so it mixes involvement with injury severity -- not an involvement
+    # measure; kept only to show that mixing.
     ka = df["kabco"].isin([3, 4]).to_numpy()
     df_ka = df.loc[ka].reset_index(drop=True)
     res_ka = pd.concat(
@@ -354,16 +421,22 @@ def run() -> dict[str, pd.DataFrame]:
 
     crash = pl.read_parquet(
         config.PROCESSED_DIR / "crss_crash.parquet",
-        columns=["n_veh_in_transport", "any_nonmotorist", "WEIGHT"],
+        columns=["n_veh_in_transport", "any_nonmotorist", "hit_and_run", "WEIGHT"],
     )
-    two = crash.filter((pl.col("n_veh_in_transport") == 2) & (pl.col("any_nonmotorist") == 0))
+    two_all = crash.filter((pl.col("n_veh_in_transport") == 2) & (pl.col("any_nonmotorist") == 0))
+    two = candidate_crashes(crash)
+    hr_share = float(
+        two_all.filter(pl.col("hit_and_run") == 1)["WEIGHT"].sum() / two_all["WEIGHT"].sum()
+    )
     summary = pd.DataFrame(
         [
             {
                 "definition": name,
                 "qualifying_crashes": int(len(d) / 2),
                 "drivers": len(d),
-                "two_vehicle_crashes_no_nonmotorist": two.height,
+                "two_vehicle_crashes_no_nonmotorist": two_all.height,
+                "weighted_share_excluded_hit_and_run": hr_share,
+                "candidate_crashes_excl_hit_and_run": two.height,
                 "share_qualifying_unweighted": len(d) / 2 / two.height,
                 "share_qualifying_weighted": float(d["WEIGHT"].sum() / 2 / two["WEIGHT"].sum()),
                 "weighted_qualifying_crashes_per_year": float(
@@ -377,8 +450,8 @@ def run() -> dict[str, pd.DataFrame]:
         ]
     )
     common = dict(
-        population="CRSS two-vehicle crashes 2016-2024 (no non-motorist, both drivers present) with exactly one "
-        "culpable and one non-culpable driver",
+        population="CRSS two-vehicle crashes 2016-2024 (no non-motorist, no hit-and-run vehicle, both drivers "
+        "present) with exactly one culpable and one non-culpable driver",
         unit="driver",
         outcome="culpable (C1 action-based definition unless stated)",
         inputs=[
@@ -396,21 +469,24 @@ def run() -> dict[str, pd.DataFrame]:
         res,
         MODULE,
         "relative_involvement",
-        description="Relative involvement ratios (QIE, C1), all qualifying crashes",
+        description="Relative involvement ratios (QIE, C1): all qualifying crashes (stratum 'all'), by day/night "
+        "(age), and alcohol by CRSS coding period (imputed V_ALCH_IM and police-reported yes vs not yes)",
         **common,
     )
     save_table(
         res_ka,
         MODULE,
         "relative_involvement_ka",
-        description="Relative involvement ratios (QIE, C1), KA crashes only",
+        description="RIR among KA crashes only: selects on injury severity, so it mixes involvement with "
+        "conditional severity (e.g. frailty); NOT a measure of involvement in severe crashes",
         **common,
     )
     save_table(
         res_v,
         MODULE,
         "relative_involvement_charge_based",
-        description="Sensitivity: RIR with culpability = moving violation charged (outcome-dependent definition)",
+        description="Sensitivity: RIR with culpability = moving violation charged (charged after the crash, so "
+        "outcome-dependent); impairment/DWI charges (11-19) and outcome-defined charges (1, 9) excluded",
         **common,
     )
     save_table(

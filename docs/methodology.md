@@ -150,7 +150,7 @@ recorded circumstances; negative: reverses).
   over implicates of the indicator BAC ≥ 0.08 g/dL (an expected share). Implicates are in
   hundredths of g/dL; `ALC_RES` is in thousandths (verified: implicates equal ⌊ALC_RES/10⌋ for
   99.97% of tested persons).
-* Severity-dependent ascertainment is analysed, not ignored (§7).
+* Severity-dependent ascertainment is analysed, not ignored (§8).
 
 ## 5. FARS analyses
 
@@ -164,7 +164,28 @@ classical double-pair comparison for belt use. They estimate relative risks *giv
 which at least one occupant died*; survivor misreporting of belt use is examined by
 reclassification sensitivity analysis.
 
-## 6. Burden
+## 6. Relative involvement (quasi-induced exposure)
+
+`analysis/exposure.py`, RQ7. Sample: CRSS crashes with exactly two in-transport vehicles,
+no non-motorist, no hit-and-run vehicle and a driver present in both, in which exactly one
+driver is culpable and the other non-culpable. Culpability (primary definition C1) uses
+pre-crash actions only — speeding, the critical pre-crash event class and common
+driver-error codes — never charges, which are laid after the crash and are rarely laid
+against the dead. Because each qualifying crash contributes one culpable and one
+non-culpable driver, the relative involvement ratio of group g (its share among culpable
+drivers divided by its share among non-culpable drivers) equals the odds of culpability
+within g. It is estimated from a saturated survey logistic model of culpability on the group,
+with linearised CIs that account for both drivers of a crash sharing a PSU; adjusted ratios
+come from a multivariable survey logit (age, sex, alcohol, vehicle type, night, year,
+region, urbanicity). Hit-and-run crashes are excluded because fleeing drivers are almost
+always coded culpable and have unknown age and sex. Alcohol is reported by CRSS coding
+period, with the police-reported "yes vs not yes" contrast alongside the imputed one,
+because the imputation fills the post-2019 unknowns almost independently of culpability. A
+charge-based definition (excluding impairment and outcome-defined charges) is a sensitivity
+analysis. Assumptions and their likely directions are listed in the module docstring and in
+`docs/limitations.md`.
+
+## 7. Burden
 
 Severity-pathway attributable fractions (`analysis/burden.py`) are computed by g-computation:
 the share of model-predicted fatal crashes that would not be fatal had exposed crashes the
@@ -172,7 +193,7 @@ reference level instead, holding other recorded circumstances fixed. They are sc
 deaths (mean 2022–2024) only as a labelled, model-predicted quantity. They exclude the
 crash-occurrence pathway and assume no unmeasured confounding and correct measurement.
 
-## 7. Measurement validity and quantitative bias analysis
+## 8. Measurement validity and quantitative bias analysis
 
 `analysis/measurement.py` quantifies unknown rates by KABCO level and year (flagging
 year-on-year changes ≥ 5 percentage points as coding breaks), compares the composition of
@@ -183,21 +204,21 @@ misclassification with outcome-specific sensitivities (Se among fatal, Se among 
 and specificity, using the standard matrix method, over a grid of assumptions. Results are a
 range of risk ratios compatible with stated assumptions, not a corrected truth.
 
-## 8. Prediction models
+## 9. Prediction models
 
 See `docs/model_validation.md`: temporal split (train 2016–2021, validate 2022, test
 2023–2024), registry-enforced feature whitelist, preprocessing fitted on training years only,
 weighted and unweighted metrics, calibration, PSU-cluster bootstrap CIs, and confirmatory
 checks of any machine-learning pattern with the transparent survey models above.
 
-## 9. Policy simulation and costs
+## 10. Policy simulation and costs
 
 See `docs/policy_assumptions.md`. The simulator separates (A) empirical baseline quantities
 from this database, (B) intervention mechanisms, (C) user-supplied assumptions and (D)
 outcomes, and labels every output *hypothetical*. No effect sizes or prices are supplied by
 the project.
 
-## 10. Reproducibility
+## 11. Reproducibility
 
 `uv sync --extra app && uv run nhtsa all` rebuilds everything from `data/raw`: archive
 validation → typed Parquet cache (incremental, SHA-256 manifest) → inventory → integrity

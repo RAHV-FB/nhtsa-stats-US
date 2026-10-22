@@ -138,7 +138,7 @@ Priority reflects scientific value × evidential strength × policy relevance ×
 | Element | Specification |
 |---|---|
 | Question | Which driver groups are over-involved as the culpable party in two-vehicle crashes, relative to their presence as non-culpable drivers? |
-| Method | CRSS two-vehicle crashes with exactly one culpable driver (culpability from police-reported driver-related factors/violations); relative involvement ratio = share among culpable ÷ share among non-culpable, weighted, with design-based CIs |
+| Method | CRSS two-vehicle crashes (no hit-and-run vehicle) with exactly one culpable driver; relative involvement ratio = share among culpable ÷ share among non-culpable, weighted, with design-based CIs. *Deviation (v1.2):* culpability is action-based (speeding, critical pre-crash event, driver-error codes), not violation-based as first planned, because charges are laid after the crash and almost never against the dead (`docs/audit/driver_behaviour_factors.md` §16); the charge-based version is a sensitivity analysis |
 | Assumptions | Non-culpable drivers are a representative sample of drivers on the road at the same place/time; culpability is coded without bias by group |
 | Justified | Relative (not absolute) crash-involvement propensities under QIE assumptions |
 | Not justified | Crash rates per trip/mile; effects of enforcement |
@@ -223,3 +223,6 @@ Behaviours are recorded by police *after* the crash, and recording depends on se
   falls 0.6–12.8% short of the FARS count by a year-dependent amount. The imputed total
   reproduces FARS within 0.9% every year (exactly in 2016 and 2024). The year-dependent gap
   distorts severity trends: 2019→2024 fatal share +19% (imputed) vs +35% (complete case).
+  Also in v1.2 (from the independent QIE audit): RQ7 culpability is action-based rather than
+  violation-based; hit-and-run crashes are excluded from the QIE sample; alcohol relative
+  involvement is reported by CRSS coding period instead of pooled.

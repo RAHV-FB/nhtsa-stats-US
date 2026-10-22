@@ -27,9 +27,10 @@
    worse when the striking vehicle is an SUV or pickup.
 5. **Some combinations amplify each other**, notably pedestrian crashes in unlit darkness. Others
    that are often assumed to do so do not.
-6. **Crash involvement and crash severity are different problems.** Teenage drivers are
-   over-involved as the culpable party but their crashes are less severe. Drivers aged 75+ are
-   over-involved *and* their crashes are more severe.
+6. **Crash involvement and crash severity are different problems.** In two-vehicle crashes,
+   teenage drivers are over-represented as the culpable party, but crashes involving them are
+   less severe. Drivers aged 75+ are also over-represented as the culpable party, and crashes
+   involving a driver aged 65+ are more severe.
 7. **Within the same vehicle, unbelted occupants die far more often than belted ones.**
    The size of that difference is very sensitive to how accurately surviving occupants report
    belt use.
@@ -265,30 +266,47 @@ The data contain no measure of how much people drive, so crash *rates* per mile 
 estimated. Quasi-induced exposure compares each driver group's share among culpable drivers in
 two-vehicle crashes with its share among non-culpable drivers (a proxy for drivers on the road).
 Culpability uses pre-crash actions (speeding, critical pre-crash event, driver-error codes), not
-charges. Relative involvement ratios (RIR), all qualifying crashes:
+charges. Crashes with a hit-and-run vehicle
+({{exposure/sample|definition=C1 action-based (primary)|weighted_share_excluded_hit_and_run|pct:0}}
+of two-vehicle crashes) are excluded, because fleeing drivers are almost always coded culpable
+and their age and sex are unknown. Relative involvement ratios (RIR), all qualifying crashes:
 
 {{mdtable:exposure/relative_involvement|factor=age_band;stratum=all|level:Driver age:;n_drivers:Drivers:,.0f;rir:RIR (95% CI):ci:2;adj_rir_ratio_vs_ref:Adjusted ratio vs 35–44:.2f}}
 
-* Drivers aged 15–20 are over-involved as the culpable party
+* Drivers aged 15–20 are over-represented as the culpable party
   (RIR {{exposure/relative_involvement|factor=age_band;level=15-20;stratum=all|rir|ci:2}}), yet
   crashes involving them are *less* severe
-  ({{severity/fatal_crude_vs_adjusted|factor=young_driver;level=yes|A_adj_rr|ci:2}}): their
-  problem is crash occurrence.
-* Drivers aged 75+ are over-involved
-  (RIR {{exposure/relative_involvement|factor=age_band;level=75+;stratum=all|rir|ci:2}}) **and**
-  crashes involving drivers aged 65+ are more severe
+  ({{severity/fatal_crude_vs_adjusted|factor=young_driver;level=yes|A_adj_rr|ci:2}}).
+* Drivers aged 75+ are also over-represented as the culpable party
+  (RIR {{exposure/relative_involvement|factor=age_band;level=75+;stratum=all|rir|ci:2}}), while
+  drivers aged 65–74 are not
+  ({{exposure/relative_involvement|factor=age_band;level=65-74;stratum=all|rir|ci:2}}). Crashes
+  involving a driver aged 65+ are more severe
   ({{severity/fatal_crude_vs_adjusted|factor=older_driver;level=yes|A_adj_rr|ci:2}}).
-* Alcohol-involved drivers are strongly over-involved
-  (RIR {{exposure/relative_involvement|factor=alcohol_im;level=yes;stratum=all|rir|ci:1}}). With
-  the charge-based culpability definition, which partly builds alcohol into culpability, the
-  estimate is {{exposure/relative_involvement_charge_based|factor=alcohol_im;level=yes|rir|ci:1}}.
-* Teenage drivers' over-involvement is lower at night
+* Alcohol-involved drivers are strongly over-represented, but the size depends on how alcohol
+  is measured. With NHTSA's imputed alcohol field the RIR falls from
+  {{exposure/relative_involvement|factor=alcohol_im;level=yes;stratum=2016-2018|rir|ci:1}} in
+  2016–2018 to {{exposure/relative_involvement|factor=alcohol_im;level=yes;stratum=2020-2024|rir|ci:1}}
+  in 2020–2024. The fall tracks the 2019–2020 coding break, when the imputation began filling
+  a third of drivers' alcohol status almost independently of who was at fault; it is not
+  evidence of a change in behaviour. Police-reported alcohol ("yes" vs anything else) gives a
+  stable {{exposure/relative_involvement|factor=alcohol_police;level=yes;stratum=2016-2018|rir|ci:1}}
+  and {{exposure/relative_involvement|factor=alcohol_police;level=yes;stratum=2020-2024|rir|ci:1}}
+  in the same periods, an upper bound if police look for alcohol more in the driver at fault.
+  With charge-based culpability (impairment charges excluded) the imputed estimate is
+  {{exposure/relative_involvement_charge_based|factor=alcohol_im;level=yes|rir|ci:1}}.
+* In two-vehicle crashes, teenage drivers' over-representation is lower at night
   (RIR {{exposure/relative_involvement|factor=age_band;level=15-20;stratum=night|rir|ci:2}}) than
   by day ({{exposure/relative_involvement|factor=age_band;level=15-20;stratum=day|rir|ci:2}}),
-  relative to the other drivers on the road at each time.
+  relative to the other drivers on the road at each time. Single-vehicle crashes, where
+  young and night-time drivers' crashes concentrate, are outside this design.
 
-*Assumptions (untestable here):* non-culpable drivers represent drivers on the road;
-culpability is assigned without bias by group. Crash-level conditions cannot be assessed by QIE.
+*Assumptions (untestable here):* non-culpable drivers represent drivers on the road — but the
+non-culpable pool is dominated by drivers struck from behind, so it reflects congested traffic
+more than all driving, and drivers less able to avoid other drivers' errors (possibly older
+drivers) may be over-represented in it, which would push their RIR down; police code pre-crash
+actions without bias by group. QIE says nothing about crash rates per mile, and crash-level
+conditions (light, weather) cannot be assessed with it.
 
 ## 8. Finding 7 — Restraint use
 
