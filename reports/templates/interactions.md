@@ -24,11 +24,18 @@ fatal crashes, or because they tend to co-occur in all crashes. Neither pattern 
 Adjusted risks p00, p10, p01, p11 are standardised predictive margins from a survey-weighted
 logistic model. The model contains the full pre-crash adjustment set (model A; model B adds
 crash configuration for pedestrian- and angle-crash pairs) plus one product term for the pair.
-The 15 pairs were specified in advance (`docs/research_plan.md`, RQ2), with the rationale for
-each recorded in the output table. p-values are Holm-adjusted across these 15 pairs, separately
-for each scale. Confidence intervals are design-based (Taylor linearisation, 42 df).
+The margins are standardised to the covariate mix of *all* police-reported crashes (the angle
+pair: all multi-vehicle crashes). For example, p11 for "pedestrian × unlit darkness" is the
+risk if every crash — with its own roads, speed limits, areas and drivers — were a pedestrian
+crash in unlit darkness. It is not the observed fatality rate among pedestrian crashes, which
+happen in a different mix of places.
 
-## Results: pre-specified pairs, fatal outcome
+Thirteen pairs were registered in advance (`docs/research_plan.md`, RQ2; operational
+definitions in its change log). The rationale for each is recorded in the output table.
+p-values are Holm-adjusted across these 13 pairs, separately for each scale. Confidence
+intervals are design-based (Taylor linearisation, 42 df).
+
+## Results: registered pairs, fatal outcome
 
 {{mdtable:interactions/pairs_fatal|prespecified=True|pair:Pair (A x B):;adj_p00:Risk with neither (per 1,000):cix1000:1;adj_p11:Risk with both (per 1,000):cix1000:1;rr_A_given_B0:RR of A when B absent:ci:2;rr_A_given_B1:RR of A when B present:ci:2;ic:Additive interaction (per 1,000):cix1000:1;ic_p_holm:Holm p, additive:.2g;ratio_of_rr:Ratio of RRs (multiplicative):ci:2;ratio_of_rr_p_holm:Holm p, multiplicative:.2g;obs_exp_all:Co-occurrence O/E, all crashes:.2f;min_cell_events:Fewest events in a cell:,.0f}}
 
@@ -36,71 +43,80 @@ Figure: `outputs/figures/figures/interactions.png`.
 
 ### What the pattern shows
 
-**Pedestrian crashes in unlit darkness show the clearest amplification on both scales.**
-The adjusted risk that a pedestrian crash in dark, unlit conditions is fatal is
-{{interactions/pairs_fatal|pair=pedestrian x dark_unlit|adj_p11|cix1000:0}} per 1,000. The
-corresponding risk for a non-pedestrian crash in daylight is
-{{interactions/pairs_fatal|pair=pedestrian x dark_unlit|adj_p00|cix1000:1}}. The pedestrian
-risk ratio is {{interactions/pairs_fatal|pair=pedestrian x dark_unlit|rr_A_given_B0|ci:1}} in
-daylight and {{interactions/pairs_fatal|pair=pedestrian x dark_unlit|rr_A_given_B1|ci:1}} in
-unlit darkness: a ratio of risk ratios of
-{{interactions/pairs_fatal|pair=pedestrian x dark_unlit|ratio_of_rr|ci:2}}. The additive
-excess is {{interactions/pairs_fatal|pair=pedestrian x dark_unlit|ic|cix1000:0}} fatal crashes
-per 1,000 such crashes.
+**Pedestrian crashes in unlit darkness show amplification on both scales.**
+The standardised risk that a crash is fatal when it is a pedestrian crash in unlit darkness is
+{{interactions/pairs_fatal|pair=pedestrian x dark_unlit|adj_p11|cix1000:0}} per 1,000, against
+{{interactions/pairs_fatal|pair=pedestrian x dark_unlit|adj_p00|cix1000:1}} for a
+non-pedestrian crash in daylight. The pedestrian risk ratio is
+{{interactions/pairs_fatal|pair=pedestrian x dark_unlit|rr_A_given_B0|ci:1}} in daylight and
+{{interactions/pairs_fatal|pair=pedestrian x dark_unlit|rr_A_given_B1|ci:1}} in unlit darkness:
+a ratio of risk ratios of {{interactions/pairs_fatal|pair=pedestrian x dark_unlit|ratio_of_rr|ci:2}}
+(Holm p {{interactions/pairs_fatal|pair=pedestrian x dark_unlit|ratio_of_rr_p_holm|.2g}}). The
+additive excess is {{interactions/pairs_fatal|pair=pedestrian x dark_unlit|ic|cix1000:0}} fatal
+crashes per 1,000 (Holm p {{interactions/pairs_fatal|pair=pedestrian x dark_unlit|ic_p_holm|.2g}}).
 
-**Pedestrian crashes on roads with limits of 50 mph or more carry the largest additive
-excess.** The excess is {{interactions/pairs_fatal|pair=pedestrian x high_speed_road|ic|cix1000:0}}
-per 1,000, and the adjusted fatal risk is
-{{interactions/pairs_fatal|pair=pedestrian x high_speed_road|adj_p11|cix1000:0}} per 1,000. On
-the ratio scale, however, the two act roughly multiplicatively
-({{interactions/pairs_fatal|pair=pedestrian x high_speed_road|ratio_of_rr|ci:2}}). The two
-scales answer different questions. The multiplicative scale says the speed environment raises
-pedestrian risk by about the same factor as it raises other risks. The additive scale says
-that, because pedestrian crashes start from a much higher baseline, that same factor produces
-far more deaths.
-
-**Motorcycle crashes involving alcohol are sub-multiplicative but have a large additive
-excess.** The ratio of risk ratios is
+**Motorcycle crashes involving alcohol: a large additive excess.** The ratio of risk ratios is
 {{interactions/pairs_fatal|pair=motorcycle x alcohol|ratio_of_rr|ci:2}}, but the additive
-excess is {{interactions/pairs_fatal|pair=motorcycle x alcohol|ic|cix1000:0}} per 1,000. This
-gives an adjusted fatal risk of
-{{interactions/pairs_fatal|pair=motorcycle x alcohol|adj_p11|cix1000:0}} per 1,000 crashes. A
-model that is "only multiplicative" would understate how many deaths concentrate in this
+excess is {{interactions/pairs_fatal|pair=motorcycle x alcohol|ic|cix1000:0}} per 1,000
+(Holm p {{interactions/pairs_fatal|pair=motorcycle x alcohol|ic_p_holm|.2g}}), giving a
+standardised fatal risk of {{interactions/pairs_fatal|pair=motorcycle x alcohol|adj_p11|cix1000:0}}
+per 1,000. The two scales answer different questions: on the ratio scale alcohol raises the
+risk of a motorcycle crash by no more than it raises other crashes' risk, but because
+motorcycle crashes start from a much higher baseline, that same factor adds far more deaths.
+A model that is "only multiplicative" would understate how many deaths concentrate in this
 combination.
 
-**Heavy trucks on high-speed roads** are super-multiplicative
-({{interactions/pairs_fatal|pair=heavy_truck x high_speed_road|ratio_of_rr|ci:2}}), with an
-additive excess of {{interactions/pairs_fatal|pair=heavy_truck x high_speed_road|ic|cix1000:1}}
-per 1,000, which is consistent with mass incompatibility rising with speed.
+**Heavy trucks on 50+ mph roads.** The additive excess is
+{{interactions/pairs_fatal|pair=heavy_truck x high_speed_road|ic|cix1000:1}} per 1,000
+(Holm p {{interactions/pairs_fatal|pair=heavy_truck x high_speed_road|ic_p_holm|.2g}}). The ratio
+of risk ratios is {{interactions/pairs_fatal|pair=heavy_truck x high_speed_road|ratio_of_rr|ci:2}}
+(Holm p {{interactions/pairs_fatal|pair=heavy_truck x high_speed_road|ratio_of_rr_p_holm|.2g}}).
+The multiplicative excess counts as supported only if its Holm-adjusted p-value is small; the
+pattern would be consistent with mass incompatibility growing with speed.
 
-**Several apparent "amplifiers" are not.** Speeding in unlit darkness
+**Several commonly assumed amplifiers are not supported.** Speeding in unlit darkness
 (ratio of RRs {{interactions/pairs_fatal|pair=speeding x dark_unlit|ratio_of_rr|ci:2}}) and a
 young driver late at night
-({{interactions/pairs_fatal|pair=young_driver x late_night|ratio_of_rr|ci:2}}) combine roughly
-multiplicatively. Rural area × unlit darkness, weekend × late night and 50+ mph road × unlit
-darkness are *sub*-multiplicative. Each factor matters, but their combination is not
-especially severe beyond what the separate factors imply.
+({{interactions/pairs_fatal|pair=young_driver x late_night|ratio_of_rr|ci:2}}) show no excess on
+the ratio scale. Rural area × unlit darkness
+({{interactions/pairs_fatal|pair=rural x dark_unlit|ratio_of_rr|ci:2}}), weekend × late night
+({{interactions/pairs_fatal|pair=weekend x late_night|ratio_of_rr|ci:2}}) and 50+ mph road ×
+unlit darkness ({{interactions/pairs_fatal|pair=high_speed_road x dark_unlit|ratio_of_rr|ci:2}})
+have ratios of risk ratios below 1. Each factor matters on its own, but the combination is not
+more severe than the separate factors imply.
 
-**Speeding on wet roads and on high-speed roads is less severe than expected — and the
-reason is measurement.** Both pairs show a negative additive interaction
-({{interactions/pairs_fatal|pair=speeding x wet|ic|cix1000:1}} and
-{{interactions/pairs_fatal|pair=speeding x high_speed_road|ic|cix1000:1}} per 1,000). The
-explanation is that police "speeding-related" is mostly "too fast for conditions", which
-concentrates on wet and icy roads and carries no excess severity (`reports/findings.md`,
-finding 3). The exploratory follow-up below isolates drivers who exceeded the limit.
+**Speeding on wet roads is less severe than expected.** The additive interaction is
+{{interactions/pairs_fatal|pair=speeding x wet|ic|cix1000:1}} per 1,000. Police
+"speeding-related" is mostly "too fast for conditions", which concentrates on wet and icy roads
+and carries no excess severity (`reports/findings.md`, finding 3), so the pair mixes two
+different exposures. The exploratory analysis below separates drivers who exceeded the limit.
 
-## Follow-up (exploratory, not pre-specified): exceeding the limit
+## Exploratory pairs (not in the registered family)
 
-These pairs were added after the speeding-type analysis. They are not part of the Holm family
-and should be read as hypothesis-generating.
+Two pairs were added when the analysis was implemented (speeding × 50+ mph road, pedestrian ×
+50+ mph road), and three after the speeding-type analysis (drivers who exceeded the limit).
+They are outside the Holm family and are hypothesis-generating; p-values are unadjusted.
 
-{{mdtable:interactions/pairs_fatal|prespecified=False|pair:Pair:;adj_p00:Risk with neither (per 1,000):cix1000:1;adj_p11:Risk with both (per 1,000):cix1000:1;rr_A_given_B0:RR of A when B absent:ci:2;rr_A_given_B1:RR of A when B present:ci:2;ic:Additive interaction (per 1,000):cix1000:1;ratio_of_rr:Ratio of RRs:ci:2}}
+{{mdtable:interactions/pairs_fatal|prespecified=False|pair:Pair:;adj_p00:Risk with neither (per 1,000):cix1000:1;adj_p11:Risk with both (per 1,000):cix1000:1;rr_A_given_B0:RR of A when B absent:ci:2;rr_A_given_B1:RR of A when B present:ci:2;ic:Additive interaction (per 1,000):cix1000:1;ic_p:p, additive:.2g;ratio_of_rr:Ratio of RRs:ci:2;ratio_of_rr_p:p, multiplicative:.2g}}
 
-For limit exceedance, the risk ratio on wet roads
-({{interactions/pairs_fatal|pair=exceeded_limit x wet|rr_A_given_B1|ci:2}}) is close to that on
-dry roads ({{interactions/pairs_fatal|pair=exceeded_limit x wet|rr_A_given_B0|ci:2}}). The
-apparent protective interaction of speeding with wet roads therefore reflects the *mix* of
-speeding types, not a lower danger of exceeding the limit in the wet.
+* **Pedestrian crashes on 50+ mph roads** have the largest additive excess of any pair,
+  {{interactions/pairs_fatal|pair=pedestrian x high_speed_road|ic|cix1000:0}} per 1,000, with a
+  standardised fatal risk of {{interactions/pairs_fatal|pair=pedestrian x high_speed_road|adj_p11|cix1000:0}}
+  per 1,000. On the ratio scale the combination is
+  {{interactions/pairs_fatal|pair=pedestrian x high_speed_road|ratio_of_rr|ci:2}}: the speed
+  environment multiplies pedestrian risk by roughly the factor it multiplies other risks, but
+  from a much higher baseline.
+* **Exceeding the limit on wet roads.** On the ratio scale, the risk ratio for limit
+  exceedance on wet roads ({{interactions/pairs_fatal|pair=exceeded_limit x wet|rr_A_given_B1|ci:2}})
+  is compared with that on dry roads ({{interactions/pairs_fatal|pair=exceeded_limit x wet|rr_A_given_B0|ci:2}}).
+  On the additive scale the excess on wet roads is
+  {{interactions/pairs_fatal|pair=exceeded_limit x wet|ic|cix1000:1}} per 1,000; crashes on wet
+  roads start from a lower baseline. The apparently protective speeding × wet pattern therefore
+  reflects the mix of speeding types and the lower wet-road baseline, not a lower danger of
+  exceeding the limit in the wet.
+* **Exceeding the limit on 50+ mph roads**: ratio of RRs
+  {{interactions/pairs_fatal|pair=exceeded_limit x high_speed_road|ratio_of_rr|ci:2}}; below 1
+  means the relative excess of exceeding the limit is smaller on roads that are already fast.
 
 ## Stability across periods
 

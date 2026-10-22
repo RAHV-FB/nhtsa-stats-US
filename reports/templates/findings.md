@@ -13,17 +13,17 @@
    of police-reported crashes but {{descriptive/frequency_vs_severity|factor=crash_type;level=pedestrian|share_fatal_fars|pct:1}}
    of fatal crashes. Rain, wet roads, intersections and crashes involving teenage drivers are
    common in crashes but *under*-represented among fatal ones.
-2. **Adjustment changes the picture.** Most of the excess severity of night-time crashes is
-   accounted for by other circumstances. The lower severity of rain-crashes disappears.
-   Interstates reverse from riskier to safer than comparable roads. The excess severity of
-   crashes involving older drivers is *unmasked*.
+2. **Adjustment changes the picture.** Much of the excess severity of night-time crashes is
+   accounted for by other circumstances. The lower severity of rain-crashes runs through wet
+   road surfaces. Interstates reverse from riskier to safer than comparable roads. The excess
+   severity of crashes involving older drivers is *unmasked*.
 3. **"Speeding" is two different things.** Crashes in which a driver exceeded the limit have an
    adjusted fatal risk ratio of {{severity/fatal_speeding_type|level=exceeded_limit_or_racing|adj_rr|ci:1}}.
    "Too fast for conditions" — three-quarters of police-reported speeding-related crashes —
    shows {{severity/fatal_speeding_type|level=too_fast_for_conditions|adj_rr|ci:2}}.
 4. **The most robust severity associations involve objective circumstances**: motorcycles,
-   pedestrians, the speed environment, unlit darkness and heavy trucks. Alcohol is also robust
-   to measurement error. Pedestrian survival falls steeply with the posted speed limit, and is
+   pedestrians, the speed environment, unlit darkness and heavy trucks. Alcohol is strongly
+   associated with severity under every coding, although its size depends on the coding. Pedestrian survival falls steeply with the posted speed limit, and is
    worse when the striking vehicle is an SUV or pickup.
 5. **Some combinations amplify each other**, notably pedestrian crashes in unlit darkness. Others
    that are often assumed to do so do not.
@@ -98,7 +98,11 @@ other circumstances (finding 2).
 
 *Source: `severity/fatal_crude_vs_adjusted`; figure `outputs/figures/figures/forest_fatal_crude_vs_adjusted.png`.
 Method: survey-weighted logistic models; standardised risk ratios (g-computation). Model A
-adjusts for pre-crash circumstances; model B adds crash configuration, a possible mediator.*
+adjusts for all pre-crash circumstances at once (mutually adjusted), so for a factor with
+downstream variables in the dependency diagram — time of day → light, weather → road surface,
+driver and vehicle mix → police-reported behaviours — model A also holds those fixed; the
+association without them is reported alongside. Model B adds crash configuration, a possible
+mediator.*
 
 | Circumstance (vs reference) | Crude RR | Adjusted RR, model A | Adjusted RR, model B |
 |---|---|---|---|
@@ -122,15 +126,24 @@ adjusts for pre-crash circumstances; model B adds crash configuration, a possibl
 
 What changes, and why it matters:
 
-* **Night.** The crude risk ratio for the small hours shrinks to about a third of its log size
-  once light, alcohol, speed environment, driver mix and other circumstances are taken into
-  account. The night-time hazard is largely the hazard of *what happens at night*: darkness,
-  alcohol, higher-speed roads and different crash types. A residual association remains.
+* **Night.** For 00:00–05:59 against 10:00–15:59 the crude risk ratio is
+  {{severity/fatal_crude_vs_adjusted|factor=tod;level=00-05|crude_rr|ci:2}}. Adjusted for the
+  other pre-crash circumstances but not for light, it is
+  {{severity/fatal_crude_vs_adjusted|factor=tod;level=00-05|Ax_adj_rr|ci:2}}; holding light fixed
+  as well, {{severity/fatal_crude_vs_adjusted|factor=tod;level=00-05|A_adj_rr|ci:2}}. Darkness is
+  part of what night means, so the second figure removes part of the night effect itself. The
+  night-time hazard is largely the hazard of *what happens at night*: darkness, alcohol,
+  higher-speed roads and different crash types. A residual association remains.
   <!-- SECTION: confounding -->
-* **Rain** looks protective in the raw data. The appearance vanishes after adjustment because
-  rain-crashes are disproportionately urban, daytime and low-speed. Wet and icy *surfaces* remain
-  associated with lower severity after adjustment, plausibly because drivers slow down (speed
-  is not observed).
+* **Rain** looks protective in the raw data (crude RR
+  {{severity/fatal_crude_vs_adjusted|factor=weather;level=rain|crude_rr|ci:2}}). Adjusted for the
+  other circumstances but not for road surface, rain-crashes remain less severe
+  ({{severity/fatal_crude_vs_adjusted|factor=weather;level=rain|Ax_adj_rr|ci:2}}); holding the
+  surface fixed as well, the difference disappears
+  ({{severity/fatal_crude_vs_adjusted|factor=weather;level=rain|A_adj_rr|ci:2}}). Rain's lower
+  severity therefore runs through wet and icy surfaces, which remain associated with lower
+  severity (wet {{severity/fatal_crude_vs_adjusted|factor=surface;level=wet|A_adj_rr|ci:2}}),
+  plausibly because drivers slow down (speed is not observed).
 * **Interstates reverse.** Crude crashes on interstates are more often fatal, but compared with
   other roads *with the same speed limit* they are less severe. This is consistent with divided,
   access-controlled design.
@@ -170,10 +183,11 @@ conclusion:
   crashes for limit exceedance and
   {{burden/attributable_fractions_fatal|shift=too_fast_for_conditions_removed|af|cipct:1}} for
   "too fast for conditions" (model-predicted, finding 10).
-* This explains the apparently protective "speeding × wet" interaction: for limit exceedance,
-  the risk ratio on wet roads
-  ({{interactions/pairs_fatal|pair=exceeded_limit x wet|rr_A_given_B1|ci:1}}) matches that on dry
-  roads ({{interactions/pairs_fatal|pair=exceeded_limit x wet|rr_A_given_B0|ci:1}}).
+* This helps explain the apparently protective "speeding × wet" interaction: for limit
+  exceedance, the risk ratio on wet roads
+  ({{interactions/pairs_fatal|pair=exceeded_limit x wet|rr_A_given_B1|ci:1}}) is compared with
+  that on dry roads ({{interactions/pairs_fatal|pair=exceeded_limit x wet|rr_A_given_B0|ci:1}})
+  in an exploratory pair (`reports/interactions.md`).
 
 *Measurement caveat.* Speeding is a police judgement made after the crash. FARS (fuller
 investigation) records speeding in
@@ -206,9 +220,12 @@ not a camera target and shows no excess severity.
 * **Unlit darkness**: {{severity/fatal_crude_vs_adjusted|factor=light;level=dark_not_lighted|A_adj_rr|ci:2}}
   (lit darkness {{severity/fatal_crude_vs_adjusted|factor=light;level=dark_lighted|A_adj_rr|ci:2}}).
 * **Heavy trucks and buses**: {{severity/fatal_crude_vs_adjusted|factor=any_heavy_truck;level=yes|A_adj_rr|ci:2}}.
-* **Alcohol** is robust to how it is coded. The adjusted RR is
+* **Alcohol** is strongly associated with severity under every coding, but the size depends on
+  the coding. The adjusted RR is
   {{measurement/alcohol_coding_sensitivity|period=2016-2024;coding=imputed (ALCHL_IM)|adj_rr|ci:1}}
-  using NHTSA's imputation,
+  using NHTSA's imputation — {{measurement/alcohol_coding_sensitivity|period=2016-2018;coding=imputed (ALCHL_IM)|adj_rr|ci:1}}
+  in 2016–2018 but {{measurement/alcohol_coding_sensitivity|period=2019-2024;coding=imputed (ALCHL_IM)|adj_rr|ci:1}}
+  in 2019–2024, after the coding break, when the imputation fills far more unknowns —
   {{measurement/alcohol_coding_sensitivity|period=2016-2024;coding=police, complete case|adj_rr|ci:1}}
   among crashes with known police-reported alcohol, and
   {{measurement/alcohol_coding_sensitivity|period=2016-2024;coding=police, unknown as no|adj_rr|ci:1}}
@@ -242,7 +259,7 @@ SUVs' share of pedestrian deaths rose from
 ({{vulnerable/pedestrian_killed_contrasts|victim=pedestrian;outcome=killed;factor=light;level=dark_not_lighted|adj_rr|ci:1}}),
 mid-block crossing
 ({{vulnerable/pedestrian_killed_contrasts|victim=pedestrian;outcome=killed;factor=location;level=midblock|adj_rr|ci:1}}
-vs marked crosswalk at an intersection) and age 75+
+vs crossing in a crosswalk) and age 75+
 ({{vulnerable/pedestrian_killed_contrasts|victim=pedestrian;outcome=killed;factor=age_band;level=75+|adj_rr|ci:1}}
 vs 25–34) are also strongly associated with pedestrian death. *Limitations*: impact speed, vehicle
 mass and front-end geometry are not separately observed. Exposure to being struck is not
@@ -250,12 +267,14 @@ measured, so these ratios describe severity *given* a pedestrian crash.
 
 ## 6. Finding 5 — Which combinations amplify risk
 
-See `reports/interactions.md`. In brief: pedestrian crashes in unlit darkness are the clearest
-case of amplification on both scales. Pedestrian crashes on 50+ mph roads and motorcycle crashes
-involving alcohol carry the largest *additive* excesses (deaths), although on the ratio scale they
-are multiplicative or less. The widely assumed amplifications of speeding by darkness and of
-young drivers by night are not supported. The protective-looking speeding × wet interaction is a
-measurement artefact of "too fast for conditions".
+See `reports/interactions.md`. In brief: among the 13 registered pairs, pedestrian crashes in
+unlit darkness are the clearest case of amplification on both scales, and motorcycle crashes
+involving alcohol carry a large *additive* excess (deaths) although on the ratio scale they are
+multiplicative or less. Pedestrian crashes on 50+ mph roads show the largest additive excess of
+all, in an exploratory pair. The widely assumed amplifications of speeding by darkness and of
+young drivers by night are not supported. The protective-looking speeding × wet interaction
+reflects the mix of speeding types ("too fast for conditions" concentrates on wet roads) and the
+lower wet-road baseline.
 
 ## 7. Finding 6 — Crash involvement is not crash severity
 
@@ -380,9 +399,10 @@ non-fatal crashes, the speeding fraction shrinks towards zero; the alcohol fract
 
 ## 14. Exploratory vs confirmatory
 
-The pre-specified analyses are: crude versus adjusted severity (RQ1), the 15 interaction pairs,
+The pre-specified analyses are: crude versus adjusted severity (RQ1), the 13 registered interaction pairs,
 the measurement analyses (RQ3), within-vehicle restraint (RQ6), QIE (RQ7), the post-2020
 decomposition (RQ5) and burden (RQ9). These are confirmatory within their stated assumptions. The
-speeding-type split and the three follow-up interaction pairs were motivated by the audit and by
-earlier results, and are exploratory. Machine-learning importance rankings are descriptive of
+speeding-type split, the two interaction pairs added at implementation and the three
+limit-exceedance follow-ups were motivated by the audit and by earlier results, and are
+exploratory. Machine-learning importance rankings are descriptive of
 the model, not findings about the world.
