@@ -37,7 +37,7 @@ def crss_crash(
 ) -> tuple[pd.DataFrame, SurveyDesign]:
     """CRSS crash file as pandas plus its survey design.
 
-    Rows with an unknown ``outcome`` (MAX_SEV 5/6/8/9 for 'fatal') are dropped *after* the
+    Rows with an unknown ``outcome`` (MAXSEV_IM 5/6/8 for 'fatal') are dropped *after* the
     design object is built from the full sample (so domain variance uses every PSU) -- the
     returned design is already subset to the returned rows.
     """

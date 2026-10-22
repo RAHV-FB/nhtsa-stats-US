@@ -213,14 +213,14 @@ def run() -> dict[str, pd.DataFrame]:
             "Estimated police-reported crashes per year by maximum KABCO severity with design-based SEs",
             "CRSS (national probability sample)",
             "crash",
-            "MAX_SEV",
+            "MAXSEV_IM (NHTSA-imputed maximum severity)",
         ),
         "frequency_vs_severity": (
             "Factor prevalence among all crashes (CRSS) vs among fatal crashes (CRSS and FARS), crude fatal "
             "rate and over-representation ratio",
             "CRSS 2016-2024 (denominators); FARS 2016-2024 (fatal crashes)",
             "crash",
-            "fatal (MAX_SEV=4)",
+            "fatal (MAXSEV_IM=4)",
         ),
         "fars_composition_by_year": (
             "Yearly composition of FARS fatal crashes and deaths",

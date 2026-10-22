@@ -133,8 +133,17 @@ recorded circumstances; negative: reverses).
 * Unknown / not reported / not applicable codes are mapped explicitly (see
   `docs/variable_harmonization.md`); binary indicators are tri-state (1 / 0 / null) and enter
   models as yes / no / unknown — never as "no".
-* Crash outcomes with unknown severity (MAX_SEV 5, 6, 8, 9; ~1.9% of CRSS crashes) are
-  excluded; NHTSA's imputed `MAXSEV_IM` is a sensitivity analysis.
+* CRSS severity outcomes use NHTSA's imputed severity (`MAXSEV_IM` for crashes, `INJSEV_IM`
+  for persons). The unimputed `MAX_SEV` is the maximum over persons whose severity is known,
+  so a crash containing a person of unknown severity would be classed by the others' injuries
+  — "unknown" silently treated as "not fatal". Its weighted fatal total falls 0.6–12.8% short
+  of the FARS count, by an amount that varies by year, whereas the imputed total reproduces
+  FARS within 0.9% in every year (the weights are calibrated to FARS through it; tested in
+  `tests/test_features.py`). The imputation fills only unknown codes. Crashes whose imputed
+  maximum is still undeterminable (codes 5, 6, 8; 0.4%) are excluded. A strict complete-case
+  outcome (`fatal_cc`, `ka_cc`: negative only when no person's severity is unknown; ~8% of
+  crashes undetermined) is the sensitivity analysis; it changes levels and trends, so both
+  are reported where trends are concerned.
 * Alcohol: imputed `ALCHL_IM` is used for adjustment because the police-reported field has a
   2019 coding break and an outcome-dependent unknown category (see research plan §3).
 * FARS BAC: the ten implicates of the multiply-imputed BAC files are combined as the mean

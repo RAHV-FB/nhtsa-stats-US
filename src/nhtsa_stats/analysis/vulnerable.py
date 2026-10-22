@@ -83,11 +83,15 @@ def _location(col: str = "LOCATION") -> pl.Expr:
 
 def build(source: str = "CRSS", years: Sequence[int] = config.YEARS) -> pl.DataFrame:
     case = "CASENUM" if source == "CRSS" else "ST_CASE"
+    # CRSS severity: NHTSA-imputed INJSEV_IM (primary, as in processing/features.py); INJ_SEV
+    # is kept for the complete-case sensitivity outcome.
+    sev = "INJSEV_IM" if source == "CRSS" else "INJ_SEV"
     p = load_table(
         source,
         "person",
         years,
-        [case, "VEH_NO", "PER_NO", "PER_TYP", "STR_VEH", "AGE", "SEX", "INJ_SEV", "LOCATION"],
+        [case, "VEH_NO", "PER_NO", "PER_TYP", "STR_VEH", "AGE", "SEX", "INJ_SEV", "LOCATION"]
+        + (["INJSEV_IM"] if source == "CRSS" else []),
     )
     p = p.filter(pl.col("PER_TYP").is_in([5, 6, 7]))
     v = load_table(
@@ -110,8 +114,10 @@ def build(source: str = "CRSS", years: Sequence[int] = config.YEARS) -> pl.DataF
         .alias("victim"),
         _striking(pl.col("body").fill_null("unknown")).alias("striking"),
         _location().alias("location"),
-        h.fatal("INJ_SEV").alias("killed"),
-        h.killed_or_serious("INJ_SEV").alias("killed_or_serious"),
+        h.fatal(sev).alias("killed"),
+        h.killed_or_serious(sev).alias("killed_or_serious"),
+        h.fatal("INJ_SEV").alias("killed_cc"),
+        h.killed_or_serious("INJ_SEV").alias("killed_or_serious_cc"),
         h.age_years().alias("age"),
         h.sex().alias("sex"),
         pl.col("str_speed_limit").fill_null(h.UNKNOWN),

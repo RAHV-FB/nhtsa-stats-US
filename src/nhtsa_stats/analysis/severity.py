@@ -260,7 +260,18 @@ def speeding_type_contrasts(outcome: str = "fatal") -> pd.DataFrame:
     return res
 
 
-def run(outcomes: Sequence[str] = ("fatal", "ka")) -> dict[str, pd.DataFrame]:
+def outcome_definition_sensitivity(primary: pd.DataFrame, cc: pd.DataFrame) -> pd.DataFrame:
+    """Model-A associations under the imputed (primary) and complete-case fatal outcomes."""
+    cols = ["crude_rr", "A_adj_rr", "A_adj_rr_low", "A_adj_rr_high"]
+    keys = ["factor", "level"]
+    a = primary[primary["A_adj_rr"].notna()][keys + cols]
+    b = cc[cc["A_adj_rr"].notna()][keys + cols]
+    m = a.merge(b, on=keys, suffixes=("", "_cc"))
+    m["adj_rr_ratio_cc_vs_primary"] = m["A_adj_rr_cc"] / m["A_adj_rr"]
+    return m
+
+
+def run(outcomes: Sequence[str] = ("fatal", "ka", "fatal_cc")) -> dict[str, pd.DataFrame]:
     out = {}
     for oc in outcomes:
         res = crude_vs_adjusted(oc)
@@ -290,4 +301,20 @@ def run(outcomes: Sequence[str] = ("fatal", "ka")) -> dict[str, pd.DataFrame]:
             inputs=["data/processed/crss_crash.parquet"],
         )
         out[f"{oc}_speeding_type"] = st
+    if "fatal" in out and "fatal_cc" in out:
+        sens = outcome_definition_sensitivity(out["fatal"], out["fatal_cc"])
+        save_table(
+            sens,
+            MODULE,
+            "fatal_outcome_definition_sensitivity",
+            description="Model-A adjusted risk ratios with the NHTSA-imputed fatal outcome (primary) and the "
+            "strict complete-case outcome (MAX_SEV; crashes with any person of unknown severity excluded "
+            "unless fatal)",
+            population="CRSS police-reported crashes 2016-2024",
+            unit="crash",
+            outcome="fatal vs fatal_cc",
+            method="Same model A fitted to each outcome definition; ratio of adjusted RRs",
+            inputs=["data/processed/crss_crash.parquet"],
+        )
+        out["fatal_outcome_definition_sensitivity"] = sens
     return out

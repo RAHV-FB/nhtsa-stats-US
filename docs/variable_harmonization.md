@@ -34,8 +34,8 @@ behind each decision is in the domain audit appendices under [`docs/audit/`](aud
 
 | Variable | Level | Source fields (both sources unless noted) | Harmonised categories | Breaks / issues handled | Reliability |
 |---|---|---|---|---|---|
-| `fatal`, `ka`, `injury`, `kabco` | crash / person | `MAX_SEV` (CRSS crash), `INJ_SEV` (person) | K; K+A; any injury; ordinal O–K. Codes 5 (injured, severity unknown), 6 (died before crash), 8, 9 → null | Label punctuation only; no definitional break (max year-to-year TVD 1.7–2.4 pp) | High |
-| `fatal_im`, `ka_im` | crash | CRSS `MAXSEV_IM` | as above | Imputation also changes 0.8% of *known* values → sensitivity only | — |
+| `fatal`, `ka`, `injury`, `kabco` | crash / person | CRSS crash `MAXSEV_IM`, CRSS person `INJSEV_IM`; FARS `INJ_SEV` | K; K+A; any injury; ordinal O–K. Codes 5 (injured, severity unknown), 6 (died before crash), 8 → null | Imputation fills only unknown codes (person 9). Weighted imputed fatal total = FARS within 0.9% every year; unimputed `MAX_SEV` falls 0.6–12.8% short (year-dependent) | High |
+| `fatal_cc`, `ka_cc`; `killed_cc`, `killed_or_serious_cc` | crash / person | CRSS `MAX_SEV`, `INJ_SEV` | Strict complete case: crash negative only if no person has `INJ_SEV` 9 (and, for KA, 5); ~8% of crashes null | Sensitivity only: levels and trends differ from the imputed outcome | — |
 | `light`, `dark` | crash | `LGT_COND` | daylight / dawn-dusk / dark-lit / dark-unlit / dark-unknown lighting / unknown | Code 6 drifts upward slowly; no break | High |
 | `weather` | crash | `WEATHER` | clear / cloudy / rain (incl. freezing) / snow-sleet / fog / other / unknown | FARS 2016–19 `WEATHER1/2`; 2020+ multi-row `weather` table — the crash-level `WEATHER` field is available all years in both sources and used throughout | Medium (CRSS 3–6% unknown) |
 | `surface` | crash (from vehicles) | `VSURCOND` | dry / wet (incl. water) / snow-ice-slush / other / unknown | CRSS 2020 rise in "not reported" (6%) → explicit unknown | High |

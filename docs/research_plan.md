@@ -1,6 +1,6 @@
 # Research plan
 
-Version 1.1 — written after the repository and data audit (see `docs/data_audit.md`) and
+Version 1.2 — written after the repository and data audit (see `docs/data_audit.md`) and
 revised as findings emerged (change log at the end).
 
 ## 1. Central question
@@ -74,16 +74,16 @@ Priority reflects scientific value × evidential strength × policy relevance ×
 | Element | Specification |
 |---|---|
 | Question | Which circumstances are associated with a crash being fatal (K) or KA, and how do associations change after adjustment? |
-| Population | CRSS police-reported crashes 2016–2024 with known maximum severity (n = 458,907 for K) |
+| Population | CRSS police-reported crashes 2016–2024 with a determinable maximum severity (imputed `MAXSEV_IM` not 5/6/8; 467,008 sampled crashes) |
 | Unit | Crash |
-| Outcome | `fatal` = MAX_SEV 4 vs 0–3; `ka` = 3–4 vs 0–2 (MAX_SEV 5/6/8/9 excluded, ~1.9%) |
+| Outcome | `fatal` = `MAXSEV_IM` 4 vs 0–3; `ka` = 3–4 vs 0–2 (NHTSA-imputed maximum severity; codes 5/6/8 excluded, 0.4%). Complete-case sensitivity `fatal_cc` / `ka_cc` from `MAX_SEV`, negative only when no person's severity is unknown |
 | Variables | PRE_CRASH set; crash configuration; all available and harmonised 2016–2024 |
 | Method | Weighted crude rates; survey-weighted logistic models A (pre-crash) and B (+configuration); standardised predictive margins → adjusted risk ratios and differences with linearised CIs |
 | Confounders / selection | Adjusted: listed covariates. Not available: travel speed (mostly unknown), vehicle mass, occupancy, EMS response. Selection: crash must be police-reported and sampled |
 | Justified interpretation | "Conditional on a reported crash, crashes with X are fatal Y times as often as comparable crashes without X" |
 | Not justified | Causal effect of X; effect of X on crash occurrence; effect of removing X via policy |
 | Limitations | Police-reported behaviours are ascertained more thoroughly in fatal crashes (RQ3); residual confounding |
-| Validation | Agreement of CRSS weighted fatal-crash composition with FARS census; KA as second outcome; MAXSEV_IM sensitivity; period-specific refits |
+| Validation | Agreement of CRSS weighted fatal-crash composition with FARS census; KA as second outcome; complete-case (`MAX_SEV`) sensitivity; period-specific refits |
 
 ### RQ2 (priority 1) — Interactions and co-occurrence
 
@@ -215,3 +215,11 @@ Behaviours are recorded by police *after* the crash, and recording depends on se
   with an adjusted OR of 5.3, nearly equal to `alcohol=yes`, and year effects shifting at
   2019). RQ5 (post-2020 severity rise) added after the descriptive baseline showed the
   increase.
+* v1.2 — CRSS outcomes switched from the unimputed `MAX_SEV` / `INJ_SEV` to NHTSA's imputed
+  `MAXSEV_IM` / `INJSEV_IM` (sensitivity: strict complete case). The survey-design audit
+  (`docs/audit/crss_survey_design.md`) showed that `MAX_SEV` is the maximum over persons with
+  *known* severity, so crashes containing a person of unknown severity were coded from the
+  others' injuries (an "unknown as no" error), and that the weighted `MAX_SEV` fatal total
+  falls 0.6–12.8% short of the FARS count by a year-dependent amount. The imputed total
+  reproduces FARS within 0.9% every year (exactly in 2016 and 2024). The year-dependent gap
+  distorts severity trends: 2019→2024 fatal share +19% (imputed) vs +35% (complete case).

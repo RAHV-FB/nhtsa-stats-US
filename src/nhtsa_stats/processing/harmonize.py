@@ -473,16 +473,23 @@ REGISTRY: dict[str, VarInfo] = {
     "PSUSTRAT": VarInfo("design", "crash"),
     "PSU_VAR": VarInfo("design", "crash"),
     # outcomes
+    # CRSS crash/person outcomes use NHTSA's imputed severity (MAXSEV_IM / INJSEV_IM), whose
+    # weighted totals reproduce FARS; *_cc are strict complete-case versions from MAX_SEV /
+    # INJ_SEV (sensitivity). FARS outcomes are census values (no imputation needed).
     "fatal": VarInfo("outcome", "crash"),
     "ka": VarInfo("outcome", "crash"),
     "injury": VarInfo("outcome", "crash"),
     "kabco": VarInfo("outcome", "crash"),
-    "fatal_im": VarInfo("outcome", "crash"),
-    "ka_im": VarInfo("outcome", "crash"),
+    "fatal_cc": VarInfo("outcome", "crash", "complete-case sensitivity"),
+    "ka_cc": VarInfo("outcome", "crash", "complete-case sensitivity"),
     "n_killed": VarInfo("outcome", "crash"),
     "n_injured": VarInfo("outcome", "crash"),
+    "n_sev_unknown": VarInfo("outcome", "crash", "persons with INJ_SEV 9 (unknown)"),
+    "n_sev_injured_unknown": VarInfo("outcome", "crash", "persons with INJ_SEV 5"),
     "killed": VarInfo("outcome", "person"),
     "killed_or_serious": VarInfo("outcome", "person"),
+    "killed_cc": VarInfo("outcome", "person", "complete-case sensitivity"),
+    "killed_or_serious_cc": VarInfo("outcome", "person", "complete-case sensitivity"),
     # post-crash consequences (mediators / leakage risks)
     "ejected": VarInfo("post_crash", "person", "consequence of crash forces and restraint"),
     "rollover_any": VarInfo("post_crash", "crash", "crash outcome mechanism"),

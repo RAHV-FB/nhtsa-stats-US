@@ -75,13 +75,30 @@ def test_crss_crash_reconciles_with_raw_accident():
 
     raw = load_table("CRSS", "accident", columns=["CASENUM", "MAX_SEV"])
     proc = pl.read_parquet(
-        config.PROCESSED_DIR / "crss_crash.parquet", columns=["case_id", "fatal", "MAX_SEV"]
+        config.PROCESSED_DIR / "crss_crash.parquet",
+        columns=["case_id", "fatal", "fatal_cc", "MAX_SEV", "MAXSEV_IM", "n_sev_unknown"],
     )
     assert proc.height == raw.height
     assert proc["case_id"].n_unique() == proc.height
-    # fatal is null exactly when MAX_SEV is 5, 6, 8 or 9
-    assert proc.filter(pl.col("fatal").is_null())["MAX_SEV"].is_in([5, 6, 8, 9]).all()
-    assert proc.filter(pl.col("MAX_SEV") == 4)["fatal"].eq(1).all()
+    # primary outcome: imputed severity; null exactly when MAXSEV_IM is 5, 6 or 8
+    assert proc.filter(pl.col("fatal").is_null())["MAXSEV_IM"].is_in([5, 6, 8]).all()
+    assert proc.filter(pl.col("MAXSEV_IM") == 4)["fatal"].eq(1).all()
+    # complete-case sensitivity: never 'not fatal' when a person's severity is unknown
+    assert proc.filter(pl.col("MAX_SEV") == 4)["fatal_cc"].eq(1).all()
+    assert proc.filter(pl.col("fatal_cc") == 0)["n_sev_unknown"].eq(0).all()
+
+
+@pytest.mark.processed
+def test_crss_imputed_fatal_total_matches_fars():
+    """CRSS weights are calibrated to FARS through MAXSEV_IM (docs/audit/crss_survey_design.md)."""
+    crss = pl.read_parquet(
+        config.PROCESSED_DIR / "crss_crash.parquet", columns=["YEAR", "WEIGHT", "fatal"]
+    )
+    fars = pl.read_parquet(config.PROCESSED_DIR / "fars_crash.parquet", columns=["YEAR"])
+    w = crss.group_by("YEAR").agg((pl.col("WEIGHT") * (pl.col("fatal") == 1)).sum().alias("w"))
+    both = w.join(fars.group_by("YEAR").len(), on="YEAR")
+    assert both.height == len(config.YEARS)
+    assert ((both["w"] / both["len"] - 1).abs() < 0.015).all()
 
 
 @pytest.mark.processed

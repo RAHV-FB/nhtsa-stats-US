@@ -188,9 +188,18 @@ def person_level(source: str, years: Sequence[int]) -> pl.DataFrame:
     )
     p = p.with_columns(h.age_band("age").alias("age_band"))
     if source == "CRSS":
+        # Primary CRSS person outcomes use NHTSA's imputed severity: INJSEV_IM fills only
+        # INJ_SEV 9 (unknown), and its weighted killed total tracks FARS deaths (within ~3% a
+        # year) whereas INJ_SEV falls 1-14% short, by a year-dependent amount. The INJ_SEV
+        # versions are kept as complete-case sensitivity outcomes.
         p = p.with_columns(
-            h.fatal("INJSEV_IM").alias("killed_im"),
-            h.killed_or_serious("INJSEV_IM").alias("killed_or_serious_im"),
+            pl.col("killed").alias("killed_cc"),
+            pl.col("killed_or_serious").alias("killed_or_serious_cc"),
+        ).with_columns(
+            h.fatal("INJSEV_IM").alias("killed"),
+            h.killed_or_serious("INJSEV_IM").alias("killed_or_serious"),
+            h.any_injury("INJSEV_IM").alias("injured"),
+            h.kabco("INJSEV_IM").alias("kabco"),
         )
     return p
 
@@ -245,6 +254,8 @@ def crash_aggregates(source: str, veh: pl.DataFrame, per: pl.DataFrame) -> pl.Da
         pl.col("PER_TYP").is_in(NONMOTORIST_TYPES).any().cast(pl.Int8).alias("any_nonmotorist"),
         (pl.col("INJ_SEV") == 4).sum().alias("n_killed"),
         pl.col("INJ_SEV").is_in([3, 4]).sum().alias("n_ka"),
+        (pl.col("INJ_SEV") == 9).sum().alias("n_sev_unknown"),
+        (pl.col("INJ_SEV") == 5).sum().alias("n_sev_injured_unknown"),
         pl.col("PER_TYP").is_in(OCCUPANT_TYPES).sum().alias("n_occupants"),
     )
     dagg = (
@@ -373,12 +384,31 @@ def build_crss(years: Sequence[int] = config.YEARS) -> tuple[pl.DataFrame, pl.Da
     kc, kv, _kp = _keys("CRSS")
     crash = acc.join(agg, on=kc, how="left")
     crash = crash_common(crash).with_columns(
-        h.fatal("MAX_SEV").alias("fatal"),
-        h.killed_or_serious("MAX_SEV").alias("ka"),
-        h.any_injury("MAX_SEV").alias("injury"),
-        h.kabco("MAX_SEV").alias("kabco"),
-        h.fatal("MAXSEV_IM").alias("fatal_im"),
-        h.killed_or_serious("MAXSEV_IM").alias("ka_im"),
+        # Primary outcomes: NHTSA-imputed maximum severity. MAX_SEV is the maximum over persons
+        # with *known* severity, so a crash containing a person of unknown severity is coded by
+        # the others' injuries ("unknown as no"); its weighted fatal total falls 0.6-12.8% short
+        # of FARS by a year-dependent amount, whereas MAXSEV_IM is calibrated to FARS
+        # (docs/audit/crss_survey_design.md).
+        h.fatal("MAXSEV_IM").alias("fatal"),
+        h.killed_or_serious("MAXSEV_IM").alias("ka"),
+        h.any_injury("MAXSEV_IM").alias("injury"),
+        h.kabco("MAXSEV_IM").alias("kabco"),
+        # Strict complete-case sensitivity outcomes: negative only when no person's severity
+        # is unknown (INJ_SEV 9; for KA also 5 'injured, severity unknown').
+        pl.when(pl.col("MAX_SEV") == 4)
+        .then(pl.lit(1, dtype=pl.Int8))
+        .when(pl.col("MAX_SEV").is_between(0, 3) & (pl.col("n_sev_unknown") == 0))
+        .then(pl.lit(0, dtype=pl.Int8))
+        .alias("fatal_cc"),
+        pl.when(pl.col("MAX_SEV").is_in([3, 4]))
+        .then(pl.lit(1, dtype=pl.Int8))
+        .when(
+            pl.col("MAX_SEV").is_between(0, 2)
+            & (pl.col("n_sev_unknown") == 0)
+            & (pl.col("n_sev_injured_unknown") == 0)
+        )
+        .then(pl.lit(0, dtype=pl.Int8))
+        .alias("ka_cc"),
         h.crss_alcohol("ALCOHOL").alias("alcohol"),
         h.crss_alcohol("ALCHL_IM").alias("alcohol_im"),
         pl.col("REGION").replace_strict(REGION_LABELS, default=h.UNKNOWN).alias("region"),

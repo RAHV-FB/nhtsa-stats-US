@@ -230,6 +230,8 @@ No design field has a null value, and no `WEIGHT` is ≤ 0, in any table-year (`
   * The precedence between strata (for example, a truck crash with an injured pedestrian) is **UNVERIFIED**. Stratum 2 contains 3.2% truck/bus crashes and
     stratum 4 contains 9.9%.
   * **Code 1 never occurs** (any year, any table). Its meaning is **UNVERIFIED**.
+* **Level [xtab]:** all nine codes occur in every PSU in every year, so STRATUM cuts across PSUs. It is a within-PSU (crash-stage)
+  stratification and not a first-stage one.
 * **CRSS 2016–2018 (unlabelled):** the code set is identical (2–10). The unweighted distribution differs from 2019 by a total variation distance of
   0.044 / 0.043 / 0.016 (2016/17/18), within the 2020–24 range of 0.037–0.055. The composition checks above give the same pattern in 2016–18 as in
   2019–24. **The 2019+ labels can be applied to 2016–2018.**
@@ -408,8 +410,10 @@ clusters.
 2. `PSU_VAR` is nested in `PSUSTRAT`, equals `PSU` outside stratum 20, and in stratum 20 splits the single PSU 56 into its PJs (§4.3).
    Using `PSU` makes stratum 20 a lonely PSU. Its variance contribution then becomes 0 (certainty treatment) and the sampling of PJs inside the
    certainty PSU is ignored. Effect: the 2016 non-motorist-share deff falls from 9.03 (PSU_VAR) to 4.99 (PSU) and the 2016 injury-share deff
-   from 25.7 to 20.0. In later years the difference is 1–10% of the variance (table 6.3).
-3. `STRATUM` is **not** a first-stage stratum. All nine crash-type strata occur inside every PSU, and the label wording describes crash types.
+   from 25.7 to 20.0. In 2017–2024, using `PSU` understates the variance by 0–17%: the largest gap is in the non-motorist share
+   (2018: 5.67 against 6.85; 2020: 9.06 against 10.86), and for the injury share it is 0–8%.
+3. `STRATUM` is **not** a first-stage stratum. **[xtab]** All nine crash-type strata occur inside every PSU in every year
+   (53–60 PSUs, 100%), and inside 95.5–100% of `PSU_VAR`s. The exceptions are small PJ-level `PSU_VAR`s of PSU 56, with at least 6 strata each. The label wording describes crash types.
    It stratifies the final (crash) stage. Under the ultimate-cluster approximation its effect is already captured in the cluster totals
    **[general]**. Using `STRATUM` as the variance stratum with crashes as independent units (specification E) gives, for the fatal, KA, injury and
    non-motorist shares in 2024, deff 0.23–0.47 where specification A gives 1.7–16.0, so standard errors would be **2–8× too small**.
