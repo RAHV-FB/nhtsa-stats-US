@@ -68,10 +68,9 @@ def build_interim(
             and prev.get("size_bytes") == a.size_bytes
             and all((root / t["parquet"]).exists() for t in prev.get("tables", {}).values())
         )
-        if up_to_date:
-            # Size match is a cheap pre-check; confirm content identity via SHA-256.
-            if sha256_file(a.path) == prev["sha256"]:
-                continue
+        # Size match is a cheap pre-check; confirm content identity via SHA-256.
+        if up_to_date and sha256_file(a.path) == prev["sha256"]:
+            continue
         todo.append(a)
     log.info("%d/%d archives need conversion", len(todo), len(archives))
     if todo:

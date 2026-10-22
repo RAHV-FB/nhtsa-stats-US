@@ -132,7 +132,7 @@ def harmonised_variables() -> str:
 
 def processed_dictionary() -> str:
     """Column-level dictionary of the analytic datasets, read from the Parquet files."""
-    import polars as pl  # noqa: PLC0415
+    import polars as pl
 
     out = [
         "# Generated dictionary of the analytic datasets",

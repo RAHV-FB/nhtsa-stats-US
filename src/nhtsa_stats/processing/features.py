@@ -370,7 +370,7 @@ def build_crss(years: Sequence[int] = config.YEARS) -> tuple[pl.DataFrame, pl.Da
     veh = vehicle_level("CRSS", years)
     per = person_level("CRSS", years)
     agg = crash_aggregates("CRSS", veh, per)
-    kc, kv, kp = _keys("CRSS")
+    kc, kv, _kp = _keys("CRSS")
     crash = acc.join(agg, on=kc, how="left")
     crash = crash_common(crash).with_columns(
         h.fatal("MAX_SEV").alias("fatal"),

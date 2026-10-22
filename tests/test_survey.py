@@ -158,7 +158,7 @@ def test_logit_ci_bounds():
 
 
 def test_incremental_design_matrix_matches_full_rebuild(rng):
-    df, y, w, strata, clus = _sim_logit(rng)
+    df, *_ = _sim_logit(rng)
     df["c"] = rng.choice(["p", "q", "r"], len(df))
     spec = ModelSpec(
         categorical={"a": [0, 1], "b": [0, 1], "c": ["p", "q", "r"]},

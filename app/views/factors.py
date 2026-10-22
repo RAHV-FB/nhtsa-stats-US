@@ -90,10 +90,10 @@ def render() -> None:
         return
     a["level"] = a["level"].astype(str)
     long = []
-    for key, name, color in (
-        ("crude", "Crude", BLUE),
-        ("A_adj", "Adjusted: pre-crash (A)", ORANGE),
-        ("B_adj", "Adjusted: + configuration (B)", "#1baf7a"),
+    for key, name in (
+        ("crude", "Crude"),
+        ("A_adj", "Adjusted: pre-crash (A)"),
+        ("B_adj", "Adjusted: + configuration (B)"),
     ):
         if f"{key}_rr" in a and a[f"{key}_rr"].notna().any():
             long.append(
