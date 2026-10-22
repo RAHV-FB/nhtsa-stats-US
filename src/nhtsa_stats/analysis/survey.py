@@ -247,25 +247,30 @@ class ModelSpec:
     ``categorical`` maps a column to its ordered levels; the first level is the reference.
     ``interactions`` are pairs of columns (categorical x categorical, or categorical x
     numeric) whose dummy/numeric blocks are multiplied.
+    ``products`` are single-column interaction terms between *groups of levels*: each entry
+    is a tuple of ``(column, levels)`` pairs and contributes the product of the indicators
+    ``1[column in levels]`` -- e.g. ``(("speeding", ["yes"]), ("speed_limit", ["50-55",
+    "60-65", "70+"]))`` adds one term for speeding on 50+ mph roads while the main effects
+    keep their full categorical detail.
     """
 
     categorical: dict[str, list] = field(default_factory=dict)
     numeric: list[str] = field(default_factory=list)
     interactions: list[tuple[str, str]] = field(default_factory=list)
     intercept: bool = True
+    products: list[tuple[tuple[str, list], ...]] = field(default_factory=list)
 
     def _block(self, df: pd.DataFrame, var: str) -> tuple[np.ndarray, list[str]]:
         if var in self.categorical:
             levels = self.categorical[var]
-            vals = df[var].to_numpy()
-            unknown = ~pd.Series(vals).isin(levels).to_numpy()
-            if unknown.any():
-                bad = pd.unique(vals[unknown])[:5]
+            codes = pd.Categorical(df[var], categories=levels).codes
+            if (codes < 0).any():
+                bad = pd.unique(df[var].to_numpy()[codes < 0])[:5]
                 raise ValueError(f"{var}: values outside declared levels: {bad}")
-            cols = [(vals == lv).astype(float) for lv in levels[1:]]
-            return np.column_stack(cols) if cols else np.zeros((len(df), 0)), [
-                f"{var}[{lv}]" for lv in levels[1:]
-            ]
+            block = np.zeros((len(df), len(levels) - 1))
+            rows = np.nonzero(codes > 0)[0]
+            block[rows, codes[rows] - 1] = 1.0
+            return block, [f"{var}[{lv}]" for lv in levels[1:]]
         return df[var].to_numpy(dtype=float)[:, None], [var]
 
     def design_matrix(self, df: pd.DataFrame) -> tuple[np.ndarray, list[str]]:
@@ -284,6 +289,14 @@ class ModelSpec:
                 for j, nj in enumerate(nb):
                     blocks.append((xa[:, i] * xb[:, j])[:, None])
                     names.append(f"{ni}:{nj}")
+        for term in self.products:
+            col = np.ones(len(df))
+            parts = []
+            for var, levels in term:
+                col = col * df[var].isin(list(levels)).to_numpy(dtype=float)
+                parts.append(f"{var}{{{'|'.join(map(str, levels))}}}")
+            blocks.append(col[:, None])
+            names.append(":".join(parts))
         return np.column_stack(blocks), names
 
     def columns(self) -> list[str]:

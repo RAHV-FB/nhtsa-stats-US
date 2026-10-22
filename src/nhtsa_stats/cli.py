@@ -33,6 +33,7 @@ ANALYSES: dict[str, str] = {
     "matched": "nhtsa_stats.analysis.matched",
     "exposure": "nhtsa_stats.analysis.exposure",
     "burden": "nhtsa_stats.analysis.burden",
+    "vulnerable": "nhtsa_stats.analysis.vulnerable",
     "ml": "nhtsa_stats.models.severity_ml",
     "policy": "nhtsa_stats.simulation.evidence",
 }
