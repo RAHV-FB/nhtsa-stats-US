@@ -144,7 +144,7 @@ No design field has a null value, and no `WEIGHT` is ≤ 0, in any table-year (`
 
 * **Lonely strata:** with `PSU_VAR` as the cluster, the minimum is 2 PSU_VARs per stratum in every year, so there are **no lonely PSUs**. With `PSU` as the cluster,
   **PSUSTRAT 20 has a single PSU (56) in every year**.
-* **Weighted crashes by PSUSTRAT** (thousands; strata 1–5 shown as an example of 2016 differences): str 1: 151 (2016), 265, 348, 349, 204, 251, 223, 290, 282;
+* **Weighted crashes by PSUSTRAT** (thousands, selected strata): str 1: 151 (2016), 265, 348, 349, 204, 251, 223, 290, 282;
   str 21: **335 (2016)**, 190, 194, 190, 142, 158, 161, 179, 175; str 20: 179, 158, 165, 129, 108, 94, 94, 95, **71** (2024). Total variation
   distance of the weighted PSUSTRAT distribution against 2019: **0.117 (2016)**, 0.051, 0.026, –, 0.055, 0.048, 0.053, 0.050, 0.056.
 * **Missing / unknown codes:** none (0 nulls; no sentinel codes).
@@ -224,8 +224,8 @@ No design field has a null value, and no `WEIGHT` is ≤ 0, in any table-year (`
 
   * "LMY" (late model year) is consistent with **youngest passenger vehicle at most 4 model years older than the crash year**.
     The share of crashes meeting this is 97.2–99.7% in strata 4, 6 and 9 in every year and 0.1–0.9% in stratum 10. The distribution of
-    youngest-PV age in stratum 4 is concentrated on ages −1 to 4 (2,051–2,785 crashes per age), with ≤ 22 crashes at ages 5 or more. The exact rule is **UNVERIFIED**.
-    The 12–19% of stratum-5/8 crashes that contain a PV ≤ 4 years old show that the stratum is assigned from information available when
+    youngest-PV age in stratum 4 is concentrated on ages 0 to 4 (2,051–2,785 crashes per age, plus 114 at age −1), with ≤ 22 crashes at any single age of 5 or more. The exact rule is **UNVERIFIED**.
+    The 11–20% of stratum-5/8 crashes (by year) that contain a PV ≤ 4 years old show that the stratum is assigned from information available when
     the crash is sampled (the police report). It is not recomputed from final coded data. **[xtab]**
   * The precedence between strata (for example, a truck crash with an injured pedestrian) is **UNVERIFIED**. Stratum 2 contains 3.2% truck/bus crashes and
     stratum 4 contains 9.9%.
@@ -304,8 +304,8 @@ No design field has a null value, and no `WEIGHT` is ≤ 0, in any table-year (`
 
   The 2016 maximum (994.5) belongs to the 2016 crashes of PJ 268 (PSU_VAR 49, PSUSTRAT 21, STRATUM 10).
 * **By STRATUM (median weight):** strata 2–5 (injury, non-motorist, motorcycle, KA) have medians of 11–31. Strata 6 and 8 (BC) have 34–160.
-  Strata 7, 9 and 10 (truck/bus and no-injury) have 96–240. Fatal and serious-injury crashes are therefore **oversampled by a factor of about 5–15** relative to
-  no-injury crashes: the unweighted fatal share is 2.1% (2024: 1,101 / 51,658) against a weighted share of 0.59%.
+  Strata 7, 9 and 10 (truck/bus and no-injury) have 96–240. The stratum-10 median weight is 15–20× the stratum-4 median (for example 223.9 against 11.3 in 2024),
+  so serious-injury crashes are heavily **oversampled**. The unweighted fatal share is 2.1% (2024: 1,101 / 51,658) against a weighted share of 0.59%.
 * **By MAX_SEV (median weight):** O 137–190, C 40–73, B 33–68, A 17–28, K 20–34, unknown (9) 172–235.
 * **Estimated national crash totals with design SE** (thousands, `svy_11`; PSUSTRAT/PSU_VAR; RSE in brackets):
 
@@ -331,11 +331,11 @@ No design field has a null value, and no `WEIGHT` is ≤ 0, in any table-year (`
   * **2020:** median 149 in January, then 109 (May) and **94–95 from June to December**. The stratum-9 median falls from 163–166 to 95–96 in June, so the sampling
     fraction rose by about 70% at mid-year.
   * **2021:** median 132–167 from January to July, then **92–94 from August to December**. The stratum-9 median is 179–182 until July and 93–100 from August.
-  * Therefore any monthly, seasonal or day-of-week analysis of 2020–2021 **must be weighted**. Unweighted month profiles are distorted by
-    about ±40%.
+  * Therefore any monthly, seasonal or day-of-week analysis of 2020–2021 **must be weighted**. For example, in 2021 October has 2.1× as many sampled crashes
+    as February (6,336 against 2,997), but only 1.35× as many weighted crashes (585.6k against 434.3k).
 * **Missing / invalid:** none. All weights are > 0 and finite.
 * **Reliability: high.** The weights are internally consistent and the FARS calibration is verified. Weight variability is moderate (deff_w 1.31–1.55).
-  Extreme weights (> 500) occur in 2016–2018, 2021, 2022 and 2024 and are rare: p99 is 236–541.
+  Weights above 500 occur in 2016, 2018, 2019, 2021, 2022 and 2024 and are rare: p99 is 236–541.
 * **Harmonised:** `crss_weight = WEIGHT` (crash weight, applied to every row of a case). For pooled multi-year **annual-average** totals,
   divide by the number of years. Do not trim or rescale the weights, because that breaks the FARS calibration.
 
@@ -361,7 +361,7 @@ missingness check, so their exact definition is recorded here.
   stratum 7, but ≤ 0.15% in the injury strata 2–6 and 8 in every year. When imputed, 66.6% of `MAX_SEV = 9` crashes become O.
 * **Imputed-fatal crashes [xtab] (`svy_08`):** crashes with `MAXSEV_IM = 4` and `MAX_SEV ≠ 4` number 10 / 31 / 11 / 31 / 30 / 9 / 17 / 4 / 5 sampled crashes,
   carrying **1,574 / 3,927 / 2,120 / 4,044 / 3,889 / 1,680 / 2,368 / 386 / 219** weighted crashes (mean weight 44–193). That is 4.5%, 11.5%, 6.3%, 12.2%, 10.9%, 4.3%, 6.0%,
-  1.0% and 0.6% of the weighted fatal total. Pooled, 53 of these 152 crashes are in stratum 10 (12,157 of 20,206 weighted, 60%), and 51 had `MAX_SEV = 9`.
+  1.0% and 0.6% of the weighted fatal total. Pooled, 53 of these 148 crashes are in stratum 10 (12,157 of 20,206 weighted, 60%), and 51 had `MAX_SEV = 9`.
   No crash with `MAX_SEV = 4` has `MAXSEV_IM ≠ 4`. **Trends in weighted `MAX_SEV = 4` are therefore distorted by year-to-year variation in imputation.** Use `MAXSEV_IM`.
 * **`A_CRAINJ` (acc_aux, unlabelled) [xtab]:** a deterministic recode of `MAXSEV_IM`. Code 4 is `MAXSEV_IM = 4` (9,958 crashes). Code 2 is `MAXSEV_IM` ∈ {1,2,3,5}. Code 3 is
   `MAXSEV_IM` ∈ {0,6,8}. Code 1 never occurs. The pattern is the same in every year. The categories (fatal / non-fatal injury / no injury) are verified by cross-tabulation, but the label wording is **UNVERIFIED**.
@@ -376,7 +376,7 @@ All 30 CRSS tables with `CASENUM` were joined to `accident` on (`YEAR`, `CASENUM
 
 | Result | Value |
 |---|---|
-| Rows checked | 13,9 million rows (for example person 1,158,730; vevent and vsoe 1,160,806; damage 1,676,876; per_aux 1,158,730; veh_aux 825,957) |
+| Rows checked | 17,422,170 rows in 30 tables. 16,646,694 of them are in the 28 tables that carry design fields; the 2 vPIC tables were checked for orphan keys only. Examples: person 1,158,730; vevent and vsoe 1,160,806; damage 1,676,876; per_aux 1,158,730; veh_aux 825,957 |
 | Rows whose CASENUM is absent from accident | **0** in every table-year |
 | `WEIGHT` mismatches (abs. diff > 1e-6) | **0** (person `WEIGHT` is bit-identical to accident `WEIGHT`: max abs diff 0.0) |
 | `PSU`, `PSU_VAR`, `PSUSTRAT`, `STRATUM`, `PJ`, `REGION`, `URBANICITY` mismatches | **0** in every table that carries them |
@@ -411,8 +411,8 @@ clusters.
    from 25.7 to 20.0. In later years the difference is 1–10% of the variance (table 6.3).
 3. `STRATUM` is **not** a first-stage stratum. All nine crash-type strata occur inside every PSU, and the label wording describes crash types.
    It stratifies the final (crash) stage. Under the ultimate-cluster approximation its effect is already captured in the cluster totals
-   **[general]**. Using `STRATUM` as the variance stratum with crashes as independent units (specification E) gives deff 0.23–0.47 where the correct value is 4.8–16.0 (2024),
-   so standard errors would be **3–8× too small**.
+   **[general]**. Using `STRATUM` as the variance stratum with crashes as independent units (specification E) gives, for the fatal, KA, injury and
+   non-motorist shares in 2024, deff 0.23–0.47 where specification A gives 1.7–16.0, so standard errors would be **2–8× too small**.
 4. `PJ` (specification D) is a second-stage unit. Ultimate-cluster variance uses first-stage units **[general]**. Using PJs gives variances that are
    not consistent with the correct ones: some are lower (injury 9.9 against 16.0 in 2024) and some higher (rural 434 against 136).
 5. Ignoring strata (specification C, clusters only) overstates variances: injury deff 20.1 against 16.0, rural 978 against 136 (2024).
@@ -531,7 +531,7 @@ Interpretation: CRSS weights are benchmarked so that weighted imputed-fatal cras
    mix a census (weight 1, no sampling variance) with a sample, and mix code definitions that are similarly named but differ in level
    (for example `URBANICITY` against `RUR_URB`).
 2. **Fatality and fatal-crash counts, and anything that describes fatal crashes in detail, come from FARS.** The CRSS fatal total is not an independent
-   estimate, because it is calibrated to FARS. CRSS fatal subgroups rest on only about 900–1,400 sampled crashes (RSE about 6–7% even nationally). CRSS
+   estimate, because it is calibrated to FARS. CRSS fatal subgroups rest on only about 900–1,400 sampled crashes (RSE 6.1–7.5% even for the national total). CRSS
    `MAX_SEV = 4` without imputation is biased low by up to 12.8%.
 3. **Severity distributions and rates per police-reported crash come from CRSS**, using `MAXSEV_IM` (or `INJSEV_IM` for persons), the full
    design and design-based SEs. FARS has no non-fatal denominator. A "fatal share" from CRSS is effectively the FARS count divided by the CRSS estimate of all crashes,
@@ -590,7 +590,8 @@ All others are present in 2016–2024. The labels for `*_IM` exist only in 2019�
   LGTCON_IM, WEATHR_IM, BDYTYP_IM, HITRUN_IM, IMPACT1_IM, MDLYR_IM, PCRASH1_IM, VEVENT_IM, AGE_IM, SEX_IM, INJSEV_IM, SEAT_IM, EJECT_IM and PERALCH_IM.
 * **Partly-unknown codes are kept, not imputed (deterministic identity mapping):** `HARM_EV`/`M_HARM` 91 "Unknown Object Not Fixed" and 93 "Unknown Fixed Object";
   `LGT_COND` 6 "Dark - Unknown Lighting" (3,908 of 3,908 kept); `INJ_SEV` 5 "Injured, Severity Unknown" (2,624 of 2,624 kept); `MAX_SEV`/`MAX_VSEV` 5 (98.2% and 99.8% kept);
-  `BODY_TYP` "unknown subtype" codes such as 9, 29, 48 and 59 (kept), except 79 "Unknown truck type (light/medium/heavy)", which is distributed; `IMPACT1` 20; `SEAT_POS` 53;
+  `BODY_TYP` "unknown subtype" codes 7, 8, 9, 19, 29, 39, 48, 59, 64, 71, 72, 73, 78, 87 and 89 (100% kept). Only 49 "Unknown light vehicle type", 79 "Unknown truck type
+  (light/medium/heavy)", 98 and 99 are distributed (0% kept; 27, 20, 34 and 43 distinct imputed values); `IMPACT1` 20; `SEAT_POS` 53;
   `EJECTION` 3 "Ejected - Unknown Degree"; `P_CRASH1` 0 "No Driver Present / Unknown if Driver Present". Analysts must still treat these codes as partly unknown in the `_IM` variables.
 * **Fully-unknown codes (8/9, 98/99, 998/999, 9998/9999) are always replaced.** The most common imputed values are: `ALCOHOL` 9 → 2 "No Alcohol Involved"
   (95.1%), `VEH_ALCH` 9 → 2 (96.7%), `DRINKING` 8 → 0 (98.6%) and 9 → 0 (94.8%), `EJECTION` 7 "Not Reported" → 0 (99.6%) and 9 → 0 (98.6%), `RELJCT1` 8 → 0 (94.4%),
@@ -693,7 +694,7 @@ All recipes are applied to the CRSS tables in `data/interim/CRSS/<table>/<year>.
 | `crash_injury_any` | crash | CRSS: `MAXSEV_IM ∈ {1,2,3,4,5}` = 1; `∈ {0}` = 0; 6 and 8 excluded |
 | `crash_injury_class_aux` | crash | `acc_aux.A_CRAINJ`: 4 fatal, 2 non-fatal injury (MAXSEV_IM 1/2/3/5), 3 no injury (MAXSEV_IM 0/6/8) |
 | `person_inj_sev_im` | person | CRSS `INJSEV_IM` 0–4 KABCO, 5 injured unknown, 6 died prior. FARS `INJ_SEV` same codes, with 9 → missing |
-| `<var>_imputed` | as variable | `1` if original ∈ its fully-unknown set (ALCOHOL 9; VEH_ALCH 9; DRINKING 8,9; AGE 998,999; SEX 8,9; INJ_SEV 9; MAX_SEV 9; MAX_VSEV 9; NUM_INJ 99; NUM_INJV 99; SEAT_POS 98,99 + 19/29/39/49 when changed; EJECTION 7,9; MOD_YEAR 9998,9999; BODY_TYP 98,99,79; IMPACT1 98,99; P_CRASH1 99; HARM_EV/M_HARM 98,99; MAN_COLL 98,99; RELJCT1 8,9; RELJCT2 98,99; LGT_COND 8,9; WEATHER 98,99; HOUR/MINUTE 99), else `0`. In practice `(*_IM != original)` gives the same result except for the aggregates and `ALCOHOL` 8 |
+| `<var>_imputed` | as variable | `1` if original ∈ its fully-unknown set (ALCOHOL 9; VEH_ALCH 9; DRINKING 8,9; AGE 998,999; SEX 8,9; INJ_SEV 9; MAX_SEV 9; MAX_VSEV 9; NUM_INJ 99; NUM_INJV 99; SEAT_POS 98,99 + 19/29/39/49 when changed; EJECTION 7,9; MOD_YEAR 9998,9999; BODY_TYP 49,79,98,99; IMPACT1 98,99; P_CRASH1 99; HARM_EV/M_HARM 98,99; MAN_COLL 98,99; RELJCT1 8,9; RELJCT2 98,99; LGT_COND 8,9; WEATHER 98,99; HOUR/MINUTE 99), else `0`. In practice `(*_IM != original)` gives the same result except for the aggregates and `ALCOHOL` 8 |
 | `crss_design_period` | crash | `YEAR==2016` → "phase-in"; 2017–2019 → "standard"; 2020–2021 → "within-year rate change"; 2022–2024 → "standard". Use as a sensitivity stratum in trend models |
 | `fars_fatal_crashes`, `fars_fatalities` | year | FARS `accident` row count; `Σ FATALS` (= count of `person.INJ_SEV == 4`) |
 
