@@ -98,15 +98,28 @@ SHIFTS = [
 ]
 
 
-def attributable_fractions(outcome: str = "fatal") -> pd.DataFrame:
-    df, design = severity.load(outcome)
-    model = severity.fit(df, design, outcome, specs.PRE_CRASH)
+TYPE_SHIFTS = [
+    Shift(
+        "exceeded_limit_removed",
+        "speeding_type",
+        ("exceeded_limit_or_racing",),
+        "no",
+        "Crashes with a driver exceeding the limit / racing as if not speeding-related (model with speeding type)",
+    ),
+    Shift(
+        "too_fast_for_conditions_removed",
+        "speeding_type",
+        ("too_fast_for_conditions",),
+        "no",
+        "'Too fast for conditions' crashes as if not speeding-related (model with speeding type)",
+    ),
+]
+
+
+def _af_rows(model, df, design, shifts, outcome, fars_deaths, fars_crashes) -> list[dict]:
     base_m, base_z = model.margin_influence(df, None)
     rows = []
-    fars = data.fars_crash(WINDOW)
-    fars_deaths = float(fars["FATALS"].sum()) / len(WINDOW)
-    fars_crashes = len(fars) / len(WINDOW)
-    for sh in SHIFTS:
+    for sh in shifts:
         if sh.name == "speeding_and_alcohol_removed":
             s1, s2 = SHIFTS[0].setter(), SHIFTS[1].setter()
 
@@ -125,11 +138,6 @@ def attributable_fractions(outcome: str = "fatal") -> pd.DataFrame:
                 "description": sh.description,
                 "outcome": outcome,
                 "n_exposed_crss": int(exposed.sum()),
-                "share_of_fatal_crss_exposed": float(
-                    np.average(df[outcome][exposed] == 1, weights=design.weight[exposed])
-                    if exposed.any()
-                    else np.nan
-                ),
                 "af": af.estimate,
                 "af_low": lo,
                 "af_high": hi,
@@ -142,6 +150,20 @@ def attributable_fractions(outcome: str = "fatal") -> pd.DataFrame:
             }
         )
         log.info("AF %s = %.3f", sh.name, af.estimate)
+    return rows
+
+
+def attributable_fractions(outcome: str = "fatal") -> pd.DataFrame:
+    df, design = severity.load(outcome)
+    fars = data.fars_crash(WINDOW)
+    fars_deaths = float(fars["FATALS"].sum()) / len(WINDOW)
+    fars_crashes = len(fars) / len(WINDOW)
+    model = severity.fit(df, design, outcome, specs.PRE_CRASH)
+    rows = _af_rows(model, df, design, SHIFTS, outcome, fars_deaths, fars_crashes)
+    df["speeding_type"] = df["speeding_type"].fillna("unknown")
+    covs = [c if c != "speeding" else "speeding_type" for c in specs.PRE_CRASH]
+    model_t = severity.fit(df, design, outcome, covs)
+    rows += _af_rows(model_t, df, design, TYPE_SHIFTS, outcome, fars_deaths, fars_crashes)
     return pd.DataFrame(rows)
 
 

@@ -218,6 +218,21 @@ def build_ledger() -> pd.DataFrame:
         )
 
     sp = _row(freq, factor="speeding", level="yes")
+    stype = _tab("severity", "fatal_speeding_type")
+    speed_rr = (
+        "all speeding-related: "
+        + _fmt_ci(
+            _row(sev, factor="speeding", level="yes"), "A_adj_rr", "A_adj_rr_low", "A_adj_rr_high"
+        )
+        + "; exceeded limit / racing: "
+        + _fmt_ci(
+            _row(stype, level="exceeded_limit_or_racing"), "adj_rr", "adj_rr_low", "adj_rr_high"
+        )
+        + "; too fast for conditions: "
+        + _fmt_ci(
+            _row(stype, level="too_fast_for_conditions"), "adj_rr", "adj_rr_low", "adj_rr_high"
+        )
+    )
     al = _row(freq, factor="alcohol_im", level="yes")
     dr = _row(freq, factor="drugs", level="yes")
     rows = [
@@ -237,26 +252,34 @@ def build_ledger() -> pd.DataFrame:
             if sp is not None
             else "",
             "fars_deaths_per_year_in_segment": round(seg["speeding"]["deaths_per_year"]),
-            "adjusted_severity_rr": _fmt_ci(
-                _row(sev, factor="speeding", level="yes"),
-                "A_adj_rr",
-                "A_adj_rr_low",
-                "A_adj_rr_high",
-            ),
-            "measurement_robustness": "FRAGILE. "
+            "adjusted_severity_rr": speed_rr,
+            "measurement_robustness": "Aggregate association FRAGILE: it mixes a strong association for exceeding "
+            "the limit with none for 'too fast for conditions'. "
             + qba_text("speeding")
             + "; "
             + facts.get("speeding_crss_vs_fars", ""),
             "interactions": pairs_for("speeding"),
             "most_affected": f"{seg['speeding']['pct_male']:.0f}% of deaths male; {seg['speeding']['pct_age_15_34']:.0f}% aged 15-34",
-            "severity_pathway_af": _fmt_ci(
+            "severity_pathway_af": "all speeding: "
+            + _fmt_ci(
                 _row(af, shift="speeding_removed"), "af", "af_low", "af_high", pct=True, digits=1
+            )
+            + "; exceeded limit / racing only: "
+            + _fmt_ci(
+                _row(af, shift="exceeded_limit_removed"),
+                "af",
+                "af_low",
+                "af_high",
+                pct=True,
+                digits=1,
             ),
             "evidence_intervention_changes_factor": NO_INTERVENTION_DATA,
-            "assumptions_required": "camera units -> coverage of speeding exposure; behavioural response (reduction in speeding prevalence "
+            "assumptions_required": "cameras act on exceeding the posted limit, not on 'too fast for conditions'; "
+            "camera units -> coverage of speeding exposure; behavioural response (reduction in speeding prevalence "
             "where covered; spillover); effect on crash occurrence; effect on severity of remaining crashes",
-            "numeric_estimate_possible": "Only conditional/hypothetical (simulator + break-even). Severity link itself uncertain.",
-            "evidence_grade_target_association": "moderate (consistent direction; magnitude sensitive to ascertainment)",
+            "numeric_estimate_possible": "Only conditional/hypothetical (simulator + break-even).",
+            "evidence_grade_target_association": "strong for exceeding the limit (large association); none detected for "
+            "'too fast for conditions'; aggregate magnitude sensitive to ascertainment",
         },
         {
             "intervention": "Roadside alcohol testing / sobriety checkpoints",

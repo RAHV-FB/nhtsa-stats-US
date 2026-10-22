@@ -58,6 +58,7 @@ CRASH_LEVELS: dict[str, list] = {
         "cyclist",
     ],
     "n_vehicles": ["2", "1", "3+"],
+    "speeding_type": ["no", "exceeded_limit_or_racing", "too_fast_for_conditions", "speeding_unspecified", "unknown"],
     "YEAR": YEAR_LEVELS,
 }
 TRI = ["no", "yes", "unknown"]
@@ -123,6 +124,7 @@ LABELS: dict[str, str] = {
     "drugs": "Drug involvement (police-reported)",
     "distracted": "Distracted driver (police-reported)",
     "crash_type": "Crash type",
+    "speeding_type": "Speeding type (police-reported)",
     "n_vehicles": "Vehicles in transport",
     "YEAR": "Year",
 }

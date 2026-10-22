@@ -202,6 +202,18 @@ def crash_aggregates(source: str, veh: pl.DataFrame, per: pl.DataFrame) -> pl.Da
         .group_by(kc)
         .agg(
             any_flag("veh_speeding").alias("speeding"),
+            # Most specific speeding type in the crash: exceeding the limit / racing takes
+            # precedence over unspecified, which takes precedence over too-fast-for-conditions.
+            pl.when((pl.col("veh_speeding_type") == "exceeded_limit_or_racing").any())
+            .then(pl.lit("exceeded_limit_or_racing"))
+            .when((pl.col("veh_speeding_type") == "speeding_unspecified").any())
+            .then(pl.lit("speeding_unspecified"))
+            .when((pl.col("veh_speeding_type") == "too_fast_for_conditions").any())
+            .then(pl.lit("too_fast_for_conditions"))
+            .when((pl.col("veh_speeding_type") == h.UNKNOWN).any())
+            .then(pl.lit(h.UNKNOWN))
+            .otherwise(pl.lit("no"))
+            .alias("speeding_type"),
             any_flag("hit_and_run"),
             any_flag("distracted"),
             any_flag("rollover").alias("rollover_any"),

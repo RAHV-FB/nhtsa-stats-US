@@ -505,6 +505,7 @@ REGISTRY: dict[str, VarInfo] = {
     "junction": VarInfo("pre_crash", "crash"),
     "work_zone": VarInfo("pre_crash", "crash"),
     "speeding": VarInfo("pre_crash", "crash", "police judgement recorded after the crash"),
+    "speeding_type": VarInfo("pre_crash", "crash", "exceeded limit/racing vs too fast for conditions vs unspecified"),
     "alcohol": VarInfo("pre_crash", "crash", "police-reported; ascertainment varies with severity"),
     "alcohol_im": VarInfo(
         "pre_crash", "crash", "NHTSA multiple-imputation-based single imputation"

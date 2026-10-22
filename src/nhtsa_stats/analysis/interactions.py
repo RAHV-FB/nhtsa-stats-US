@@ -79,6 +79,7 @@ class Combination:
     covariates: str = "A"  # A = PRE_CRASH, B = PRE_CRASH + configuration
     rationale: str = ""
     extra_covariates: tuple[str, ...] = field(default=())
+    prespecified: bool = True
 
 
 SPEEDING = Exposure("speeding", ("yes",), ("no",), "speeding-related")
@@ -176,6 +177,39 @@ PAIRS: list[Combination] = [
     ),
 ]
 
+EXCEEDED = Exposure(
+    "speeding_type",
+    ("exceeded_limit_or_racing",),
+    ("no",),
+    "exceeded limit / racing (vs not speeding)",
+)
+# Follow-up pairs added AFTER the speeding-type analysis showed that "speeding-related" mixes a
+# strong association (exceeding the limit) with none ("too fast for conditions").  Exploratory:
+# excluded from the multiplicity family of the pre-specified pairs.
+FOLLOW_UP: list[Combination] = [
+    Combination(
+        "exceeded_limit x wet",
+        (EXCEEDED, WET),
+        "A",
+        "Does the wet-road deficit persist for limit exceedance?",
+        prespecified=False,
+    ),
+    Combination(
+        "exceeded_limit x dark_unlit",
+        (EXCEEDED, DARK_UNLIT),
+        "A",
+        "Limit exceedance in darkness.",
+        prespecified=False,
+    ),
+    Combination(
+        "exceeded_limit x high_speed_road",
+        (EXCEEDED, HIGH_SPEED),
+        "A",
+        "Limit exceedance on 50+ mph roads.",
+        prespecified=False,
+    ),
+]
+
 TRIPLES: list[Combination] = [
     Combination("speeding x alcohol x dark_unlit", (SPEEDING, ALCOHOL, DARK_UNLIT), "A"),
     Combination("motorcycle x speeding x alcohol", (MOTORCYCLE, SPEEDING, ALCOHOL), "A"),
@@ -186,6 +220,8 @@ TRIPLES: list[Combination] = [
 # --------------------------------------------------------------------------------------
 def _covariates(comb: Combination) -> list[str]:
     base = list(specs.PRE_CRASH) + (list(specs.CIRCUMSTANCE) if comb.covariates == "B" else [])
+    if any(e.var == "speeding_type" for e in comb.exposures):
+        base = ["speeding_type" if c == "speeding" else c for c in base]
     for e in comb.exposures:
         if e.var not in base:
             base.append(e.var)
@@ -337,6 +373,7 @@ def analyse_pair(
     coef = model.coef_table().set_index("term").loc[term]
     rec = {
         "pair": comb.name,
+        "prespecified": comb.prespecified,
         "A": a.label,
         "B": b.label,
         "covariate_set": comb.covariates,
@@ -449,7 +486,12 @@ def _adjust_p(p: pd.Series, method: str) -> pd.Series:
     return pd.Series(out, index=p.index)
 
 
-def run_pairs(outcome: str, years: Sequence[int] | None = None, tag: str = "all") -> pd.DataFrame:
+def run_pairs(
+    outcome: str,
+    years: Sequence[int] | None = None,
+    tag: str = "all",
+    include_follow_up: bool = True,
+) -> pd.DataFrame:
     df, design = severity.load(outcome, years)
     n_years = df["YEAR"].nunique()
     rows = []
@@ -462,15 +504,24 @@ def run_pairs(outcome: str, years: Sequence[int] | None = None, tag: str = "all"
             rows.append(
                 {"pair": comb.name, "outcome": outcome, "period": tag, "flag": f"failed: {exc}"}
             )
+    for comb in FOLLOW_UP if include_follow_up else []:
+        try:
+            rows.append({**analyse_pair(df, design, outcome, comb, n_years), "period": tag})
+            log.info("%s %s %s done", outcome, tag, comb.name)
+        except Exception as exc:  # keep going; record the failure explicitly
+            log.exception("pair %s failed", comb.name)
+            rows.append(
+                {"pair": comb.name, "outcome": outcome, "period": tag, "flag": f"failed: {exc}"}
+            )
     res = pd.DataFrame(rows)
-    for scale, col in (
-        ("additive", "ic_p"),
-        ("multiplicative", "ratio_of_rr_p"),
-        ("odds", "product_p"),
-    ):
+    pre = res["prespecified"].fillna(True).astype(bool)
+    for col in ("ic_p", "ratio_of_rr_p", "product_p"):
         if col in res:
-            res[f"{col}_holm"] = _adjust_p(res[col], "holm")
-            res[f"{col}_bh"] = _adjust_p(res[col], "bh")
+            # Multiplicity adjustment within the pre-specified family only.
+            res[f"{col}_holm"] = np.nan
+            res[f"{col}_bh"] = np.nan
+            res.loc[pre, f"{col}_holm"] = _adjust_p(res.loc[pre, col], "holm")
+            res.loc[pre, f"{col}_bh"] = _adjust_p(res.loc[pre, col], "bh")
     return res
 
 

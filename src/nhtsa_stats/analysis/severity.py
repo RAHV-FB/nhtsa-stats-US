@@ -227,6 +227,39 @@ def export_model(model: SurveyLogit, outcome: str, name: str) -> None:
     )
 
 
+def speeding_type_contrasts(outcome: str = "fatal") -> pd.DataFrame:
+    """Adjusted risk ratios by speeding *type* (model A with the speeding indicator replaced).
+
+    Police "speeding-related" mixes exceeding the posted limit (what automated enforcement
+    targets) with "too fast for conditions" (often below the limit, e.g. on wet or icy roads).
+    """
+    df, design = load(outcome)
+    df["speeding_type"] = df["speeding_type"].fillna("unknown")
+    covs = [c if c != "speeding" else "speeding_type" for c in specs.PRE_CRASH]
+    model = fit(df, design, outcome, covs)
+    levels = observed_levels(df, "speeding_type")
+    res = factor_contrasts(model, df, "speeding_type", levels)
+    crude = crude_table(df, design, outcome, "speeding_type", levels, df["YEAR"].nunique())
+    res = res.merge(
+        crude[["level", "n", "n_events", "rate", "crude_rr", "crude_rr_low", "crude_rr_high"]],
+        on="level",
+        how="left",
+    )
+    # How each type is distributed over surfaces (weighted shares of crashes of that type).
+    for surf in ("dry", "wet", "snow_ice"):
+        res[f"share_on_{surf}"] = [
+            float(
+                np.average(
+                    df.loc[df["speeding_type"] == lv, "surface"] == surf,
+                    weights=design.weight[(df["speeding_type"] == lv).to_numpy()],
+                )
+            )
+            for lv in res["level"]
+        ]
+    res.insert(0, "outcome", outcome)
+    return res
+
+
 def run(outcomes: Sequence[str] = ("fatal", "ka")) -> dict[str, pd.DataFrame]:
     out = {}
     for oc in outcomes:
@@ -244,4 +277,17 @@ def run(outcomes: Sequence[str] = ("fatal", "ka")) -> dict[str, pd.DataFrame]:
             inputs=["data/processed/crss_crash.parquet"],
         )
         out[oc] = res
+        st = speeding_type_contrasts(oc)
+        save_table(
+            st,
+            MODULE,
+            f"{oc}_speeding_type",
+            description=f"Adjusted risk ratios for crash outcome '{oc}' by police-reported speeding type",
+            population="CRSS police-reported crashes 2016-2024 with known maximum severity",
+            unit="crash",
+            outcome=oc,
+            method="Model A with speeding replaced by speeding type; standardised margins; linearised CIs",
+            inputs=["data/processed/crss_crash.parquet"],
+        )
+        out[f"{oc}_speeding_type"] = st
     return out
