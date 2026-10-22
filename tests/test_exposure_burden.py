@@ -116,3 +116,48 @@ def test_app_prediction_matches_model():
     p, lo, hi = predict(model, {"a": "yes"})
     assert p == pytest.approx(y[df["a"] == "yes"].mean(), rel=1e-6)
     assert lo < p < hi
+
+
+def _burden_fixture(rng, rr_speed: float):
+    from nhtsa_stats.analysis import burden
+
+    n = 20000
+    df = pd.DataFrame(
+        {
+            "speeding": rng.choice(["no", "yes"], n, p=[0.8, 0.2]),
+            "alcohol_im": rng.choice(["no", "yes"], n, p=[0.9, 0.1]),
+            "light": "daylight",
+            "speed_limit": "30-35",
+        }
+    )
+    p = 0.01 * np.where(df["speeding"] == "yes", rr_speed, 1.0)
+    y = (rng.random(n) < p).astype(float)
+    spec = ModelSpec(categorical={"speeding": ["no", "yes"], "alcohol_im": ["no", "yes"]})
+    design = SurveyDesign.from_arrays(np.ones(n), np.repeat([1, 2], n // 2), np.arange(n) % 40)
+    model = SurveyLogit(spec).fit(df, y, design)
+    return burden, df, design, model, y
+
+
+def test_af_matches_closed_form_and_scales_only_fatal():
+    rng = np.random.default_rng(3)
+    burden, df, design, model, y = _burden_fixture(rng, rr_speed=3.0)
+    rows = burden._af_rows(model, df, design, burden.SHIFTS[:2], "fatal", 1000.0, 900.0)
+    af = rows[0]["af"]
+    # Saturated in speeding: AF = 1 - sum(p_cf)/sum(p_obs) with p_cf the 'no' rate.
+    p_no = y[df["speeding"] == "no"].mean()
+    expected = 1 - (len(df) * p_no) / y.sum()
+    assert af == pytest.approx(expected, abs=0.01)
+    assert rows[0]["fars_scaled_deaths_per_year"] == pytest.approx(af * 1000.0)
+    ka = burden._af_rows(model, df, design, burden.SHIFTS[:1], "ka", 1000.0, 900.0)
+    assert np.isnan(ka[0]["fars_scaled_deaths_per_year"])
+
+
+def test_af_near_zero_without_effect_and_joint_counts_union():
+    rng = np.random.default_rng(4)
+    burden, df, design, model, _ = _burden_fixture(rng, rr_speed=1.0)
+    joint = next(s for s in burden.SHIFTS if s.name == "speeding_and_alcohol_removed")
+    rows = burden._af_rows(model, df, design, [burden.SHIFTS[0], joint], "fatal", 1.0, 1.0)
+    lo, hi = rows[0]["af_low"], rows[0]["af_high"]
+    assert lo < 0 < hi
+    union = ((df["speeding"] == "yes") | (df["alcohol_im"] == "yes")).sum()
+    assert rows[1]["n_exposed_crss"] == union

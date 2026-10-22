@@ -2,7 +2,7 @@
 
 *Data audited: typed Parquet cache `data/interim/{FARS,CRSS}/{accident,weather,crashrf,acc_aux}/{year}.parquet`, plus the
 inventory files in `outputs/audit/`. Analysis scripts (not part of the package; the directory is shared with other audits) are in
-`/tmp/claude-0/-home-user-nhtsa-stats-US/dd56b1ab-53ab-5c90-8154-cdf8a010f996/scratchpad/audit_scripts/`:
+`scripts/audit/`:
 `01_codebook_compare.py` (code sets, labels and distributions by year), `02_time.py`, `03_weather.py`, `04_urbanicity.py`, `05_counts.py`, `05b_counts.py`,
 `06_missing_by_severity.py`, `07_crashrf.py`, `08_imputation.py`, `09_concentration.py`, `10_junction.py`, `11_ruralurban.py`,
 `12_crss_label_transfer.py`, `13_consistency.py`, `14_harmonised_dists.py`, `15_harmev_groups.py`.

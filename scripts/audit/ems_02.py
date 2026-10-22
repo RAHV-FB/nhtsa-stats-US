@@ -1,0 +1,11 @@
+import sys; sys.path.insert(0,'.')
+from util import *
+a=load_table('FARS','accident',columns=['YEAR','ST_CASE','STATE','HOUR','MINUTE','NOT_HOUR','NOT_MIN','ARR_HOUR','ARR_MIN','HOSP_HR','HOSP_MN','RUR_URB'])
+a=a.with_columns(((pl.col('ARR_HOUR')==99)|(pl.col('ARR_MIN').is_in([98,99]))).alias('arrU'),((pl.col('NOT_HOUR')<=23)&(pl.col('NOT_MIN')<=59)&(pl.col('ARR_HOUR')<=23)&(pl.col('ARR_MIN')<=59)).alias('both'))
+bad=a.group_by(['STATE','YEAR']).agg(pl.col('arrU').mean()).filter(pl.col('arrU')>0.5).group_by('STATE').agg(pl.col('YEAR').min().alias('y0'),pl.col('YEAR').max().alias('y1'),pl.len(),pl.col('arrU').mean().round(3)).sort('STATE')
+print('states with arrival-unknown >50% (first,last year, n years, mean):',bad.rows())
+nat=a.group_by('YEAR').agg(pl.col('both').mean().round(3)).sort('YEAR'); print('both NOT and ARR known:',nat.rows())
+ex=a.filter(~pl.col('STATE').is_in(bad['STATE'].to_list())).group_by('YEAR').agg(pl.col('arrU').mean().round(3)).sort('YEAR'); print('arr unknown excl those states:',ex.rows())
+b=a.filter(pl.col('both')&(pl.col('HOUR')<=23)&(pl.col('MINUTE')<=59)).with_columns(((pl.col('NOT_HOUR')*60+pl.col('NOT_MIN'))-(pl.col('HOUR')*60+pl.col('MINUTE'))).alias('dn'))
+b=b.with_columns(pl.when(pl.col('dn')< -720).then(pl.col('dn')+1440).when(pl.col('dn')>720).then(pl.col('dn')-1440).otherwise(pl.col('dn')).alias('dn'))
+print('notification minus crash time: share <0',(b['dn']<0).mean().__round__(4),' share < -5',(b['dn']< -5).mean().__round__(4),' share ==0',(b['dn']==0).mean().__round__(4),' median',b['dn'].median(),' p90',b['dn'].quantile(0.9),' >60:',(b['dn']>60).mean().__round__(4))

@@ -7,7 +7,11 @@ Adjustment sets (see docs/methodology.md for the causal reasoning):
 
 * ``PRE_CRASH`` -- circumstances that exist before the crash (time, light, weather, surface,
   road, area, driver age mix, vehicle mix, and the police-reported behaviours speeding and
-  alcohol).  This is the main adjustment set for "total" adjusted associations.
+  alcohol).  Model A adjusts for all of them *mutually*: each factor's model-A association
+  also holds fixed the variables downstream of it in the project's dependency diagram
+  (``DESCENDANTS``; e.g. rain -> wet surface), so it is not a total association for upstream
+  factors.  For those factors a second association that leaves out the descendants is
+  reported ("A excluding downstream variables").
 * ``CIRCUMSTANCE`` -- crash configuration (crash type, number of vehicles).  Configuration is
   plausibly a *mediator* of several pre-crash factors (e.g. darkness -> pedestrian crash), so
   models that add it estimate associations *net of* configuration, not total associations.
@@ -115,6 +119,18 @@ PRE_CRASH = [
     "alcohol_im",
 ]
 CIRCUMSTANCE = ["crash_type", "n_vehicles"]
+
+# PRE_CRASH variables downstream of each factor in the dependency diagram
+# (docs/research_plan.md §5): time of day -> light; weather -> surface; driver-age and vehicle
+# mix -> police-reported behaviours.
+DESCENDANTS: dict[str, list[str]] = {
+    "tod": ["light"],
+    "weather": ["surface"],
+    "young_driver": ["speeding", "alcohol_im"],
+    "older_driver": ["speeding", "alcohol_im"],
+    "any_motorcycle": ["speeding", "alcohol_im"],
+    "any_heavy_truck": ["speeding", "alcohol_im"],
+}
 
 # Human-readable names for tables and the interface.
 LABELS: dict[str, str] = {

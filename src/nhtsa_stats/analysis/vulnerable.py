@@ -40,7 +40,7 @@ log = logging.getLogger(__name__)
 MODULE = "vulnerable"
 
 STRIKING_LEVELS = ["car", "suv", "pickup", "van", "large", "motorcycle", "other_unknown"]
-LOCATION_LEVELS = ["intersection_crosswalk", "intersection_other", "midblock", "other", "unknown"]
+LOCATION_LEVELS = ["crosswalk", "intersection_other", "midblock", "other", "unknown"]
 AGE_LEVELS = [
     "25-34",
     "0-14",
@@ -68,9 +68,11 @@ def _striking(body: pl.Expr) -> pl.Expr:
 def _location(col: str = "LOCATION") -> pl.Expr:
     """Non-motorist location (codes stable 2016-2024 in both sources, embedded labels)."""
     c = pl.col(col)
+    # 'crosswalk': at an intersection in a marked or unmarked/unknown crosswalk (1, 2), or in a
+    # marked crosswalk away from an intersection (10).
     return (
         pl.when(c.is_in([1, 2, 10]))
-        .then(pl.lit("intersection_crosswalk"))
+        .then(pl.lit("crosswalk"))
         .when(c.is_in([3, 9]))
         .then(pl.lit("intersection_other"))
         .when(c.is_in([11, 12, 13]))
@@ -205,6 +207,7 @@ COVARIATES = [
 
 
 def _spec(df: pd.DataFrame, covs: list[str], interactions=()) -> ModelSpec:
+    h.assert_no_leakage(covs, allow_year=True)
     return ModelSpec(
         categorical={c: severity.observed_levels(df, c, LEVELS[c]) for c in covs},
         interactions=list(interactions),
@@ -233,7 +236,20 @@ def adjusted_contrasts(victim: str, outcome: str) -> pd.DataFrame:
         )
         adj["n"] = adj["level"].map(n["n"]).fillna(0).astype(int)
         adj["n_events"] = adj["level"].map(n["events"]).fillna(0).astype(int)
-        adj["flag"] = np.where(adj["n_events"] < 20, "few events", "")
+        ref_rse = adj["adj_rate_rse"].iloc[0]
+        adj["flag"] = [
+            "; ".join(
+                x
+                for x, cond in (
+                    ("few events", ev < 20),
+                    ("n<30", n_ < config.MIN_CELL_N),
+                    ("level RSE>30%", rse > config.MAX_RSE),
+                    ("reference RSE>30%", ref_rse > config.MAX_RSE),
+                )
+                if cond
+            )
+            for ev, n_, rse in zip(adj["n_events"], adj["n"], adj["adj_rate_rse"], strict=True)
+        ]
         crude_rows.append(adj)
     out = pd.concat(crude_rows, ignore_index=True)
     out.insert(0, "outcome", outcome)

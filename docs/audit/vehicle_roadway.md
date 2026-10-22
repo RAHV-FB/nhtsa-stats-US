@@ -1081,8 +1081,8 @@ Implementable recipes are also given in the structured summary returned with thi
 
 ## 15. Reproducibility
 
-Scripts are in `/tmp/claude-0/-home-user-nhtsa-stats-US/dd56b1ab-53ab-5c90-8154-cdf8a010f996/scratchpad/audit_scripts/`.
-They are outside the repository and not committed.
+Scripts are in `scripts/audit/`.
+They are exploratory checks, not part of the package or its tests.
 
 | script | purpose |
 |---|---|
@@ -1096,4 +1096,4 @@ They are outside the repository and not committed.
 | 13_bodygroup.py, 14_body_detail.py | body-group validation against vPIC, A_BODY, GVWR, ROLLOVER |
 | 16_aux_checks.py, 17_im_checks.py, 18_numoccs.py, 19_rollover_mc.py | veh_aux, CRSS *_IM, NUMOCCS, rollover, towed and deformed checks |
 
-Run each with `cd /home/user/nhtsa-stats-US && POLARS_MAX_THREADS=2 uv run python <script>`.
+Run each from the repository root with `POLARS_MAX_THREADS=2 uv run python <script>`.

@@ -2,8 +2,8 @@
 
 *Data audited: the typed Parquet cache `data/interim/CRSS/{accident,vehicle,person,acc_aux,veh_aux,per_aux,…}/{year}.parquet`
 (all 30 CRSS tables for the cross-table consistency check), `data/interim/FARS/{accident,person}/{year}.parquet`, and the
-inventory files in `outputs/audit/`. The analysis scripts are kept outside the repository in
-`/tmp/claude-0/-home-user-nhtsa-stats-US/dd56b1ab-53ab-5c90-8154-cdf8a010f996/scratchpad/audit_scripts/`. That directory is shared with
+inventory files in `outputs/audit/`. The analysis scripts are in
+`scripts/audit/`. That directory is shared with
 other audits, and the scripts for this appendix are the `svy_*` files: `svy_lib.py` (an independent with-replacement Taylor
 variance estimator that does not use `src/`), `svy_01_structure.py`, `svy_01b_rest.py` (strata, PSUs and nesting), `svy_02_weights.py`
 (weights), `svy_03_fars_compare.py` (FARS benchmark), `svy_04_deff.py`, `svy_04b_pooled.py` (design effects and pooled years),

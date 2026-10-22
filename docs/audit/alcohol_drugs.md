@@ -2,7 +2,7 @@
 
 *Data audited: typed Parquet cache `data/interim/{FARS,CRSS}/{person,vehicle,accident,drugs,drimpair,nmimpair,miper,midrvacc,miacc,acc_aux,per_aux}/{year}.parquet`,
 plus the inventory files in `outputs/audit/`. The analysis scripts are not part of the package. They are in
-`/tmp/claude-0/-home-user-nhtsa-stats-US/dd56b1ab-53ab-5c90-8154-cdf8a010f996/scratchpad/audit_scripts/ad/`:*
+`scripts/audit/ad/`:*
 
 | Script | Purpose |
 |---|---|
@@ -18,7 +18,7 @@ plus the inventory files in `outputs/audit/`. The analysis scripts are not part 
 | `ad_14_crss_derive.py`, `ad_15_crss_sev.py`, `ad_19_crss_transfer.py` | CRSS derivations, severity, 2016-18 label transfer |
 | `ad_18_drug_results.py`, `ad_20_misc.py` | drug results; 2024 provisional data; vitreous; crash-level comparison |
 
-Intermediate files are in `.../scratchpad/out_ad/`.
+Intermediate files are written to `/tmp/nhtsa-audit/out_ad/`.
 
 *No external documentation was used. Evidence tags:*
 - **[label]**: the meaning comes from the in-archive `<VAR>NAME` column.

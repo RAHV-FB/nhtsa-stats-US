@@ -226,3 +226,13 @@ Behaviours are recorded by police *after* the crash, and recording depends on se
   Also in v1.2 (from the independent QIE audit): RQ7 culpability is action-based rather than
   violation-based; hit-and-run crashes are excluded from the QIE sample; alcohol relative
   involvement is reported by CRSS coding period instead of pooled.
+  RQ2 operationalisation, recorded from the implementation (from the independent modelling
+  audit): the Holm family is the 13 registered pairs above. "Dark" is dark-unlit vs
+  daylight; "night" in the young-driver and weekend pairs is 00:00–05:59 vs 10:00–15:59;
+  "speed limit 50+" is 50+ vs ≤45 mph. Pairs whose exposure is a crash configuration
+  (pedestrian crash, angle collision) use model B, i.e. model A plus crash configuration,
+  instead of model A; the angle pair is standardised over multi-vehicle crashes. Two pairs
+  added at implementation (speeding × 50+ road, pedestrian × 50+ road) and the
+  limit-exceedance follow-ups are exploratory and outside the Holm family. Three-way
+  combinations use a fixed list of three triples (not "pairs that survive"), each estimated
+  only when the fully exposed cell has at least 20 fatal crashes.

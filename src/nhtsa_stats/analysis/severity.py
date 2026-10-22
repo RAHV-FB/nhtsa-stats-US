@@ -10,8 +10,13 @@ For every level of every factor the module reports
 * the crude (weighted) outcome rate and the crude risk ratio versus the reference level;
 * standardised adjusted risk ratios and risk differences from survey-weighted logistic
   models via predictive margins (g-computation over the observed covariate distribution):
-  - model A adjusts for the PRE_CRASH set (total association),
-  - model B adds crash configuration (association net of crash type / vehicle count);
+  - model A adjusts for the whole PRE_CRASH set at once (mutually adjusted; for factors with
+    registered downstream variables, ``specs.DESCENDANTS``, an association leaving those out
+    is reported too, columns ``Ax_*``),
+  - model B adds crash configuration (association net of crash type / vehicle count). For
+    crash type itself the contrast comes from model A + crash type, and no vehicle-count
+    contrast is reported: crash type fixes the vehicle count for most types, so setting
+    either for every crash would standardise over combinations that cannot occur;
 * the percentage change of the log risk ratio from crude to adjusted, which identifies
   associations that weaken or disappear after adjustment.
 
@@ -27,6 +32,7 @@ from collections.abc import Sequence
 import numpy as np
 import pandas as pd
 
+from nhtsa_stats import config
 from nhtsa_stats.analysis import data, specs
 from nhtsa_stats.analysis.survey import (
     Estimate,
@@ -35,6 +41,7 @@ from nhtsa_stats.analysis.survey import (
     SurveyLogit,
     proportion_table,
 )
+from nhtsa_stats.processing import harmonize as h
 from nhtsa_stats.reporting.io import save_json, save_table
 
 log = logging.getLogger(__name__)
@@ -83,6 +90,7 @@ def fit(
     interactions: Sequence[tuple[str, str]] = (),
     ridge: float = RIDGE,
 ) -> SurveyLogit:
+    h.assert_no_leakage(list(covariates), allow_year=True)
     model = SurveyLogit(crash_spec(df, covariates, interactions), ridge=ridge)
     model.fit(df, df[outcome].to_numpy(), design)
     if not model.converged_:
@@ -119,6 +127,7 @@ def factor_contrasts(
                 "factor": factor,
                 "level": lv,
                 "adj_rate": m.estimate,
+                "adj_rate_rse": m.se / m.estimate if m.estimate > 0 else np.inf,
                 "adj_rate_low": lo,
                 "adj_rate_high": hi,
                 "adj_rr": rr["est"],
@@ -158,24 +167,42 @@ def crude_vs_adjusted(outcome: str = "fatal", years: Sequence[int] | None = None
     log.info("%s: %d crashes, %d events", outcome, len(df), int(df[outcome].sum()))
     model_a = fit(df, design, outcome, specs.PRE_CRASH)
     model_b = fit(df, design, outcome, specs.PRE_CRASH + specs.CIRCUMSTANCE)
+    model_type = fit(df, design, outcome, [*specs.PRE_CRASH, "crash_type"])
     export_model(model_a, outcome, "A")
     export_model(model_b, outcome, "B")
+    # Model A without each factor's downstream variables (one fit per distinct exclusion set).
+    model_ax: dict[str, SurveyLogit] = {}
+    by_excl: dict[tuple[str, ...], list[str]] = {}
+    for f, desc in specs.DESCENDANTS.items():
+        by_excl.setdefault(tuple(desc), []).append(f)
+    for desc, fs in by_excl.items():
+        m = fit(df, design, outcome, [c for c in specs.PRE_CRASH if c not in desc])
+        model_ax.update(dict.fromkeys(fs, m))
     factors = [f for f in specs.PRE_CRASH + specs.CIRCUMSTANCE if f != "YEAR"] + ["YEAR"]
     out = []
     for f in factors:
         levels = observed_levels(df, f)
         crude = crude_table(df, design, outcome, f, levels, n_years)
-        b = factor_contrasts(model_b, df, f, levels).add_prefix("B_")
         parts = [crude]
         if f in specs.PRE_CRASH:
             a = factor_contrasts(model_a, df, f, levels).add_prefix("A_")
             parts.append(a.drop(columns=["A_factor", "A_level"]))
-        parts.append(b.drop(columns=["B_factor", "B_level"]))
+        if f in model_ax:
+            ax = factor_contrasts(model_ax[f], df, f, levels).add_prefix("Ax_")
+            ax["Ax_excluded"] = ",".join(specs.DESCENDANTS[f])
+            parts.append(ax.drop(columns=["Ax_factor", "Ax_level"]))
+        if f == "n_vehicles":
+            b = None  # not identifiable apart from crash type (see module docstring)
+        else:
+            b = factor_contrasts(model_type if f == "crash_type" else model_b, df, f, levels)
+            b = b.add_prefix("B_").drop(columns=["B_factor", "B_level"])
+            parts.append(b)
         merged = pd.concat(parts, axis=1)
         out.append(merged)
         log.info("contrasts done for %s", f)
     res = pd.concat(out, ignore_index=True)
     res.insert(0, "outcome", outcome)
+    res["adj_flag"] = _adjusted_flags(res)
     # Attenuation: share of the crude log-RR that remains after adjustment.
     with np.errstate(divide="ignore", invalid="ignore"):
         res["A_logrr_retained"] = np.log(res["A_adj_rr"]) / np.log(res["crude_rr"])
@@ -193,7 +220,7 @@ def crude_vs_adjusted(outcome: str = "fatal", years: Sequence[int] | None = None
         unit="crash",
         outcome=outcome,
         method="Pseudo-ML logistic regression; Taylor-linearised variance (25 strata, 67 PSUs); "
-        "model A = PRE_CRASH covariates, model B = A + crash type + number of vehicles",
+        "model A = PRE_CRASH covariates (mutually adjusted), model B = A + crash type + number of vehicles",
         inputs=["data/processed/crss_crash.parquet"],
         extra={
             "n": len(df),
@@ -203,6 +230,23 @@ def crude_vs_adjusted(outcome: str = "fatal", years: Sequence[int] | None = None
         },
     )
     return res
+
+
+def _adjusted_flags(res: pd.DataFrame) -> list[str]:
+    """Flag adjusted contrasts whose level or reference margin is unstable (n < 30 or RSE > 30%)."""
+    flags = []
+    ref_rse = res.groupby("factor")["A_adj_rate_rse"].transform("first")
+    for i, r in res.iterrows():
+        f = []
+        if r["n"] < config.MIN_CELL_N:
+            f.append("n<30")
+        rse = r.get("A_adj_rate_rse")
+        if pd.notna(rse) and rse > config.MAX_RSE:
+            f.append("level RSE>30%")
+        if pd.notna(ref_rse.iloc[i]) and ref_rse.iloc[i] > config.MAX_RSE:
+            f.append("reference RSE>30%")
+        flags.append("; ".join(f))
+    return flags
 
 
 def export_model(model: SurveyLogit, outcome: str, name: str) -> None:
@@ -257,6 +301,30 @@ def speeding_type_contrasts(outcome: str = "fatal") -> pd.DataFrame:
             for lv in res["level"]
         ]
     res.insert(0, "outcome", outcome)
+    return res
+
+
+def hit_and_run_sensitivity(outcome: str = "fatal") -> pd.DataFrame:
+    """Model A refitted without crashes involving a hit-and-run vehicle.
+
+    'Unknown' levels of police-reported driver attributes (speeding in particular) are mostly
+    crashes whose driver fled -- a post-crash behaviour. Restricting the population removes
+    that proxy without adjusting for a post-crash variable.
+    """
+    df, design = load(outcome)
+    keep = (df["hit_and_run"] != 1).to_numpy()
+    d = df.loc[keep].reset_index(drop=True)
+    dsg = design.subset(keep)
+    model = fit(d, dsg, outcome, specs.PRE_CRASH)
+    parts = []
+    for f in specs.PRE_CRASH:
+        if f == "YEAR":
+            continue
+        parts.append(factor_contrasts(model, d, f, observed_levels(d, f)))
+    res = pd.concat(parts, ignore_index=True)
+    res.insert(0, "outcome", outcome)
+    res["n_crashes"] = len(d)
+    res["share_excluded_weighted"] = 1 - dsg.weight.sum() / design.weight.sum()
     return res
 
 
@@ -317,4 +385,20 @@ def run(outcomes: Sequence[str] = ("fatal", "ka", "fatal_cc")) -> dict[str, pd.D
             inputs=["data/processed/crss_crash.parquet"],
         )
         out["fatal_outcome_definition_sensitivity"] = sens
+    if "fatal" in out:
+        hr = hit_and_run_sensitivity("fatal")
+        save_table(
+            hr,
+            MODULE,
+            "fatal_excluding_hit_and_run",
+            description="Model-A adjusted risk ratios for the fatal outcome, crashes involving a hit-and-run "
+            "vehicle excluded (removes 'unknown' levels that mainly mark a driver who fled)",
+            population="CRSS police-reported crashes 2016-2024 without a hit-and-run vehicle",
+            unit="crash",
+            outcome="fatal",
+            method="Model A refitted on the restricted population (domain of the full design); "
+            "standardised margins; linearised CIs",
+            inputs=["data/processed/crss_crash.parquet"],
+        )
+        out["fatal_excluding_hit_and_run"] = hr
     return out

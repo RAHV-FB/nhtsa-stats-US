@@ -132,6 +132,11 @@ def _af_rows(model, df, design, shifts, outcome, fars_deaths, fars_crashes) -> l
         af = ms.contrast(lambda v: (v["obs"] - v["cf"]) / v["obs"])
         lo, hi = af.ci()
         exposed = df[sh.var].isin(sh.exposed).to_numpy()
+        if sh.name == "speeding_and_alcohol_removed":
+            exposed = exposed | df[SHIFTS[1].var].isin(SHIFTS[1].exposed).to_numpy()
+        # Only a fraction of *fatal* crashes can be scaled to FARS. Deaths assume the averted
+        # fatal crashes carry the average number of deaths per FARS fatal crash.
+        scale = outcome == "fatal"
         rows.append(
             {
                 "shift": sh.name,
@@ -143,9 +148,12 @@ def _af_rows(model, df, design, shifts, outcome, fars_deaths, fars_crashes) -> l
                 "af_high": hi,
                 "fars_deaths_per_year_window": fars_deaths,
                 "fars_fatal_crashes_per_year_window": fars_crashes,
-                "fars_scaled_deaths_per_year": af.estimate * fars_deaths,
-                "fars_scaled_deaths_low": lo * fars_deaths,
-                "fars_scaled_deaths_high": hi * fars_deaths,
+                "fars_scaled_fatal_crashes_per_year": af.estimate * fars_crashes
+                if scale
+                else np.nan,
+                "fars_scaled_deaths_per_year": af.estimate * fars_deaths if scale else np.nan,
+                "fars_scaled_deaths_low": lo * fars_deaths if scale else np.nan,
+                "fars_scaled_deaths_high": hi * fars_deaths if scale else np.nan,
                 "kind": "model-predicted (severity pathway only; no unmeasured confounding assumed)",
             }
         )
@@ -200,6 +208,9 @@ def bias_sensitivity(af: pd.DataFrame) -> pd.DataFrame:
                     "fars_scaled_deaths_per_year": af_b * base["fars_deaths_per_year_window"]
                     if np.isfinite(af_b)
                     else np.nan,
+                    "note": "bias-corrected RR below 1: no excess severity, fraction negative"
+                    if np.isfinite(af_b) and af_b < 0
+                    else "",
                 }
             )
     return pd.DataFrame(rows)
@@ -214,7 +225,9 @@ def run() -> dict[str, pd.DataFrame]:
         unit="crash",
         inputs=["data/processed/crss_crash.parquet", "data/processed/fars_crash.parquet"],
         method="g-computation with survey logistic model A; AF = (observed - counterfactual predicted)/observed; "
-        "linearised CI; FARS-scaled = AF x mean annual FARS deaths 2022-2024",
+        "linearised CI; for the fatal outcome only, FARS-scaled = AF x mean annual FARS fatal crashes (or deaths) "
+        "2022-2024, assuming the averted fatal crashes carry the average number of deaths per fatal crash; "
+        "fractions of KA crashes are not scaled",
     )
     save_table(
         out["attributable_fractions_fatal"],

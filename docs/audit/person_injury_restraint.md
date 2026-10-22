@@ -1000,7 +1000,7 @@ missing data. EJECT_IM in particular encodes "unknown ⇒ not ejected".
 
 ## 9. Scripts and outputs
 
-All scripts are in `/tmp/claude-0/-home-user-nhtsa-stats-US/dd56b1ab-53ab-5c90-8154-cdf8a010f996/scratchpad/audit_scripts/`
+All scripts are in `scripts/audit/`
 and were run with `POLARS_MAX_THREADS=2 uv run python <script> [FARS|CRSS]`.
 
 | script | purpose |

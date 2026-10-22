@@ -187,10 +187,11 @@ def fars_testing() -> pd.DataFrame:
         years=[y for y in config.YEARS if y >= 2018],
         columns=["ST_CASE", "VEH_NO", "PER_NO", "DRUGSPEC", "DRUGRES"],
     ).unique()
-    # DRUGSPEC 0 = test not given; 99/98 unknown / not reported (embedded labels).
+    # DRUGSPEC (embedded labels): 0 test not given; 96 not reported; 99 reported as unknown if
+    # tested. 97 'unknown specimen' and 98 'other specimen' mean a test was given.
     tested = (
         drugs.to_pandas()
-        .assign(tested=lambda d: ~d["DRUGSPEC"].isin([0, 96, 97, 98, 99]))
+        .assign(tested=lambda d: ~d["DRUGSPEC"].isin([0, 96, 99]))
         .groupby(["YEAR", "ST_CASE", "VEH_NO", "PER_NO"])["tested"]
         .max()
         .reset_index()

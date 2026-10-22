@@ -1081,9 +1081,9 @@ Their logic is restated briefly:
 ## 11. Scripts and outputs
 
 All scripts are in
-`/tmp/claude-0/-home-user-nhtsa-stats-US/dd56b1ab-53ab-5c90-8154-cdf8a010f996/scratchpad/audit_scripts/aux_derived/`.
-Outputs are in `…/scratchpad/out_aux/`. Run each script with
-`cd /home/user/nhtsa-stats-US && POLARS_MAX_THREADS=2 uv run python <script>`.
+`scripts/audit/aux_derived/`.
+Outputs are written to `/tmp/nhtsa-audit/out_aux/`. Run each script from the repository root with
+`POLARS_MAX_THREADS=2 uv run python <script>`.
 
 | script | purpose |
 |---|---|

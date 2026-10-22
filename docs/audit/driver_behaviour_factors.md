@@ -917,10 +917,10 @@ Implementation notes:
 
 ---
 
-## 20. Scripts (scratch, outside the repository)
+## 20. Scripts (exploratory checks, not part of the package)
 
-Directory: `/tmp/claude-0/-home-user-nhtsa-stats-US/dd56b1ab-53ab-5c90-8154-cdf8a010f996/scratchpad/audit_scripts/driver_behaviour/`.
-Run them with `POLARS_MAX_THREADS=2 uv run python <script>` from the repository root. Outputs are written to `…/scratchpad/out/`.
+Directory: `scripts/audit/driver_behaviour/`.
+Run them with `POLARS_MAX_THREADS=2 uv run python <script>` from the repository root. Outputs are written to `/tmp/nhtsa-audit/out/`.
 
 | script | content |
 |---|---|

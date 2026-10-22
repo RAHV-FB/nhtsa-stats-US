@@ -1,0 +1,42 @@
+"""FARS drivers: drug result distribution among tested by sev x year; class prevalence by year (scheme break 2022); police DRUGS vs test; DRUG_DET."""
+import polars as pl
+OUT = "/tmp/nhtsa-audit/out_ad"
+pl.Config.set_tbl_rows(200); pl.Config.set_tbl_width_chars(260); pl.Config.set_tbl_cols(30)
+K = ["YEAR","ST_CASE","VEH_NO","PER_NO"]
+df = pl.read_parquet(f"{OUT}/fars_drivers.parquet").filter(pl.col("sev").is_in(["killed","survived"]))
+dp = pl.read_parquet(f"{OUT}/fars_drug_person.parquet")
+df = df.join(dp.drop(["drug_test_status","drug_result"]), on=K, how="left")
+t = df.filter(pl.col("drug_test_status")=="tested")
+print("drug_result among tested drivers (%), by sev x year")
+x = t.group_by(["sev","YEAR","drug_result"]).len().with_columns((100*pl.col("len")/pl.col("len").sum().over(["sev","YEAR"])).round(1).alias("pct"))
+print(x.pivot(on="drug_result", index=["sev","YEAR"], values="pct", sort_columns=True).sort(["sev","YEAR"]))
+cls = ["narcotic","depressant","stimulant","hallucinogen","cannabinoid","pcp_dissoc","inhalant","steroid","caff_nicotine","other_np","other"]
+print("class positivity among tested drivers (% of tested), killed only, by year")
+y = t.filter(pl.col("sev")=="killed").group_by("YEAR").agg([pl.col(f"cls_{c}").mean().mul(100).round(1).alias(c) for c in cls]+[pl.col("pos_cann_excl_cthc").mean().mul(100).round(1).alias("cann_excl_cTHC"), pl.col("pos_class").mean().mul(100).round(1).alias("any_class"), pl.len()]).sort("YEAR")
+print(y)
+print("same, survived")
+y = t.filter(pl.col("sev")=="survived").group_by("YEAR").agg([pl.col(f"cls_{c}").mean().mul(100).round(1).alias(c) for c in cls]+[pl.col("pos_class").mean().mul(100).round(1).alias("any_class"), pl.len()]).sort("YEAR")
+print(y)
+# police DRUGS vs test
+print("police DRUGS by drug_result among tested drivers (row %: DRUGS code within result), pooled by sev")
+z = t.filter(pl.col("drug_result").is_in(["positive_class","negative"])).group_by(["sev","drug_result","DRUGS"]).len().with_columns((100*pl.col("len")/pl.col("len").sum().over(["sev","drug_result"])).round(1).alias("pct"))
+print(z.pivot(on="DRUGS", index=["sev","drug_result"], values="pct", sort_columns=True).sort(["sev","drug_result"]))
+print("P(drug tested | DRUGS police code) by sev:")
+print(df.group_by(["sev","DRUGS"]).agg((pl.col("drug_test_status")=="tested").mean().mul(100).round(1).alias("pct_tested"), pl.len()).sort(["sev","DRUGS"]))
+print("DRUGS code distribution among all drivers by sev (%):")
+print(df.group_by(["sev","DRUGS"]).len().with_columns((100*pl.col("len")/pl.col("len").sum().over("sev")).round(1).alias("pct")).pivot(on="sev", index="DRUGS", values="pct").sort("DRUGS"))
+# DRUG_DET vs test (2016-2021)
+print("DRUG_DET (2016-2021) by drug test status, drivers:")
+print(df.filter(pl.col("YEAR")<=2021).group_by(["DRUG_DET","drug_test_status"]).len().pivot(on="drug_test_status", index="DRUG_DET", values="len", sort_columns=True).sort("DRUG_DET"))
+print("ALC_DET (2016-2021) by alc_stat, drivers:")
+print(df.filter(pl.col("YEAR")<=2021).group_by(["ALC_DET","alc_stat"]).len().pivot(on="alc_stat", index="ALC_DET", values="len", sort_columns=True).sort("ALC_DET"))
+print("ALC_DET x DRINKING (2016-2021) drivers:")
+print(df.filter(pl.col("YEAR")<=2021).group_by(["ALC_DET","DRINKING"]).len().pivot(on="DRINKING", index="ALC_DET", values="len", sort_columns=True).sort("ALC_DET"))
+print("DRUG_DET x DRUGS (2016-2021) drivers:")
+print(df.filter(pl.col("YEAR")<=2021).group_by(["DRUG_DET","DRUGS"]).len().pivot(on="DRUGS", index="DRUG_DET", values="len", sort_columns=True).sort("DRUG_DET"))
+# drimpair 9 vs DRINKING/DRUGS
+print("DRIMPAIR any=9 rate by DRINKING / DRUGS, drivers:")
+print(df.group_by(["DRINKING"]).agg(pl.col("drimp_9").mean().mul(100).round(1), pl.len()).sort("DRINKING"))
+print(df.group_by(["DRUGS"]).agg(pl.col("drimp_9").mean().mul(100).round(1), pl.len()).sort("DRUGS"))
+print("DRIMPAIR=9 by year/sev:")
+print(df.group_by(["YEAR","sev"]).agg(pl.col("drimp_9").mean().mul(100).round(1)).pivot(on="sev", index="YEAR", values="drimp_9").sort("YEAR"))

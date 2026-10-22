@@ -54,6 +54,7 @@ from nhtsa_stats.analysis.survey import (
     svy_mean,
     svy_total,
 )
+from nhtsa_stats.processing import harmonize as h
 from nhtsa_stats.reporting.io import save_table
 
 log = logging.getLogger(__name__)
@@ -80,6 +81,13 @@ class Combination:
     rationale: str = ""
     extra_covariates: tuple[str, ...] = field(default=())
     prespecified: bool = True
+    # Standardisation population for the margins (None = all crashes). Pairs whose exposure
+    # is a multi-vehicle crash type are standardised over multi-vehicle crashes only, because
+    # setting a single-vehicle crash to 'angle collision' is not a possible crash.
+    domain: str | None = None
+
+
+DOMAINS = {"multi_vehicle": lambda d: (d["n_vehicles"] != "1").to_numpy()}
 
 
 SPEEDING = Exposure("speeding", ("yes",), ("no",), "speeding-related")
@@ -141,7 +149,9 @@ PAIRS: list[Combination] = [
         "speeding x high_speed_road",
         (SPEEDING, HIGH_SPEED),
         "A",
-        "Kinetic energy rises with the square of speed; speeding on fast roads adds more energy.",
+        "Kinetic energy rises with the square of speed; speeding on fast roads adds more energy. "
+        "Added at implementation, not in the registered plan: exploratory.",
+        prespecified=False,
     ),
     Combination(
         "high_speed_road x dark_unlit", (HIGH_SPEED, DARK_UNLIT), "A", "Unlit high-speed roads."
@@ -158,6 +168,7 @@ PAIRS: list[Combination] = [
         (OLDER, ANGLE),
         "B",
         "Frailty in side impacts; older drivers over-involved in angle crashes.",
+        domain="multi_vehicle",
     ),
     Combination(
         "heavy_truck x high_speed_road", (HEAVY, HIGH_SPEED), "A", "Mass incompatibility at speed."
@@ -173,7 +184,9 @@ PAIRS: list[Combination] = [
         "pedestrian x high_speed_road",
         (PEDESTRIAN, HIGH_SPEED),
         "B",
-        "Impact speed and pedestrian survival.",
+        "Impact speed and pedestrian survival. Added at implementation, not in the registered "
+        "plan: exploratory.",
+        prespecified=False,
     ),
 ]
 
@@ -249,7 +262,9 @@ def combo_margins(
     """Margins for every exposed/reference state combination as level mixtures."""
     k = len(comb.exposures)
     states = [tuple((i >> j) & 1 for j in range(k)) for i in range(2**k)]
-    weights = [{s: _level_weights(df, design.weight, e, s) for s in (0, 1)} for e in comb.exposures]
+    dom = None if comb.domain is None else DOMAINS[comb.domain](df)
+    wdom = design.weight if dom is None else np.where(dom, design.weight, 0.0)
+    weights = [{s: _level_weights(df, wdom, e, s) for s in (0, 1)} for e in comb.exposures]
     values, influence = {}, {}
     cache: dict[tuple, tuple[float, np.ndarray]] = {}
     for st in states:
@@ -262,7 +277,7 @@ def combo_margins(
         for assign, pw in combos:
             key = tuple(sorted(assign.items()))
             if key not in cache:
-                cache[key] = model.margin_influence(df, lambda d, a=assign: d.assign(**a))
+                cache[key] = model.margin_influence(df, lambda d, a=assign: d.assign(**a), dom)
             m, z = cache[key]
             m_tot += pw * m
             z_tot += pw * z
@@ -278,6 +293,7 @@ def _fit(
     full_product: bool = True,
 ) -> tuple[SurveyLogit, str]:
     covs = _covariates(comb)
+    h.assert_no_leakage(covs, allow_year=True)
     exps = comb.exposures
     products = []
     if len(exps) == 2:

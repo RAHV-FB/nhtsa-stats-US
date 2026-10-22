@@ -1,0 +1,20 @@
+import polars as pl, sys
+OUT="/tmp/nhtsa-audit/out"
+pl.Config.set_tbl_rows(100); pl.Config.set_tbl_cols(30); pl.Config.set_tbl_width_chars(300)
+d = pl.read_csv(f"{OUT}/diffmiss.csv")
+# 1. By year, ALL (FARS unweighted; CRSS weighted)
+a = d.filter(pl.col("grouping")=="ALL").with_columns(pl.when(pl.col("source")=="CRSS").then(pl.col("pct_w")).otherwise(pl.col("pct_unw")).alias("p"),
+     (pl.col("source").str.slice(0,1)+pl.col("year").cast(pl.Utf8).str.slice(2,2)).alias("sy"))
+print("== missing % by source-year (CRSS weighted)")
+print(a.pivot(on="sy", index="var", values="p").sort("var"))
+# 2. pooled by severity: FARS veh_death vs no; CRSS MAX_VSEV groups (weighted), pooled over years (n-weighted mean of yearly rates for FARS; for CRSS pooled weight approximated via average of yearly)
+s = d.filter(pl.col("grouping")=="sev")
+s = s.group_by("source","group","var").agg(((pl.col("pct_unw")*pl.col("n")).sum()/pl.col("n").sum()).round(2).alias("unw"), pl.col("pct_w").mean().round(2).alias("w_meanyr"), pl.col("n").sum().alias("n"))
+print("== FARS by vehicle-death status (pooled 2016-2024, unweighted)")
+print(s.filter(pl.col("source")=="FARS").pivot(on="group", index="var", values="unw").sort("var"))
+print("== CRSS by MAX_VSEV (pooled 2016-2024; mean of yearly weighted %)")
+c = s.filter((pl.col("source")=="CRSS")&pl.col("group").is_in(["K","A","B","C","O","Unknown"]))
+print(c.pivot(on="group", index="var", values="w_meanyr").select("var","K","A","B","C","O","Unknown").sort("var"))
+print("== CRSS by MAX_VSEV (pooled; unweighted)")
+print(c.pivot(on="group", index="var", values="unw").select("var","K","A","B","C","O","Unknown").sort("var"))
+print(d.filter((pl.col("grouping")=="sev")&(pl.col("var")=="TRAV_SP")).group_by("source","group").agg(pl.col("n").sum()).sort("source","group"))

@@ -415,9 +415,7 @@ See the structured summary returned with this appendix for implementable recipes
 
 ## 11. Scripts
 
-Scratch scripts are in
-`/tmp/claude-0/-home-user-nhtsa-stats-US/dd56b1ab-53ab-5c90-8154-cdf8a010f996/scratchpad/audit_scripts/`, outside the
-repository:
+Scratch scripts are in `scripts/audit/`:
 
 * `util.py`
 * `pb_01-04.py` (pbtype)

@@ -552,6 +552,13 @@ REGISTRY: dict[str, VarInfo] = {
     # person-level
     "age": VarInfo("pre_crash", "person"),
     "age_band": VarInfo("pre_crash", "person"),
+    # Non-motorist analyses (analysis/vulnerable.py)
+    "str_speed_limit": VarInfo(
+        "pre_crash", "person", "posted limit of the striking vehicle's road"
+    ),
+    "str_speeding": VarInfo("pre_crash", "person", "striking vehicle speeding-related (police)"),
+    "striking": VarInfo("pre_crash", "person", "body type of the striking vehicle"),
+    "location": VarInfo("pre_crash", "person", "non-motorist's location at the crash"),
     "sex": VarInfo("pre_crash", "person"),
     "role": VarInfo("pre_crash", "person"),
     "seat": VarInfo("pre_crash", "person"),
@@ -567,11 +574,20 @@ REGISTRY: dict[str, VarInfo] = {
 MODEL_ALLOWED_TIMINGS = {"pre_crash", "crash_circumstance"}
 
 
-def assert_no_leakage(features: list[str], allowed: set[str] | None = None) -> None:
-    """Raise if any model feature is post-crash, an outcome, an id, or unregistered."""
+def assert_no_leakage(
+    features: list[str], allowed: set[str] | None = None, allow_year: bool = False
+) -> None:
+    """Raise if any model feature is post-crash, an outcome, an id, or unregistered.
+
+    ``allow_year`` admits the calendar-year adjustment (registered as a design variable),
+    which statistical severity models include; prediction models evaluated on later years
+    must not use it.
+    """
     allowed = allowed or MODEL_ALLOWED_TIMINGS
     bad = []
     for f in features:
+        if allow_year and f == "YEAR":
+            continue
         info = REGISTRY.get(f)
         if info is None or info.timing not in allowed:
             bad.append((f, None if info is None else info.timing))

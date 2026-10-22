@@ -285,6 +285,8 @@ def trends() -> None:
 def interaction_panel() -> None:
     d = load_table("interactions", "pairs_fatal")
     d = d[d["ic"].notna()].copy()
+    pre = d["prespecified"].astype(str).str.lower().eq("true") if "prespecified" in d else True
+    d["label"] = d["pair"].str.replace("_", " ") + np.where(pre, "", " *")
     d = d.sort_values("ic")
     fig, axes = plt.subplots(1, 2, figsize=(9.2, 0.33 * len(d) + 1.4), sharey=True)
     y = np.arange(len(d))
@@ -298,7 +300,7 @@ def interaction_panel() -> None:
     ax.set_xticklabels([str(t) for t in ticks])
     ax.set_xlabel("Additive interaction: excess fatal crashes per 1,000 (symlog)")
     ax.set_yticks(y)
-    ax.set_yticklabels(d["pair"].str.replace("_", " "))
+    ax.set_yticklabels(d["label"])
     ax.set_title("Additive scale (IC)", loc="left")
     ax = axes[1]
     ax.hlines(y, d["ratio_of_rr_low"], d["ratio_of_rr_high"], color=ORANGE, linewidth=1.6)
@@ -312,7 +314,7 @@ def interaction_panel() -> None:
     for a in axes:
         a.grid(axis="y", visible=False)
     fig.suptitle(
-        "Do circumstances amplify each other? Pre-specified pairs, fatal outcome, CRSS 2016-2024",
+        "Do circumstances amplify each other? Fatal outcome, CRSS 2016-2024",
         x=0.01,
         ha="left",
         fontsize=11,
@@ -321,7 +323,8 @@ def interaction_panel() -> None:
     _caption(
         fig,
         "Adjusted risks from survey-weighted models with one product term per pair; 95% CIs. IC > 0: joint excess risk larger "
-        "than the sum of the separate excesses. Source: outputs/tables/interactions/pairs_fatal.csv",
+        "than the sum of the separate excesses. * exploratory pair (not in the registered plan; outside the Holm "
+        "family). Source: outputs/tables/interactions/pairs_fatal.csv",
     )
     fig.tight_layout()
     save_figure(fig, MODULE, "interactions")
