@@ -1,7 +1,7 @@
 outcome,model,domain,n_crashes,n_night,n_day,adj_rate_night,adj_rate_day,rr,rr_low,rr_high
 fatal,crude,"light in dark_lighted,dark_not_lighted,dark_unknown_lighting",125205,70400,54124,0.0133788,0.00678181,1.97274,1.77772,2.18916
-fatal,all_blocks_without_light,"light in dark_lighted,dark_not_lighted,dark_unknown_lighting",125205,70400,54124,0.0117818,0.00820401,1.4361,1.30545,1.57982
-fatal,all_blocks_with_dark_type,"light in dark_lighted,dark_not_lighted,dark_unknown_lighting",125205,70400,54124,0.0118245,0.00816007,1.44907,1.31506,1.59673
+fatal,all_blocks_without_light,"light in dark_lighted,dark_not_lighted,dark_unknown_lighting",125205,70400,54124,0.0117777,0.00820882,1.43476,1.3041,1.57852
+fatal,all_blocks_with_dark_type,"light in dark_lighted,dark_not_lighted,dark_unknown_lighting",125205,70400,54124,0.0118205,0.00816462,1.44777,1.31369,1.59555
 ka,crude,"light in dark_lighted,dark_not_lighted,dark_unknown_lighting",125205,70400,54124,0.0525359,0.0316625,1.65924,1.5669,1.75703
-ka,all_blocks_without_light,"light in dark_lighted,dark_not_lighted,dark_unknown_lighting",125205,70400,54124,0.0476074,0.0364541,1.30595,1.25014,1.36426
-ka,all_blocks_with_dark_type,"light in dark_lighted,dark_not_lighted,dark_unknown_lighting",125205,70400,54124,0.0477539,0.0362892,1.31593,1.25908,1.37534
+ka,all_blocks_without_light,"light in dark_lighted,dark_not_lighted,dark_unknown_lighting",125205,70400,54124,0.0475975,0.036466,1.30526,1.24932,1.3637
+ka,all_blocks_with_dark_type,"light in dark_lighted,dark_not_lighted,dark_unknown_lighting",125205,70400,54124,0.0477442,0.0363006,1.31525,1.25827,1.3748

@@ -29,6 +29,9 @@ Methods
         columns divided by the same sum over all columns, where xbar are period means of the
         design-matrix columns and b0 the P0 coefficients.  Factor-level contributions are
         invariant to the reference category; single-level contributions are not.
+        Police-reported speeding is binary in the main models (as in every other module); its
+        split by type (exceeded limit / too fast for conditions / unspecified) is used for
+        prevalence, within-subgroup estimates and one sensitivity decomposition.
     (d) Denominator check: KABCO distribution by year, fatal share among injury (K/KABC) and
         among K+A crashes (insensitive to the reporting of property-damage-only crashes), and an
         exact split of the change in the log fatal share into the change in the number of fatal
@@ -100,6 +103,13 @@ COVARIATE_SETS: dict[str, list[str]] = {
     "A": BASE_COVARIATES,
     "B": [*BASE_COVARIATES, *specs.CIRCUMSTANCE],
 }
+# Descriptive / sensitivity-only factor: police-reported speeding split by type (exceeded the
+# limit or racing; too fast for conditions; unspecified).  The main models keep the binary
+# ``speeding`` used by every other module.
+EXTRA_FACTORS = ("speeding_type",)
+SPEEDING_BY_TYPE = [
+    "speeding_type" if c == "speeding" else c for c in [*BASE_COVARIATES, *specs.CIRCUMSTANCE]
+]
 SET_LABELS = {
     "A": "pre-crash circumstances (PRE_CRASH without year)",
     "B": "pre-crash circumstances + crash configuration (crash type, vehicles)",
@@ -125,12 +135,13 @@ def load() -> tuple[pd.DataFrame, SurveyDesign]:
     """All CRSS crashes (including unknown severity) with the full design."""
     df, design = data.crss_crash(outcome=None, tri_state_cols=specs.CRASH_TRI)
     covs = COVARIATE_SETS["B"]
-    keep = [*covs, "YEAR", "kabco", "fatal", "ka", "fatal_im", "night"]
+    keep = [*covs, *EXTRA_FACTORS, "YEAR", "kabco", "fatal", "ka", "fatal_im", "night"]
     df = df[keep].copy()
     df["YEAR"] = df["YEAR"].astype(int)
     for c in ("kabco", "fatal", "ka", "fatal_im", "night"):
         df[c] = df[c].astype(float)
-    for c in covs:
+    df["speeding_type"] = df["speeding_type"].fillna("unknown")
+    for c in [*covs, *EXTRA_FACTORS]:
         df[c] = pd.Categorical(df[c], categories=specs.CRASH_LEVELS[c])
         if df[c].isna().any():
             raise ValueError(f"{c}: values outside specs.CRASH_LEVELS")
@@ -144,7 +155,7 @@ def outcome_frame(
     """Rows with a known outcome; categories trimmed to the levels present (declared order)."""
     keep = df[outcome].notna().to_numpy()
     out = df.loc[keep].reset_index(drop=True)
-    for c in COVARIATE_SETS["B"]:
+    for c in [*COVARIATE_SETS["B"], *EXTRA_FACTORS]:
         out[c] = out[c].cat.remove_unused_categories()
     return out, design.subset(keep)
 
@@ -582,6 +593,15 @@ def detailed_composition(
 SUBGROUPS: dict[str, Callable[[pd.DataFrame], np.ndarray]] = {
     "all crashes": lambda d: np.ones(len(d), dtype=bool),
     "speeding-related": lambda d: (d["speeding"] == "yes").to_numpy(),
+    "speeding: exceeded limit or racing": lambda d: (
+        d["speeding_type"] == "exceeded_limit_or_racing"
+    ).to_numpy(),
+    "speeding: too fast for conditions": lambda d: (
+        d["speeding_type"] == "too_fast_for_conditions"
+    ).to_numpy(),
+    "speeding: type unspecified": lambda d: (
+        d["speeding_type"] == "speeding_unspecified"
+    ).to_numpy(),
     "alcohol involved (imputed)": lambda d: (d["alcohol_im"] == "yes").to_numpy(),
     "no speeding and no alcohol recorded": lambda d: (
         (d["speeding"] == "no") & (d["alcohol_im"] == "no")
@@ -699,9 +719,9 @@ def annual_series(
         n_est = estimate(ms, lambda m, yy=yy: m[f"N{yy}"], "lin")
         c = estimate(ms, lambda m, yy=yy: m[f"crude{yy}"], "share")
         rec = {
-            "weighted_crashes": n_est["estimate"],
-            "weighted_crashes_low": n_est["low"],
-            "weighted_crashes_high": n_est["high"],
+            "weighted_crashes_known_severity": n_est["estimate"],
+            "weighted_crashes_known_severity_low": n_est["low"],
+            "weighted_crashes_known_severity_high": n_est["high"],
             "crude_share": c["estimate"],
             "crude_low": c["low"],
             "crude_high": c["high"],
@@ -753,7 +773,7 @@ def prevalence_change(df: pd.DataFrame, design: SurveyDesign) -> pd.DataFrame:
     in0 = df["YEAR"].isin(P0_YEARS).to_numpy()
     in1 = df["YEAR"].isin(P1_YEARS).to_numpy()
     rows = []
-    for var in COVARIATE_SETS["B"]:
+    for var in [*COVARIATE_SETS["B"], *EXTRA_FACTORS]:
         for lv in levels_of(df, var):
             ind = (df[var] == lv).to_numpy(dtype=float)
             vals, tots = {}, {}
@@ -774,6 +794,7 @@ def prevalence_change(df: pd.DataFrame, design: SurveyDesign) -> pd.DataFrame:
                     "change_low": d["low"],
                     "change_high": d["high"],
                     "coding_drift_variable": var in CODING_DRIFT,
+                    "in_main_models": var in COVARIATE_SETS["B"],
                     "flag": "suppressed" if min(n0, n1) < config.MIN_CELL_N else "",
                 }
             )
@@ -801,9 +822,10 @@ def _known(m: dict[str, float], yy: int) -> float:
 
 
 def _period_mean(m: dict[str, float], cls: str, years: Sequence[int]) -> float:
+    """Annual average of one class ('N' = all known severities; 'KA', 'KABC' = sums)."""
     if cls == "N":
         return float(np.mean([_known(m, yy) for yy in years]))
-    return float(np.mean([m[f"{cls}|{yy}"] for yy in years]))
+    return float(np.mean([sum(m[f"{c}|{yy}"] for c in cls) for yy in years]))
 
 
 def kabco_by_year(ms: MarginSet, df: pd.DataFrame) -> pd.DataFrame:
@@ -947,6 +969,49 @@ def numerator_denominator(ms: MarginSet, fars_counts: pd.Series) -> pd.DataFrame
             )
         fars0 = float(fars_counts.loc[list(P0_YEARS)].mean())
         fars1 = float(fars_counts.loc[list(yrs)].mean())
+        # Conditional shares that do not involve O (property-damage-only) or C crashes, and the
+        # fatal share with the FARS census count as numerator (CI: CRSS denominator only).
+        extra: list[tuple[str, str, str, Callable, str]] = [
+            (
+                "ratio_K_share_of_injury_KABC",
+                "estimated",
+                "ratio",
+                lambda m, ys=yrs: (
+                    (_period_mean(m, "K", ys) / _period_mean(m, "KABC", ys))
+                    / (_period_mean(m, "K", P0_YEARS) / _period_mean(m, "KABC", P0_YEARS))
+                ),
+                "ratio",
+            ),
+            (
+                "ratio_K_share_of_KA",
+                "estimated",
+                "ratio",
+                lambda m, ys=yrs: (
+                    (_period_mean(m, "K", ys) / _period_mean(m, "KA", ys))
+                    / (_period_mean(m, "K", P0_YEARS) / _period_mean(m, "KA", P0_YEARS))
+                ),
+                "ratio",
+            ),
+            (
+                "ratio_fatal_share_FARS_numerator_CRSS_denominator",
+                "estimated (FARS census count / CRSS estimate)",
+                "ratio",
+                lambda m, ys=yrs, r=fars1 / fars0: (
+                    r / (_period_mean(m, "N", ys) / _period_mean(m, "N", P0_YEARS))
+                ),
+                "ratio",
+            ),
+        ]
+        for name, label, units, f, scale in extra:
+            rows.append(
+                {
+                    "comparison": comp,
+                    "quantity": name,
+                    "label": label,
+                    "units": units,
+                    **estimate(ms, f, scale),
+                }
+            )
         rows.append(
             {
                 "comparison": comp,
@@ -1104,7 +1169,9 @@ def fars_changes(comp: pd.DataFrame) -> pd.DataFrame:
 # Driver
 # --------------------------------------------------------------------------------------
 def check_leakage() -> None:
-    assert_no_leakage([*COVARIATE_SETS["B"], "YEAR"], allowed=MODEL_ALLOWED_TIMINGS | {"design"})
+    assert_no_leakage(
+        [*COVARIATE_SETS["B"], *EXTRA_FACTORS, "YEAR"], allowed=MODEL_ALLOWED_TIMINGS | {"design"}
+    )
 
 
 def _save(df: pd.DataFrame, name: str, description: str, method: str, outcome: str, **kw) -> None:
@@ -1192,13 +1259,17 @@ def run(outcomes: Sequence[str] = OUTCOMES, sensitivity: bool = True) -> dict[st
                 p0_years=(2019,),
                 p1_years=(2021,),
             ),
+            decompose(df, design, SPEEDING_BY_TYPE, "fatal", "sens_B_speeding_by_type"),
         ]
         dfi, dsi = outcome_frame(df_all, design_all, "fatal_im")
         sens_im = decompose(dfi, dsi, COVARIATE_SETS["B"], "fatal_im", "sens_B_outcome_MAXSEV_IM")
         decomp_tabs += [decomposition_table(d, design) for d in sens]
         decomp_tabs.append(decomposition_table(sens_im, dsi))
-        by_factor, _ = detailed_composition(sens[0], df, design)
-        detail_f.append(by_factor)
+        for d in (sens[0], sens[-1]):
+            by_factor, by_term = detailed_composition(d, df, design)
+            detail_f.append(by_factor)
+            if d is sens[-1]:
+                detail_c.append(by_term)
 
     out["decomposition"] = pd.concat(decomp_tabs, ignore_index=True)
     out["decomposition_detailed_by_factor"] = pd.concat(detail_f, ignore_index=True)

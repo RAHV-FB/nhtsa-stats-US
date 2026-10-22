@@ -9,7 +9,7 @@
   "data/processed/crss_crash.parquet",
   "data/processed/fars_crash.parquet"
  ],
- "rows": 138,
+ "rows": 156,
  "columns": [
   "comparison",
   "quantity",
@@ -21,6 +21,6 @@
   "high"
  ],
  "module": "nhtsa_stats.analysis.trends",
- "git_commit": "743b472-dirty",
- "generated_utc": "2026-10-22T17:21:42Z"
+ "git_commit": "aab9ff8-dirty",
+ "generated_utc": "2026-10-22T17:29:14Z"
 }

@@ -27,8 +27,8 @@
   "converged"
  ],
  "module": "nhtsa_stats.analysis.trends",
- "git_commit": "743b472-dirty",
- "generated_utc": "2026-10-22T17:21:42Z",
+ "git_commit": "aab9ff8-dirty",
+ "generated_utc": "2026-10-22T17:29:14Z",
  "covariate_sets": {
   "A": "pre-crash circumstances (PRE_CRASH without year)",
   "B": "pre-crash circumstances + crash configuration (crash type, vehicles)"

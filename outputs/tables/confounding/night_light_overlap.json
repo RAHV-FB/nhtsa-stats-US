@@ -17,6 +17,6 @@
   "weighted_share_of_period"
  ],
  "module": "nhtsa_stats.analysis.confounding",
- "git_commit": "9074d23-dirty",
- "generated_utc": "2026-10-22T17:07:57Z"
+ "git_commit": "2fc4f56-dirty",
+ "generated_utc": "2026-10-22T17:23:05Z"
 }

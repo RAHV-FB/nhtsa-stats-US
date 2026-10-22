@@ -14,9 +14,9 @@
   "outcome",
   "n",
   "events",
-  "weighted_crashes",
-  "weighted_crashes_low",
-  "weighted_crashes_high",
+  "weighted_crashes_known_severity",
+  "weighted_crashes_known_severity_low",
+  "weighted_crashes_known_severity_high",
   "crude_share",
   "crude_low",
   "crude_high",
@@ -51,6 +51,6 @@
   "flag"
  ],
  "module": "nhtsa_stats.analysis.trends",
- "git_commit": "743b472-dirty",
- "generated_utc": "2026-10-22T17:21:42Z"
+ "git_commit": "aab9ff8-dirty",
+ "generated_utc": "2026-10-22T17:29:14Z"
 }

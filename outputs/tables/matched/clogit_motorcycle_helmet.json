@@ -1,0 +1,41 @@
+{
+ "table": "matched/clogit_motorcycle_helmet.csv",
+ "description": "Within-motorcycle conditional logit of death: unhelmeted vs helmeted, age band, sex, passenger vs operator",
+ "population": "FARS 2016-2024 motorcycle operators/passengers with helmet coded helmet/none, known age and outcome; motorcycles with >= 2 riders and discordant outcomes",
+ "unit": "person within vehicle (matched set = vehicle)",
+ "outcome": "killed (died within 30 days)",
+ "method": "statsmodels ConditionalLogit (groups = motorcycle); crash-cluster-robust CIs",
+ "inputs": [
+  "data/processed/fars_person.parquet"
+ ],
+ "rows": 7,
+ "columns": [
+  "term",
+  "coef",
+  "se_model",
+  "se_robust",
+  "odds_ratio",
+  "or_low",
+  "or_high",
+  "or_low_model",
+  "or_high_model",
+  "p_robust",
+  "info_n_sets",
+  "info_n_persons",
+  "info_n_deaths",
+  "info_n_crash_clusters",
+  "info_converged",
+  "info_max_abs_score",
+  "info_max_newton_step_over_se",
+  "info_loglike"
+ ],
+ "module": "nhtsa_stats.analysis.matched",
+ "git_commit": "aab9ff8-dirty",
+ "generated_utc": "2026-10-22T17:31:59Z",
+ "helmet_discordant_sets": {
+  "sets_discordant_exposure": 336,
+  "persons_exposed": 3586,
+  "deaths_exposed": 1846,
+  "deaths_unexposed": 1586
+ }
+}

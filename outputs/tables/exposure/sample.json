@@ -1,26 +1,29 @@
 {
  "table": "exposure/sample.csv",
- "description": "QIE sample size",
- "population": "CRSS two-vehicle crashes 2016-2024 with exactly one driver charged with a moving violation",
+ "description": "QIE sample sizes under both culpability definitions",
+ "population": "CRSS two-vehicle crashes 2016-2024 (no non-motorist, both drivers present) with exactly one culpable and one non-culpable driver",
  "unit": "driver",
- "outcome": "culpable (moving violation charged)",
+ "outcome": "culpable (C1 action-based definition unless stated)",
  "method": "Quasi-induced exposure: RIR = odds of culpability within group (saturated survey logit, linearised CI); adjusted ratios from a multivariable survey logit",
  "inputs": [
-  "data/interim/CRSS/violatn",
   "data/interim/CRSS/vehicle",
+  "data/interim/CRSS/driverrf",
+  "data/interim/CRSS/distract",
+  "data/interim/CRSS/violatn",
   "data/interim/CRSS/person",
   "data/processed/crss_crash.parquet"
  ],
- "rows": 1,
+ "rows": 2,
  "columns": [
+  "definition",
   "qualifying_crashes",
   "drivers",
-  "two_vehicle_crashes",
+  "two_vehicle_crashes_no_nonmotorist",
   "share_qualifying_unweighted",
   "share_qualifying_weighted",
   "weighted_qualifying_crashes_per_year"
  ],
  "module": "nhtsa_stats.analysis.exposure",
- "git_commit": "8211d77-dirty",
- "generated_utc": "2026-10-22T17:01:36Z"
+ "git_commit": "adf4c91-dirty",
+ "generated_utc": "2026-10-22T17:38:28Z"
 }

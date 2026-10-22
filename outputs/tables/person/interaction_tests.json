@@ -1,0 +1,29 @@
+{
+ "table": "person/interaction_tests.csv",
+ "description": "Design-adjusted Wald F tests of the pre-specified interaction product terms",
+ "population": "CRSS LPV occupants aged 8+ (see table rows)",
+ "unit": "person",
+ "outcome": "killed,killed_or_serious",
+ "method": "Korn-Graubard adjusted Wald F on all product terms; Holm adjustment across tests",
+ "inputs": [
+  "data/processed/crss_person.parquet (+ young/older_driver from crss_crash.parquet)"
+ ],
+ "rows": 6,
+ "columns": [
+  "interaction",
+  "outcome",
+  "population",
+  "n",
+  "events",
+  "n_product_terms",
+  "wald_F",
+  "df_num",
+  "df_den",
+  "p",
+  "converged",
+  "p_holm"
+ ],
+ "module": "nhtsa_stats.analysis.person",
+ "git_commit": "adf4c91-dirty",
+ "generated_utc": "2026-10-22T17:38:03Z"
+}

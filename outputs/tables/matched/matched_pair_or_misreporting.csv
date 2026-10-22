@@ -1,0 +1,6 @@
+population,misreport_fraction,n10_unbelted_died_belted_survived,n01_belted_died_unbelted_survived,n00_both_belted,n11_both_unbelted,or_unbelted_vs_belted,or_low,or_high,n_vehicles,tipping_point_f
+all eligible vehicles,0,6214,1264,16720,7558,4.91614,4.62764,5.22262,31756,0.215837
+all eligible vehicles,0.05,6214,1264,16720,7558,2.8111,2.67453,2.95463,31756,0.215837
+all eligible vehicles,0.1,6214,1264,16720,7558,1.90484,1.82162,1.99185,31756,0.215837
+all eligible vehicles,0.2,6214,1264,16720,7558,1.07882,1.03644,1.12294,31756,0.215837
+complete-restraint vehicles,0,6047,1222,16481,7350,4.94845,4.65341,5.26218,31100,0.214178

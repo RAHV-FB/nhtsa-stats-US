@@ -1,0 +1,25 @@
+{
+ "table": "matched/double_pair_counts.csv",
+ "description": "Pair types, vehicles and deaths entering the DPC",
+ "population": "As double_pair_comparison",
+ "unit": "person within vehicle (matched set = vehicle)",
+ "outcome": "killed (died within 30 days)",
+ "method": "Counts",
+ "inputs": [
+  "data/processed/fars_person.parquet"
+ ],
+ "rows": 20,
+ "columns": [
+  "analysis",
+  "attribute_x1",
+  "driver_x",
+  "other_x",
+  "vehicles",
+  "driver_deaths",
+  "other_deaths",
+  "both_died"
+ ],
+ "module": "nhtsa_stats.analysis.matched",
+ "git_commit": "aab9ff8-dirty",
+ "generated_utc": "2026-10-22T17:31:59Z"
+}

@@ -160,6 +160,10 @@ def test_kabco_shares_and_numerator_denominator_identity():
     )
     assert comp["ratio_fatal_share"] > 1.5
     assert comp["FARS_ratio_fatal_crashes (census)"] == pytest.approx(1.0)
+    assert comp["ratio_fatal_share_FARS_numerator_CRSS_denominator"] == pytest.approx(
+        1.0 / comp["ratio_reported_crashes_denominator"]
+    )
+    assert comp["ratio_K_share_of_KA"] > 1.0
 
 
 def test_fars_changes_arithmetic():

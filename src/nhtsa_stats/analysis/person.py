@@ -463,6 +463,8 @@ def crude_vs_adjusted(
     res = pd.concat([pd.concat(p, axis=1) for p in parts.values()], ignore_index=True)
     res.insert(0, "population", pop.name)
     res.insert(1, "outcome", outcome)
+    lead = ["population", "outcome", "factor", "level"]
+    res = res[lead + [c for c in res.columns if c not in lead]]
     with np.errstate(divide="ignore", invalid="ignore"):
         for name in models:
             res[f"{name}_logrr_retained"] = np.log(res[f"{name}_adj_rr"]) / np.log(res["crude_rr"])

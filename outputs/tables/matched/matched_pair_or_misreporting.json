@@ -1,0 +1,28 @@
+{
+ "table": "matched/matched_pair_or_misreporting.csv",
+ "description": "Closed-form matched-pair OR (unbelted vs belted) in two-occupant vehicles with one death, under reclassification of a fraction f of belted survivors to unbelted",
+ "population": "FARS 2016-2024 occupants (driver/passenger) of in-transport light passenger vehicles, seat front-left/front-other/second row, age 13+, belted or unbelted, known outcome; vehicles with exactly 2 eligible occupants and exactly one death",
+ "unit": "person within vehicle (matched set = vehicle)",
+ "outcome": "killed (died within 30 days)",
+ "method": "Conditional ML for 1:1 matched pairs: OR = n10/n01; expected counts under misreporting n10*(1-f), n01 + f*n00",
+ "inputs": [
+  "data/processed/fars_person.parquet"
+ ],
+ "rows": 5,
+ "columns": [
+  "population",
+  "misreport_fraction",
+  "n10_unbelted_died_belted_survived",
+  "n01_belted_died_unbelted_survived",
+  "n00_both_belted",
+  "n11_both_unbelted",
+  "or_unbelted_vs_belted",
+  "or_low",
+  "or_high",
+  "n_vehicles",
+  "tipping_point_f"
+ ],
+ "module": "nhtsa_stats.analysis.matched",
+ "git_commit": "aab9ff8-dirty",
+ "generated_utc": "2026-10-22T17:31:59Z"
+}

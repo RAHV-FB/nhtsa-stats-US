@@ -63,5 +63,7 @@
  ],
  "ridge": 0.01,
  "design_df": 42,
- "stochastic_components": "none (deterministic estimators)"
+ "stochastic_components": "none (deterministic estimators)",
+ "crss_crash_fingerprint": "9904403-1792688952",
+ "data_unchanged_during_run": true
 }

@@ -9,13 +9,12 @@
   "data/processed/crss_crash.parquet",
   "data/processed/fars_crash.parquet"
  ],
- "rows": 5,
+ "rows": 7,
  "columns": [
   "shift",
   "description",
   "outcome",
   "n_exposed_crss",
-  "share_of_fatal_crss_exposed",
   "af",
   "af_low",
   "af_high",
@@ -27,6 +26,6 @@
   "kind"
  ],
  "module": "nhtsa_stats.analysis.burden",
- "git_commit": "8211d77-dirty",
- "generated_utc": "2026-10-22T16:58:28Z"
+ "git_commit": "5ab31b0-dirty",
+ "generated_utc": "2026-10-22T17:41:54Z"
 }

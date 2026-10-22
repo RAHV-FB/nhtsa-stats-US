@@ -39,10 +39,11 @@ Method
     so the penalised fit is identical; verified in tests/test_confounding.py).
 
 Light condition and night
-    Darkness is part of what "night" is: 99% of night crashes with known light are dark, and
-    almost no night crash is in daylight.  Adjusting for light therefore (i) removes the part of
-    the night association that runs through darkness itself, and (ii) relies on the logistic
-    model to extrapolate the night effect into night x daylight cells that barely exist.  The
+    Darkness is part of what "night" is: about 94% of night crashes (weighted) are in darkness
+    and only ~2.5% are coded daylight (``night_light_overlap``), whereas 81% of daytime crashes
+    are in daylight.  Adjusting for light therefore (i) removes the part of the night
+    association that runs through darkness itself, and (ii) relies on the logistic model to
+    extrapolate the night effect into night x daylight cells that barely exist.  The
     module reports results with and without the light block, the night-by-light overlap table,
     and a within-darkness comparison (night vs evening/early-morning crashes in the dark),
     which needs no such extrapolation.

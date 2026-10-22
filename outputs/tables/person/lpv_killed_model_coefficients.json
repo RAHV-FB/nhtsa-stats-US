@@ -23,8 +23,8 @@
   "model"
  ],
  "module": "nhtsa_stats.analysis.person",
- "git_commit": "743b472-dirty",
- "generated_utc": "2026-10-22T17:20:13Z",
+ "git_commit": "1460fe7-dirty",
+ "generated_utc": "2026-10-22T17:43:33Z",
  "n": 904846,
  "events": 6911,
  "params_A": 94,

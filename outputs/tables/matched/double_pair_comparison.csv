@@ -1,0 +1,41 @@
+analysis,attribute_x1,misreport_fraction,component,rr_x1_vs_x0,rr_low,rr_high,reduction_1_minus_rr,reduction_low,reduction_high,se_log_poisson,boot_degenerate_share,n_pairs,n_pairs_with_death,rr_low_crash_boot,rr_high_crash_boot,tipping_point_f
+belt_driver_rf,belted,0,driver_subject|other_x=1,0.322161,0.304129,0.339944,0.677839,0.660056,0.695871,0.0326029,0,90240,45805,,,0.211693
+belt_driver_rf,belted,0,driver_subject|other_x=0,0.331097,0.31291,0.351217,0.668903,0.648783,0.68709,0.0344832,0,90240,45805,,,0.211693
+belt_driver_rf,belted,0,other_subject|driver_x=1,0.361888,0.343489,0.382177,0.638112,0.617823,0.656511,0.0323011,0,90240,45805,,,0.211693
+belt_driver_rf,belted,0,other_subject|driver_x=0,0.352121,0.332417,0.372726,0.647879,0.627274,0.667583,0.0347661,0,90240,45805,,,0.211693
+belt_driver_rf,belted,0,combined (inverse-variance weighted),0.341505,0.329308,0.354128,0.658495,0.645872,0.670692,,0,90240,45805,0.33005,0.354662,0.211693
+belt_driver_rf,belted,0.05,driver_subject|other_x=1,0.456422,0.43575,0.47669,0.543578,0.52331,0.56425,0.029979,0,90240,45805,,,0.211693
+belt_driver_rf,belted,0.05,driver_subject|other_x=0,0.453917,0.43262,0.477353,0.546083,0.522647,0.56738,0.0320987,0,90240,45805,,,0.211693
+belt_driver_rf,belted,0.05,other_subject|driver_x=1,0.494821,0.474878,0.517356,0.505179,0.482644,0.525122,0.0299431,0,90240,45805,,,0.211693
+belt_driver_rf,belted,0.05,other_subject|driver_x=0,0.497552,0.474843,0.521273,0.502448,0.478727,0.525157,0.0321322,0,90240,45805,,,0.211693
+belt_driver_rf,belted,0.05,combined (inverse-variance weighted),0.475236,0.46138,0.489368,0.524764,0.510632,0.53862,,0,90240,45805,0.462214,0.490181,0.211693
+belt_driver_rf,belted,0.1,driver_subject|other_x=1,0.603342,0.5799,0.626459,0.396658,0.373541,0.4201,0.0284689,0,90240,45805,,,0.211693
+belt_driver_rf,belted,0.1,driver_subject|other_x=0,0.58807,0.563091,0.615749,0.41193,0.384251,0.436909,0.0305759,0,90240,45805,,,0.211693
+belt_driver_rf,belted,0.1,other_subject|driver_x=1,0.63935,0.617097,0.665366,0.36065,0.334634,0.382903,0.0285158,0,90240,45805,,,0.211693
+belt_driver_rf,belted,0.1,other_subject|driver_x=0,0.655953,0.628926,0.684023,0.344047,0.315977,0.371074,0.0305321,0,90240,45805,,,0.211693
+belt_driver_rf,belted,0.1,combined (inverse-variance weighted),0.621092,0.605039,0.637032,0.378908,0.362968,0.394961,,0,90240,45805,0.606282,0.63847,0.211693
+belt_driver_rf,belted,0.2,driver_subject|other_x=1,0.943001,0.911434,0.974126,0.0569989,0.0258736,0.088566,0.027038,0,90240,45805,,,0.211693
+belt_driver_rf,belted,0.2,driver_subject|other_x=0,0.897038,0.862382,0.933843,0.102962,0.066157,0.137618,0.028825,0,90240,45805,,,0.211693
+belt_driver_rf,belted,0.2,other_subject|driver_x=1,0.969889,0.940453,1.00293,0.0301109,-0.0029317,0.059547,0.0270826,0,90240,45805,,,0.211693
+belt_driver_rf,belted,0.2,other_subject|driver_x=0,1.01959,0.98131,1.05951,-0.0195854,-0.0595051,0.0186895,0.0287831,0,90240,45805,,,0.211693
+belt_driver_rf,belted,0.2,combined (inverse-variance weighted),0.956381,0.933765,0.978578,0.0436194,0.0214223,0.0662354,,0,90240,45805,0.936028,0.980346,0.211693
+belt_driver_rf_complete_restraint_vehicles,belted,0,driver_subject|other_x=1,0.319873,0.302031,0.338323,0.680127,0.661677,0.697969,0.0328952,0,88938,45241,,,
+belt_driver_rf_complete_restraint_vehicles,belted,0,driver_subject|other_x=0,0.330694,0.312608,0.34975,0.669306,0.65025,0.687392,0.0346425,0,88938,45241,,,
+belt_driver_rf_complete_restraint_vehicles,belted,0,other_subject|driver_x=1,0.362938,0.343998,0.383362,0.637062,0.616638,0.656002,0.03245,0,88938,45241,,,
+belt_driver_rf_complete_restraint_vehicles,belted,0,other_subject|driver_x=0,0.351062,0.330383,0.37203,0.648938,0.62797,0.669617,0.0350599,0,88938,45241,,,
+belt_driver_rf_complete_restraint_vehicles,belted,0,combined (inverse-variance weighted),0.340825,0.328779,0.352561,0.659175,0.647439,0.671221,,0,88938,45241,0.329161,0.35284,
+age_65plus_vs_25_44_both_belted_same_sex,age 65+,0,driver_subject|other_x=1,1.93889,1.50996,2.55308,-0.938894,-1.55308,-0.509964,0.155318,0,6986,2973,,,
+age_65plus_vs_25_44_both_belted_same_sex,age 65+,0,driver_subject|other_x=0,2.28086,1.82675,2.93884,-1.28086,-1.93884,-0.826746,0.146704,0,6986,2973,,,
+age_65plus_vs_25_44_both_belted_same_sex,age 65+,0,other_subject|driver_x=1,4.04995,3.21844,5.2903,-3.04995,-4.2903,-2.21844,0.150461,0,6986,2973,,,
+age_65plus_vs_25_44_both_belted_same_sex,age 65+,0,other_subject|driver_x=0,3.44275,2.73666,4.49844,-2.44275,-3.49844,-1.73666,0.151682,0,6986,2973,,,
+age_65plus_vs_25_44_both_belted_same_sex,age 65+,0,combined (inverse-variance weighted),2.80836,2.41293,3.34457,-1.80836,-2.34457,-1.41293,,0,6986,2973,2.38611,3.31224,
+female_vs_male_both_belted_age_gap_le5,female,0,driver_subject|other_x=1,1.0295,0.944676,1.1164,-0.0295039,-0.116396,0.0553239,0.0527781,0,35200,13243,,,
+female_vs_male_both_belted_age_gap_le5,female,0,driver_subject|other_x=0,0.93984,0.861647,1.02387,0.0601602,-0.0238679,0.138353,0.051944,0,35200,13243,,,
+female_vs_male_both_belted_age_gap_le5,female,0,other_subject|driver_x=1,1.00442,0.906624,1.11639,-0.00442201,-0.116387,0.0933756,0.062394,0,35200,13243,,,
+female_vs_male_both_belted_age_gap_le5,female,0,other_subject|driver_x=0,1.10025,1.03242,1.17239,-0.100248,-0.172388,-0.0324162,0.0398836,0,35200,13243,,,
+female_vs_male_both_belted_age_gap_le5,female,0,combined (inverse-variance weighted),1.03057,0.99673,1.0659,-0.0305699,-0.0659028,0.00327047,,0,35200,13243,0.995974,1.06745,
+motorcycle_helmet,helmet worn,0,driver_subject|other_x=1,0.70464,0.575363,0.848507,0.29536,0.151493,0.424637,0.119534,0,4735,4482,,,
+motorcycle_helmet,helmet worn,0,driver_subject|other_x=0,0.81025,0.642509,1.02412,0.18975,-0.0241235,0.357491,0.152965,0,4735,4482,,,
+motorcycle_helmet,helmet worn,0,other_subject|driver_x=1,0.705152,0.557956,0.882999,0.294848,0.117001,0.442044,0.153263,0,4735,4482,,,
+motorcycle_helmet,helmet worn,0,other_subject|driver_x=0,0.613241,0.502992,0.733412,0.386759,0.266588,0.497008,0.119151,0,4735,4482,,,
+motorcycle_helmet,helmet worn,0,combined (inverse-variance weighted),0.692919,0.598482,0.794025,0.307081,0.205975,0.401518,,0,4735,4482,0.604109,0.793887,
