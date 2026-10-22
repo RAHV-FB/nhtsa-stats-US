@@ -1,0 +1,23 @@
+{
+ "table": "simulation/coverage_doubling_demo.csv",
+ "description": "Why doubling units does not double coverage: coverage at u and 2u for the saturating and capped-linear forms (dimensionless illustration)",
+ "population": "",
+ "unit": "units (dimensionless)",
+ "outcome": "",
+ "method": "",
+ "inputs": [],
+ "rows": 9,
+ "columns": [
+  "form",
+  "units",
+  "coverage",
+  "coverage_at_double_units",
+  "doubling_ratio",
+  "marginal_coverage_per_extra_unit",
+  "kind",
+  "note"
+ ],
+ "module": "nhtsa_stats.simulation.engine",
+ "git_commit": "a49b126-dirty",
+ "generated_utc": "2026-10-22T18:44:10Z"
+}

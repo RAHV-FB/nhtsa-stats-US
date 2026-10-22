@@ -1,0 +1,33 @@
+{
+ "table": "simulation/segment_overlap.csv",
+ "description": "Observed pairwise overlap of target segments (deaths/year), the basis for combining interventions without double counting",
+ "population": "FARS fatal crashes and deaths 2022-2024 (census); CRSS police-reported crashes 2022-2024 (sample)",
+ "unit": "segment pair",
+ "outcome": "",
+ "method": "",
+ "inputs": [
+  "data/processed/fars_crash.parquet",
+  "data/processed/fars_person.parquet",
+  "data/processed/crss_crash.parquet",
+  "data/processed/crss_person.parquet",
+  "outputs/tables/severity/*.csv",
+  "outputs/tables/matched/belt_effect.csv"
+ ],
+ "rows": 10,
+ "columns": [
+  "segment_a",
+  "segment_b",
+  "deaths_a",
+  "deaths_b",
+  "deaths_both",
+  "deaths_either",
+  "share_of_a_also_in_b",
+  "share_of_b_also_in_a",
+  "nested",
+  "kind",
+  "note"
+ ],
+ "module": "nhtsa_stats.simulation.engine",
+ "git_commit": "a49b126-dirty",
+ "generated_utc": "2026-10-22T18:44:10Z"
+}

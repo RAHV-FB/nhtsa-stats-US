@@ -1,0 +1,57 @@
+outcome,stage,model,params,valid_log_loss_w,valid_auroc_w,valid_ap_w,valid_brier_skill_w,valid_oe_w,chosen
+fatal,pre_crash,logit_main,{'C': 100.0},0.0345449,0.807886,0.0635009,0.0290885,1.13608,True
+fatal,pre_crash,logit_l2,{'C': 0.0001},0.0394329,0.732149,0.0232716,0.000748723,1.18853,False
+fatal,pre_crash,logit_l2,{'C': 0.001},0.0375246,0.775317,0.0344283,0.00550854,1.17635,False
+fatal,pre_crash,logit_l2,{'C': 0.01},0.0349852,0.8118,0.0585178,0.0206595,1.15328,False
+fatal,pre_crash,logit_l2,{'C': 0.1},0.0345218,0.810195,0.0635243,0.028645,1.13968,True
+fatal,pre_crash,logit_l2,{'C': 1.0},0.0345333,0.808228,0.063955,0.0293679,1.13709,False
+fatal,pre_crash,logit_l2,{'C': 10.0},0.0345423,0.807916,0.0636126,0.0292075,1.13633,False
+fatal,pre_crash,logit_interact,{'C': 100.0},0.034325,0.813172,0.0685186,0.0309349,1.13391,True
+fatal,pre_crash,hgb,"{'learning_rate': 0.05, 'max_leaf_nodes': 15, 'min_samples_leaf': 100, 'n_iter': 343}",0.0335393,0.835231,0.0781294,0.0362012,1.13924,False
+fatal,pre_crash,hgb,"{'learning_rate': 0.05, 'max_leaf_nodes': 15, 'min_samples_leaf': 400, 'n_iter': 265}",0.0335217,0.834942,0.0822702,0.036596,1.14396,False
+fatal,pre_crash,hgb,"{'learning_rate': 0.05, 'max_leaf_nodes': 31, 'min_samples_leaf': 100, 'n_iter': 176}",0.0334566,0.837251,0.0811619,0.0366247,1.15326,True
+fatal,pre_crash,hgb,"{'learning_rate': 0.05, 'max_leaf_nodes': 31, 'min_samples_leaf': 400, 'n_iter': 255}",0.0335406,0.833882,0.0796631,0.0363848,1.14015,False
+fatal,pre_crash,rf,{'min_samples_leaf': 50},0.0341768,0.833147,0.0593777,0.0216779,1.14377,True
+fatal,pre_crash,rf,{'min_samples_leaf': 200},0.0347597,0.828429,0.0533132,0.0166722,1.15133,False
+fatal,pre_crash+circumstance,logit_main,{'C': 100.0},0.0302902,0.888961,0.130288,0.0694827,1.11094,True
+fatal,pre_crash+circumstance,logit_l2,{'C': 0.0001},0.0392732,0.783331,0.0252951,0.00103715,1.189,False
+fatal,pre_crash+circumstance,logit_l2,{'C': 0.001},0.0366194,0.833906,0.0416706,0.00782364,1.17976,False
+fatal,pre_crash+circumstance,logit_l2,{'C': 0.01},0.0320079,0.885273,0.107383,0.0406489,1.15649,False
+fatal,pre_crash+circumstance,logit_l2,{'C': 0.1},0.0304117,0.889779,0.128147,0.0667791,1.12281,False
+fatal,pre_crash+circumstance,logit_l2,{'C': 1.0},0.0302906,0.889279,0.130495,0.0695278,1.11305,False
+fatal,pre_crash+circumstance,logit_l2,{'C': 10.0},0.0302874,0.888993,0.130611,0.0696438,1.11135,True
+fatal,pre_crash+circumstance,logit_interact,{'C': 100.0},0.0299878,0.892859,0.140214,0.0749526,1.11028,True
+fatal,pre_crash+circumstance,hgb,"{'learning_rate': 0.05, 'max_leaf_nodes': 15, 'min_samples_leaf': 100, 'n_iter': 261}",0.028877,0.911639,0.16088,0.0871583,1.12008,False
+fatal,pre_crash+circumstance,hgb,"{'learning_rate': 0.05, 'max_leaf_nodes': 15, 'min_samples_leaf': 400, 'n_iter': 305}",0.0288193,0.912698,0.160814,0.0873415,1.10898,False
+fatal,pre_crash+circumstance,hgb,"{'learning_rate': 0.05, 'max_leaf_nodes': 31, 'min_samples_leaf': 100, 'n_iter': 218}",0.0287678,0.913037,0.160451,0.0877915,1.11463,False
+fatal,pre_crash+circumstance,hgb,"{'learning_rate': 0.05, 'max_leaf_nodes': 31, 'min_samples_leaf': 400, 'n_iter': 204}",0.0287309,0.912407,0.163153,0.0884217,1.11391,True
+fatal,pre_crash+circumstance,rf,{'min_samples_leaf': 50},0.0305182,0.9032,0.123882,0.0503982,1.12614,True
+fatal,pre_crash+circumstance,rf,{'min_samples_leaf': 200},0.0318682,0.896077,0.0910921,0.0317289,1.14012,False
+ka,pre_crash,logit_main,{'C': 100.0},0.130026,0.728882,0.15834,0.0639006,0.99505,True
+ka,pre_crash,logit_l2,{'C': 0.0001},0.1426,0.670226,0.077418,0.0061453,1.02882,False
+ka,pre_crash,logit_l2,{'C': 0.001},0.135259,0.72172,0.138214,0.0301861,1.01241,False
+ka,pre_crash,logit_l2,{'C': 0.01},0.130439,0.729396,0.15817,0.0606868,0.997928,False
+ka,pre_crash,logit_l2,{'C': 0.1},0.130048,0.729004,0.158611,0.0638112,0.995261,False
+ka,pre_crash,logit_l2,{'C': 1.0},0.130024,0.728892,0.1585,0.0639613,0.995112,True
+ka,pre_crash,logit_l2,{'C': 10.0},0.130026,0.728884,0.158382,0.06391,0.995057,False
+ka,pre_crash,logit_interact,{'C': 100.0},0.129699,0.731776,0.160379,0.0651987,0.995945,True
+ka,pre_crash,hgb,"{'learning_rate': 0.05, 'max_leaf_nodes': 15, 'min_samples_leaf': 100, 'n_iter': 446}",0.126864,0.757984,0.175806,0.0742944,0.994625,False
+ka,pre_crash,hgb,"{'learning_rate': 0.05, 'max_leaf_nodes': 15, 'min_samples_leaf': 400, 'n_iter': 523}",0.126648,0.757985,0.178201,0.0756064,0.992564,True
+ka,pre_crash,hgb,"{'learning_rate': 0.05, 'max_leaf_nodes': 31, 'min_samples_leaf': 100, 'n_iter': 190}",0.12704,0.755713,0.176421,0.0741971,0.994089,False
+ka,pre_crash,hgb,"{'learning_rate': 0.05, 'max_leaf_nodes': 31, 'min_samples_leaf': 400, 'n_iter': 271}",0.12685,0.756786,0.175659,0.0744186,0.990317,False
+ka,pre_crash,rf,{'min_samples_leaf': 50},0.128914,0.750907,0.16588,0.060625,1.00164,True
+ka,pre_crash,rf,{'min_samples_leaf': 200},0.130767,0.743515,0.145411,0.0499017,1.00875,False
+ka,pre_crash+circumstance,logit_main,{'C': 100.0},0.117001,0.824227,0.23388,0.115837,0.990689,True
+ka,pre_crash+circumstance,logit_l2,{'C': 0.0001},0.140893,0.730877,0.0912732,0.00979717,1.03004,False
+ka,pre_crash+circumstance,logit_l2,{'C': 0.001},0.128642,0.804074,0.182646,0.0498853,1.01685,False
+ka,pre_crash+circumstance,logit_l2,{'C': 0.01},0.118337,0.824712,0.230247,0.107626,0.998807,False
+ka,pre_crash+circumstance,logit_l2,{'C': 0.1},0.11711,0.824527,0.233208,0.115136,0.991772,False
+ka,pre_crash+circumstance,logit_l2,{'C': 1.0},0.117002,0.824278,0.234044,0.115908,0.990875,False
+ka,pre_crash+circumstance,logit_l2,{'C': 10.0},0.117,0.824233,0.233924,0.115853,0.990709,True
+ka,pre_crash+circumstance,logit_interact,{'C': 100.0},0.116583,0.825924,0.239556,0.118573,0.991079,True
+ka,pre_crash+circumstance,hgb,"{'learning_rate': 0.05, 'max_leaf_nodes': 15, 'min_samples_leaf': 100, 'n_iter': 499}",0.112715,0.845174,0.266263,0.136686,0.979691,False
+ka,pre_crash+circumstance,hgb,"{'learning_rate': 0.05, 'max_leaf_nodes': 15, 'min_samples_leaf': 400, 'n_iter': 482}",0.112615,0.845593,0.267357,0.137152,0.979423,True
+ka,pre_crash+circumstance,hgb,"{'learning_rate': 0.05, 'max_leaf_nodes': 31, 'min_samples_leaf': 100, 'n_iter': 466}",0.112827,0.844321,0.263925,0.135366,0.972198,False
+ka,pre_crash+circumstance,hgb,"{'learning_rate': 0.05, 'max_leaf_nodes': 31, 'min_samples_leaf': 400, 'n_iter': 412}",0.112787,0.844307,0.264761,0.136216,0.975714,False
+ka,pre_crash+circumstance,rf,{'min_samples_leaf': 50},0.116391,0.840032,0.245055,0.108378,0.994512,True
+ka,pre_crash+circumstance,rf,{'min_samples_leaf': 200},0.119773,0.832021,0.20607,0.0867884,1.00361,False

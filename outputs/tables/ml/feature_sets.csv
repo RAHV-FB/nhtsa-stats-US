@@ -1,0 +1,69 @@
+stage,feature,registry_variable,registry_timing,registry_note,type,declared_levels
+pre_crash,region,region,pre_crash,,categorical,south|northeast|midwest|west
+pre_crash,urbanicity,urbanicity,pre_crash,CRSS area-level (PSU) urban/rural,categorical,urban|rural
+pre_crash,tod,tod,pre_crash,,categorical,10-15|06-09|16-19|20-23|00-05|unknown
+pre_crash,weekend,weekend,pre_crash,,tri-state yes/no/unknown,no|yes|unknown
+pre_crash,light,light,pre_crash,,categorical,daylight|dawn_dusk|dark_lighted|dark_not_lighted|dark_unknown_lighting|unknown
+pre_crash,weather,weather,pre_crash,,categorical,clear|cloudy|rain|snow_sleet|fog|other|unknown
+pre_crash,surface,surface,pre_crash,,categorical,dry|wet|snow_ice|other|unknown
+pre_crash,speed_limit,speed_limit,pre_crash,,categorical,30-35|<=25|40-45|50-55|60-65|70+|none_nontrafficway|unknown
+pre_crash,interstate,interstate,pre_crash,,tri-state yes/no/unknown,no|yes|unknown
+pre_crash,junction,junction,pre_crash,,categorical,non_junction|intersection|driveway|interchange|other|unknown
+pre_crash,work_zone,work_zone,pre_crash,,tri-state yes/no/unknown,no|yes|unknown
+pre_crash,young_driver,young_driver,pre_crash,,tri-state yes/no/unknown,no|yes|unknown
+pre_crash,older_driver,older_driver,pre_crash,,tri-state yes/no/unknown,no|yes|unknown
+pre_crash,any_motorcycle,any_motorcycle,pre_crash,,tri-state yes/no/unknown,no|yes|unknown
+pre_crash,any_heavy_truck,any_heavy_truck,pre_crash,,tri-state yes/no/unknown,no|yes|unknown
+pre_crash,speeding,speeding,pre_crash,police judgement recorded after the crash,tri-state yes/no/unknown,no|yes|unknown
+pre_crash,alcohol_im,alcohol_im,pre_crash,NHTSA multiple-imputation-based single imputation,tri-state yes/no/unknown,no|yes|unknown
+pre_crash,speed_limit_mph,speed_limit,pre_crash,,numeric (+ missing indicator),
+pre_crash,oldest_vehicle_age,oldest_vehicle_age,pre_crash,,numeric (+ missing indicator),
+pre_crash+circumstance,region,region,pre_crash,,categorical,south|northeast|midwest|west
+pre_crash+circumstance,urbanicity,urbanicity,pre_crash,CRSS area-level (PSU) urban/rural,categorical,urban|rural
+pre_crash+circumstance,tod,tod,pre_crash,,categorical,10-15|06-09|16-19|20-23|00-05|unknown
+pre_crash+circumstance,weekend,weekend,pre_crash,,tri-state yes/no/unknown,no|yes|unknown
+pre_crash+circumstance,light,light,pre_crash,,categorical,daylight|dawn_dusk|dark_lighted|dark_not_lighted|dark_unknown_lighting|unknown
+pre_crash+circumstance,weather,weather,pre_crash,,categorical,clear|cloudy|rain|snow_sleet|fog|other|unknown
+pre_crash+circumstance,surface,surface,pre_crash,,categorical,dry|wet|snow_ice|other|unknown
+pre_crash+circumstance,speed_limit,speed_limit,pre_crash,,categorical,30-35|<=25|40-45|50-55|60-65|70+|none_nontrafficway|unknown
+pre_crash+circumstance,interstate,interstate,pre_crash,,tri-state yes/no/unknown,no|yes|unknown
+pre_crash+circumstance,junction,junction,pre_crash,,categorical,non_junction|intersection|driveway|interchange|other|unknown
+pre_crash+circumstance,work_zone,work_zone,pre_crash,,tri-state yes/no/unknown,no|yes|unknown
+pre_crash+circumstance,young_driver,young_driver,pre_crash,,tri-state yes/no/unknown,no|yes|unknown
+pre_crash+circumstance,older_driver,older_driver,pre_crash,,tri-state yes/no/unknown,no|yes|unknown
+pre_crash+circumstance,any_motorcycle,any_motorcycle,pre_crash,,tri-state yes/no/unknown,no|yes|unknown
+pre_crash+circumstance,any_heavy_truck,any_heavy_truck,pre_crash,,tri-state yes/no/unknown,no|yes|unknown
+pre_crash+circumstance,speeding,speeding,pre_crash,police judgement recorded after the crash,tri-state yes/no/unknown,no|yes|unknown
+pre_crash+circumstance,alcohol_im,alcohol_im,pre_crash,NHTSA multiple-imputation-based single imputation,tri-state yes/no/unknown,no|yes|unknown
+pre_crash+circumstance,crash_type,crash_type,crash_circumstance,,categorical,mv_rear_end|mv_angle|mv_sideswipe|mv_head_on|mv_other|sv_on_roadway|sv_off_roadway|sv_rollover_first|pedestrian|cyclist
+pre_crash+circumstance,n_vehicles,n_vehicles,crash_circumstance,,categorical,2|1|3+
+pre_crash+circumstance,speed_limit_mph,speed_limit,pre_crash,,numeric (+ missing indicator),
+pre_crash+circumstance,oldest_vehicle_age,oldest_vehicle_age,pre_crash,,numeric (+ missing indicator),
+excluded,YEAR,,,calendar year: not a feature under temporal validation,,
+excluded,hit_and_run,,,registered crash_circumstance but is driver behaviour after the crash,,
+excluded,fatal,,,outcome,,
+excluded,ka,,,outcome,,
+excluded,injury,,,outcome,,
+excluded,kabco,,,outcome,,
+excluded,fatal_cc,,,outcome (complete-case),,
+excluded,ka_cc,,,outcome (complete-case),,
+excluded,fatal_im,,,outcome,,
+excluded,ka_im,,,outcome,,
+excluded,n_killed,,,outcome count,,
+excluded,n_ka,,,outcome count,,
+excluded,n_injured,,,outcome count,,
+excluded,n_sev_unknown,,,outcome-derived,,
+excluded,n_sev_injured_unknown,,,outcome-derived,,
+excluded,NUM_INJ,,,outcome count,,
+excluded,MAX_SEV,,,outcome,,
+excluded,MAXSEV_IM,,,outcome (imputed),,
+excluded,STRATUM,,,"CRSS sampling stratum, assigned from injury severity",,
+excluded,WEIGHT,,,design,,
+excluded,PSUSTRAT,,,design,,
+excluded,PSU_VAR,,,design,,
+excluded,PSU,,,design,,
+excluded,PJ,,,design,,
+excluded,case_id,,,identifier,,
+excluded,rollover_any,,,post-crash consequence,,
+excluded,fire_any,,,post-crash consequence,,
+excluded,towed_any,,,post-crash consequence,,

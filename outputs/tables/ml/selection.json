@@ -1,0 +1,34 @@
+{
+ "fatal|pre_crash": {
+  "selected": "hgb",
+  "rule": "first of ['logit_main', 'logit_l2', 'logit_interact', 'hgb', 'rf'] with 2022 weighted log loss <= best x 1.01 and weighted AUROC >= best - 0.005",
+  "best_valid_log_loss": 0.03345658881463098,
+  "best_valid_auroc": 0.8372513778331651,
+  "selected_valid_log_loss": 0.03345658881463098,
+  "selected_valid_auroc": 0.8372513778331651
+ },
+ "fatal|pre_crash+circumstance": {
+  "selected": "hgb",
+  "rule": "first of ['logit_main', 'logit_l2', 'logit_interact', 'hgb', 'rf'] with 2022 weighted log loss <= best x 1.01 and weighted AUROC >= best - 0.005",
+  "best_valid_log_loss": 0.028730906912221316,
+  "best_valid_auroc": 0.9124068812311438,
+  "selected_valid_log_loss": 0.028730906912221316,
+  "selected_valid_auroc": 0.9124068812311438
+ },
+ "ka|pre_crash": {
+  "selected": "hgb",
+  "rule": "first of ['logit_main', 'logit_l2', 'logit_interact', 'hgb', 'rf'] with 2022 weighted log loss <= best x 1.01 and weighted AUROC >= best - 0.005",
+  "best_valid_log_loss": 0.1266484617701803,
+  "best_valid_auroc": 0.7579851431840758,
+  "selected_valid_log_loss": 0.1266484617701803,
+  "selected_valid_auroc": 0.7579851431840758
+ },
+ "ka|pre_crash+circumstance": {
+  "selected": "hgb",
+  "rule": "first of ['logit_main', 'logit_l2', 'logit_interact', 'hgb', 'rf'] with 2022 weighted log loss <= best x 1.01 and weighted AUROC >= best - 0.005",
+  "best_valid_log_loss": 0.11261499491478669,
+  "best_valid_auroc": 0.8455931271185717,
+  "selected_valid_log_loss": 0.11261499491478669,
+  "selected_valid_auroc": 0.8455931271185717
+ }
+}

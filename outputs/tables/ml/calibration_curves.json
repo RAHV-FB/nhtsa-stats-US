@@ -1,0 +1,27 @@
+{
+ "table": "ml/calibration_curves.csv",
+ "description": "Reliability curves on test: 20 equal-size risk groups",
+ "population": "CRSS police-reported crashes (all severities, national probability sample) with a determinable maximum severity; train 2016-2021, validation 2022, test 2023-2024",
+ "unit": "crash",
+ "outcome": "",
+ "method": "Weighted (WEIGHT) and unweighted metrics; 95% percentile CIs from 200 Rao-Wu rescaled bootstrap replicates of PSU_VAR within PSUSTRAT (seed config.RANDOM_SEED)",
+ "inputs": [
+  "data/processed/crss_crash.parquet"
+ ],
+ "rows": 800,
+ "columns": [
+  "outcome",
+  "stage",
+  "model",
+  "weighting",
+  "bin",
+  "share_of_crashes",
+  "mean_predicted",
+  "observed_rate",
+  "observed_low",
+  "observed_high"
+ ],
+ "module": "nhtsa_stats.models.severity_ml",
+ "git_commit": "a49b126-dirty",
+ "generated_utc": "2026-10-22T18:41:41Z"
+}

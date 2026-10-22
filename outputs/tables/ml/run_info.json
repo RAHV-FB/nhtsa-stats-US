@@ -1,0 +1,95 @@
+{
+ "runtime_seconds": 1084.9,
+ "n_boot": 200,
+ "seed": 20240601,
+ "train_years": [
+  2016,
+  2017,
+  2018,
+  2019,
+  2020,
+  2021
+ ],
+ "valid_years": [
+  2022
+ ],
+ "test_years": [
+  2023,
+  2024
+ ],
+ "outcome_definitions": {
+  "fatal": "MAXSEV_IM 4 (K) vs 0-3 (O/C/B/A); 5/6/8 excluded",
+  "ka": "MAXSEV_IM 3-4 (K or A) vs 0-2 (O/C/B); 5/6/8 excluded"
+ },
+ "rows": {
+  "fatal": {
+   "train": 311700,
+   "valid": 53828,
+   "test": 101480
+  },
+  "ka": {
+   "train": 311700,
+   "valid": 53828,
+   "test": 101480
+  }
+ },
+ "events": {
+  "fatal": {
+   "train": 6422,
+   "valid": 1301,
+   "test": 2235
+  },
+  "ka": {
+   "train": 39789,
+   "valid": 7180,
+   "test": 13376
+  }
+ },
+ "weighted_prevalence": {
+  "fatal": {
+   "train": 0.005562390267429443,
+   "valid": 0.006627307829014372,
+   "test": 0.0060161636539938345
+  },
+  "ka": {
+   "train": 0.03197049955706436,
+   "valid": 0.03313846356050975,
+   "test": 0.03134823151235947
+  }
+ },
+ "unweighted_prevalence": {
+  "fatal": {
+   "train": 0.02060314404876484,
+   "valid": 0.024169577171732185,
+   "test": 0.022024044146629878
+  },
+  "ka": {
+   "train": 0.12765158806544755,
+   "valid": 0.13338782789626216,
+   "test": 0.13180922349231375
+  }
+ },
+ "processed_file_has_fatal_cc": false,
+ "processed_file_mtime_utc": "2026-10-22T17:39:25Z",
+ "feature_unknown_shares": {
+  "region": 0.0,
+  "urbanicity": 0.0,
+  "tod": 0.005426520225248564,
+  "weekend": 0.0,
+  "light": 0.007038484582925545,
+  "weather": 0.042441998068201446,
+  "surface": 0.02916461439722981,
+  "speed_limit": 0.1386715793199472,
+  "interstate": 8.102466348111806e-05,
+  "junction": 0.04280874128185282,
+  "work_zone": 0.0,
+  "young_driver": 0.09647905192614815,
+  "older_driver": 0.09658353109747907,
+  "any_motorcycle": 0.0,
+  "any_heavy_truck": 0.0,
+  "speeding": 0.03536300115353534,
+  "alcohol_im": 0.0,
+  "crash_type": 0.0,
+  "n_vehicles": 0.0
+ }
+}

@@ -1,0 +1,34 @@
+{
+ "table": "simulation/threshold_conditional_on_empirical_estimates.csv",
+ "description": "HYPOTHETICAL: behaviour change needed per 1% of all deaths IF the Layer-A belt estimate / adjusted severity RRs were causal effects (severity pathway only)",
+ "population": "FARS fatal crashes and deaths 2022-2024 (census); CRSS police-reported crashes 2022-2024 (sample)",
+ "unit": "segment x empirical input",
+ "outcome": "",
+ "method": "",
+ "inputs": [
+  "data/processed/fars_crash.parquet",
+  "data/processed/fars_person.parquet",
+  "data/processed/crss_crash.parquet",
+  "data/processed/crss_person.parquet",
+  "outputs/tables/severity/*.csv",
+  "outputs/tables/matched/belt_effect.csv"
+ ],
+ "rows": 24,
+ "columns": [
+  "segment",
+  "empirical_input",
+  "input_point",
+  "input_value",
+  "required_quantity",
+  "required_value",
+  "reduction_of_all_deaths_pct",
+  "deaths_to_prevent_per_year",
+  "kind",
+  "assumptions",
+  "source",
+  "attainable"
+ ],
+ "module": "nhtsa_stats.simulation.engine",
+ "git_commit": "a49b126-dirty",
+ "generated_utc": "2026-10-22T18:44:10Z"
+}

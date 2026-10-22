@@ -1,0 +1,30 @@
+column,sources,tables,first_year,last_year,meaning,measures_intervention_or_cost
+ALC_STATUS,"CRSS,FARS",person,2016,2024,alcohol test given to a crash-involved person (post-crash; testing depends on injury severity) -- not roadside screening of the driving population,False
+ATST_TYP,"CRSS,FARS",person,2016,2024,type of alcohol test given to a crash-involved person (post-crash),False
+A_LIC_C,FARS,veh_aux,2016,2024,auxiliary licence compliance/status of a crash-involved driver,False
+A_LIC_S,FARS,veh_aux,2016,2024,auxiliary licence compliance/status of a crash-involved driver,False
+BACKUPCAMERA,"CRSS,FARS",vpicdecode,2016,2024,back-up camera fitted to the vehicle (VIN decode) -- not an enforcement camera,False
+BACKUPCAMERAID,"CRSS,FARS",vpicdecode,2016,2024,back-up camera fitted to the vehicle (VIN decode) -- not an enforcement camera,False
+BASEPRICE,"CRSS,FARS",vpicdecode,2016,2024,"vehicle base price decoded from the VIN (vPIC) -- a vehicle attribute, not a programme cost",False
+DRUGTST1,"CRSS,FARS",person,2016,2017,drug test type for a crash-involved person (post-crash),False
+DRUGTST2,"CRSS,FARS",person,2016,2017,drug test type for a crash-involved person (post-crash),False
+DRUGTST3,"CRSS,FARS",person,2016,2017,drug test type for a crash-involved person (post-crash),False
+DSTATUS,"CRSS,FARS",person,2016,2024,drug test status of a crash-involved person (post-crash),False
+EMER_USE,"CRSS,FARS","person,vehicle",2016,2024,emergency use of a vehicle at the time of the crash,False
+L_STATUS,FARS,vehicle,2016,2024,licence status of a crash-involved driver,False
+MVIOLATN,"CRSS,FARS",violatn,2016,2019,violations charged to a crash-involved driver (consequence of the crash; not enforcement intensity),False
+PEDESTRIANAUTOEMERGENCYBRAKING,"CRSS,FARS",vpicdecode,2016,2024,automatic emergency braking fitted to the vehicle (VIN decode),False
+PEDESTRIANAUTOEMERGENCYBRAKINGID,"CRSS,FARS",vpicdecode,2016,2024,automatic emergency braking fitted to the vehicle (VIN decode),False
+PREV_ACC,FARS,vehicle,2016,2024,prior convictions/suspensions/crashes of crash-involved drivers (FARS): driver history without an exposure denominator,False
+PREV_DWI,FARS,vehicle,2016,2024,prior convictions/suspensions/crashes of crash-involved drivers (FARS): driver history without an exposure denominator,False
+PREV_OTH,FARS,vehicle,2016,2024,prior convictions/suspensions/crashes of crash-involved drivers (FARS): driver history without an exposure denominator,False
+PREV_SPD,FARS,vehicle,2016,2024,prior convictions/suspensions/crashes of crash-involved drivers (FARS): driver history without an exposure denominator,False
+PREV_SUS,FARS,vehicle,2016,2017,prior convictions/suspensions/crashes of crash-involved drivers (FARS): driver history without an exposure denominator,False
+PREV_SUS1,FARS,vehicle,2018,2024,prior convictions/suspensions/crashes of crash-involved drivers (FARS): driver history without an exposure denominator,False
+PREV_SUS2,FARS,vehicle,2018,2024,prior convictions/suspensions/crashes of crash-involved drivers (FARS): driver history without an exposure denominator,False
+PREV_SUS3,FARS,vehicle,2018,2024,prior convictions/suspensions/crashes of crash-involved drivers (FARS): driver history without an exposure denominator,False
+REARAUTOMATICEMERGENCYBRAKING,"CRSS,FARS",vpicdecode,2016,2024,automatic emergency braking fitted to the vehicle (VIN decode),False
+REARAUTOMATICEMERGENCYBRAKINGID,"CRSS,FARS",vpicdecode,2016,2024,automatic emergency braking fitted to the vehicle (VIN decode),False
+SPEC_USE,"CRSS,FARS","person,vehicle",2016,2024,"vehicle in special use (e.g. police vehicle, taxi) -- not enforcement activity",False
+SP_JUR,FARS,accident,2016,2024,"special jurisdiction of the crash site (e.g. national park, military base)",False
+VIOLATION,"CRSS,FARS",violatn,2020,2024,violations charged to a crash-involved driver (consequence of the crash; not enforcement intensity),False

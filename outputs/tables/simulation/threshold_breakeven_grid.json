@@ -1,0 +1,29 @@
+{
+ "table": "simulation/threshold_breakeven_grid.csv",
+ "description": "HYPOTHETICAL: share of segment deaths that must be prevented when break-even requires R deaths prevented per year (R = annualised cost / user threshold)",
+ "population": "FARS fatal crashes and deaths 2022-2024 (census); CRSS police-reported crashes 2022-2024 (sample)",
+ "unit": "segment x R",
+ "outcome": "",
+ "method": "",
+ "inputs": [
+  "data/processed/fars_crash.parquet",
+  "data/processed/fars_person.parquet",
+  "data/processed/crss_crash.parquet",
+  "data/processed/crss_person.parquet",
+  "outputs/tables/severity/*.csv",
+  "outputs/tables/matched/belt_effect.csv"
+ ],
+ "rows": 50,
+ "columns": [
+  "segment",
+  "reliability",
+  "segment_deaths_per_year",
+  "required_deaths_prevented_per_year",
+  "required_share_of_segment_deaths",
+  "required_pct_of_all_deaths",
+  "kind"
+ ],
+ "module": "nhtsa_stats.simulation.engine",
+ "git_commit": "a49b126-dirty",
+ "generated_utc": "2026-10-22T18:44:10Z"
+}
