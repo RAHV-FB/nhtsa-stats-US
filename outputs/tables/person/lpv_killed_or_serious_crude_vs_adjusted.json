@@ -12,6 +12,7 @@
  "columns": [
   "population",
   "outcome",
+  "factor",
   "level",
   "n",
   "n_events",
@@ -26,7 +27,6 @@
   "crude_rr",
   "crude_rr_low",
   "crude_rr_high",
-  "factor",
   "A_adj_rate",
   "A_adj_rate_low",
   "A_adj_rate_high",
@@ -51,8 +51,8 @@
   "B_flag"
  ],
  "module": "nhtsa_stats.analysis.person",
- "git_commit": "aab9ff8-dirty",
- "generated_utc": "2026-10-22T17:33:16Z",
+ "git_commit": "13861a2-dirty",
+ "generated_utc": "2026-10-22T17:55:59Z",
  "n": 904846,
  "events": 49874,
  "params_A": 94,
