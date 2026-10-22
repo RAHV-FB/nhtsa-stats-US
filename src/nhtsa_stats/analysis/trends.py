@@ -89,7 +89,11 @@ from nhtsa_stats.analysis.survey import (
     svy_mean,
 )
 from nhtsa_stats.ingestion.cache import load_table
-from nhtsa_stats.processing.harmonize import MODEL_ALLOWED_TIMINGS, assert_no_leakage
+from nhtsa_stats.processing.harmonize import (
+    LPV_BODY_GROUPS,
+    MODEL_ALLOWED_TIMINGS,
+    assert_no_leakage,
+)
 from nhtsa_stats.reporting.io import save_json, save_table
 
 log = logging.getLogger(__name__)
@@ -125,7 +129,7 @@ FARS_INPUTS = [
     "data/processed/fars_person.parquet",
     "data/interim/FARS/midrvacc (multiply-imputed driver BAC, 10 implicates)",
 ]
-LPV_BODIES = ("car", "suv", "pickup", "van", "light_truck_other")
+LPV_BODIES = LPV_BODY_GROUPS
 
 
 # --------------------------------------------------------------------------------------
@@ -135,10 +139,10 @@ def load() -> tuple[pd.DataFrame, SurveyDesign]:
     """All CRSS crashes (including unknown severity) with the full design."""
     df, design = data.crss_crash(outcome=None, tri_state_cols=specs.CRASH_TRI)
     covs = COVARIATE_SETS["B"]
-    keep = [*covs, *EXTRA_FACTORS, "YEAR", "kabco", "fatal", "ka", "fatal_im", "night"]
+    keep = [*covs, *EXTRA_FACTORS, "YEAR", "kabco", "fatal", "ka", "fatal_cc", "night"]
     df = df[keep].copy()
     df["YEAR"] = df["YEAR"].astype(int)
-    for c in ("kabco", "fatal", "ka", "fatal_im", "night"):
+    for c in ("kabco", "fatal", "ka", "fatal_cc", "night"):
         df[c] = df[c].astype(float)
     df["speeding_type"] = df["speeding_type"].fillna("unknown")
     for c in [*covs, *EXTRA_FACTORS]:
@@ -1261,8 +1265,10 @@ def run(outcomes: Sequence[str] = OUTCOMES, sensitivity: bool = True) -> dict[st
             ),
             decompose(df, design, SPEEDING_BY_TYPE, "fatal", "sens_B_speeding_by_type"),
         ]
-        dfi, dsi = outcome_frame(df_all, design_all, "fatal_im")
-        sens_im = decompose(dfi, dsi, COVARIATE_SETS["B"], "fatal_im", "sens_B_outcome_MAXSEV_IM")
+        dfi, dsi = outcome_frame(df_all, design_all, "fatal_cc")
+        sens_im = decompose(
+            dfi, dsi, COVARIATE_SETS["B"], "fatal_cc", "sens_B_outcome_complete_case"
+        )
         decomp_tabs += [decomposition_table(d, design) for d in sens]
         decomp_tabs.append(decomposition_table(sens_im, dsi))
         for d in (sens[0], sens[-1]):
@@ -1321,7 +1327,7 @@ def run(outcomes: Sequence[str] = OUTCOMES, sensitivity: bool = True) -> dict[st
             "2016-19 and 2020-24 into composition and within-circumstance effects (both "
             "references and their average), plus sensitivity analyses",
             LIN_METHOD + "; separate period models; cross-period predictive margins",
-            "fatal; ka; fatal_im (sensitivity)",
+            "fatal; ka (NHTSA-imputed severity); fatal_cc (complete-case sensitivity)",
             dict(extra={"covariate_sets": SET_LABELS}),
         ),
         "decomposition_detailed_by_factor": (

@@ -29,11 +29,31 @@ def test_restraint_break_2016_none_code():
 def test_helmet_moves_from_rest_use_to_helm_use_in_2019():
     out = _apply(
         h.helmet_use(),
-        YEAR=[2017, 2017, 2018, 2019, 2019, 2019],
-        REST_USE=[5, 17, 3, 20, 20, 20],
-        HELM_USE=[None, None, None, 5, 17, 99],
+        YEAR=[2017, 2017, 2018, 2019, 2019, 2019, 2017],
+        REST_USE=[5, 17, 3, 20, 20, 20, 99],
+        HELM_USE=[None, None, None, 5, 17, 99, None],
+        # motorcycles, except the last row: a car occupant with unknown restraint (2017)
+        BODY_TYP=[80, 80, 80, 80, 80, 80, 4],
     )
-    assert out == ["helmet", "none", "not_applicable", "helmet", "none", "unknown"]
+    assert out == [
+        "helmet",
+        "none",
+        "not_applicable",
+        "helmet",
+        "none",
+        "unknown",
+        "not_applicable",
+    ]
+
+
+def test_restraint_kept_when_seat_unknown():
+    out = _apply(
+        h.restraint_in_belted_seat(),
+        REST_USE=[3, 20, 3, 3],
+        BODY_TYP=[4, 4, 4, 80],
+        SEAT_POS=[99, 98, 55, 11],
+    )
+    assert out == ["belted", "none", "not_applicable", "not_applicable"]
 
 
 def test_unknown_is_never_no():

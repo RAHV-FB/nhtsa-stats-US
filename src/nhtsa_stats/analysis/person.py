@@ -78,14 +78,14 @@ from nhtsa_stats.analysis.survey import (
     proportion_table,
     svy_total,
 )
-from nhtsa_stats.processing.harmonize import REGISTRY, assert_no_leakage
+from nhtsa_stats.processing.harmonize import LPV_BODY_GROUPS, REGISTRY, assert_no_leakage
 from nhtsa_stats.reporting.io import save_json, save_table
 
 log = logging.getLogger(__name__)
 MODULE = "person"
 OUTCOMES: tuple[str, ...] = ("killed", "killed_or_serious")
 OCCUPANT_PER_TYP: tuple[int, ...] = (1, 2, 9)
-LPV_BODIES: tuple[str, ...] = ("car", "suv", "pickup", "van", "light_truck_other")
+LPV_BODIES: tuple[str, ...] = LPV_BODY_GROUPS
 MIN_RESTRAINT_AGE = 8
 # Same tiny L2 penalty as the crash-level models (severity.RIDGE): keeps coefficients finite
 # for levels with zero events (e.g. occupants in pedestrian crashes) while shrinking any level

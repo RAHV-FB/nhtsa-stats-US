@@ -82,13 +82,14 @@ from statsmodels.discrete.conditional_models import ConditionalLogit
 from statsmodels.tools.sm_exceptions import ConvergenceWarning
 
 from nhtsa_stats import config
+from nhtsa_stats.processing import harmonize as h
 from nhtsa_stats.reporting.io import save_json, save_table
 
 log = logging.getLogger(__name__)
 MODULE = "matched"
 INPUT = "data/processed/fars_person.parquet"
 
-LPV_BODIES: tuple[str, ...] = ("car", "suv", "pickup", "van", "light_truck_other")
+LPV_BODIES: tuple[str, ...] = h.LPV_BODY_GROUPS
 ELIGIBLE_SEATS: tuple[str, ...] = ("front_left", "front_other", "second_row")
 OCCUPANT_PTYPES: tuple[str, ...] = ("driver", "passenger")
 MIN_AGE = 13

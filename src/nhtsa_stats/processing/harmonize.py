@@ -425,25 +425,36 @@ def restraint_in_belted_seat(
     From 2017 code 20 means "none used *or* not applicable", and from 2019 every motorcyclist has
     REST_USE = 20 (helmets moved to HELM_USE).  Belt information is therefore only meaningful for
     occupants of vehicles with BODY_TYP 1-79 (light vehicles, buses, trucks) seated in rows 1-4
-    (SEAT_POS 11-49); everyone else (motorcycles 80-89, other 90-97, cargo/exterior/trailing
-    positions 50-56, unknown body/seat) is ``not_applicable``.  See docs/audit/person_injury_restraint.md §4.6.
+    (SEAT_POS 11-49) or in an unrecorded seat (98/99: the occupant is inside the vehicle, so
+    the recorded belt use still applies); everyone else (motorcycles 80-89, other 90-97,
+    cargo/exterior/trailing positions 50-56, unknown body) is ``not_applicable``.  See
+    docs/audit/person_injury_restraint.md §4.6.
     """
-    eligible = pl.col(body_col).is_between(1, 79) & pl.col(seat_col).is_between(11, 49)
+    eligible = pl.col(body_col).is_between(1, 79) & (
+        pl.col(seat_col).is_between(11, 49) | pl.col(seat_col).is_in([98, 99])
+    )
     return pl.when(eligible).then(restraint_use(rest_col)).otherwise(pl.lit("not_applicable"))
 
 
 def helmet_use(
-    rest_col: str = "REST_USE", helm_col: str = "HELM_USE", year: str = "YEAR"
+    rest_col: str = "REST_USE",
+    helm_col: str = "HELM_USE",
+    year: str = "YEAR",
+    body_col: str = "BODY_TYP",
 ) -> pl.Expr:
     """Motorcycle helmet use harmonised across the 2019 move from REST_USE to HELM_USE.
 
     2016-2018 (REST_USE) and 2019+ (HELM_USE): 5 DOT-compliant helmet, 16 other helmet,
     19 helmet unknown if DOT-compliant -> helmet; 17 no helmet -> none; 29 / 98 / 99 ->
     unknown; everything else (20 not applicable, 96 non-occupant, belt codes) -> not_applicable.
+    Defined for motorcycle riders (BODY_TYP 80-89) only; before 2019 REST_USE 98/99 would
+    otherwise make every other occupant's helmet 'unknown'.
     """
     src = pl.when(pl.col(year) <= 2018).then(pl.col(rest_col)).otherwise(pl.col(helm_col))
     return (
-        pl.when(src.is_in([5, 16, 19]))
+        pl.when(~pl.col(body_col).is_between(80, 89))
+        .then(pl.lit("not_applicable"))
+        .when(src.is_in([5, 16, 19]))
         .then(pl.lit("helmet"))
         .when(src == 17)
         .then(pl.lit("none"))

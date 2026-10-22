@@ -514,8 +514,11 @@ def role_expr() -> pl.Expr:
             & pl.col("seat").is_in(["second_row", "third_row_plus"])
         )
         .then(pl.lit("rear_passenger"))
+        .when((pl.col("ptype") == "passenger") & (pl.col("seat") == "cargo_exterior_other"))
+        .then(pl.lit("cargo_exterior_passenger"))
+        # Seat not recorded (SEAT_POS 98/99, and a few passengers coded in the driver's seat).
         .when(pl.col("ptype") == "passenger")
-        .then(pl.lit("other_passenger"))
+        .then(pl.lit("passenger_seat_unknown"))
         .otherwise(pl.col("ptype"))
         .alias("role")
     )
