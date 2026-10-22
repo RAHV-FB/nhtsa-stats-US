@@ -27,12 +27,13 @@ import numpy as np
 import pandas as pd
 
 from nhtsa_stats.analysis import data
+from nhtsa_stats.processing import harmonize as h
 from nhtsa_stats.reporting.io import load_table, save_json, save_table
 
 log = logging.getLogger(__name__)
 MODULE = "policy"
 WINDOW = (2022, 2023, 2024)
-LPV = ["car", "suv", "pickup", "van", "light_truck_other"]
+LPV = list(h.LPV_BODY_GROUPS)
 
 NO_INTERVENTION_DATA = (
     "None. The 36 archives contain no records of cameras, enforcement intensity, checkpoints, roadside tests "

@@ -30,6 +30,7 @@ import pandas as pd
 from nhtsa_stats import config
 from nhtsa_stats.analysis import data, specs
 from nhtsa_stats.analysis.survey import logit_ci, svy_mean, svy_total
+from nhtsa_stats.processing import harmonize as h
 from nhtsa_stats.reporting.io import save_table
 
 log = logging.getLogger(__name__)
@@ -163,7 +164,7 @@ def fars_composition_by_year() -> pd.DataFrame:
     per = data.fars_person()
     killed = per[per["killed"] == 1].copy()
     occ_killed = killed[killed["ptype"].isin(["driver", "passenger"])]
-    lpv = occ_killed[occ_killed["body"].isin(["car", "suv", "pickup", "van", "light_truck_other"])]
+    lpv = occ_killed[occ_killed["body"].isin(h.LPV_BODY_GROUPS)]
     rows = []
     for y, g in crash.groupby("YEAR"):
         k = killed[killed["YEAR"] == y]

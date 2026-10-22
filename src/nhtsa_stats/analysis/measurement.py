@@ -37,6 +37,7 @@ from nhtsa_stats import config
 from nhtsa_stats.analysis import data
 from nhtsa_stats.analysis.survey import svy_mean
 from nhtsa_stats.ingestion.cache import load_table
+from nhtsa_stats.processing import harmonize as h
 from nhtsa_stats.reporting.io import save_table
 
 log = logging.getLogger(__name__)
@@ -48,15 +49,27 @@ CRASH_FIELDS = {
     "alcohol": "Alcohol involved (police-reported ALCOHOL)",
     "drugs": "Drug involvement (any driver, police-reported)",
     "distracted": "Distracted driver (any driver)",
-    "young_driver": "Driver 15-20 involved (age known)",
+    "young_driver": "Driver 15-20 involved (CRSS: NHTSA-imputed age)",
 }
 
 
+def observed_severity(max_sev: pd.Series) -> np.ndarray:
+    """Recorded (unimputed) maximum severity: 0-4, or 9 for unknown severity, else -1.
+
+    Recording completeness is stratified by the severity police actually recorded, with
+    unknown severity as its own stratum. Stratifying by imputed severity would move crashes of
+    unknown severity -- which also have the most unknown fields -- into the KABCO cells.
+    """
+    v = max_sev.to_numpy(float)
+    return np.where(np.isin(v, [0, 1, 2, 3, 4, 9]), v, -1).astype(int)
+
+
 def unknown_by_severity() -> pd.DataFrame:
-    df, design = data.crss_crash(outcome="kabco")
+    df, design = data.crss_crash(outcome=None)
+    sev = observed_severity(df["MAX_SEV"])
     rows = []
-    for k in range(5):
-        dom = (df["kabco"] == k).to_numpy()
+    for k in (0, 1, 2, 3, 4, 9):
+        dom = sev == k
         for var, label in CRASH_FIELDS.items():
             x = df[var].to_numpy(float)
             unk = svy_mean(design, np.isnan(x).astype(float), dom)
@@ -90,11 +103,14 @@ def unknown_by_severity() -> pd.DataFrame:
 
 
 def unknown_by_year() -> pd.DataFrame:
-    df, design = data.crss_crash(outcome="fatal")
+    # 'fatal' here is the recorded severity (MAX_SEV 4 vs 0-3), see observed_severity().
+    df, design = data.crss_crash(outcome=None)
+    sev = observed_severity(df["MAX_SEV"])
     rows = []
     for y in config.YEARS:
         for fat in (0, 1):
-            dom = ((df["YEAR"] == y) & (df["fatal"] == fat)).to_numpy()
+            in_sev = (sev == 4) if fat else np.isin(sev, [0, 1, 2, 3])
+            dom = (df["YEAR"] == y).to_numpy() & in_sev
             for var in [*CRASH_FIELDS, "alcohol_im"]:
                 x = df[var].to_numpy(float)
                 rows.append(
@@ -245,14 +261,13 @@ def police_vs_bac() -> pd.DataFrame:
 
 
 def restraint_reporting() -> pd.DataFrame:
-    df, design = data.crss_person(outcome="kabco")
-    lpv = (
-        df["body"].isin(["car", "suv", "pickup", "van", "light_truck_other"]).to_numpy()
-        & (df["age"] >= 13).to_numpy()
-    )
+    # Stratified by recorded person severity (INJ_SEV; 9 = unknown), see observed_severity().
+    df, design = data.crss_person(outcome=None)
+    sev = observed_severity(df["INJ_SEV"])
+    lpv = df["body"].isin(h.LPV_BODY_GROUPS).to_numpy() & (df["age"] >= 13).to_numpy()
     rows = []
-    for k in range(5):
-        dom = lpv & (df["kabco"] == k).to_numpy()
+    for k in (0, 1, 2, 3, 4, 9):
+        dom = lpv & (sev == k)
         r = df["restraint"].to_numpy()
         known = dom & np.isin(r, ["belted", "none"])
         rows.append(

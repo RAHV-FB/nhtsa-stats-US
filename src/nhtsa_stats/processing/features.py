@@ -41,6 +41,18 @@ HARM_EV_ROLLOVER = 1
 REL_ROAD_OFF = [2, 3, 4, 5, 6, 8, 10]
 
 
+def body_flag(yes: list[str], unknown: list[str]) -> pl.Expr:
+    """Tri-state 'any vehicle in body groups ``yes``' over a crash's vehicles."""
+    b = pl.col("body")
+    return (
+        pl.when(b.is_in(yes).any())
+        .then(pl.lit(1, dtype=pl.Int8))
+        .when(b.is_in(unknown).any() | b.is_null().any())
+        .then(pl.lit(None, dtype=pl.Int8))
+        .otherwise(pl.lit(0, dtype=pl.Int8))
+    )
+
+
 def any_flag(col: str) -> pl.Expr:
     """Tri-state 'any' aggregation (see module docstring)."""
     c = pl.col(col)
@@ -87,9 +99,11 @@ def vehicle_level(source: str, years: Sequence[int]) -> pl.DataFrame:
     dist = (
         dist.with_columns(pl.coalesce("DRDISTRACT", "MDRDSTRD").alias("code"))
         .with_columns(
-            pl.when(pl.col("code").is_in([0, 16]))
+            # 16 'no driver present / unknown if driver present' cannot be told apart from
+            # an unknown driver, so it is unknown rather than 'not distracted'.
+            pl.when(pl.col("code") == 0)
             .then(pl.lit(0, dtype=pl.Int8))
-            .when(pl.col("code").is_in([96, 99]) | pl.col("code").is_null())
+            .when(pl.col("code").is_in([16, 96, 99]) | pl.col("code").is_null())
             .then(pl.lit(None, dtype=pl.Int8))
             .otherwise(pl.lit(1, dtype=pl.Int8))
             .alias("distracted")
@@ -193,6 +207,7 @@ def person_level(source: str, years: Sequence[int]) -> pl.DataFrame:
         # year) whereas INJ_SEV falls 1-14% short, by a year-dependent amount. The INJ_SEV
         # versions are kept as complete-case sensitivity outcomes.
         p = p.with_columns(
+            h.age_years("AGE_IM").alias("age_im"),
             pl.col("killed").alias("killed_cc"),
             pl.col("killed_or_serious").alias("killed_or_serious_cc"),
         ).with_columns(
@@ -227,17 +242,15 @@ def crash_aggregates(source: str, veh: pl.DataFrame, per: pl.DataFrame) -> pl.Da
             any_flag("distracted"),
             any_flag("rollover").alias("rollover_any"),
             any_flag("fire").alias("fire_any"),
-            (pl.col("body") == "motorcycle").any().cast(pl.Int8).alias("any_motorcycle"),
-            pl.col("body")
-            .is_in(["medium_heavy_truck", "bus"])
-            .any()
-            .cast(pl.Int8)
-            .alias("any_heavy_truck"),
-            pl.col("body")
-            .is_in(["suv", "pickup", "van", "light_truck_other"])
-            .any()
-            .cast(pl.Int8)
-            .alias("any_light_truck"),
+            # Tri-state: a vehicle of unknown body type can neither confirm nor rule out the
+            # category, so a crash with no confirmed vehicle and an unknown one is unknown.
+            body_flag(["motorcycle"], h.BODY_UNKNOWN_FOR["motorcycle"]).alias("any_motorcycle"),
+            body_flag(["medium_heavy_truck", "bus"], h.BODY_UNKNOWN_FOR["heavy"]).alias(
+                "any_heavy_truck"
+            ),
+            body_flag(
+                ["suv", "pickup", "van", "light_truck_other"], h.BODY_UNKNOWN_FOR["light_truck"]
+            ).alias("any_light_truck"),
             pl.col("speed_limit_mph").max().alias("speed_limit_mph"),
             pl.col("speed_limit_zero").any().alias("speed_limit_zero"),
             # Surface condition: first vehicle with a known value (VEH_NO order).
@@ -248,27 +261,33 @@ def crash_aggregates(source: str, veh: pl.DataFrame, per: pl.DataFrame) -> pl.Da
         )
     )
     drivers = per.filter(pl.col("PER_TYP").is_in(DRIVER_TYPES))
+    sev = "INJSEV_IM" if source == "CRSS" else "INJ_SEV"
+    # CRSS driver-age flags use NHTSA's imputed age: unknown reported age is mostly a driver
+    # who fled (hit-and-run, a post-crash behaviour), so an 'unknown' level would adjust for
+    # it by proxy. FARS has no imputed age and keeps the reported one.
+    age = "age_im" if source == "CRSS" else "age"
     pagg = per.group_by(kc).agg(
         (pl.col("PER_TYP") == 5).any().cast(pl.Int8).alias("any_pedestrian"),
         pl.col("PER_TYP").is_in([6, 7]).any().cast(pl.Int8).alias("any_cyclist"),
         pl.col("PER_TYP").is_in(NONMOTORIST_TYPES).any().cast(pl.Int8).alias("any_nonmotorist"),
-        (pl.col("INJ_SEV") == 4).sum().alias("n_killed"),
-        pl.col("INJ_SEV").is_in([3, 4]).sum().alias("n_ka"),
+        # CRSS counts use the imputed severity so they agree with the crash outcomes.
+        (pl.col(sev) == 4).sum().alias("n_killed"),
+        pl.col(sev).is_in([3, 4]).sum().alias("n_ka"),
         (pl.col("INJ_SEV") == 9).sum().alias("n_sev_unknown"),
         (pl.col("INJ_SEV") == 5).sum().alias("n_sev_injured_unknown"),
         pl.col("PER_TYP").is_in(OCCUPANT_TYPES).sum().alias("n_occupants"),
     )
     dagg = (
         drivers.with_columns(
-            pl.when(pl.col("age").is_between(15, 20))
+            pl.when(pl.col(age).is_between(15, 20))
             .then(1)
-            .when(pl.col("age").is_not_null())
+            .when(pl.col(age).is_not_null())
             .then(0)
             .cast(pl.Int8)
             .alias("young"),
-            pl.when(pl.col("age") >= 65)
+            pl.when(pl.col(age) >= 65)
             .then(1)
-            .when(pl.col("age").is_not_null())
+            .when(pl.col(age).is_not_null())
             .then(0)
             .cast(pl.Int8)
             .alias("older"),

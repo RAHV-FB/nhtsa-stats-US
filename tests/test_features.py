@@ -7,7 +7,7 @@ import pytest
 
 from nhtsa_stats import config
 from nhtsa_stats.processing import harmonize as h
-from nhtsa_stats.processing.features import any_flag
+from nhtsa_stats.processing.features import any_flag, body_flag
 
 
 def _apply(expr: pl.Expr, **cols) -> list:
@@ -37,7 +37,8 @@ def test_helmet_moves_from_rest_use_to_helm_use_in_2019():
 
 
 def test_unknown_is_never_no():
-    assert _apply(h.speeding_related(), SPEEDREL=[0, 3, 9, 8]) == [0, 1, None, 0]
+    # SPEEDREL 8 (no driver present / unknown if driver present) is unknown, not "no"
+    assert _apply(h.speeding_related(), SPEEDREL=[0, 3, 9, 8]) == [0, 1, None, None]
     assert _apply(h.police_reported("DRINKING"), DRINKING=[0, 1, 8, 9]) == [0, 1, None, None]
     assert _apply(h.fatal("INJ_SEV"), INJ_SEV=[4, 3, 5, 6, 9]) == [1, 0, None, None, None]
 
@@ -54,6 +55,32 @@ def test_body_groups_absorb_2017_pickup_merge():
     ]
 
 
+def test_unknown_body_codes_stay_unknown():
+    assert _apply(h.body_group(), BODY_TYP=[48, 49, 73, 79, 78, 98]) == [
+        "light_truck_other",
+        "light_unknown_type",
+        "truck_unknown_type",
+        "truck_unknown_type",
+        "medium_heavy_truck",
+        "unknown",
+    ]
+
+
+def test_body_flag_is_tri_state():
+    df = pl.DataFrame(
+        {
+            "g": [1, 1, 2, 2, 3, 3, 4],
+            "body": ["car", "motorcycle", "car", "truck_unknown_type", "car", "unknown", "car"],
+        }
+    )
+    out = df.group_by("g", maintain_order=True).agg(
+        body_flag(["motorcycle"], h.BODY_UNKNOWN_FOR["motorcycle"]).alias("m"),
+        body_flag(["medium_heavy_truck"], h.BODY_UNKNOWN_FOR["heavy"]).alias("h"),
+    )
+    assert out["m"].to_list() == [1, 0, None, 0]
+    assert out["h"].to_list() == [0, None, None, 0]
+
+
 def test_tri_state_any_flag():
     df = pl.DataFrame({"g": [1, 1, 2, 2, 3, 3], "x": [0, 1, 0, 0, 0, None]})
     out = df.group_by("g", maintain_order=True).agg(any_flag("x"))["x"].to_list()
@@ -63,6 +90,8 @@ def test_tri_state_any_flag():
 def test_leakage_registry_blocks_post_crash():
     with pytest.raises(ValueError, match="ejected"):
         h.assert_no_leakage(["light", "ejected"])
+    with pytest.raises(ValueError, match="hit_and_run"):
+        h.assert_no_leakage(["light", "hit_and_run"])
     with pytest.raises(ValueError, match="unregistered_thing"):
         h.assert_no_leakage(["unregistered_thing"])
     h.assert_no_leakage(["light", "speeding", "crash_type"])

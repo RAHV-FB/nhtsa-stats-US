@@ -237,11 +237,27 @@ BODY_GROUPS: dict[str, list[int]] = {
     "suv": [14, 15, 16, 19],
     "van": [20, 21, 22, 28, 29],
     "pickup": [30, 31, 32, 33, 34, 39],
-    "light_truck_other": [40, 41, 42, 45, 48, 49],
+    "light_truck_other": [40, 41, 42, 45, 48],
+    # 49 'unknown light vehicle type': a light vehicle whose type is unknown. Kept apart from
+    # the known groups -- its use rises from 0.7% to ~3.7% of light-vehicle occupants in CRSS
+    # from 2018 (docs/audit/vehicle_roadway.md).
+    "light_unknown_type": [49],
     "bus": [50, 51, 52, 55, 58, 59],
     "medium_heavy_truck": [60, 61, 62, 63, 64, 66, 67, 71, 72, 78],
     "motorcycle": [80, 81, 82, 83, 84, 85, 86, 87, 88, 89],
-    "other": [65, 73, 79, 90, 91, 92, 93, 94, 95, 96, 97],
+    # 73 camper/motorhome of unknown truck type, 79 unknown truck type (light/medium/heavy).
+    "truck_unknown_type": [73, 79],
+    "other": [65, 90, 91, 92, 93, 94, 95, 96, 97],
+}
+
+# Light passenger vehicles (BODY_TYP 1-49), including those whose light-vehicle type is unknown.
+LPV_BODY_GROUPS = ("car", "suv", "pickup", "van", "light_truck_other", "light_unknown_type")
+
+# Body groups that cannot rule a vehicle in or out of a category, for tri-state crash flags.
+BODY_UNKNOWN_FOR = {
+    "motorcycle": ["unknown"],
+    "heavy": ["unknown", "truck_unknown_type"],
+    "light_truck": ["unknown", "light_unknown_type", "truck_unknown_type"],
 }
 
 
@@ -287,16 +303,15 @@ def vehicle_age_band(age: str = "veh_age") -> pl.Expr:
 def speeding_related(col: str = "SPEEDREL") -> pl.Expr:
     """SPEEDREL: 0 no; 2 racing, 3 exceeded limit, 4 too fast for conditions, 5 specifics
     unknown (all = yes); 8 no driver present / unknown if driver present; 9 unknown.
-    Code 8 is treated as 'no' (no driver to speed is the dominant case) -- see harmonisation
-    doc; sensitivity analyses treat it as unknown."""
-    return binary(col, yes=[2, 3, 4, 5], no=[0, 8])
+    Code 8 is unknown: it cannot distinguish a driverless vehicle from an unknown driver."""
+    return binary(col, yes=[2, 3, 4, 5], no=[0])
 
 
 def speeding_type(col: str = "SPEEDREL") -> pl.Expr:
     return _map(
         col,
         {
-            "no": [0, 8],
+            "no": [0],
             "exceeded_limit_or_racing": [2, 3],
             "too_fast_for_conditions": [4],
             "speeding_unspecified": [5],
@@ -522,7 +537,7 @@ REGISTRY: dict[str, VarInfo] = {
     "drugs": VarInfo("pre_crash", "crash", "police-reported; very incomplete"),
     "distracted": VarInfo("pre_crash", "crash", "police-reported"),
     "hit_and_run": VarInfo(
-        "crash_circumstance", "crash", "driver behaviour after the crash; excluded from models"
+        "post_crash", "crash", "driver behaviour after the crash (leaving the scene)"
     ),
     "any_motorcycle": VarInfo("pre_crash", "crash"),
     "any_heavy_truck": VarInfo("pre_crash", "crash"),
