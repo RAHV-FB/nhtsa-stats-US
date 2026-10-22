@@ -109,9 +109,12 @@ Consequences are quantified in `outputs/tables/measurement/` and summarised in
 ## 6. FARS and CRSS: sampling frames and the no-pooling rule
 
 FARS is a census of fatal crashes; CRSS is a probability sample of police-reported crashes
-(including fatal ones). CRSS-weighted fatal crashes (29,200–37,800 per year) are of the same
-order as FARS counts (33,500–39,800) but not equal, and the two record some attributes
-differently for the same population (§4 of `variable_harmonization.md`). Therefore:
+(including fatal ones). The CRSS weights are calibrated to FARS through NHTSA's imputed
+maximum severity: weighted `MAXSEV_IM` = 4 crashes equal the FARS count exactly in 2016 and
+2024 and within 0.9% in every other year. The unimputed `MAX_SEV`, which ignores persons of
+unknown severity, falls 0.6–12.8% short by year — the reason CRSS outcomes use the imputed
+severity (research plan v1.2). The two systems still record some attributes differently for
+the same fatal crashes (§4 of `variable_harmonization.md`). Therefore:
 
 * **counts of fatal crashes and deaths come from FARS only**;
 * **severity rates and models come from CRSS only**, with design-based inference
@@ -122,3 +125,34 @@ differently for the same population (§4 of `variable_harmonization.md`). Theref
 
 Details of the design analysis, including design effects and imputation, are in
 [`audit/crss_survey_design.md`](audit/crss_survey_design.md).
+
+Key design facts verified there: `PSU_VAR` is nested in `PSUSTRAT` in every year, keeps its
+stratum across years and leaves no stratum with a single PSU (the sampling `PSU` would, in
+stratum 20); 2016 has 54 variance PSUs, 2017 and 2022 have 66, other years 67. Pooled
+analyses must use the shared `PSU_VAR` identifiers — year-specific clusters understate the
+SE of pooled proportions by a factor of about 2. `STRATUM` (crash-type sampling strata) must
+not be used as a variance stratum. Design effects under the correct design are 1.1–2.2 for
+the fatal share, 3.4–11.5 for KA and 105–175 for the rural-PSU share.
+
+## 7. Completeness review of the audit
+
+An independent critic checked the seven domain appendices against the full column
+inventory ([`audit/completeness_critique.md`](audit/completeness_critique.md)). It covered
+the twelve tables no appendix had discussed (`pbtype`, `nmcrash`, `nmprior`, `nmdistract`,
+`safetyeq`, `cevent`, `vevent`, `vsoe`, `damage`, `vehiclesf`, `pvehiclesf`,
+`vpictrailerdecode`), the FARS EMS times and coordinates, resolved nine contradictions
+between appendices with code and recomputed 19 numeric claims (18 reproduced; the vPIC
+decode coverage was overstated by ~2.5 points because parked vehicles' decode rows were
+counted). Rules adopted from it:
+
+* differential missingness by severity is computed on the *recorded* severity, with unknown
+  severity as its own stratum — stratifying by imputed severity moves crashes of unknown
+  severity, which have the most unknown fields, into the KABCO cells;
+* for CRSS 2016–2018 (no labels) same-year FARS labels are used first; overlapping code sets
+  alone do not prove an unchanged meaning (e.g. `REST_MIS` code 0 changed meaning in 2019);
+* non-motorist contributing circumstances (`nmcrash`) are recorded far more often for the
+  dead and have national coding steps in 2018–2019, so they are not used; FARS EMS times
+  are missing for more than half of crashes and almost entirely for several states, so no
+  EMS analysis is attempted;
+* travel speed (`TRAV_SP`) is missing for more than half of drivers and more often in severe
+  crashes, so it is not used.

@@ -58,7 +58,7 @@ Row counts per table and year: [`generated/inventory_tables.md`](generated/inven
 | `PSU`, `PJ` | sampling PSU and police jurisdiction | not used directly |
 | `STRATUM` | crash-type sampling stratum (labelled, e.g. "Stratum 10 - Other") | descriptive only |
 | `REGION`, `URBANICITY` | census region; urban/rural area of the PSU | covariates |
-| `*_IM` | NHTSA single imputations of selected fields | sensitivity analyses (and alcohol, see harmonisation) |
+| `*_IM` | NHTSA single imputations of selected fields (fill only unknown codes) | primary CRSS severity outcomes (`MAXSEV_IM`, `INJSEV_IM`), alcohol (`ALCHL_IM`) and driver age (`AGE_IM`); see harmonisation |
 
 ## 3. Analytic datasets (`data/processed/`, rebuilt by `nhtsa features`)
 
@@ -71,4 +71,11 @@ Row counts per table and year: [`generated/inventory_tables.md`](generated/inven
 
 Column-by-column definitions: [`generated/processed_datasets.md`](generated/processed_datasets.md).
 Crash-level "any X" flags use a tri-state rule: 1 if any unit has X, 0 if all units are known
-not to, null otherwise.
+not to, null otherwise. For body-type flags a vehicle of unknown body type (98/99, and the
+"unknown light-vehicle type" / "unknown truck type" codes where they cannot rule the category
+out) makes the flag unknown unless another vehicle confirms it.
+
+The person files cover slightly different populations: `fars_person` keeps occupants of parked
+or working vehicles (`PER_TYP` 3, about 350–480 a year, 42–67 killed) with empty vehicle
+fields and role `parked_vehicle_occupant`; `crss_person` excludes them. Analyses select by
+person type and role, so no estimate is affected, but raw person counts differ for this reason.

@@ -26,10 +26,23 @@ policy questions require data that do not exist in this repository.
   recording, while the alcohol association is robust (see `reports/findings.md`).
 * **Coding breaks.** CRSS police-reported alcohol (2019), drug involvement (2019–2020),
   distraction (2017–2020), junction coding (2017–2021, worst in 2019), traffic-control
-  coding, CRSS surface "not reported" (2020), FARS rollover (2022), restraint/helmet (2019
+  coding, CRSS surface "not reported" (rising every year from 2020), FARS rollover (2022), restraint/helmet (2019
   move of helmet codes), body type (2017 pickup merge), and several label rewordings. Each is
   documented in `docs/variable_harmonization.md` and handled by harmonisation, imputed
   versions, explicit unknown levels or exclusion from trend claims.
+* **Imputed severity.** CRSS severity outcomes use NHTSA's single imputation (`MAXSEV_IM`,
+  `INJSEV_IM`), whose weighted fatal total reproduces the FARS count; the unimputed field
+  treats crashes containing a person of unknown severity as non-fatal and falls up to 12.8%
+  short in some years. The imputation rests on few crashes: 4–31 sampled crashes a year are
+  imputed fatal, but they carry large weights and make up 0.6–12.2% of the weighted fatal
+  total (most in 2017 and 2019–2020). Their imputation variance is not included in the
+  design-based standard errors, so year-specific fatal and KA shares are somewhat more
+  uncertain than their intervals suggest. Trend statements are therefore also checked
+  against a strict complete-case outcome.
+* **Unknown values as proxies for post-crash events.** Unknown driver age and unknown
+  speeding are concentrated in hit-and-run crashes (92% and 64% respectively in CRSS), so an
+  "unknown" level partly encodes a driver leaving the scene. CRSS driver-age flags therefore
+  use NHTSA's imputed age; the speeding "unknown" level remains and is not interpreted.
 * **Distraction and drug involvement** are unknown or not reported for 42–74% of drivers in
   recent years and their unknown share changed sharply; they are not used as model
   exposures. Drug *presence* in a toxicology result is not impairment.
