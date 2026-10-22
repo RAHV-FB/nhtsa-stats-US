@@ -432,7 +432,7 @@ def relative_involvement() -> None:
     del sev
     _caption(
         fig,
-        "Two-vehicle crashes with exactly one driver charged with a moving violation; RIR = culpable share / non-culpable "
+        "Two-vehicle crashes with exactly one culpable driver (action-based definition C1); RIR = culpable share / non-culpable "
         "share. Relative, assumption-dependent; not a crash rate. Source: outputs/tables/exposure.",
     )
     fig.tight_layout()
