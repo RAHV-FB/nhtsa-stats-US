@@ -327,15 +327,30 @@ class SurveyLogit:
         if self.spec.intercept:
             ybar = np.clip(np.average(y, weights=w), 1e-6, 1 - 1e-6)
             beta[0] = np.log(ybar / (1 - ybar))
+
+        def objective(b: np.ndarray) -> float:
+            eta = x @ b
+            # log(1 + exp(eta)) computed stably
+            return float(np.sum(w * (y * eta - np.logaddexp(0.0, eta))) - 0.5 * np.sum(pen * b * b))
+
         converged = False
-        for it in range(self.max_iter):
-            eta = x @ beta
-            mu = _sigmoid(eta)
+        obj = objective(beta)
+        it = 0
+        for it in range(self.max_iter):  # noqa: B007 - reported as n_iter_
+            mu = _sigmoid(x @ beta)
             grad = x.T @ (w * (y - mu)) - pen * beta
             hess = (x * (w * mu * (1 - mu))[:, None]).T @ x + np.diag(pen)
-            step = np.linalg.solve(hess, grad)
-            beta = beta + step
-            if np.max(np.abs(step)) < self.tol:
+            step = np.linalg.lstsq(hess, grad, rcond=None)[0]
+            # Damped Newton: halve the step until the penalised log-likelihood improves.
+            t = 1.0
+            while True:
+                cand = beta + t * step
+                cand_obj = objective(cand)
+                if cand_obj >= obj - 1e-12 * abs(obj) or t < 1e-8:
+                    break
+                t *= 0.5
+            beta, obj = cand, cand_obj
+            if np.max(np.abs(t * step)) < self.tol:
                 converged = True
                 break
         eta = x @ beta
