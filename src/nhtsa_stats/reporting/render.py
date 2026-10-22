@@ -13,8 +13,9 @@ Placeholder grammar::
   The filters must select exactly one row, otherwise rendering fails.
 * ``format`` is a Python format spec (``.2f``, ``,.0f``) or one of
   ``pct:N`` (x100, N decimals, with %), ``ci:N`` (``est (low–high)`` using the companion
-  columns ``<column>_low`` / ``<column>_high``; columns named ``*_rr``/``adj_rr``/``rr`` also
-  accept ``<column>_low``), ``cipct:N`` (the same, x100 with %), ``x1000:N`` (x1000).
+  columns ``<column>_low`` / ``<column>_high``), ``cipct:N`` (the same, x100 with %),
+  ``cix1000:N`` (the same, x1000), ``x1000:N`` (x1000).
+* A filter value ``a~b`` matches either ``a`` or ``b``.
 
 Unresolvable placeholders raise ``RenderError`` listing every failure.
 """
@@ -66,13 +67,13 @@ def _fmt(value, fmt: str, row: pd.Series | None = None, column: str | None = Non
     def num(v):
         return float(v)
 
-    if fmt.startswith(("ci:", "cipct:")):
+    if fmt.startswith(("ci:", "cipct:", "cix1000:")):
         kind, nd = fmt.split(":")
         nd = int(nd)
         lo_col, hi_col = f"{column}_low", f"{column}_high"
         if row is None or lo_col not in row or hi_col not in row:
             raise RenderError(f"CI columns {lo_col}/{hi_col} missing")
-        mult, suf = (100.0, "%") if kind == "cipct" else (1.0, "")
+        mult, suf = {"cipct": (100.0, "%"), "cix1000": (1000.0, ""), "ci": (1.0, "")}[kind]
         est, lo, hi = (mult * num(row[c]) for c in (column, lo_col, hi_col))
         return f"{est:.{nd}f}{suf} ({lo:.{nd}f}–{hi:.{nd}f}{suf})"
     if fmt.startswith("pct:"):
@@ -95,7 +96,7 @@ def _filtered(table: str, filters: str, spec: str) -> pd.DataFrame:
             k, v = (x.strip() for x in f.split("=", 1))
             if k not in df.columns:
                 raise RenderError(f"{table}: no column {k!r} (filter in {spec})")
-            vals = [x.strip() for x in v.split("/")] if k != "pair" and "/" in v else [v]
+            vals = [x.strip() for x in v.split("~")]  # "a~b" matches either value
             mask &= df[k].map(_norm).isin(vals)
     return df[mask]
 

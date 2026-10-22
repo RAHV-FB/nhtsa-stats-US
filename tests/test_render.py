@@ -66,5 +66,5 @@ def test_mdtable(tables):
 
 
 def test_multi_value_filter(tables):
-    out = render.render_text("{{mdtable:m/t|factor=speeding/alcohol;level=yes|factor::}}")
+    out = render.render_text("{{mdtable:m/t|factor=speeding~alcohol;level=yes|factor::}}")
     assert out.splitlines()[2:] == ["| speeding |", "| alcohol |"]
