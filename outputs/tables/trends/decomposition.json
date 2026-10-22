@@ -8,7 +8,7 @@
  "inputs": [
   "data/processed/crss_crash.parquet"
  ],
- "rows": 160,
+ "rows": 180,
  "columns": [
   "analysis",
   "outcome",
@@ -27,8 +27,8 @@
   "converged"
  ],
  "module": "nhtsa_stats.analysis.trends",
- "git_commit": "aab9ff8-dirty",
- "generated_utc": "2026-10-22T17:29:14Z",
+ "git_commit": "9071ab7-dirty",
+ "generated_utc": "2026-10-22T17:52:29Z",
  "covariate_sets": {
   "A": "pre-crash circumstances (PRE_CRASH without year)",
   "B": "pre-crash circumstances + crash configuration (crash type, vehicles)"
