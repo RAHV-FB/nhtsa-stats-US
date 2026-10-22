@@ -122,3 +122,14 @@ def test_tri_state_columns_are_tri_state():
         "night",
     ):
         assert set(df[col].drop_nulls().unique().to_list()) <= {0, 1}, col
+
+
+def test_restraint_not_applicable_outside_belted_seats():
+    out = _apply(
+        h.restraint_in_belted_seat(),
+        REST_USE=[20, 20, 20, 3, 20],
+        BODY_TYP=[4, 80, 50, 14, 34],
+        SEAT_POS=[11, 11, 21, 13, 52],
+    )
+    # car driver unbelted; motorcyclist (2019+ code 20) n/a; bus 2nd row unbelted; SUV belted; pickup bed n/a
+    assert out == ["none", "not_applicable", "none", "belted", "not_applicable"]

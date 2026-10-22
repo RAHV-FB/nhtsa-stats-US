@@ -107,6 +107,7 @@ def vehicle_level(source: str, years: Sequence[int]) -> pl.DataFrame:
         h.speeding_type().alias("veh_speeding_type"),
         h.surface_condition().alias("surface"),
         h.speed_limit_mph().alias("speed_limit_mph"),
+        (pl.col("VSPD_LIM") == 0).alias("speed_limit_zero"),
         h.hit_and_run().alias("hit_and_run"),
         # Post-crash consequences, kept only for mediation/descriptive use.
         pl.when(pl.col("ROLLOVER").is_in([1, 2, 3, 9]))
@@ -133,6 +134,7 @@ def person_level(source: str, years: Sequence[int]) -> pl.DataFrame:
     cols = [
         *kp[1:],
         "PER_TYP",
+        "BODY_TYP",
         "AGE",
         "SEX",
         "INJ_SEV",
@@ -161,7 +163,7 @@ def person_level(source: str, years: Sequence[int]) -> pl.DataFrame:
         h.any_injury("INJ_SEV").alias("injured"),
         h.kabco("INJ_SEV").alias("kabco"),
         h.seat_row().alias("seat"),
-        h.restraint_use().alias("restraint"),
+        h.restraint_in_belted_seat().alias("restraint"),
         h.helmet_use().alias("helmet"),
         h.ejected().alias("ejected"),
         h.police_reported("DRINKING").alias("pr_alcohol"),
@@ -173,10 +175,14 @@ def person_level(source: str, years: Sequence[int]) -> pl.DataFrame:
         .alias("alc_tested"),
         # Measured BAC (g/dL) where a result exists (ALC_RES in thousandths; >= 940 special).
         pl.when(pl.col("ALC_RES") < 940).then(pl.col("ALC_RES") / 1000).alias("bac_measured"),
-        # AIR_BAG 1-9 deployed (some location), 20 not deployed.
+        # POST-CRASH. AIR_BAG 1-9 deployed (some location); 20 not deployed or no air bag at this
+        # position (2017+); 2016 used 0 'not applicable' and 28 'switched off' for the latter.
         pl.when(pl.col("AIR_BAG").is_between(1, 9))
         .then(pl.lit(1, dtype=pl.Int8))
-        .when(pl.col("AIR_BAG") == 20)
+        .when(
+            (pl.col("AIR_BAG") == 20)
+            | ((pl.col("YEAR") == 2016) & pl.col("AIR_BAG").is_in([0, 28]))
+        )
         .then(pl.lit(0, dtype=pl.Int8))
         .alias("airbag_deployed"),
     )
@@ -212,6 +218,7 @@ def crash_aggregates(source: str, veh: pl.DataFrame, per: pl.DataFrame) -> pl.Da
             .cast(pl.Int8)
             .alias("any_light_truck"),
             pl.col("speed_limit_mph").max().alias("speed_limit_mph"),
+            pl.col("speed_limit_zero").any().alias("speed_limit_zero"),
             # Surface condition: first vehicle with a known value (VEH_NO order).
             pl.col("surface").filter(pl.col("surface") != h.UNKNOWN).first().alias("surface"),
             pl.col("veh_age").max().alias("oldest_vehicle_age"),
@@ -274,6 +281,8 @@ def crash_common(df: pl.DataFrame) -> pl.DataFrame:
         .alias("n_vehicles"),
         pl.when(pl.col("speed_limit_mph").is_not_null())
         .then(h.speed_limit_band("speed_limit_mph"))
+        .when(pl.col("speed_limit_zero"))
+        .then(pl.lit("none_nontrafficway"))
         .otherwise(pl.lit(h.UNKNOWN))
         .alias("speed_limit"),
         pl.col("surface").fill_null(h.UNKNOWN),

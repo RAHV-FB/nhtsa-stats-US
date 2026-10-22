@@ -40,7 +40,7 @@ CRASH_LEVELS: dict[str, list] = {
     ],
     "weather": ["clear", "cloudy", "rain", "snow_sleet", "fog", "other", "unknown"],
     "surface": ["dry", "wet", "snow_ice", "other", "unknown"],
-    "speed_limit": ["30-35", "<=25", "40-45", "50-55", "60-65", "70+", "unknown"],
+    "speed_limit": ["30-35", "<=25", "40-45", "50-55", "60-65", "70+", "none_nontrafficway", "unknown"],
     "tod": ["10-15", "06-09", "16-19", "20-23", "00-05", "unknown"],
     "junction": ["non_junction", "intersection", "driveway", "interchange", "other", "unknown"],
     "urbanicity": ["urban", "rural"],

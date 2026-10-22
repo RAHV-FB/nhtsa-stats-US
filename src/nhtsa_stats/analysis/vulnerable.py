@@ -159,7 +159,7 @@ def load(victim: str, outcome: str) -> tuple[pd.DataFrame, SurveyDesign]:
 
 LEVELS = {
     "striking": STRIKING_LEVELS,
-    "str_speed_limit": ["<=25", "30-35", "40-45", "50-55", "60-65", "70+", "unknown"],
+    "str_speed_limit": ["<=25", "30-35", "40-45", "50-55", "60-65", "70+", "none_nontrafficway", "unknown"],
     "location": LOCATION_LEVELS,
     "age_band": AGE_LEVELS,
     "sex": ["male", "female", "unknown"],

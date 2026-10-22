@@ -129,11 +129,14 @@ def surface_condition(col: str = "VSURCOND") -> pl.Expr:
 
 
 def speed_limit_band(col: str = "VSPD_LIM") -> pl.Expr:
-    """Posted speed limit in mph (5-90); 0 = no statutory limit / non-trafficway;
-    98 not reported; 99 unknown."""
+    """Posted speed limit in mph (5-90); 0 = no statutory limit / non-trafficway (kept as its
+    own level: mostly parking lots and driveways, not an unknown limit); 98 not reported;
+    99 unknown."""
     c = pl.col(col)
     return (
-        pl.when(c.is_between(1, 25))
+        pl.when(c == 0)
+        .then(pl.lit("none_nontrafficway"))
+        .when(c.is_between(1, 25))
         .then(pl.lit("<=25"))
         .when(c.is_between(26, 35))
         .then(pl.lit("30-35"))
@@ -397,6 +400,21 @@ def restraint_use(col: str = "REST_USE") -> pl.Expr:
             "not_applicable": [0, 5, 16, 17, 19, 29, 96],
         },
     )
+
+
+def restraint_in_belted_seat(
+    rest_col: str = "REST_USE", body_col: str = "BODY_TYP", seat_col: str = "SEAT_POS"
+) -> pl.Expr:
+    """Restraint use restricted to occupants of belt-equipped vehicles in belted seating rows.
+
+    From 2017 code 20 means "none used *or* not applicable", and from 2019 every motorcyclist has
+    REST_USE = 20 (helmets moved to HELM_USE).  Belt information is therefore only meaningful for
+    occupants of vehicles with BODY_TYP 1-79 (light vehicles, buses, trucks) seated in rows 1-4
+    (SEAT_POS 11-49); everyone else (motorcycles 80-89, other 90-97, cargo/exterior/trailing
+    positions 50-56, unknown body/seat) is ``not_applicable``.  See docs/audit/person_injury_restraint.md §4.6.
+    """
+    eligible = pl.col(body_col).is_between(1, 79) & pl.col(seat_col).is_between(11, 49)
+    return pl.when(eligible).then(restraint_use(rest_col)).otherwise(pl.lit("not_applicable"))
 
 
 def helmet_use(
