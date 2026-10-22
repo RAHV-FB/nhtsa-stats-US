@@ -8,6 +8,7 @@ import pytest
 import statsmodels.api as sm
 
 from nhtsa_stats.analysis.survey import (
+    MarginSet,
     ModelSpec,
     SurveyDesign,
     SurveyLogit,
@@ -183,3 +184,20 @@ def test_fast_margins_equal_slow_margins(rng):
     )  # different object -> full rebuild
     assert fast[0] == pytest.approx(slow[0])
     np.testing.assert_allclose(fast[1], slow[1])
+
+
+@pytest.mark.parametrize("scale", [1e-3, 1.0, 1e7])
+def test_contrast_gradient_is_scale_free(rng, scale):
+    """Delta-method SE of a ratio equals the analytic one for margins of any magnitude."""
+    n = 400
+    design = SurveyDesign.from_arrays(
+        np.ones(n), np.repeat([1, 2], n // 2), np.repeat(np.arange(40), n // 40)
+    )
+    za, zb = rng.normal(size=n) * scale, rng.normal(size=n) * scale
+    a, b = 3.0 * scale, 2.0 * scale
+    ms = MarginSet({"a": a, "b": b}, {"a": za, "b": zb}, design)
+    est = ms.ratio("a", "b")
+    z = za / b - a * zb / b**2
+    exact = float(np.sqrt(design.vcov_total(z)[0, 0]))
+    assert est.estimate == pytest.approx(1.5)
+    assert est.se == pytest.approx(exact, rel=1e-8)

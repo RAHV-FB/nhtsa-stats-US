@@ -540,14 +540,20 @@ class MarginSet:
         v = self.design.vcov_total(self.influence[name])[0, 0]
         return Estimate(self.values[name], float(np.sqrt(v)), self.design.df, self.design.n)
 
-    def contrast(self, f: Callable[[dict[str, float]], float], eps: float = 1e-7) -> Estimate:
-        """Delta-method estimate of a smooth function of the margins."""
+    def contrast(self, f: Callable[[dict[str, float]], float], rel_step: float = 6e-6) -> Estimate:
+        """Delta-method estimate of a smooth function of the margins.
+
+        The gradient uses central differences with a step relative to each margin's size, so
+        it is accurate both for probabilities (~1e-3) and for weighted totals (~1e7).
+        """
         base = f(self.values)
         grad = {}
-        for k in self.values:
-            bumped = dict(self.values)
-            bumped[k] += eps
-            grad[k] = (f(bumped) - base) / eps
+        for k, v in self.values.items():
+            h = rel_step * max(abs(v), 1e-12)
+            up, down = dict(self.values), dict(self.values)
+            up[k] = v + h
+            down[k] = v - h
+            grad[k] = (f(up) - f(down)) / (2 * h)
         z = sum(grad[k] * self.influence[k] for k in self.values)
         v = self.design.vcov_total(z)[0, 0]
         return Estimate(float(base), float(np.sqrt(v)), self.design.df, self.design.n)
