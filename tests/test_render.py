@@ -36,10 +36,10 @@ def tables(tmp_path, monkeypatch):
 
 
 def test_formats(tables):
-    assert render.render_text("{{m/t|factor=speeding,level=yes|adj_rr|.2f}}") == "1.83"
-    assert render.render_text("{{m/t|factor=speeding,level=yes|adj_rr|ci:2}}") == "1.83 (1.49–2.25)"
-    assert render.render_text("{{m/t|factor=speeding,level=yes|share|pct:1}}") == "10.1%"
-    assert render.render_text("{{m/t|factor=speeding,level=yes|deaths|,.0f}}") == "37,806"
+    assert render.render_text("{{m/t|factor=speeding;level=yes|adj_rr|.2f}}") == "1.83"
+    assert render.render_text("{{m/t|factor=speeding;level=yes|adj_rr|ci:2}}") == "1.83 (1.49–2.25)"
+    assert render.render_text("{{m/t|factor=speeding;level=yes|share|pct:1}}") == "10.1%"
+    assert render.render_text("{{m/t|factor=speeding;level=yes|deaths|,.0f}}") == "37,806"
     assert render.render_text("{{m/t|YEAR=2017|adj_rr|.1f}}") == "4.4"
     assert render.render_text("{{json:m/j|a.b|,.0f}}") == "3,871"
 
@@ -53,3 +53,18 @@ def test_ambiguous_or_missing_fails(tables):
         render.render_text("{{m/t|factor=alcohol|nope|.2f}}")
     with pytest.raises(render.RenderError, match="table not found"):
         render.render_text("{{m/zzz||x|.2f}}")
+
+
+def test_mdtable(tables):
+    out = render.render_text(
+        "{{mdtable:m/t|factor=speeding|level:Level:;adj_rr:RR (95% CI):ci:2;share:Share:pct:0}}"
+    )
+    lines = out.splitlines()
+    assert lines[0] == "| Level | RR (95% CI) | Share |"
+    assert lines[2] == "| yes | 1.83 (1.49–2.25) | 10% |"
+    assert len(lines) == 4
+
+
+def test_multi_value_filter(tables):
+    out = render.render_text("{{mdtable:m/t|factor=speeding/alcohol;level=yes|factor::}}")
+    assert out.splitlines()[2:] == ["| speeding |", "| alcohol |"]

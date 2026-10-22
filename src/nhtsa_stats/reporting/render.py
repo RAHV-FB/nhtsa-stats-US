@@ -9,7 +9,7 @@ Placeholder grammar::
     {{module/table|filters|column|format}}
     {{json:module/name|dotted.key.path|format}}
 
-* ``filters`` is ``key=value`` pairs separated by commas (string comparison); may be empty.
+* ``filters`` is ``key=value`` pairs separated by semicolons (string comparison); may be empty.
   The filters must select exactly one row, otherwise rendering fails.
 * ``format`` is a Python format spec (``.2f``, ``,.0f``) or one of
   ``pct:N`` (x100, N decimals, with %), ``ci:N`` (``est (low–high)`` using the companion
@@ -30,7 +30,7 @@ import pandas as pd
 
 from nhtsa_stats import config
 
-PLACEHOLDER = re.compile(r"\{\{(.+?)\}\}")
+PLACEHOLDER = re.compile(r"\{\{(.+?)\}\}", re.DOTALL)
 TEMPLATE_DIR = config.PROJECT_ROOT / "reports" / "templates"
 REPORT_DIR = config.PROJECT_ROOT / "reports"
 
@@ -87,7 +87,52 @@ def _fmt(value, fmt: str, row: pd.Series | None = None, column: str | None = Non
         return format(value, fmt)
 
 
+def _filtered(table: str, filters: str, spec: str) -> pd.DataFrame:
+    df = _table(table)
+    mask = pd.Series(True, index=df.index)
+    if filters:
+        for f in filters.split(";"):
+            k, v = (x.strip() for x in f.split("=", 1))
+            if k not in df.columns:
+                raise RenderError(f"{table}: no column {k!r} (filter in {spec})")
+            vals = [x.strip() for x in v.split("/")] if k != "pair" and "/" in v else [v]
+            mask &= df[k].map(_norm).isin(vals)
+    return df[mask]
+
+
+def mdtable(spec: str) -> str:
+    """``mdtable:module/table|filters|col:Header:fmt;col:Header:fmt`` -> markdown table of the
+    matching rows (in table order).  ``fmt`` may itself contain ':' (e.g. ``ci:2``)."""
+    parts = [p.strip() for p in spec.split("|")]
+    if len(parts) != 3:
+        raise RenderError(f"mdtable needs table|filters|columns: {spec}")
+    table, filters, cols = parts[0][len("mdtable:") :], parts[1], parts[2]
+    rows = _filtered(table, filters, spec)
+    if rows.empty:
+        raise RenderError(f"{table}: mdtable filters {filters!r} matched no rows")
+    columns = []
+    for c in cols.split(";"):
+        name, header, *fmt = c.split(":")
+        if name not in rows.columns:
+            raise RenderError(f"{table}: no column {name!r} in mdtable")
+        columns.append((name, header or name, ":".join(fmt)))
+    lines = ["| " + " | ".join(h for _, h, _ in columns) + " |", "|" + "---|" * len(columns)]
+    for _, r in rows.iterrows():
+        cells = []
+        for name, _, fmt in columns:
+            v = r[name]
+            cells.append(
+                "—"
+                if (fmt and not fmt.startswith(("ci", "cipct")) and pd.isna(v))
+                else _fmt(v, fmt, r, name)
+            )
+        lines.append("| " + " | ".join(cells) + " |")
+    return "\n".join(lines)
+
+
 def resolve(spec: str) -> str:
+    if spec.startswith("mdtable:"):
+        return mdtable(spec)
     parts = [p.strip() for p in spec.split("|")]
     if parts[0].startswith("json:"):
         if len(parts) not in (2, 3):
@@ -100,14 +145,7 @@ def resolve(spec: str) -> str:
         raise RenderError(f"placeholder needs 4 fields (table|filters|column|format): {spec}")
     table, filters, column, fmt = parts
     df = _table(table)
-    mask = pd.Series(True, index=df.index)
-    if filters:
-        for f in filters.split(","):
-            k, v = (x.strip() for x in f.split("=", 1))
-            if k not in df.columns:
-                raise RenderError(f"{table}: no column {k!r} (filter in {spec})")
-            mask &= df[k].map(_norm) == v
-    rows = df[mask]
+    rows = _filtered(table, filters, spec)
     if len(rows) != 1:
         raise RenderError(f"{table}: filters {filters!r} matched {len(rows)} rows (need 1): {spec}")
     if column not in df.columns:
