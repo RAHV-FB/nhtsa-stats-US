@@ -318,6 +318,59 @@ def qba_grid() -> pd.DataFrame:
     return pd.DataFrame(rows)
 
 
+def alcohol_coding_sensitivity() -> pd.DataFrame:
+    """Adjusted fatal RR for alcohol under three codings and two periods.
+
+    Codings: NHTSA-imputed ALCHL_IM (primary); police-reported ALCOHOL complete-case (unknown
+    crashes dropped); police-reported with unknown counted as "no".  Periods: 2016-2018 (non-
+    reports mostly coded "No") and 2019-2024 (non-reports coded unknown, then imputed).  The
+    adjustment set is model A with the alcohol variable swapped.
+    """
+    from nhtsa_stats.analysis import severity, specs
+
+    rows = []
+    for period, years in (
+        ("2016-2018", [2016, 2017, 2018]),
+        ("2019-2024", list(range(2019, 2025))),
+        ("2016-2024", list(config.YEARS)),
+    ):
+        df, design = severity.load("fatal", years)
+        variants = {
+            "imputed (ALCHL_IM)": ("alcohol_im", np.ones(len(df), dtype=bool), None),
+            "police, complete case": ("alcohol", (df["alcohol"] != "unknown").to_numpy(), None),
+            "police, unknown as no": (
+                "alcohol",
+                np.ones(len(df), dtype=bool),
+                df["alcohol"].replace({"unknown": "no"}),
+            ),
+        }
+        for name, (var, keep, newcol) in variants.items():
+            d = df.copy()
+            if newcol is not None:
+                d[var] = newcol
+            d = d.loc[keep].reset_index(drop=True)
+            covs = [c for c in specs.PRE_CRASH if c != "alcohol_im"] + [var]
+            m = severity.fit(d, design.subset(keep), "fatal", covs)
+            levels = severity.observed_levels(d, var, ["no", "yes"])
+            fc = severity.factor_contrasts(m, d, var, levels).set_index("level").loc["yes"]
+            rows.append(
+                {
+                    "period": period,
+                    "coding": name,
+                    "n": len(d),
+                    "events": int(d["fatal"].sum()),
+                    "share_yes": float(
+                        np.average(d[var] == "yes", weights=design.subset(keep).weight)
+                    ),
+                    "adj_rr": fc["adj_rr"],
+                    "adj_rr_low": fc["adj_rr_low"],
+                    "adj_rr_high": fc["adj_rr_high"],
+                }
+            )
+            log.info("alcohol sensitivity %s %s done", period, name)
+    return pd.DataFrame(rows)
+
+
 def run() -> dict[str, pd.DataFrame]:
     out = {
         "unknown_by_severity": unknown_by_severity(),
@@ -327,6 +380,7 @@ def run() -> dict[str, pd.DataFrame]:
         "police_vs_bac": police_vs_bac(),
         "restraint_reporting": restraint_reporting(),
         "qba_grid": qba_grid(),
+        "alcohol_coding_sensitivity": alcohol_coding_sensitivity(),
     }
     desc = {
         "unknown_by_severity": "Weighted % unknown / yes by KABCO for police-reported behavioural fields (CRSS crashes)",
@@ -336,6 +390,7 @@ def run() -> dict[str, pd.DataFrame]:
         "police_vs_bac": "Police-reported alcohol vs measured BAC>=0.08 among tested FARS drivers",
         "restraint_reporting": "Restraint reporting among CRSS light-vehicle occupants aged 13+ by KABCO",
         "qba_grid": "Quantitative bias analysis: crude fatal RR corrected for outcome-dependent exposure sensitivity",
+        "alcohol_coding_sensitivity": "Adjusted fatal RR for alcohol under imputed / complete-case / unknown-as-no codings, by period",
     }
     for name, df in out.items():
         save_table(

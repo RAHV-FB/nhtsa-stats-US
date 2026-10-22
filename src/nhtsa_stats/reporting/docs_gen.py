@@ -130,6 +130,11 @@ def harmonised_variables() -> str:
     return "\n".join(out)
 
 
+def run() -> dict:
+    main()
+    return {"generated": [str(p) for p in GEN_DIR.glob("*.md")]}
+
+
 def main() -> None:
     GEN_DIR.mkdir(parents=True, exist_ok=True)
     (GEN_DIR / "inventory_tables.md").write_text(inventory_tables())

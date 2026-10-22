@@ -35,7 +35,7 @@ from nhtsa_stats.analysis.survey import (
     SurveyLogit,
     proportion_table,
 )
-from nhtsa_stats.reporting.io import save_table
+from nhtsa_stats.reporting.io import save_json, save_table
 
 log = logging.getLogger(__name__)
 MODULE = "severity"
@@ -155,6 +155,8 @@ def crude_vs_adjusted(outcome: str = "fatal", years: Sequence[int] | None = None
     log.info("%s: %d crashes, %d events", outcome, len(df), int(df[outcome].sum()))
     model_a = fit(df, design, outcome, specs.PRE_CRASH)
     model_b = fit(df, design, outcome, specs.PRE_CRASH + specs.CIRCUMSTANCE)
+    export_model(model_a, outcome, "A")
+    export_model(model_b, outcome, "B")
     factors = [f for f in specs.PRE_CRASH + specs.CIRCUMSTANCE if f != "YEAR"] + ["YEAR"]
     out = []
     for f in factors:
@@ -198,6 +200,28 @@ def crude_vs_adjusted(outcome: str = "fatal", years: Sequence[int] | None = None
         },
     )
     return res
+
+
+def export_model(model: SurveyLogit, outcome: str, name: str) -> None:
+    """Save a fitted model (levels, coefficients, design-based covariance) for prediction in
+    the interface without refitting.  Predictions are conditional on a reported crash."""
+    save_json(
+        {
+            "outcome": outcome,
+            "model": name,
+            "population": "CRSS police-reported crashes 2016-2024 with known maximum severity",
+            "levels": model.spec.categorical,
+            "terms": model.names_,
+            "coef": model.coef_.tolist(),
+            "vcov": model.vcov_.tolist(),
+            "design_df": model.design_.df,
+            "n": model.n_,
+            "events": model.n_events_,
+            "ridge": model.ridge,
+        },
+        MODULE,
+        f"model_{name}_{outcome}",
+    )
 
 
 def run(outcomes: Sequence[str] = ("fatal", "ka")) -> dict[str, pd.DataFrame]:

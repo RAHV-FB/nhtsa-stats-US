@@ -36,6 +36,8 @@ ANALYSES: dict[str, str] = {
     "vulnerable": "nhtsa_stats.analysis.vulnerable",
     "ml": "nhtsa_stats.models.severity_ml",
     "policy": "nhtsa_stats.simulation.evidence",
+    "figures": "nhtsa_stats.reporting.figures",
+    "docs": "nhtsa_stats.reporting.docs_gen",
 }
 
 log = logging.getLogger("nhtsa")
