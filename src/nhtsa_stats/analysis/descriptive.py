@@ -48,6 +48,7 @@ SHARED_FACTORS = [
     "crash_type",
     "n_vehicles",
     "speeding",
+    "speeding_type",
     "any_motorcycle",
     "any_heavy_truck",
     "young_driver",
