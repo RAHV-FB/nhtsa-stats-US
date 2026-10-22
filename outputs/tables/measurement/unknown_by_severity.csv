@@ -1,0 +1,31 @@
+kabco,field,label,n,pct_unknown,pct_unknown_se,pct_yes,pct_yes_among_known
+0,speeding,Speeding-related (any vehicle),221666,3.5154,0.539435,9.01818,9.34676
+0,alcohol,Alcohol involved (police-reported ALCOHOL),221666,28.1506,3.38267,3.13225,4.35947
+0,drugs,"Drug involvement (any driver, police-reported)",221666,39.4645,3.74641,0.717966,1.18602
+0,distracted,Distracted driver (any driver),221666,43.9011,3.25001,13.2294,23.5823
+0,young_driver,Driver 15-20 involved (age known),221666,9.98355,0.687311,18.5659,20.625
+0,speed_limit,Posted speed limit,221666,14.5947,2.84391,,
+1,speeding,Speeding-related (any vehicle),101881,2.80651,0.558629,12.1206,12.4705
+1,alcohol,Alcohol involved (police-reported ALCOHOL),101881,26.0616,3.19192,3.77616,5.10717
+1,drugs,"Drug involvement (any driver, police-reported)",101881,40.4256,3.35908,1.18801,1.99417
+1,distracted,Distracted driver (any driver),101881,44.739,2.5648,15.9879,28.9316
+1,young_driver,Driver 15-20 involved (age known),101881,7.19011,0.553683,19.1132,20.5939
+1,speed_limit,Posted speed limit,101881,16.1377,3.46228,,
+2,speeding,Speeding-related (any vehicle),76217,2.96561,0.401918,13.3305,13.7379
+2,alcohol,Alcohol involved (police-reported ALCOHOL),76217,25.0507,3.10459,7.39844,9.87126
+2,drugs,"Drug involvement (any driver, police-reported)",76217,38.7828,3.50397,2.00834,3.28068
+2,distracted,Distracted driver (any driver),76217,41.3234,3.15975,13.7267,23.3938
+2,young_driver,Driver 15-20 involved (age known),76217,5.40018,0.492121,19.2094,20.306
+2,speed_limit,Posted speed limit,76217,9.54965,1.60741,,
+3,speeding,Speeding-related (any vehicle),49333,3.36792,0.520446,16.9167,17.5063
+3,alcohol,Alcohol involved (police-reported ALCOHOL),49333,28.7218,2.94726,13.2343,18.5671
+3,drugs,"Drug involvement (any driver, police-reported)",49333,42.1246,3.34535,3.91731,6.76852
+3,distracted,Distracted driver (any driver),49333,47.7281,2.82988,10.912,20.8754
+3,young_driver,Driver 15-20 involved (age known),49333,5.14985,0.450553,15.2136,16.0396
+3,speed_limit,Posted speed limit,49333,13.4931,2.74883,,
+4,speeding,Speeding-related (any vehicle),9810,4.86591,0.721385,21.0358,22.1117
+4,alcohol,Alcohol involved (police-reported ALCOHOL),9810,47.3858,2.80449,17.6914,33.6248
+4,drugs,"Drug involvement (any driver, police-reported)",9810,53.0207,3.21222,8.09153,17.2236
+4,distracted,Distracted driver (any driver),9810,62.2248,1.85707,7.23576,19.1548
+4,young_driver,Driver 15-20 involved (age known),9810,4.38054,0.483732,12.8729,13.4626
+4,speed_limit,Posted speed limit,9810,6.72432,1.54656,,

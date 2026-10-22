@@ -1,0 +1,35 @@
+{
+ "table": "person/lpv_killed_model_coefficients.csv",
+ "description": "Survey logistic regression coefficients for 'killed' (CRSS occupants of light passenger vehicles aged 8+ (known age))",
+ "population": "CRSS occupants of light passenger vehicles aged 8+ (known age)",
+ "unit": "person",
+ "outcome": "killed",
+ "method": "Survey-weighted logistic regression (pseudo-ML, ridge 0.01), Taylor-linearised variance (25 strata, 67 PSUs, t with 42 df); standardised predictive margins -> adjusted RR/RD. Model A = person covariates + PRE_CRASH; model B = A + crash type + number of vehicles.",
+ "inputs": [
+  "data/processed/crss_person.parquet (+ young/older_driver from crss_crash.parquet)"
+ ],
+ "rows": 199,
+ "columns": [
+  "population",
+  "outcome",
+  "term",
+  "coef",
+  "se",
+  "t",
+  "p",
+  "odds_ratio",
+  "or_low",
+  "or_high",
+  "model"
+ ],
+ "module": "nhtsa_stats.analysis.person",
+ "git_commit": "1460fe7-dirty",
+ "generated_utc": "2026-10-22T17:43:33Z",
+ "n": 904846,
+ "events": 6911,
+ "params_A": 94,
+ "converged_A": true,
+ "params_B": 105,
+ "converged_B": true,
+ "design_df": 42
+}

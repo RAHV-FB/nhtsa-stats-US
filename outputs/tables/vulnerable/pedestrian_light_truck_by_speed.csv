@@ -1,0 +1,11 @@
+victim,outcome,quantity,estimate,low,high
+pedestrian,killed,risk car <=35,0.0438993,0.0337367,0.0540619
+pedestrian,killed,risk SUV/pickup <=35,0.0710809,0.0569208,0.0852409
+pedestrian,killed,risk car 40+,0.140133,0.124831,0.155434
+pedestrian,killed,risk SUV/pickup 40+,0.164322,0.140689,0.187955
+pedestrian,killed,"RR SUV/pickup vs car, <=35 mph",1.61918,1.24975,2.09782
+pedestrian,killed,"RR SUV/pickup vs car, 40+ mph",1.17262,1.03062,1.33418
+pedestrian,killed,"RD SUV/pickup vs car, <=35 mph",0.0271816,0.0122814,0.0420817
+pedestrian,killed,"RD SUV/pickup vs car, 40+ mph",0.0241894,0.00356313,0.0448157
+pedestrian,killed,interaction contrast (additive),-0.00299216,-0.0272331,0.0212487
+pedestrian,killed,ratio of RRs,0.724205,0.544371,0.963446

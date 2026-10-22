@@ -1,0 +1,11 @@
+step,persons,deaths,vehicles,crashes
+all FARS person records,800688,353706,572793,325922
+occupants of in-transport vehicles (driver/passenger),720583,281513,498835,325626
+light passenger vehicle,581793,215438,382474,279020
+seat front-left / front-other / second row,565447,211582,382224,278845
+age 13+ (known),524353,206362,378612,276316
+restraint belted or none (known),477977,186574,347876,255519
+known outcome (killed 0/1),474889,186574,346125,254593
+>= 2 eligible occupants in the vehicle,224529,65722,95765,85555
+matched sets with discordant outcomes (analysed),110142,48740,45248,44990
+  of which discordant belt use (identify the belt OR),37959,15834,14006,13975

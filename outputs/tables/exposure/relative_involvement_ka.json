@@ -1,0 +1,33 @@
+{
+ "table": "exposure/relative_involvement_ka.csv",
+ "description": "RIR among KA crashes only: selects on injury severity, so it mixes involvement with conditional severity (e.g. frailty); NOT a measure of involvement in severe crashes",
+ "population": "CRSS two-vehicle crashes 2016-2024 (no non-motorist, no hit-and-run vehicle, both drivers present) with exactly one culpable and one non-culpable driver",
+ "unit": "driver",
+ "outcome": "culpable (C1 action-based definition unless stated)",
+ "method": "Quasi-induced exposure: RIR = odds of culpability within group (saturated survey logit, linearised CI); adjusted ratios from a multivariable survey logit",
+ "inputs": [
+  "data/interim/CRSS/vehicle",
+  "data/interim/CRSS/driverrf",
+  "data/interim/CRSS/distract",
+  "data/interim/CRSS/violatn",
+  "data/interim/CRSS/person",
+  "data/processed/crss_crash.parquet"
+ ],
+ "rows": 12,
+ "columns": [
+  "factor",
+  "level",
+  "n_drivers",
+  "n_culpable",
+  "rir",
+  "rir_low",
+  "rir_high",
+  "adj_rir_ratio_vs_ref",
+  "adj_low",
+  "adj_high",
+  "flag"
+ ],
+ "module": "nhtsa_stats.analysis.exposure",
+ "git_commit": "ad92e63-dirty",
+ "generated_utc": "2026-10-22T18:31:58Z"
+}

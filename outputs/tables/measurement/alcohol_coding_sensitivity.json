@@ -1,0 +1,23 @@
+{
+ "table": "measurement/alcohol_coding_sensitivity.csv",
+ "description": "Adjusted fatal RR for alcohol under codings, by period",
+ "population": "",
+ "unit": "",
+ "outcome": "",
+ "method": "model A with alcohol variable swapped",
+ "inputs": [],
+ "rows": 9,
+ "columns": [
+  "period",
+  "coding",
+  "n",
+  "events",
+  "share_yes",
+  "adj_rr",
+  "adj_rr_low",
+  "adj_rr_high"
+ ],
+ "module": "nhtsa_stats.analysis.measurement",
+ "git_commit": "743b472-dirty",
+ "generated_utc": "2026-10-22T17:18:51Z"
+}

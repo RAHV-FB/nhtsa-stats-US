@@ -1,0 +1,157 @@
+comparison,quantity,label,units,estimate,se,low,high
+2020-2024 vs 2016-2019,fatal_crashes_per_year_P0,estimated,crashes/year,31057.2,1510.39,28009.1,34105.3
+2020-2024 vs 2016-2019,fatal_crashes_per_year_comparison,estimated,crashes/year,35980.8,1991.71,31961.3,40000.2
+2020-2024 vs 2016-2019,crashes_known_severity_per_year_P0,estimated,crashes/year,6.46773e+06,335345,5.79098e+06,7.14449e+06
+2020-2024 vs 2016-2019,crashes_known_severity_per_year_comparison,estimated,crashes/year,5.72592e+06,304100,5.11222e+06,6.33962e+06
+2020-2024 vs 2016-2019,fatal_share_P0,estimated,proportion,0.00480186,0.000289257,0.00425206,0.00542237
+2020-2024 vs 2016-2019,fatal_share_comparison,estimated,proportion,0.00628384,0.000423728,0.00548404,0.00719943
+2020-2024 vs 2016-2019,ratio_fatal_share,estimated,ratio,1.30863,0.0552213,1.2018,1.42495
+2020-2024 vs 2016-2019,ratio_fatal_crashes_numerator,estimated,ratio,1.15853,0.0432995,1.07437,1.24929
+2020-2024 vs 2016-2019,ratio_reported_crashes_denominator,estimated,ratio,0.885306,0.0240688,0.838041,0.935236
+2020-2024 vs 2016-2019,numerator_share_of_log_rise,estimated,proportion of log ratio,0.54709,0.0907475,0.363954,0.730226
+2020-2024 vs 2016-2019,denominator_share_of_log_rise,estimated,proportion of log ratio,0.45291,0.0907475,0.269774,0.636046
+2020-2024 vs 2016-2019,hypothetical_share_if_denominator_constant,hypothetical,proportion,0.00556312,0.00039365,0.00482255,0.00641667
+2020-2024 vs 2016-2019,change_O_crashes_per_year,estimated,crashes/year,-506001,140682,-789909,-222093
+2020-2024 vs 2016-2019,ratio_O_crashes,estimated,ratio,0.890996,0.0282549,0.835761,0.949881
+2020-2024 vs 2016-2019,change_C_crashes_per_year,estimated,crashes/year,-222908,36172.1,-295906,-149910
+2020-2024 vs 2016-2019,ratio_C_crashes,estimated,ratio,0.787368,0.0306659,0.727851,0.851751
+2020-2024 vs 2016-2019,change_B_crashes_per_year,estimated,crashes/year,-8977.88,14451.3,-38141.8,20186
+2020-2024 vs 2016-2019,ratio_B_crashes,estimated,ratio,0.984949,0.0237947,0.938081,1.03416
+2020-2024 vs 2016-2019,change_A_crashes_per_year,estimated,crashes/year,-8849.52,6274.96,-21512.9,3813.86
+2020-2024 vs 2016-2019,ratio_A_crashes,estimated,ratio,0.940937,0.039539,0.864434,1.02421
+2020-2024 vs 2016-2019,change_K_crashes_per_year,estimated,crashes/year,4923.59,1319.88,2259.96,7587.23
+2020-2024 vs 2016-2019,ratio_K_crashes,estimated,ratio,1.15853,0.0432995,1.07437,1.24929
+2020-2024 vs 2016-2019,ratio_K_share_of_injury_KABC,estimated,ratio,1.33037,0.0449366,1.2427,1.42421
+2020-2024 vs 2016-2019,ratio_K_share_of_KA,estimated,ratio,1.18424,0.0385178,1.109,1.26458
+2020-2024 vs 2016-2019,ratio_fatal_share_FARS_numerator_CRSS_denominator,estimated (FARS census count / CRSS estimate),ratio,1.25061,0.0340005,1.18385,1.32115
+2020-2024 vs 2016-2019,FARS_ratio_fatal_crashes (census),observed,ratio,1.10718,0,,
+2020 vs 2016-2019,fatal_crashes_per_year_P0,estimated,crashes/year,31057.2,1510.39,28009.1,34105.3
+2020 vs 2016-2019,fatal_crashes_per_year_comparison,estimated,crashes/year,31876.7,1949.81,27941.8,35811.6
+2020 vs 2016-2019,crashes_known_severity_per_year_P0,estimated,crashes/year,6.46773e+06,335345,5.79098e+06,7.14449e+06
+2020 vs 2016-2019,crashes_known_severity_per_year_comparison,estimated,crashes/year,5.05875e+06,242569,4.56923e+06,5.54828e+06
+2020 vs 2016-2019,fatal_share_P0,estimated,proportion,0.00480186,0.000289257,0.00425206,0.00542237
+2020 vs 2016-2019,fatal_share_comparison,estimated,proportion,0.00630129,0.000429374,0.00549141,0.00722976
+2020 vs 2016-2019,ratio_fatal_share,estimated,ratio,1.31226,0.0659995,1.1856,1.45245
+2020 vs 2016-2019,ratio_fatal_crashes_numerator,estimated,ratio,1.02639,0.0457746,0.938046,1.12305
+2020 vs 2016-2019,ratio_reported_crashes_denominator,estimated,ratio,0.782152,0.0236525,0.735847,0.831371
+2020 vs 2016-2019,numerator_share_of_log_rise,estimated,proportion of log ratio,0.0958426,0.150234,-0.207341,0.399026
+2020 vs 2016-2019,denominator_share_of_log_rise,estimated,proportion of log ratio,0.904157,0.150234,0.600974,1.20734
+2020 vs 2016-2019,hypothetical_share_if_denominator_constant,hypothetical,proportion,0.00492857,0.000374745,0.00422724,0.00574559
+2020 vs 2016-2019,change_O_crashes_per_year,estimated,crashes/year,-1.04259e+06,161964,-1.36944e+06,-715732
+2020 vs 2016-2019,ratio_O_crashes,estimated,ratio,0.775403,0.0276352,0.721591,0.833227
+2020 vs 2016-2019,change_C_crashes_per_year,estimated,crashes/year,-273610,35669.7,-345595,-201626
+2020 vs 2016-2019,ratio_C_crashes,estimated,ratio,0.739003,0.0243479,0.691465,0.789809
+2020 vs 2016-2019,change_B_crashes_per_year,estimated,crashes/year,-73770.4,12773.1,-99547.5,-47993.3
+2020 vs 2016-2019,ratio_B_crashes,estimated,ratio,0.876325,0.0185498,0.839678,0.914571
+2020 vs 2016-2019,change_A_crashes_per_year,estimated,crashes/year,-19832.9,6457.35,-32864.4,-6801.45
+2020 vs 2016-2019,ratio_A_crashes,estimated,ratio,0.867633,0.0377364,0.794724,0.94723
+2020 vs 2016-2019,change_K_crashes_per_year,estimated,crashes/year,819.521,1416.55,-2039.19,3678.23
+2020 vs 2016-2019,ratio_K_crashes,estimated,ratio,1.02639,0.0457746,0.938046,1.12305
+2020 vs 2016-2019,ratio_K_share_of_injury_KABC,estimated,ratio,1.28409,0.054197,1.17924,1.39825
+2020 vs 2016-2019,ratio_K_share_of_KA,estimated,ratio,1.14694,0.0439002,1.06168,1.23905
+2020 vs 2016-2019,ratio_fatal_share_FARS_numerator_CRSS_denominator,estimated (FARS census count / CRSS estimate),ratio,1.34423,0.0406499,1.26465,1.42882
+2020 vs 2016-2019,FARS_ratio_fatal_crashes (census),observed,ratio,1.05139,0,,
+2021 vs 2016-2019,fatal_crashes_per_year_P0,estimated,crashes/year,31057.2,1510.39,28009.1,34105.3
+2021 vs 2016-2019,fatal_crashes_per_year_comparison,estimated,crashes/year,37827.5,2543.96,32693.6,42961.4
+2021 vs 2016-2019,crashes_known_severity_per_year_P0,estimated,crashes/year,6.46773e+06,335345,5.79098e+06,7.14449e+06
+2021 vs 2016-2019,crashes_known_severity_per_year_comparison,estimated,crashes/year,5.89982e+06,294696,5.3051e+06,6.49454e+06
+2021 vs 2016-2019,fatal_share_P0,estimated,proportion,0.00480186,0.000289257,0.00425206,0.00542237
+2021 vs 2016-2019,fatal_share_comparison,estimated,proportion,0.00641164,0.000488053,0.00549823,0.00747564
+2021 vs 2016-2019,ratio_fatal_share,estimated,ratio,1.33524,0.0660478,1.20839,1.47541
+2021 vs 2016-2019,ratio_fatal_crashes_numerator,estimated,ratio,1.218,0.058173,1.10608,1.34124
+2021 vs 2016-2019,ratio_reported_crashes_denominator,estimated,ratio,0.912193,0.02394,0.865137,0.961808
+2021 vs 2016-2019,numerator_share_of_log_rise,estimated,proportion of log ratio,0.682116,0.0891567,0.502191,0.862042
+2021 vs 2016-2019,denominator_share_of_log_rise,estimated,proportion of log ratio,0.317884,0.0891567,0.137958,0.497809
+2021 vs 2016-2019,hypothetical_share_if_denominator_constant,hypothetical,proportion,0.00584865,0.000470952,0.00497107,0.00688009
+2021 vs 2016-2019,change_O_crashes_per_year,estimated,crashes/year,-405980,145633,-699880,-112080
+2021 vs 2016-2019,ratio_O_crashes,estimated,ratio,0.912543,0.0294429,0.855018,0.973938
+2021 vs 2016-2019,change_C_crashes_per_year,estimated,crashes/year,-174871,37345.6,-250237,-99504.2
+2021 vs 2016-2019,ratio_C_crashes,estimated,ratio,0.833191,0.0317671,0.771487,0.89983
+2021 vs 2016-2019,change_B_crashes_per_year,estimated,crashes/year,9595.89,19108.4,-28966.4,48158.2
+2021 vs 2016-2019,ratio_B_crashes,estimated,ratio,1.01609,0.0324488,0.952669,1.08373
+2021 vs 2016-2019,change_A_crashes_per_year,estimated,crashes/year,-3427.1,7507.47,-18577.8,11723.6
+2021 vs 2016-2019,ratio_A_crashes,estimated,ratio,0.977127,0.049291,0.88255,1.08184
+2021 vs 2016-2019,change_K_crashes_per_year,estimated,crashes/year,6770.34,1827.82,3081.66,10459
+2021 vs 2016-2019,ratio_K_crashes,estimated,ratio,1.218,0.058173,1.10608,1.34124
+2021 vs 2016-2019,ratio_K_share_of_injury_KABC,estimated,ratio,1.33654,0.0546635,1.23066,1.45154
+2021 vs 2016-2019,ratio_K_share_of_KA,estimated,ratio,1.19589,0.0497116,1.09966,1.30054
+2021 vs 2016-2019,ratio_fatal_share_FARS_numerator_CRSS_denominator,estimated (FARS census count / CRSS estimate),ratio,1.27608,0.0334902,1.21026,1.34549
+2021 vs 2016-2019,FARS_ratio_fatal_crashes (census),observed,ratio,1.16404,0,,
+2022 vs 2016-2019,fatal_crashes_per_year_P0,estimated,crashes/year,31057.2,1510.39,28009.1,34105.3
+2022 vs 2016-2019,fatal_crashes_per_year_comparison,estimated,crashes/year,36853,2227.55,32357.6,41348.4
+2022 vs 2016-2019,crashes_known_severity_per_year_P0,estimated,crashes/year,6.46773e+06,335345,5.79098e+06,7.14449e+06
+2022 vs 2016-2019,crashes_known_severity_per_year_comparison,estimated,crashes/year,5.73483e+06,347048,5.03445e+06,6.4352e+06
+2022 vs 2016-2019,fatal_share_P0,estimated,proportion,0.00480186,0.000289257,0.00425206,0.00542237
+2022 vs 2016-2019,fatal_share_comparison,estimated,proportion,0.00642618,0.000478192,0.00552973,0.00746686
+2022 vs 2016-2019,ratio_fatal_share,estimated,ratio,1.33827,0.0655816,1.21225,1.47738
+2022 vs 2016-2019,ratio_fatal_crashes_numerator,estimated,ratio,1.18662,0.0499324,1.09001,1.29179
+2022 vs 2016-2019,ratio_reported_crashes_denominator,estimated,ratio,0.886682,0.0330163,0.822495,0.955879
+2022 vs 2016-2019,numerator_share_of_log_rise,estimated,proportion of log ratio,0.58724,0.106501,0.372312,0.802169
+2022 vs 2016-2019,denominator_share_of_log_rise,estimated,proportion of log ratio,0.41276,0.106501,0.197831,0.627688
+2022 vs 2016-2019,hypothetical_share_if_denominator_constant,hypothetical,proportion,0.00569798,0.000429916,0.00489289,0.00663466
+2022 vs 2016-2019,change_O_crashes_per_year,estimated,crashes/year,-499155,188519,-879602,-118707
+2022 vs 2016-2019,ratio_O_crashes,estimated,ratio,0.892471,0.039332,0.816523,0.975483
+2022 vs 2016-2019,change_C_crashes_per_year,estimated,crashes/year,-203438,39877.4,-283914,-122962
+2022 vs 2016-2019,ratio_C_crashes,estimated,ratio,0.80594,0.0361825,0.736131,0.88237
+2022 vs 2016-2019,change_B_crashes_per_year,estimated,crashes/year,-28513.3,18794.9,-66442.9,9416.35
+2022 vs 2016-2019,ratio_B_crashes,estimated,ratio,0.952198,0.0302438,0.893078,1.01523
+2022 vs 2016-2019,change_A_crashes_per_year,estimated,crashes/year,-7597.63,6385.63,-20484.4,5289.1
+2022 vs 2016-2019,ratio_A_crashes,estimated,ratio,0.949293,0.040873,0.870289,1.03547
+2022 vs 2016-2019,change_K_crashes_per_year,estimated,crashes/year,5795.85,1543.14,2681.67,8910.03
+2022 vs 2016-2019,ratio_K_crashes,estimated,ratio,1.18662,0.0499324,1.09001,1.29179
+2022 vs 2016-2019,ratio_K_share_of_injury_KABC,estimated,ratio,1.36086,0.0513412,1.26109,1.46851
+2022 vs 2016-2019,ratio_K_share_of_KA,estimated,ratio,1.19856,0.0472148,1.10696,1.29773
+2022 vs 2016-2019,ratio_fatal_share_FARS_numerator_CRSS_denominator,estimated (FARS census count / CRSS estimate),ratio,1.30082,0.048437,1.20665,1.40234
+2022 vs 2016-2019,FARS_ratio_fatal_crashes (census),observed,ratio,1.15342,0,,
+2023 vs 2016-2019,fatal_crashes_per_year_P0,estimated,crashes/year,31057.2,1510.39,28009.1,34105.3
+2023 vs 2016-2019,fatal_crashes_per_year_comparison,estimated,crashes/year,37268.2,2580.8,32059.9,42476.5
+2023 vs 2016-2019,crashes_known_severity_per_year_P0,estimated,crashes/year,6.46773e+06,335345,5.79098e+06,7.14449e+06
+2023 vs 2016-2019,crashes_known_severity_per_year_comparison,estimated,crashes/year,5.9403e+06,335757,5.26272e+06,6.61789e+06
+2023 vs 2016-2019,fatal_share_P0,estimated,proportion,0.00480186,0.000289257,0.00425206,0.00542237
+2023 vs 2016-2019,fatal_share_comparison,estimated,proportion,0.00627379,0.000487986,0.005362,0.00733948
+2023 vs 2016-2019,ratio_fatal_share,estimated,ratio,1.30653,0.0859946,1.14402,1.49213
+2023 vs 2016-2019,ratio_fatal_crashes_numerator,estimated,ratio,1.19999,0.0713358,1.06433,1.35294
+2023 vs 2016-2019,ratio_reported_crashes_denominator,estimated,ratio,0.918452,0.0271309,0.8653,0.97487
+2023 vs 2016-2019,numerator_share_of_log_rise,estimated,proportion of log ratio,0.681851,0.104423,0.471117,0.892586
+2023 vs 2016-2019,denominator_share_of_log_rise,estimated,proportion of log ratio,0.318149,0.104423,0.107414,0.528883
+2023 vs 2016-2019,hypothetical_share_if_denominator_constant,hypothetical,proportion,0.00576217,0.00044497,0.00493033,0.00673341
+2023 vs 2016-2019,change_O_crashes_per_year,estimated,crashes/year,-316796,145319,-610063,-23529.9
+2023 vs 2016-2019,ratio_O_crashes,estimated,ratio,0.931755,0.0305588,0.872081,0.995512
+2023 vs 2016-2019,change_C_crashes_per_year,estimated,crashes/year,-224016,41693.7,-308157,-139875
+2023 vs 2016-2019,ratio_C_crashes,estimated,ratio,0.786311,0.0369939,0.715089,0.864627
+2023 vs 2016-2019,change_B_crashes_per_year,estimated,crashes/year,15561.7,21042.9,-26904.7,58028
+2023 vs 2016-2019,ratio_B_crashes,estimated,ratio,1.02609,0.0357802,0.956364,1.1009
+2023 vs 2016-2019,change_A_crashes_per_year,estimated,crashes/year,-8389.73,7021.97,-22560.6,5781.17
+2023 vs 2016-2019,ratio_A_crashes,estimated,ratio,0.944006,0.0447771,0.857832,1.03884
+2023 vs 2016-2019,change_K_crashes_per_year,estimated,crashes/year,6211.04,2178.11,1815.43,10606.6
+2023 vs 2016-2019,ratio_K_crashes,estimated,ratio,1.19999,0.0713358,1.06433,1.35294
+2023 vs 2016-2019,ratio_K_share_of_injury_KABC,estimated,ratio,1.35649,0.0810755,1.20235,1.53038
+2023 vs 2016-2019,ratio_K_share_of_KA,estimated,ratio,1.21462,0.0624995,1.09482,1.34753
+2023 vs 2016-2019,ratio_fatal_share_FARS_numerator_CRSS_denominator,estimated (FARS census count / CRSS estimate),ratio,1.20317,0.0355414,1.13354,1.27707
+2023 vs 2016-2019,FARS_ratio_fatal_crashes (census),observed,ratio,1.10505,0,,
+2024 vs 2016-2019,fatal_crashes_per_year_P0,estimated,crashes/year,31057.2,1510.39,28009.1,34105.3
+2024 vs 2016-2019,fatal_crashes_per_year_comparison,estimated,crashes/year,36078.4,2292.08,31452.8,40704
+2024 vs 2016-2019,crashes_known_severity_per_year_P0,estimated,crashes/year,6.46773e+06,335345,5.79098e+06,7.14449e+06
+2024 vs 2016-2019,crashes_known_severity_per_year_comparison,estimated,crashes/year,5.9959e+06,346038,5.29757e+06,6.69423e+06
+2024 vs 2016-2019,fatal_share_P0,estimated,proportion,0.00480186,0.000289257,0.00425206,0.00542237
+2024 vs 2016-2019,fatal_share_comparison,estimated,proportion,0.00601718,0.000469817,0.0051396,0.00704353
+2024 vs 2016-2019,ratio_fatal_share,estimated,ratio,1.25309,0.0648912,1.12875,1.39114
+2024 vs 2016-2019,ratio_fatal_crashes_numerator,estimated,ratio,1.16168,0.061985,1.04309,1.29375
+2024 vs 2016-2019,ratio_reported_crashes_denominator,estimated,ratio,0.927048,0.0264617,0.875155,0.982018
+2024 vs 2016-2019,numerator_share_of_log_rise,estimated,proportion of log ratio,0.66425,0.1329,0.396047,0.932453
+2024 vs 2016-2019,denominator_share_of_log_rise,estimated,proportion of log ratio,0.33575,0.1329,0.0675472,0.603953
+2024 vs 2016-2019,hypothetical_share_if_denominator_constant,hypothetical,proportion,0.00557821,0.000452362,0.00473576,0.00656954
+2024 vs 2016-2019,change_O_crashes_per_year,estimated,crashes/year,-265487,141858,-551768,20794.4
+2024 vs 2016-2019,ratio_O_crashes,estimated,ratio,0.942808,0.0300687,0.884039,1.00548
+2024 vs 2016-2019,change_C_crashes_per_year,estimated,crashes/year,-238606,41735.4,-322831,-154380
+2024 vs 2016-2019,ratio_C_crashes,estimated,ratio,0.772394,0.0384975,0.698483,0.854127
+2024 vs 2016-2019,change_B_crashes_per_year,estimated,crashes/year,32236.7,18778.6,-5660,70133.4
+2024 vs 2016-2019,ratio_B_crashes,estimated,ratio,1.05404,0.0325915,0.990282,1.12191
+2024 vs 2016-2019,change_A_crashes_per_year,estimated,crashes/year,-5000.23,6357.3,-17829.8,7829.32
+2024 vs 2016-2019,ratio_A_crashes,estimated,ratio,0.966628,0.0412213,0.886919,1.0535
+2024 vs 2016-2019,change_K_crashes_per_year,estimated,crashes/year,5021.21,1884.81,1217.51,8824.91
+2024 vs 2016-2019,ratio_K_crashes,estimated,ratio,1.16168,0.061985,1.04309,1.29375
+2024 vs 2016-2019,ratio_K_share_of_injury_KABC,estimated,ratio,1.3097,0.065908,1.18323,1.4497
+2024 vs 2016-2019,ratio_K_share_of_KA,estimated,ratio,1.16154,0.0521317,1.06096,1.27166
+2024 vs 2016-2019,ratio_fatal_share_FARS_numerator_CRSS_denominator,estimated (FARS census count / CRSS estimate),ratio,1.14555,0.0326987,1.08143,1.21348
+2024 vs 2016-2019,FARS_ratio_fatal_crashes (census),observed,ratio,1.06198,0,,
