@@ -736,12 +736,16 @@ def cached_lattice(
     exposure: Exposure,
     outcome: str,
     cache_dir: Path | None = None,
+    fingerprint: str | None = None,
 ) -> dict[frozenset[str], SubsetFit]:
     """``fit_lattice`` with an optional pickle cache (a convenience for re-tabulating only;
-    delete the cache whenever data or model code change)."""
+    delete the cache whenever model code changes).  ``fingerprint`` must identify the data
+    build that ``df`` was loaded from (taken *before* loading, so a rebuild during a long run
+    cannot mislabel the cache)."""
     if cache_dir is None:
         return fit_lattice(df, design, exposure, outcome)
-    path = Path(cache_dir) / f"lattice_{exposure.name}_{outcome}_{data_fingerprint()}.pkl"
+    fingerprint = fingerprint or data_fingerprint()
+    path = Path(cache_dir) / f"lattice_{exposure.name}_{outcome}_{fingerprint}.pkl"
     if path.exists():
         log.info("using cached lattice %s", path)
         with path.open("rb") as fh:
@@ -759,8 +763,9 @@ def analyse_exposure(
     exposure: Exposure,
     outcome: str,
     cache_dir: Path | None = None,
+    fingerprint: str | None = None,
 ) -> dict[str, pd.DataFrame]:
-    lattice = cached_lattice(df, design, exposure, outcome, cache_dir)
+    lattice = cached_lattice(df, design, exposure, outcome, cache_dir, fingerprint)
     ms = lattice_marginset(lattice, design)
     shap = [shapley_table(lattice, ms, exposure, outcome)]
     if "light" in exposure.blocks:
@@ -846,7 +851,7 @@ def run(
     for oc in outcomes:
         parts: dict[str, list[pd.DataFrame]] = {"sequential": [], "shapley": [], "lattice": []}
         for name in names:
-            res = analyse_exposure(df, design, EXPOSURES[name], oc, cache_dir)
+            res = analyse_exposure(df, design, EXPOSURES[name], oc, cache_dir, fingerprint)
             for k, v in res.items():
                 parts[k].append(v)
         for k, frames in parts.items():

@@ -1,0 +1,39 @@
+{
+ "table": "confounding/shapley_fatal.csv",
+ "description": "Shapley (all-orderings average) shares of the crude log-RR accounted for by each covariate block, with and without light",
+ "population": "CRSS police-reported crashes 2016-2024 with known maximum severity (MAX_SEV 0-4)",
+ "unit": "crash",
+ "outcome": "fatal",
+ "method": "Survey-weighted logistic models (exposure + every subset of covariate blocks; ridge 0.01 on mean-1 weights; exact cell compression); standardised predictive margins over all crashes; risk ratio = margin(all exposed) / margin(all reference); Taylor-linearised influence summed within 67 PSUs / 25 strata, t with 42 df; shares and Shapley values by the delta method across models",
+ "inputs": [
+  "data/processed/crss_crash.parquet"
+ ],
+ "rows": 68,
+ "columns": [
+  "exposure",
+  "outcome",
+  "variant",
+  "block",
+  "variables",
+  "shapley_logrr_reduction",
+  "shapley_logrr_low",
+  "shapley_logrr_high",
+  "shapley_share_of_crude",
+  "share_low",
+  "share_high",
+  "min_share_any_order",
+  "max_share_any_order",
+  "crude_rr",
+  "full_rr",
+  "flag"
+ ],
+ "module": "nhtsa_stats.analysis.confounding",
+ "git_commit": "a8620e3-dirty",
+ "generated_utc": "2026-10-22T18:11:30Z",
+ "exposures": {
+  "night": "Night (21:00-05:59) vs day (06:00-20:59); time-of-day bands are not adjusted for because they define the exposure",
+  "rural": "Crash in a rural vs urban CRSS PSU (area-level URBANICITY, not crash-site rurality)",
+  "weekend": "Weekend (Saturday/Sunday) vs weekday",
+  "older_driver": "At least one driver aged 65+ vs no such driver (crashes with an unknown-age driver and no known 65+ driver form a separate 'unknown' level)"
+ }
+}

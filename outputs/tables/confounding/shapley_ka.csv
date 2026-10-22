@@ -1,0 +1,69 @@
+exposure,outcome,variant,block,variables,shapley_logrr_reduction,shapley_logrr_low,shapley_logrr_high,shapley_share_of_crude,share_low,share_high,min_share_any_order,max_share_any_order,crude_rr,full_rr,flag
+night,ka,all_blocks,calendar_area,"YEAR,region,urbanicity",0.00274476,-0.00187839,0.0073679,0.00392544,-0.00260967,0.0104606,-0.0127497,0.029594,2.01219,1.22588,
+night,ka,all_blocks,weekend,weekend,0.0274802,0.0241127,0.0308477,0.0393011,0.0342238,0.0443784,0.0163824,0.0734444,2.01219,1.22588,
+night,ka,all_blocks,light,light,0.163458,0.126687,0.200228,0.233771,0.191068,0.276473,0.0862222,0.400689,2.01219,1.22588,
+night,ka,all_blocks,road_environment,"speed_limit,interstate,junction,work_zone,weather,surface",0.0549269,0.0438914,0.0659625,0.0785544,0.0614582,0.0956506,0.0301056,0.109466,2.01219,1.22588,
+night,ka,all_blocks,alcohol,alcohol_im,0.144389,0.123499,0.16528,0.2065,0.169018,0.243982,0.115168,0.311818,2.01219,1.22588,
+night,ka,all_blocks,speeding,speeding,0.0133279,0.00622911,0.0204267,0.019061,0.00935514,0.0287669,0.000391587,0.0407743,2.01219,1.22588,
+night,ka,all_blocks,driver_vehicle_mix,"young_driver,older_driver,any_motorcycle,any_heavy_truck",-0.0409527,-0.0496878,-0.0322176,-0.0585689,-0.0734836,-0.0436543,-0.135583,0.0248853,2.01219,1.22588,
+night,ka,all_blocks,configuration,"crash_type,n_vehicles",0.130186,0.0994244,0.160948,0.186187,0.152311,0.220063,0.0249812,0.350665,2.01219,1.22588,
+night,ka,all_blocks,retained_after_all_blocks,,0.203662,0.159561,0.247762,0.291269,0.237675,0.344863,,,2.01219,1.22588,
+night,ka,excluding_light,calendar_area,"YEAR,region,urbanicity",0.00355332,-0.00173994,0.00884658,0.00508182,-0.00236723,0.0125309,-0.0127497,0.029594,2.01219,1.36759,
+night,ka,excluding_light,weekend,weekend,0.0300815,0.0263728,0.0337902,0.0430214,0.0374123,0.0486304,0.0199447,0.0734444,2.01219,1.36759,
+night,ka,excluding_light,road_environment,"speed_limit,interstate,junction,work_zone,weather,surface",0.0622515,0.0496224,0.0748806,0.0890297,0.0695147,0.108545,0.0657728,0.107283,2.01219,1.36759,
+night,ka,excluding_light,alcohol,alcohol_im,0.170457,0.146728,0.194185,0.243781,0.200138,0.287424,0.185653,0.311818,2.01219,1.36759,
+night,ka,excluding_light,speeding,speeding,0.0136284,0.00584758,0.0214092,0.0194908,0.00879461,0.030187,0.00592222,0.0407743,2.01219,1.36759,
+night,ka,excluding_light,driver_vehicle_mix,"young_driver,older_driver,any_motorcycle,any_heavy_truck",-0.0649179,-0.0755235,-0.0543123,-0.092843,-0.113263,-0.0724226,-0.135583,-0.0412224,2.01219,1.36759,
+night,ka,excluding_light,configuration,"crash_type,n_vehicles",0.171121,0.131333,0.21091,0.244731,0.204307,0.285154,0.151767,0.350665,2.01219,1.36759,
+night,ka,excluding_light,retained_after_all_blocks,,0.313047,0.263858,0.362236,0.447708,0.396462,0.498953,,,2.01219,1.36759,
+rural,ka,all_blocks,calendar_region,"YEAR,region",-0.0051093,-0.0213184,0.0110998,-0.0156371,-0.0676101,0.0363359,-0.0597979,0.0253945,1.38644,1.21805,
+rural,ka,all_blocks,time,"tod,weekend",0.00370595,-0.00285922,0.0102711,0.0113421,-0.00961964,0.0323038,-0.0568683,0.0921556,1.38644,1.21805,
+rural,ka,all_blocks,light,light,0.0244135,0.0143835,0.0344434,0.0747176,0.0203402,0.129095,-0.0087307,0.178239,1.38644,1.21805,
+rural,ka,all_blocks,road_environment,"speed_limit,interstate,junction,work_zone,weather,surface",0.0674656,0.0195651,0.115366,0.206479,0.0357903,0.377168,0.0624723,0.338197,1.38644,1.21805,
+rural,ka,all_blocks,alcohol,alcohol_im,0.00728884,-0.0118953,0.0264729,0.0223076,-0.0298247,0.0744399,-0.00669683,0.0509396,1.38644,1.21805,
+rural,ka,all_blocks,speeding,speeding,-0.0034258,-0.031197,0.0243454,-0.0104847,-0.0982492,0.0772798,-0.0495756,0.0175458,1.38644,1.21805,
+rural,ka,all_blocks,driver_vehicle_mix,"young_driver,older_driver,any_motorcycle,any_heavy_truck",0.0181251,-0.0146879,0.0509381,0.055472,-0.0261424,0.137086,-0.0465459,0.128249,1.38644,1.21805,
+rural,ka,all_blocks,configuration,"crash_type,n_vehicles",0.0170316,-0.0481553,0.0822185,0.0521254,-0.130008,0.234258,-0.118955,0.269677,1.38644,1.21805,
+rural,ka,all_blocks,retained_after_all_blocks,,0.197247,0.0809166,0.313578,0.603678,0.332204,0.875152,,,1.38644,1.21805,
+rural,ka,excluding_light,calendar_region,"YEAR,region",-0.00521136,-0.0216725,0.0112498,-0.0159494,-0.0686665,0.0367677,-0.0597979,0.0253945,1.38644,1.22553,
+rural,ka,excluding_light,time,"tod,weekend",0.00386752,-0.00515165,0.0128867,0.0118366,-0.0169201,0.0405932,-0.0568683,0.0921556,1.38644,1.22553,
+rural,ka,excluding_light,road_environment,"speed_limit,interstate,junction,work_zone,weather,surface",0.0796073,0.0300074,0.129207,0.243639,0.0572089,0.430069,0.120853,0.338197,1.38644,1.22553,
+rural,ka,excluding_light,alcohol,alcohol_im,0.00762524,-0.0118043,0.0270547,0.0233371,-0.029321,0.0759953,-0.00669683,0.0509396,1.38644,1.22553,
+rural,ka,excluding_light,speeding,speeding,-0.00320701,-0.0311333,0.0247193,-0.00981509,-0.0978506,0.0782204,-0.0495756,0.0175458,1.38644,1.22553,
+rural,ka,excluding_light,driver_vehicle_mix,"young_driver,older_driver,any_motorcycle,any_heavy_truck",0.0178106,-0.0146637,0.0502849,0.0545095,-0.0264836,0.135503,-0.0465459,0.128249,1.38644,1.22553,
+rural,ka,excluding_light,configuration,"crash_type,n_vehicles",0.0228806,-0.0424253,0.0881865,0.0700263,-0.107358,0.24741,-0.118955,0.269677,1.38644,1.22553,
+rural,ka,excluding_light,retained_after_all_blocks,,0.20337,0.0865299,0.32021,0.622416,0.344977,0.899854,,,1.38644,1.22553,
+weekend,ka,all_blocks,calendar_area,"YEAR,region,urbanicity",0.00090503,-0.00220609,0.00401614,0.002243,-0.00549042,0.00997641,-0.00853946,0.0135876,1.49704,1.14381,
+weekend,ka,all_blocks,time_of_day,tod,0.047232,0.04008,0.0543839,0.117058,0.0971047,0.137012,0.0333002,0.264985,1.49704,1.14381,
+weekend,ka,all_blocks,light,light,0.0228712,0.0180825,0.0276599,0.0566832,0.0443596,0.0690067,-0.00976617,0.165315,1.49704,1.14381,
+weekend,ka,all_blocks,road_environment,"speed_limit,interstate,junction,work_zone,weather,surface",0.0130459,0.00761573,0.018476,0.0323324,0.0189223,0.0457425,-0.000212038,0.0632328,1.49704,1.14381,
+weekend,ka,all_blocks,alcohol,alcohol_im,0.0625526,0.0534083,0.0716969,0.155028,0.133763,0.176294,0.0971305,0.246169,1.49704,1.14381,
+weekend,ka,all_blocks,speeding,speeding,0.00750905,0.00264697,0.0123711,0.0186102,0.00671491,0.0305055,0.0101872,0.0340509,1.49704,1.14381,
+weekend,ka,all_blocks,driver_vehicle_mix,"young_driver,older_driver,any_motorcycle,any_heavy_truck",0.0508251,0.0412325,0.0604177,0.125963,0.101614,0.150313,0.071947,0.180216,1.49704,1.14381,
+weekend,ka,all_blocks,configuration,"crash_type,n_vehicles",0.0641816,0.0520568,0.0763065,0.159066,0.132872,0.18526,0.0557825,0.295444,1.49704,1.14381,
+weekend,ka,all_blocks,retained_after_all_blocks,,0.134369,0.10718,0.161558,0.333015,0.285857,0.380173,,,1.49704,1.14381,
+weekend,ka,excluding_light,calendar_area,"YEAR,region,urbanicity",0.000929105,-0.00227202,0.00413023,0.00230267,-0.00565104,0.0102564,-0.00853946,0.0135876,1.49704,1.14444,
+weekend,ka,excluding_light,time_of_day,tod,0.0614548,0.051868,0.0710416,0.152308,0.125713,0.178902,0.0676658,0.264985,1.49704,1.14444,
+weekend,ka,excluding_light,road_environment,"speed_limit,interstate,junction,work_zone,weather,surface",0.0133047,0.00779013,0.0188192,0.0329738,0.0193717,0.046576,-0.000212038,0.0632328,1.49704,1.14444,
+weekend,ka,excluding_light,alcohol,alcohol_im,0.0658271,0.0564188,0.0752354,0.163144,0.141255,0.185033,0.0988673,0.246169,1.49704,1.14444,
+weekend,ka,excluding_light,speeding,speeding,0.0077108,0.00269459,0.012727,0.0191102,0.00682029,0.0314001,0.0102364,0.0340509,1.49704,1.14444,
+weekend,ka,excluding_light,driver_vehicle_mix,"young_driver,older_driver,any_motorcycle,any_heavy_truck",0.0503334,0.0409154,0.0597515,0.124745,0.10075,0.14874,0.071947,0.180216,1.49704,1.14444,
+weekend,ka,excluding_light,configuration,"crash_type,n_vehicles",0.0690168,0.0565868,0.0814468,0.171049,0.144306,0.197792,0.0640698,0.295444,1.49704,1.14444,
+weekend,ka,excluding_light,retained_after_all_blocks,,0.134915,0.107576,0.162253,0.334368,0.286896,0.38184,,,1.49704,1.14444,
+older_driver,ka,all_blocks,calendar_area,"YEAR,region,urbanicity",0.00813016,-0.00340361,0.0196639,-0.168062,-0.507234,0.171111,-0.32803,-0.0137174,0.952775,1.2142,crude log-RR CI includes 0: shares unstable
+older_driver,ka,all_blocks,time,"tod,weekend",-0.05442,-0.0607015,-0.0481385,1.12494,-0.262285,2.51216,0.116021,2.81779,0.952775,1.2142,crude log-RR CI includes 0: shares unstable
+older_driver,ka,all_blocks,light,light,-0.0380119,-0.0436835,-0.0323404,0.785759,-0.19294,1.76446,-0.0608837,2.29369,0.952775,1.2142,crude log-RR CI includes 0: shares unstable
+older_driver,ka,all_blocks,road_environment,"speed_limit,interstate,junction,work_zone,weather,surface",-0.0200939,-0.0290188,-0.0111689,0.415368,-0.0646436,0.895379,-0.00960067,1.14292,0.952775,1.2142,crude log-RR CI includes 0: shares unstable
+older_driver,ka,all_blocks,alcohol,alcohol_im,-0.0370546,-0.0432518,-0.0308575,0.765971,-0.222127,1.75407,0.248062,1.57574,0.952775,1.2142,crude log-RR CI includes 0: shares unstable
+older_driver,ka,all_blocks,speeding,speeding,-0.0199954,-0.0265276,-0.0134632,0.413333,-0.106901,0.933566,0.241995,0.737864,0.952775,1.2142,crude log-RR CI includes 0: shares unstable
+older_driver,ka,all_blocks,driver_vehicle_mix_other,"young_driver,any_motorcycle,any_heavy_truck",-0.0220833,-0.0337384,-0.0104281,0.456491,-0.0898893,1.00287,0.0565719,0.729269,0.952775,1.2142,crude log-RR CI includes 0: shares unstable
+older_driver,ka,all_blocks,configuration,"crash_type,n_vehicles",-0.0589304,-0.0759976,-0.0418632,1.21817,-0.179301,2.61565,0.274469,2.78868,0.952775,1.2142,crude log-RR CI includes 0: shares unstable
+older_driver,ka,all_blocks,retained_after_all_blocks,,0.194083,0.151189,0.236978,-4.01197,-9.93607,1.91213,,,0.952775,1.2142,crude log-RR CI includes 0: shares unstable
+older_driver,ka,excluding_light,calendar_area,"YEAR,region,urbanicity",0.00854182,-0.00311397,0.0201976,-0.176571,-0.525349,0.172207,-0.32803,-0.0137174,0.952775,1.21377,crude log-RR CI includes 0: shares unstable
+older_driver,ka,excluding_light,time,"tod,weekend",-0.0787162,-0.088285,-0.0691474,1.62717,-0.386765,3.64111,0.647293,2.81779,0.952775,1.21377,crude log-RR CI includes 0: shares unstable
+older_driver,ka,excluding_light,road_environment,"speed_limit,interstate,junction,work_zone,weather,surface",-0.022584,-0.0317778,-0.0133901,0.466842,-0.074166,1.00785,-0.00960067,1.14292,0.952775,1.21377,crude log-RR CI includes 0: shares unstable
+older_driver,ka,excluding_light,alcohol,alcohol_im,-0.0409691,-0.0475792,-0.034359,0.846889,-0.245372,1.93915,0.249488,1.57574,0.952775,1.21377,crude log-RR CI includes 0: shares unstable
+older_driver,ka,excluding_light,speeding,speeding,-0.0202956,-0.0270004,-0.0135908,0.419538,-0.108226,0.947302,0.241995,0.737864,0.952775,1.21377,crude log-RR CI includes 0: shares unstable
+older_driver,ka,excluding_light,driver_vehicle_mix_other,"young_driver,any_motorcycle,any_heavy_truck",-0.0208177,-0.0325146,-0.00912086,0.430331,-0.0832489,0.943912,0.0565719,0.669649,0.952775,1.21377,crude log-RR CI includes 0: shares unstable
+older_driver,ka,excluding_light,configuration,"crash_type,n_vehicles",-0.0672675,-0.0852847,-0.0492503,1.39051,-0.209756,2.99078,0.341526,2.78868,0.952775,1.21377,crude log-RR CI includes 0: shares unstable
+older_driver,ka,excluding_light,retained_after_all_blocks,,0.193732,0.151142,0.236322,-4.00471,-9.91126,1.90184,,,0.952775,1.21377,crude log-RR CI includes 0: shares unstable

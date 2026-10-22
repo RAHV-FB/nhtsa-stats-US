@@ -25,6 +25,6 @@
   "flag"
  ],
  "module": "nhtsa_stats.analysis.confounding",
- "git_commit": "2fc4f56-dirty",
- "generated_utc": "2026-10-22T17:23:05Z"
+ "git_commit": "a8620e3-dirty",
+ "generated_utc": "2026-10-22T18:11:25Z"
 }
