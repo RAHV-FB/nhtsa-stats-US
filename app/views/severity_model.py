@@ -61,6 +61,16 @@ def render() -> None:
         cond[var] = cols[i % 3].selectbox(
             label, levels, index=levels.index(default), key=f"sm_{var}"
         )
+    if "crash_type" in cond and "n_vehicles" in cond:
+        from nhtsa_stats.models.severity_ml import compatible_n_vehicles
+
+        ok = compatible_n_vehicles(cond["crash_type"])
+        if cond["n_vehicles"] not in ok:
+            st.warning(
+                f"Crash type '{cond['crash_type']}' cannot have {cond['n_vehicles']} vehicles in "
+                f"transport (possible: {', '.join(ok)}). Choose a possible combination."
+            )
+            return
     p, lo, hi = predict(model, cond)
     ref = {v: (lv[0] if v != "YEAR" else lv[-1]) for v, lv in model["levels"].items()}
     p0, _, _ = predict(model, ref)
@@ -102,7 +112,9 @@ def render() -> None:
                 except Exception as exc:  # model artefacts may be absent
                     st.caption(f"ML model unavailable: {exc}")
                 else:
-                    if res.get("status") == "ok":
+                    if res.get("status") != "ok":
+                        st.warning(f"The prediction model declined: {res.get('reason', '')}")
+                    else:
                         st.metric(
                             f"Predicted probability ({res['model']}, {res['stage']})",
                             f"{100 * res['probability']:.2f}%",

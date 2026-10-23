@@ -31,8 +31,19 @@ def git_commit() -> str:
             check=True,
             timeout=10,
         )
+        # Only source changes make a run "dirty"; the outputs being written do not.
         dirty = subprocess.run(
-            ["git", "status", "--porcelain", "--untracked-files=no"],
+            [
+                "git",
+                "status",
+                "--porcelain",
+                "--untracked-files=no",
+                "--",
+                ".",
+                ":(exclude)outputs",
+                ":(exclude)reports",
+                ":(exclude)docs/generated",
+            ],
             cwd=config.PROJECT_ROOT,
             capture_output=True,
             text=True,

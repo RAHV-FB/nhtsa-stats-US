@@ -93,19 +93,18 @@ def render() -> None:
             est = svy_mean(design, y, dom)
             n = int(dom.sum())
             ev = int(np.nansum(y[dom]))
+            small = n < config.MIN_CELL_N  # suppressed: no estimates shown
             rows.append(
                 {
                     "A": "exposed" if sa else "reference",
                     "B": "exposed" if sb else "reference",
                     "sample_n": n,
                     "events": ev,
-                    "crashes_per_year": round(
-                        svy_total(design, np.ones(design.n), dom).estimate / n_years, -2
-                    ),
-                    "crude_rate": fmt_pct(est.estimate, 3),
-                    "flag": "suppressed"
-                    if n < config.MIN_CELL_N
-                    else ("few events" if ev < 20 else ""),
+                    "crashes_per_year": None
+                    if small
+                    else round(svy_total(design, np.ones(design.n), dom).estimate / n_years, -2),
+                    "crude_rate": "—" if small else fmt_pct(est.estimate, 3),
+                    "flag": "suppressed" if small else ("few events" if ev < 20 else ""),
                 }
             )
     st.subheader("Observed cells (CRSS, weighted)")
@@ -113,7 +112,8 @@ def render() -> None:
     st.dataframe(pd.DataFrame(rows), hide_index=True, width="stretch")
     known = np.isfinite(ia) & np.isfinite(ib)
     oe = {}
-    for tag, dom in (("all crashes", known), ("fatal crashes", known & (y == 1))):
+    event_tag = "fatal crashes" if outcome == "fatal" else "fatal-or-serious (KA) crashes"
+    for tag, dom in (("all crashes", known), (event_tag, known & (y == 1))):
         pa = svy_mean(design, np.nan_to_num(ia), dom).estimate
         pb = svy_mean(design, np.nan_to_num(ib), dom).estimate
         pab = svy_mean(design, np.nan_to_num(ia * ib), dom).estimate
@@ -140,9 +140,13 @@ def render() -> None:
     if pre is not None:
         for comb in it.PAIRS:
             ea, eb = comb.exposures
-            if {(ea.var, ea.exposed, ea.reference), (eb.var, eb.exposed, eb.reference)} == {
-                (a.var, a.exposed, a.reference),
-                (b.var, b.exposed, b.reference),
+            # Order-insensitive: the same levels picked in another order are the same pair.
+            if {
+                (ea.var, frozenset(ea.exposed), frozenset(ea.reference)),
+                (eb.var, frozenset(eb.exposed), frozenset(eb.reference)),
+            } == {
+                (a.var, frozenset(a.exposed), frozenset(a.reference)),
+                (b.var, frozenset(b.exposed), frozenset(b.reference)),
             }:
                 hit = pre[pre["pair"] == comb.name]
                 if len(hit):

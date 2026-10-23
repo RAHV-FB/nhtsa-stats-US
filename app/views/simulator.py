@@ -55,7 +55,9 @@ def _baseline_section(engine, base) -> None:
     st.caption(
         f"Mean per year over {base.window[0]}-{base.window[1]}. Deaths are observed FARS counts, "
         "except alcohol (BAC >= 0.08), which is an expected value over NHTSA's 10 multiply-imputed "
-        "BAC values rather than a census count. KA crashes are CRSS design-based estimates. "
+        "BAC values rather than a census count. KA crashes are CRSS design-based estimates; for "
+        "the alcohol row they count crashes with NHTSA-imputed police-reported alcohol involvement "
+        "(ALCHL_IM), not a BAC threshold. "
         "Segment counts exclude deaths whose status is unknown, so they are lower bounds."
     )
     rows = []

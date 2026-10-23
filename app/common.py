@@ -93,11 +93,12 @@ def filter_controls(df: pd.DataFrame, key: str) -> np.ndarray:
     yr = c1.slider("Years", 2016, 2024, (2016, 2024), key=f"{key}_yr")
     regions = c2.multiselect("Region", specs.CRASH_LEVELS["region"], key=f"{key}_reg")
     area = c3.multiselect("Area", ["urban", "rural"], key=f"{key}_area")
+    # Combine into new arrays: under copy-on-write .to_numpy() can be read-only.
     m = df["YEAR"].between(*yr).to_numpy()
     if regions:
-        m &= df["region"].isin(regions).to_numpy()
+        m = m & df["region"].isin(regions).to_numpy()
     if area:
-        m &= df["urbanicity"].isin(area).to_numpy()
+        m = m & df["urbanicity"].isin(area).to_numpy()
     return m
 
 

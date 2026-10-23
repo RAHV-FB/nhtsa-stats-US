@@ -82,10 +82,11 @@ def cmd_build(args: argparse.Namespace) -> None:
 
 
 def cmd_analyze(args: argparse.Namespace) -> None:
-    names = args.modules or list(ANALYSES)
-    unknown = [n for n in names if n not in ANALYSES]
+    unknown = [n for n in args.modules if n not in ANALYSES]
     if unknown:
         raise SystemExit(f"unknown module(s): {unknown}; see `nhtsa list`")
+    # Always in dependency order, whatever order the modules were named in.
+    names = [n for n in ANALYSES if not args.modules or n in args.modules]
     for name in names:
         t0 = time.time()
         mod = importlib.import_module(ANALYSES[name])

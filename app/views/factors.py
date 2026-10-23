@@ -70,8 +70,11 @@ def render() -> None:
             f"{fmt_pct(a, 3)} – {fmt_pct(b, 3)}"
             for a, b in zip(tab["low"], tab["high"], strict=True)
         ],
-        crashes_per_year=tab["crashes_per_year"].round(-2).astype(int),
+        crashes_per_year=tab["crashes_per_year"].round(-2).astype(int).astype(str),
     )[["level", "sample_n", "events", "crashes_per_year", "share_of_crashes", "rate", "ci", "flag"]]
+    # Suppressed levels (< 30 sample crashes): counts only, no estimates.
+    sup = tab["flag"].str.startswith("suppressed").to_numpy()
+    nice.loc[sup, ["crashes_per_year", "share_of_crashes", "rate", "ci"]] = "—"
     st.dataframe(nice, hide_index=True, width="stretch")
     st.caption(
         "sample_n = unweighted CRSS crashes; crashes_per_year = weighted national estimate (police-reported); "
@@ -110,7 +113,7 @@ def render() -> None:
     ld = pd.concat(long)
     ld = ld[np.isfinite(ld["rr"])]
     base = alt.Chart(ld).encode(
-        y=alt.Y("level:N", sort=list(a["level"]), title=None),
+        y=alt.Y("level:N", sort=list(a["level"]), title=None, axis=alt.Axis(labelOverlap=False)),
         yOffset="model:N",
         color=alt.Color(
             "model:N",
@@ -141,7 +144,7 @@ def render() -> None:
         .encode(x="r:Q")
     )
     st.altair_chart(
-        alt.layer(rules, pts, ref).properties(height=max(48 * len(a), 160)),
+        alt.layer(rules, pts, ref).properties(height=max(66 * len(a), 180)),
         width="stretch",
     )
     st.caption(

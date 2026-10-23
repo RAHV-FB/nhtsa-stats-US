@@ -263,10 +263,14 @@ class ModelSpec:
     def _block(self, df: pd.DataFrame, var: str) -> tuple[np.ndarray, list[str]]:
         if var in self.categorical:
             levels = self.categorical[var]
-            codes = pd.Categorical(df[var], categories=levels).codes
-            if (codes < 0).any():
-                bad = pd.unique(df[var].to_numpy()[codes < 0])[:5]
+            values = df[var]
+            undeclared = values.notna() & ~values.isin(levels)
+            if undeclared.any():
+                bad = pd.unique(values[undeclared].to_numpy())[:5]
                 raise ValueError(f"{var}: values outside declared levels: {bad}")
+            codes = pd.Categorical(values, categories=levels).codes
+            if (codes < 0).any():  # missing values
+                raise ValueError(f"{var}: missing values; declare an explicit level for them")
             block = np.zeros((len(df), len(levels) - 1))
             rows = np.nonzero(codes > 0)[0]
             block[rows, codes[rows] - 1] = 1.0

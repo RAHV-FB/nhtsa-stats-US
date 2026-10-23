@@ -19,7 +19,7 @@ from views import factors, findings, interactions, methods, severity_model, simu
 st.set_page_config(page_title="US crash severity research", layout="wide")
 
 pages = [
-    st.Page(findings.render, title="Findings", url_path="findings", default=True),
+    st.Page(findings.render, title="Findings", default=True),  # served at the root URL
     st.Page(factors.render, title="Factor explorer", url_path="factors"),
     st.Page(interactions.render, title="Interaction explorer", url_path="interactions"),
     st.Page(severity_model.render, title="Severity model", url_path="severity"),
