@@ -62,7 +62,9 @@ def test_contrast_arithmetic_matches_margins():
         m["110"] * m["000"] / (m["100"] * m["010"])
     )
     three = tab.loc["f0 x f1 x f2"]
-    expected = sum((-1) ** (3 - sum(b)) * m["".join(map(str, b))] for b in itertools.product((0, 1), repeat=3))
+    expected = sum(
+        (-1) ** (3 - sum(b)) * m["".join(map(str, b))] for b in itertools.product((0, 1), repeat=3)
+    )
     assert three["additive_contrast"] == pytest.approx(expected)
     # The data were generated with a positive f0 x f1 log-odds interaction.
     assert pair["additive_contrast"] > 0
@@ -125,3 +127,23 @@ def test_holm():
     assert adj[3] == pytest.approx(0.06)
     assert adj[1] == pytest.approx(0.06)
     assert np.isnan(adj[2])
+
+
+def test_saturated_in_all_levels_is_calibrated_within_recorded_cells():
+    """With products over every observed level (unknown included), weighted predictions sum to
+    weighted events in every recorded factor cell (score equations; no ridge)."""
+    df, design = _data(seed=5)
+    df.loc[df.index[:500], "f1"] = "unknown"
+    res = fa.fit_factorial(df, design, FACTORS3[:2], ["cov"], "y", ridge=0.0, min_n=1, min_events=1)
+    pred = res.model.predict(df)
+    w = design.weight
+    for a in ("no", "yes"):
+        for b in ("no", "yes", "unknown"):
+            m = ((df["f0"] == a) & (df["f1"] == b)).to_numpy()
+            assert np.sum(w[m] * pred[m]) == pytest.approx(np.sum(w[m] * df.loc[m, "y"]), rel=1e-6)
+    assert "f0{yes}:f1{unknown}" in res.model.names_
+
+
+def test_product_terms_with_levels():
+    terms = fa.product_terms(FACTORS3[:2], {"f0": ["no", "yes"], "f1": ["no", "yes", "unknown"]})
+    assert len(terms) == 2

@@ -16,15 +16,15 @@ tables drive the "Case comparison" page of the research interface.*
   that probability is with each factor absent.
 * They do **not** give the share of a particular death "caused" by each factor. Even inside one
   fitted model, the share credited to a factor changes with the scale and the order in which
-  factors are considered, can exceed 100% or be negative, and requires combinations that may
-  not exist in the data.
+  factors are considered, can be negative, and requires combinations that may not exist in the
+  data.
 
 ## 1. The user's example: exceeded limit, alcohol, drugs, no belt, at night
 
 Phase 2 was asked to examine a case like *a driver exceeding the limit, alcohol involved, drug
 involvement recorded, no seatbelt, a night-time collision*. Night cannot be combined with drugs
-in the grid (police drug status is known for too few night-time drivers to support the extra
-dimension), so the case is examined in two models.
+in one grid: to keep enough drivers in each cell, the drug grid (restricted to drivers with a
+known police drug code) omits night. The case is therefore examined in two models.
 
 **(a) Without drugs** — exceeded limit + alcohol + unbelted + night + single-vehicle crash:
 
@@ -56,11 +56,17 @@ individual case. The single-vehicle comparison is unsupported (too few multi-veh
 the same other four factors). Because an intermediate combination is unsupported, no allocation
 of the risk difference among the factors is shown for this case.
 
-*Calibration.* The observed rate for these drivers is about twice the model's own prediction for
-them, so the model (main effects plus pairwise products) under-predicts this extreme
-combination; the observed rate, from
-{{cases/scenarios|model=main (no drugs);case=speeding=exceeded_limit, alcohol=yes, unbelted=yes, night=night, single_vehicle=yes|crss_deaths|,.0f}}
-deaths, is itself imprecise. Both are reported; neither is a forensic probability for one driver.
+*Calibration and standardisation.* Three numbers describe "the risk" of this case. The observed
+rate ({{cases/scenarios|model=main (no drugs);case=speeding=exceeded_limit, alcohol=yes, unbelted=yes, night=night, single_vehicle=yes|observed_rate|pct:1}},
+from {{cases/scenarios|model=main (no drugs);case=speeding=exceeded_limit, alcohol=yes, unbelted=yes, night=night, single_vehicle=yes|crss_deaths|,.0f}}
+deaths, itself imprecise) and the model's mean prediction for the same drivers
+({{cases/scenarios|model=main (no drugs);case=speeding=exceeded_limit, alcohol=yes, unbelted=yes, night=night, single_vehicle=yes|predicted_in_cell|pct:1}})
+agree because the model is saturated in the case factors (a first version with only pairwise
+products did not, `docs/model_validation.md`). The standardised probability
+({{cases/scenarios|model=main (no drugs);case=speeding=exceeded_limit, alcohol=yes, unbelted=yes, night=night, single_vehicle=yes|model_risk|pct:1}})
+is somewhat lower because such crashes occur disproportionately in rural areas and involve
+younger drivers (both in the model); standardisation answers "what if this combination occurred in the
+average crash setting". None of the three is a forensic probability for one driver.
 
 **(b) With police-reported drugs** (drivers with known drug status; night not in this grid) —
 exceeded limit + alcohol + drugs + unbelted + single-vehicle crash:
@@ -93,10 +99,11 @@ and all different: {{cases/scenario_contrasts|model=main (no drugs);case=speedin
 (Shapley, risk scale), {{cases/scenario_contrasts|model=main (no drugs);case=speeding=none, alcohol=yes, unbelted=yes, night=night, single_vehicle=yes;factor=unbelted|shapley_share_log_rr|pct:0}}
 (Shapley, log scale), {{cases/scenario_contrasts|model=main (no drugs);case=speeding=none, alcohol=yes, unbelted=yes, night=night, single_vehicle=yes;factor=unbelted|share_if_added_first|pct:0}}
 (belt considered first) and {{cases/scenario_contrasts|model=main (no drugs);case=speeding=none, alcohol=yes, unbelted=yes, night=night, single_vehicle=yes;factor=unbelted|share_if_added_last|pct:0}}
-(belt considered last). Shares above 100% and negative shares arise because the single-vehicle
-and night factors *lower* the modelled risk relative to the reference in this model (the
-standardised risk for a daytime multi-vehicle crash of an unbelted drinking driver is higher),
-so the "parts" do not partition a positive whole. None of these is the cause of anyone's death.
+(belt considered last). Negative shares arise because the single-vehicle factor has a point
+estimate below 1 in this combination (its interval includes 1) (RR {{cases/scenario_contrasts|model=main (no drugs);case=speeding=none, alcohol=yes, unbelted=yes, night=night, single_vehicle=yes;factor=single_vehicle|rr_case_vs_without|ci:2@rr_case_vs_without}}
+for the case vs the same driver in a multi-vehicle crash), so the "parts" do not partition a
+positive whole and the other factors' shares must exceed it. None of these is the cause of
+anyone's death.
 
 ## 3. Why individual attribution is not identifiable (answer to G)
 

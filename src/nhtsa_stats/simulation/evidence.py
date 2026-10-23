@@ -200,13 +200,13 @@ def phase2_evidence() -> dict[str, str]:
         b = _row(dpc, split="driver speeding (any)", stratum="driver speeding")
         c = _row(dpc, split="driver BAC >= .08 (MI)", stratum="driver BAC >= .08")
         out["belt"] = (
-            "Phase 2: within-vehicle belt RR is the same whether the driver was speeding "
+            "Phase 2: within-vehicle belt RR is unchanged by whether the driver was speeding "
             + _fmt_ci(b, "rr_belted_vs_unbelted", "rr_low", "rr_high")
             + " or not "
             + _fmt_ci(a, "rr_belted_vs_unbelted", "rr_low", "rr_high")
             + ", and with a BAC >= .08 driver "
             + _fmt_ci(c, "rr_belted_vs_unbelted", "rr_low", "rr_high")
-            + ": belt protection is independent of the behaviour that caused the crash, so belt "
+            + " (slightly more protective): belt protection is largely independent of the behaviour that led to the crash, so belt "
             "and impaired-driving measures act on different stages and do not substitute for each other."
         )
     if bounds is not None:

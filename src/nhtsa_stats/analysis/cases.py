@@ -21,10 +21,10 @@ about it.  This module pre-computes, for every combination on a grid of driver-l
 Population and model
     CRSS drivers of light passenger vehicles 2016-2024 with known injury outcome and belt use
     belted / none / unknown.  Outcome: the driver dies (imputed severity).  Survey logistic
-    model with the case factors (speeding: none / exceeded limit / other speeding / unknown;
-    alcohol imputed; unbelted; night; single-vehicle) as main effects plus all pairwise
-    products of their indicators, adjusted for crash environment, driver age and sex, vehicle
-    body type and the other drivers' recorded behaviour; standardised over all such drivers.
+    model saturated in the case factors (speeding: none / exceeded limit / other speeding /
+    unknown; alcohol imputed; unbelted; night; single-vehicle: main effects and the products of
+    their indicators for every subset of factors), adjusted for crash environment, driver age and sex, vehicle
+    body type; standardised over all such drivers.
     A second model adds police-reported drugs (yes / no) on the subset with known drug status.
 
 Not inferable: the cause of any individual death; the share of a death "due to" each factor.
@@ -60,13 +60,11 @@ GRID: dict[str, tuple[str, list[str]]] = {
     "single_vehicle": ("single_vehicle", ["no", "yes"]),
 }
 DRUG_GRID = ("own_drugs_police", ["no", "yes"])
-COVARIATES = [c for c in multifactor.ENV if c not in ("tod", "light")] + [
-    "age",
-    "sex",
-    "body",
-    "other_speeding",
-    "other_alcohol_im",
-]
+# The other drivers' behaviour is NOT adjusted for: "no other vehicle" coincides exactly with a
+# single-vehicle crash, a case factor, so those covariates would be collinear with it and the
+# counterfactual "same driver in a multi-vehicle crash" would keep an impossible
+# "no other vehicle" value (found by the independent Phase-2 audit).
+COVARIATES = [c for c in multifactor.ENV if c not in ("tod", "light")] + ["age", "sex", "body"]
 
 
 def case_frame():
@@ -93,12 +91,19 @@ def case_frame():
 
 
 def _products(factors: dict[str, tuple[str, list[str]]]) -> list:
-    """Pairwise products of non-reference indicators of the grid factors."""
-    ind = [(col, [lv]) for col, levels in factors.values() for lv in levels[1:]]
+    """Products of non-reference indicators for every subset of >= 2 factors (one level per
+    factor; ``factors`` maps a name to (column, levels with the reference first)), so the model
+    is saturated in the case factors.  With an indicator for every
+    factor cell, the score equations make the weighted predictions sum to the weighted deaths in
+    every cell: the model is calibrated within cells by construction (up to the small ridge)."""
     out = []
-    for (ca, la), (cb, lb) in itertools.combinations(ind, 2):
-        if ca != cb:
-            out.append(((ca, la), (cb, lb)))
+    items = list(factors.values())
+    for r in range(2, len(items) + 1):
+        for subset in itertools.combinations(items, r):
+            for levels in itertools.product(*(lv[1:] for _, lv in subset)):
+                out.append(
+                    tuple((col, [lev]) for (col, _), lev in zip(subset, levels, strict=True))
+                )
     return out
 
 
@@ -113,8 +118,11 @@ def fit(df: pd.DataFrame, design, factors: dict[str, tuple[str, list[str]]]):
         fl = next((levels for col, levels in factors.values() if col == c), None)
         ref = fl[0] if fl else pd.Series(work[c]).value_counts().index[0]
         cats[c] = [ref, *sorted((v for v in pd.unique(work[c]) if v != ref), key=str)]
+    # Products over *every* observed non-reference level of the case factors (including
+    # 'unknown'), so that each recorded factor cell has its own parameter.
+    observed = {n: (col, cats[col]) for n, (col, _) in factors.items()}
     m = SurveyLogit(
-        ModelSpec(categorical=cats, products=_products(factors)),
+        ModelSpec(categorical=cats, products=_products(observed)),
         ridge=RIDGE * len(cells) / len(work),
     )
     m.fit(cells, cells["drv_killed"].to_numpy(float), cd)
@@ -343,7 +351,7 @@ def run() -> dict[str, pd.DataFrame]:
     scen_all = pd.concat([scen, scen2], ignore_index=True)
     contr_all = pd.concat([contr, contr2], ignore_index=True)
     pop = "CRSS 2016-2024 drivers of light passenger vehicles (belt use belted/none/unknown); second model: drivers with known police drug status"
-    method = "Survey logistic model with grid factors, all pairwise products of their indicators, and environment/person covariates; g-computation standardised over the population; Taylor linearisation (42 df); cells with < 30 drivers or < 10 deaths withheld; Shapley allocations exact over the factors present"
+    method = "Survey logistic model saturated in the grid factors (all products of their indicators), with environment/person covariates; g-computation standardised over the population; Taylor linearisation (42 df); cells with < 30 drivers or < 10 deaths withheld; Shapley allocations exact over the factors present"
     save_table(
         scen_all,
         MODULE,

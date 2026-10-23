@@ -667,8 +667,8 @@ def run() -> dict[str, pd.DataFrame]:
     frames = load_frames()
     out = run_analyses(frames)
     method = (
-        "Survey logistic model with all factor main effects, every product of factor "
-        "indicators, and categorical covariates; standardised margins for all 2^k "
+        "Survey logistic model with all factor main effects, a product for every combination "
+        "of non-reference factor levels (unknown included), and categorical covariates; standardised margins for all 2^k "
         "combinations (g-computation over the analysis population); Taylor linearisation on "
         "25 strata / 67 PSUs (t, 42 df); cells with < 30 units or < 10 events withheld; Holm "
         "across the registered family per scale"

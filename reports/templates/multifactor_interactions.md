@@ -9,8 +9,8 @@ police-reported crash, not causal effects.*
 ## Summary
 
 1. **The unit matters.** The same recorded behaviour has different associations depending on
-   whose death is the outcome. Alcohol involvement of the responsible driver carries a risk ratio
-   of {{multifactor/victims|victim=crash fatal (any driver's behaviour)|rr_alcohol_only|ci:1@rr_alcohol_only}}
+   whose death is the outcome. Recorded alcohol involvement — of any driver for the crash
+   outcome, of the responsible driver for each person's death — carries a risk ratio of {{multifactor/victims|victim=crash fatal (any driver's behaviour)|rr_alcohol_only|ci:1@rr_alcohol_only}}
    for the crash being fatal, {{multifactor/victims|victim=driver killed (own behaviour)|rr_alcohol_only|ci:1@rr_alcohol_only}}
    for the driver's own death, {{multifactor/victims|victim=passenger killed (their driver's behaviour)|rr_alcohol_only|ci:1@rr_alcohol_only}}
    for a passenger's death, {{multifactor/victims|victim=other-vehicle occupant killed (the other driver's behaviour)|rr_alcohol_only|ci:1@rr_alcohol_only}}
@@ -27,13 +27,16 @@ police-reported crash, not causal effects.*
    {{multifactor/interactions|analysis=crash_exceeded_x_alcohol;contrast=exceeded x alcohol|additive_contrast|cix1000:1}}
    per 1,000 crashes), but a smaller ratio than their product (ratio of risk ratios
    {{multifactor/interactions|analysis=crash_exceeded_x_alcohol;contrast=exceeded x alcohol|multiplicative_ratio|ci:2}}).
-3. **When one driver is the only driver, the two behaviours combine multiplicatively.** In
+3. **When one driver is the only driver, no departure from multiplicativity is detected.** In
    single-vehicle crashes the ratio of risk ratios is
    {{multifactor/interactions|analysis=sv_driver_exceeded_x_alcohol;contrast=exceeded x alcohol|multiplicative_ratio|ci:2}}:
-   no departure from multiplicativity. The crash-level sub-multiplicativity is partly an artefact
-   of attributing two different drivers' behaviours to one crash.
-4. **Belt non-use dominates every occupant combination, and combines super-additively with
-   behaviour.** For light-vehicle drivers, the standardised risk of dying is
+   no departure from multiplicativity is detected. The crash-level sub-multiplicativity may
+   partly reflect pooling two different drivers' behaviours and different crash types in one
+   crash-level contrast; the two explanations cannot be separated here.
+4. **Belt non-use dominates every occupant combination.** Its additive interaction with the
+   driver's speeding is positive for drivers and passengers, and with the driver's alcohol for
+   passengers (Holm-adjusted; for drivers the alcohol × unbelted additive contrast does not
+   survive the adjustment). For light-vehicle drivers, the standardised risk of dying is
    {{multifactor/margins|analysis=lpv_driver_speeding_x_alcohol_x_unbelted;combination=none|adj_risk|cipct:2}}
    with none of the three factors and
    {{multifactor/margins|analysis=lpv_driver_speeding_x_alcohol_x_unbelted;combination=speeding + alcohol + unbelted|adj_risk|cipct:1}}
@@ -56,7 +59,8 @@ attributable deaths; if they combine sub-multiplicatively, adding up relative ri
 the combination.
 
 *Design.* For each analysis a survey logistic model contains every factor's categorical main
-effect, the product of the exposed indicators for every subset of factors (so the factors are
+effect, a product term for every combination of non-reference levels (unknown included) of every
+subset of factors (so the factors are
 saturated among themselves), and the adjustment covariates. The 2^k standardised risks are the
 mean predicted risk over the analysis population with every unit set to each combination.
 Additive interaction is the k-way contrast Σ(−1)^(k−|s|) p_s (for two factors
@@ -94,10 +98,12 @@ per 1,000 crashes (Holm p {{multifactor/interactions|analysis=sv_driver_exceeded
 ratio of RRs {{multifactor/interactions|analysis=sv_driver_exceeded_x_alcohol;contrast=exceeded x alcohol|multiplicative_ratio|ci:2}}.
 Within single-vehicle crashes both risk ratios are smaller than at the crash level, because
 the crash-level comparison also contrasts *crash types* (alcohol and exceedance are
-concentrated in single-vehicle crashes, which are more severe), and the two behaviours combine
-multiplicatively. The interpretation that best fits both analyses: the same driver's alcohol and
-speed do not "use up" each other's risk; the apparent sub-multiplicativity at the crash level
-is mostly a consequence of pooling different drivers and crash types.
+concentrated in single-vehicle crashes, which are more severe), and no departure from
+multiplicativity is detected. One interpretation consistent with both analyses: the same
+driver's alcohol and speed do not "use up" each other's risk, and the crash-level
+sub-multiplicativity reflects pooling different drivers and crash types. Because the
+single-vehicle restriction changes both the driver attribution and the crash type, the data
+cannot say which of the two matters.
 
 ## 4. Occupant level: whose behaviour, whose belt
 
@@ -113,15 +119,18 @@ is mostly a consequence of pooling different drivers and crash types.
 
 {{mdtable:multifactor/interactions|analysis=passenger_driver_speeding_x_driver_alcohol_x_unbelted|contrast:Contrast:;additive_contrast:Additive (per 1,000):cix1000:1;additive_contrast_p_holm:Holm p:.2g;multiplicative_ratio:Multiplicative ratio:ci:2;multiplicative_ratio_p_holm:Holm p:.2g}}
 
-*Reading.* Belt non-use carries by far the largest risk ratio for occupants (about 30 for
-drivers, 28 for passengers), much larger than the within-vehicle ratio of about 3
+*Reading.* Belt non-use carries by far the largest risk ratio for occupants
+({{multifactor/margins|analysis=lpv_driver_speeding_x_alcohol_x_unbelted;combination=unbelted|rr_vs_none|.0f}}
+for drivers, {{multifactor/margins|analysis=passenger_driver_speeding_x_driver_alcohol_x_unbelted;combination=unbelted|rr_vs_none|.0f}}
+for passengers), much larger than the within-vehicle ratio of about 3
 (`reports/alcohol_drugs_restraints.md` §6): across crashes, unbelted occupants are in more
-violent crashes and survivors over-report belt use. On the additive scale the pairs involving
-belt non-use are positive and, for passengers, Holm-significant: an unbelted passenger of a
-drinking or speeding driver has a much larger *excess* risk than either factor alone implies.
-On the ratio scale the same pairs are sub-multiplicative. Both statements are correct; they
-answer different questions (how many extra deaths vs how many times the risk). The three-way
-contrasts are not distinguishable from zero on either scale.
+violent crashes, and survivors may over-report belt use (not testable here). On the additive
+scale the pairs involving belt non-use are positive; an unbelted passenger of a drinking or
+speeding driver has a much larger *excess* risk than either factor alone implies. On the ratio
+scale, alcohol × unbelted is clearly sub-multiplicative for drivers and passengers, whereas no
+multiplicative departure is detected for speeding × unbelted (§7 gives every contrast with its
+Holm-adjusted p-value). Super-additive and sub-multiplicative at once is not a contradiction: the
+two scales answer different questions (how many extra deaths vs how many times the risk).
 
 *Sensitivity.* Adding crash configuration (a mediator of speeding and alcohol) reduces every
 risk ratio — the driver's unbelted RR from
@@ -146,7 +155,8 @@ four-way contrast and the speeding × drugs contrasts. The supported pairs show 
 as alcohol: police-recorded drug involvement is associated with the driver's death
 ({{multifactor/margins|analysis=lpv_driver_drugs_known_4way;combination=drugs|rr_vs_none|ci:1}}
 when it is the only factor), and alcohol × drugs is sub-multiplicative
-({{multifactor/interactions|analysis=lpv_driver_drugs_known_4way;contrast=alcohol x drugs|multiplicative_ratio|ci:2}}).
+({{multifactor/interactions|analysis=lpv_driver_drugs_known_4way;contrast=alcohol x drugs|multiplicative_ratio|ci:2}},
+Holm p {{multifactor/interactions|analysis=lpv_driver_drugs_known_4way;contrast=alcohol x drugs|multiplicative_ratio_p_holm|.2g}}).
 Because police drug status is neither complete nor independent of alcohol recording, these
 numbers describe police-recorded drug involvement in a selected subset; they are not a drug
 effect and are not used for ranking.
@@ -157,14 +167,17 @@ effect and are not used for ranking.
 
 * For **the impaired or speeding driver** and **their passengers**, both behaviours are
   associated with death, alcohol more than speeding (any type).
-* For **occupants of the other vehicle** in two-vehicle crashes, the other driver's alcohol is
+* *(This table is exploratory; it is not part of the Holm family.)* For **occupants of the other
+  vehicle** in two-vehicle crashes, the other driver's alcohol is
   strongly associated with death (their own driver's behaviour and belt held fixed); the other
   driver's recorded speeding much less so, and the two combine super-multiplicatively
   (ratio {{multifactor/victims|victim=other-vehicle occupant killed (the other driver's behaviour)|multiplicative_ratio|ci:2}}).
 * For **pedestrians**, once the speed limit, light and pedestrian age are held fixed, the
-  striking driver's recorded speeding and alcohol add little: the pedestrian's death is
-  dominated by impact speed proxies already in the model (the posted limit) and by
-  vulnerability. Police-recorded speeding is rare in pedestrian crashes
+  associations with the striking driver's recorded speeding and alcohol are imprecise and much
+  smaller than for occupants (intervals compatible with no association and with modest ones, but
+  not with occupant-sized ratios). One hypothesis is that the posted limit already captures much
+  of the impact-speed variation that matters for a pedestrian; the data cannot test it.
+  Police-recorded speeding is rare in pedestrian crashes
   ({{multifactor/victims|victim=pedestrian killed (striking driver's behaviour)|n_speeding_only|,.0f}}
   sample pedestrians), so this comparison is imprecise.
 
@@ -174,24 +187,26 @@ should not be quoted as a driver-level or person-level risk.
 
 ## 7. Which combinations show interaction (answer to E)
 
-| Combination (unit) | Additive | Multiplicative |
-|---|---|---|
-| Exceeded × alcohol (crash) | super-additive, Holm p {{multifactor/interactions|analysis=crash_exceeded_x_alcohol;contrast=exceeded x alcohol|additive_contrast_p_holm|.2g}} | sub-multiplicative, Holm p {{multifactor/interactions|analysis=crash_exceeded_x_alcohol;contrast=exceeded x alcohol|multiplicative_ratio_p_holm|.2g}} |
-| Exceeded × alcohol (single-vehicle driver) | super-additive, Holm p {{multifactor/interactions|analysis=sv_driver_exceeded_x_alcohol;contrast=exceeded x alcohol|additive_contrast_p_holm|.2g}} | none detected ({{multifactor/interactions|analysis=sv_driver_exceeded_x_alcohol;contrast=exceeded x alcohol|multiplicative_ratio|ci:2}}) |
-| Speeding × night (crash) | super-additive, Holm p {{multifactor/interactions|analysis=crash_speeding_x_alcohol_x_night;contrast=speeding x night|additive_contrast_p_holm|.2g}} | none detected |
-| Alcohol × night (crash) | none detected | sub-multiplicative, Holm p {{multifactor/interactions|analysis=crash_speeding_x_alcohol_x_night;contrast=alcohol x night|multiplicative_ratio_p_holm|.2g}} |
-| Speeding × alcohol × night (crash) | {{multifactor/interactions|analysis=crash_speeding_x_alcohol_x_night;contrast=speeding x alcohol x night|additive_contrast|cix1000:1}} per 1,000 (Holm p {{multifactor/interactions|analysis=crash_speeding_x_alcohol_x_night;contrast=speeding x alcohol x night|additive_contrast_p_holm|.2g}}) | {{multifactor/interactions|analysis=crash_speeding_x_alcohol_x_night;contrast=speeding x alcohol x night|multiplicative_ratio|ci:2}} |
-| Speeding × unbelted (driver) | super-additive, Holm p {{multifactor/interactions|analysis=lpv_driver_speeding_x_alcohol_x_unbelted;contrast=speeding x unbelted|additive_contrast_p_holm|.2g}} | sub-multiplicative ({{multifactor/interactions|analysis=lpv_driver_speeding_x_alcohol_x_unbelted;contrast=speeding x unbelted|multiplicative_ratio|ci:2}}) |
-| Alcohol × unbelted (driver) | positive ({{multifactor/interactions|analysis=lpv_driver_speeding_x_alcohol_x_unbelted;contrast=alcohol x unbelted|additive_contrast|cix1000:1}} per 1,000; Holm p {{multifactor/interactions|analysis=lpv_driver_speeding_x_alcohol_x_unbelted;contrast=alcohol x unbelted|additive_contrast_p_holm|.2g}}) | sub-multiplicative, Holm p {{multifactor/interactions|analysis=lpv_driver_speeding_x_alcohol_x_unbelted;contrast=alcohol x unbelted|multiplicative_ratio_p_holm|.2g}} |
-| Driver alcohol × unbelted (passenger) | super-additive, Holm p {{multifactor/interactions|analysis=passenger_driver_speeding_x_driver_alcohol_x_unbelted;contrast=driver_alcohol x unbelted|additive_contrast_p_holm|.2g}} | {{multifactor/interactions|analysis=passenger_driver_speeding_x_driver_alcohol_x_unbelted;contrast=driver_alcohol x unbelted|multiplicative_ratio|ci:2}} |
-| Speeding × alcohol × unbelted (driver; passenger) | not detected | not detected |
-| Four-way with drugs | withheld (insufficient support) | withheld |
+Every registered contrast, with Holm-adjusted p-values (a contrast is called "detected" below
+only if its Holm p < 0.05):
+
+{{mdtable:multifactor/interactions|registered=True|analysis:Analysis:;contrast:Contrast:;additive_contrast:Additive (per 1,000):cix1000:1;additive_contrast_p_holm:Holm p:.2g;multiplicative_ratio:Ratio of RRs:ci:2;multiplicative_ratio_p_holm:Holm p:.2g;flag:Status:}}
+
+Detected, by this criterion: exceedance × alcohol at crash level (super-additive and
+sub-multiplicative) and for single-vehicle drivers (super-additive only); speeding × night
+(super-additive); alcohol × night and speeding × alcohol at crash level (sub-multiplicative);
+belt non-use × speeding (super-additive, drivers and passengers); belt non-use × alcohol
+(sub-multiplicative for drivers; super-additive and sub-multiplicative for passengers); and,
+in the selected drug-known subset, speeding × unbelted (super-additive) and alcohol × drugs,
+alcohol × unbelted and drugs × unbelted (sub-multiplicative).
+No three-way contrast is detected; the four-way contrast is withheld.
 
 *Distinguishing genuine interaction from high baselines.* Several combinations look
 "unusually deadly" in raw counts simply because each factor has a high risk on its own; the
 multiplicative contrasts above show that, on the ratio scale, almost no combination exceeds the
-product of its parts. The additive excesses are real in the sense that matters for burden: the
-same intervention on one factor removes more deaths where the other factor is present. They do
+product of its parts. The additive excesses matter for burden: a given difference in one factor is
+associated with more excess deaths where the other factor is present. That is a statement about
+associations conditional on a crash, not about what an intervention would achieve, and it does
 not show biological synergy.
 
 ## 8. Limitations

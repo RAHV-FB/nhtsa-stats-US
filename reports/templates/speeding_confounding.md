@@ -22,8 +22,11 @@ of the crude log risk ratio — between
 {{speeding/shapley|exposure=exceeded;outcome=fatal;variant=all_blocks;block=alcohol|max_share_any_order|pct:0}}
 depending on what is already in the model. For speeding of any type the alcohol share is
 {{speeding/shapley|exposure=speeding_any;outcome=fatal;variant=all_blocks;block=alcohol|shapley_share_of_crude|cipct:0@share}}.
-So alcohol accounts for a real but minority part of the speeding association; the road and
-crash environment accounts for more.
+So alcohol accounts for a real but minority part of the speeding association — about as much
+as crash configuration ({{speeding/shapley|exposure=exceeded;outcome=fatal;variant=all_blocks;block=configuration|shapley_share_of_crude|pct:0}})
+and less than the five environment blocks together. About
+{{speeding/shapley|exposure=exceeded;outcome=fatal;variant=all_blocks;block=retained_after_all_blocks|shapley_share_of_crude|pct:0}}
+of the crude log risk ratio **remains** after all recorded circumstances are held fixed.
 
 **B. Does exceeding the limit remain independently associated with fatal severity?** Yes. With
 all seven blocks, including crash configuration, the risk ratio is
@@ -123,12 +126,19 @@ share {{speeding/shapley|exposure=exceeded;outcome=ka;variant=all_blocks;block=a
 
 {{mdtable:speeding/shapley|exposure=alcohol;outcome=fatal;variant=all_blocks|block:Block:;shapley_share_of_crude:Share of crude log-RR:cipct:0@share;min_share_any_order:Smallest:pct:0;max_share_any_order:Largest:pct:0}}
 
-*Reading the decompositions.* For both behaviours the largest single block is the road and
-crash environment or crash configuration, not the other behaviour. Exceedance retains more of
-its crude association than alcohol does: alcohol's association runs to a large extent through
-*which kind of crash* happens (configuration's share), consistent with impairment acting at
-Stage A (crash occurrence: departures, head-on) and speed at Stage B (energy within a crash
-type).
+*Reading the decompositions.* For exceedance, alcohol and crash configuration are the two
+largest single blocks (each about a tenth of the crude log-RR) and most of the association
+remains after all seven. For alcohol, crash configuration is by far the largest block
+({{speeding/shapley|exposure=alcohol;outcome=fatal;variant=all_blocks;block=configuration|shapley_share_of_crude|pct:0}})
+and speeding type is small
+({{speeding/shapley|exposure=alcohol;outcome=fatal;variant=all_blocks;block=speeding_type|shapley_share_of_crude|pct:0}});
+alcohol retains less of its crude association
+({{speeding/shapley|exposure=alcohol;outcome=fatal;variant=all_blocks;block=retained_after_all_blocks|shapley_share_of_crude|pct:0}})
+than exceedance does. Alcohol's association runs to a large extent through *which kind of
+crash* happens, consistent with impairment acting at Stage A (crash occurrence: departures,
+head-on), whereas exceedance keeps most of its association within crash types, consistent with
+speed acting at Stage B (energy within a crash). For any speeding, the configuration block's share is not distinguishable from zero
+({{speeding/shapley|exposure=speeding_any;outcome=fatal;variant=all_blocks;block=configuration|shapley_share_of_crude|cipct:0@share}}).
 
 ## 4. Stratified associations (Q2)
 
@@ -140,9 +150,19 @@ strata RRs with a design-based CI and p-value.*
 * **Without alcohol the association is stronger, not weaker** — the relative excess of
   exceedance is larger where the baseline risk is lower. This contradicts the hypothesis that
   exceedance looks dangerous mainly because of alcohol.
-* The association is weaker at night, in single-vehicle crashes and on 50+ mph roads, where the
-  baseline risk is already high; on the additive scale the picture reverses (see
-  `reports/multifactor_interactions.md`).
+* The *relative* association is also weaker at night, in single-vehicle crashes and on 50+ mph
+  roads, where the baseline risk is already high. On the *absolute* scale the excess is larger
+  where alcohol is present ({{speeding/strata|exposure=exceeded;outcome=fatal;stratum=alcohol|rd|x1000:0}}
+  vs {{speeding/strata|exposure=exceeded;outcome=fatal;stratum=no alcohol|rd|x1000:0}} extra fatal
+  crashes per 1,000; point estimates, each standardised within its stratum), at night
+  ({{speeding/strata|exposure=exceeded;outcome=fatal;stratum=night (21-05)|rd|x1000:0}} vs
+  {{speeding/strata|exposure=exceeded;outcome=fatal;stratum=day (06-20)|rd|x1000:0}}) and on 50+ mph
+  roads ({{speeding/strata|exposure=exceeded;outcome=fatal;stratum=limit >= 50 mph|rd|x1000:0}} vs
+  {{speeding/strata|exposure=exceeded;outcome=fatal;stratum=limit <= 45 mph|rd|x1000:0}}). The
+  formal additive contrast for exceedance × alcohol, with its interval, is in
+  `reports/multifactor_interactions.md` §2.
+* The association is larger in 2020–2024 than in 2016–2019, consistent with the Phase-1 finding
+  that the post-2020 rise in severity was clearest in speeding-related crashes.
 * Any speeding (pooled types), for comparison:
 
 {{mdtable:speeding/strata|exposure=speeding_any;outcome=fatal|split:Split:;stratum:Stratum:;rr:Adjusted RR:ci:2;heterogeneity_p:p:.2g}}
@@ -156,15 +176,18 @@ CRSS jurisdictions record speeding less often than FARS analysts, who use more s
 
 {{mdtable:speeding/fars_crss_recording||stratum:Alcohol stratum:;measure:Measure:;fars_share:FARS share:pct:1;crss_share:CRSS share:cipct:1@crss_share;crss_over_fars:CRSS / FARS:ci:2@crss_over_fars}}
 
-Recording is *less* complete in alcohol-involved fatal crashes than in others. If police
-under-record speeding more in alcohol crashes, the alcohol-stratified analyses understate the
-overlap, and speeding's association within the alcohol stratum is, if anything, understated. The
-competing story — police record speeding more readily when alcohol is involved, inflating the
-apparent overlap — is not supported for fatal crashes.
+For any speeding, the point estimate of CRSS recording relative to FARS is lower in
+alcohol-involved fatal crashes than in others (the intervals overlap and the difference was not
+formally tested); for exceedance the two are close. (The two systems'
+alcohol measures differ — imputed police report in CRSS, multiply imputed BAC in FARS — so the
+comparison is approximate.) This does not support the competing explanation that police
+record speeding *more* readily once alcohol is found, which would have inflated the apparent
+overlap of the two behaviours; if anything, speeding is under-recorded in alcohol-involved
+crashes.
 
 **Outcome-dependent recording.** If exceedance in non-fatal crashes is recorded less completely
 than in fatal ones, the crude RR is inflated. Within the no-alcohol stratum the observed crude
-RR of {{speeding/stratified_qba|alcohol_stratum=no;se_fatal=0.9;se_nonfatal=1.0|rr_observed|.1f}}
+RR of {{speeding/stratified_qba|alcohol_stratum=no;se_fatal=0.9;se_nonfatal=1|rr_observed|.1f}}
 becomes {{speeding/stratified_qba|alcohol_stratum=no;se_fatal=0.9;se_nonfatal=0.5|rr_corrected|.1f}}
 if non-fatal exceedance were recorded only half as completely (fatal sensitivity 0.9), and
 {{speeding/stratified_qba|alcohol_stratum=no;se_fatal=0.9;se_nonfatal=0.2|rr_corrected|.1f}} at
@@ -180,23 +203,37 @@ non-fatal crashes would remove it, and the alcohol-stratum association is the mo
 
 {{mdtable:speeding/selection_by_fatality||measure:Speeding measure:;population:Population:;or:Speeding–alcohol odds ratio:ci:2@or;interval:Interval:}}
 
-Speeding and alcohol are associated in all police-reported crashes. Among fatal crashes alone
-the association is weaker, because both raise the chance that a crash is fatal: a fatal crash
-without alcohol is more likely to have *another* reason to be fatal, such as speeding
-(collider stratification). Statistics computed only from fatal crashes therefore mis-state how
-often the two co-occur in the crashes that produced the deaths, and a "speeding and alcohol"
-category in FARS cannot be read as the population overlap of the behaviours. The FARS estimate
-differs from CRSS-fatal because FARS records both more completely.
+Within one recording system (CRSS), the speeding–alcohol association is weaker among fatal
+crashes than among all crashes — for exceedance
+{{speeding/selection_by_fatality|measure=exceeded limit / racing;population=CRSS fatal crashes|or|.2f}}
+against {{speeding/selection_by_fatality|measure=exceeded limit / racing;population=CRSS all crashes|or|.2f}}.
+Both behaviours raise the chance that a crash is fatal, so a fatal crash without alcohol is more
+likely to have *another* reason to be fatal, such as speeding (collider stratification). FARS
+records both behaviours more completely than CRSS police reports; its odds ratios
+({{speeding/selection_by_fatality|measure=any speeding;interval=range over 10 implicates|or|.2f}}
+for any speeding, {{speeding/selection_by_fatality|measure=exceeded limit / racing;interval=range over 10 implicates|or|.2f}}
+for exceedance) are larger than the CRSS fatal-crash values but, for exceedance, still about
+half the all-crash association. Two forces therefore act on FARS-only co-occurrence statistics —
+selection on fatality weakens the association, fuller recording strengthens it — and a
+"speeding and alcohol" category among deaths cannot be read as the overlap of the two
+behaviours in the crashes that produced the deaths.
 
 ## 7. Interpretation
 
 * **What survives.** A large association between exceeding the limit and fatal outcomes,
-  present without alcohol, by day and night, in all crash types and road classes, robust to
+  present without alcohol, by day and night, in single- and multi-vehicle crashes, on lower- and
+  higher-speed roads, before and after 2020, and robust to
   moderate recording bias. A large association for alcohol that is not explained by speeding.
-* **What changes.** "Speeding" as a category: its association halves under adjustment and most
-  of it belongs to exceedance. The share of the exceedance association that alcohol accounts
-  for depends on the model; on average about a fifth of the crude log-RR.
-* **What does not follow.** That alcohol "causes" a fifth of speeding deaths, or that speeding
+* **What changes.** "Speeding" as a category: most of its association belongs to exceedance,
+  which is under a tenth of recorded speeding in minor crashes. The share of the exceedance
+  association that alcohol accounts for depends on the model — from
+  {{speeding/behaviour_change|exposure=exceeded;outcome=fatal;blocks_already_in=crude|share_of_crude|pct:0}}
+  when alcohol is the only adjustment to
+  {{speeding/behaviour_change|exposure=exceeded;outcome=fatal;blocks_already_in=calendar_area+configuration+driver_vehicle_mix+light+road_environment+time|share_of_crude|pct:0}}
+  when it is added last — and averages
+  {{speeding/shapley|exposure=exceeded;outcome=fatal;variant=all_blocks;block=alcohol|shapley_share_of_crude|pct:0}}
+  of the crude log-RR.
+* **What does not follow.** That alcohol "causes" a tenth of speeding deaths, or that speeding
   deaths are "really" alcohol deaths: the decomposition is of a statistical association, the
   ordering of blocks is unverifiable, configuration is plausibly a mediator, and both
   behaviours are recorded after the crash.

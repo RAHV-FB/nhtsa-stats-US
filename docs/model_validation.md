@@ -537,9 +537,18 @@ Phase-2 models are explanatory survey logistic models (no tuning), documented in
   withheld combinations (`multifactor/analyses`); the case explorer withholds unsupported cells.
 * **Calibration of the case model.** For each supported grid case, the mean model prediction for
   the drivers actually in the cell (`cases/scenarios.predicted_in_cell`) is reported next to the
-  observed weighted rate. Agreement is good for common combinations; the model (main effects and
-  pairwise products) under-predicts some extreme five-factor combinations, which is why observed
-  rates, support and the standardised risk are always shown together.
+  observed weighted rate. A first specification with only pairwise products of the case factors
+  was mis-calibrated in two cells with more than 5,000 drivers (observed/predicted 0.59 and 1.74;
+  `tests/test_phase2_analysis.py::test_case_model_calibrated_in_large_cells`), so the final model
+  is saturated in the case factors, which makes it calibrated within every factor cell by
+  construction. Observed rates, support and standardised risks are always shown together,
+  because standardisation (not misfit) is what separates them.
+* **Collinearity found by the independent audit.** The case model first adjusted for the other
+  drivers' recorded behaviour, whose level "no other vehicle" coincides exactly with a
+  single-vehicle crash (154,323 driver records each way). The single-vehicle effect was then
+  split between collinear terms by the ridge, and the counterfactual "same driver in a
+  multi-vehicle crash" kept an impossible covariate value, halving standardised risks for
+  single-vehicle cases. Those covariates were removed from the case model.
 * **Predictive contribution.** `contributions/predictive` uses the Phase-1 temporal split
   (train 2016–2021, test 2023–2024) with a design-weighted pseudo-R² and AUROC; the full logistic
   model's test AUROC is close to the Phase-1 main-effects survey logistic model with configuration.

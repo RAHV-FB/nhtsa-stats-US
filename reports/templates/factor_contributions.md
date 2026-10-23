@@ -31,8 +31,9 @@ and **predictive** (out-of-sample prediction).*
    to alcohol and {{contributions/burden_shapley|player_set=speeding_alcohol;quantity=Shapley share[speeding]|estimate|pct:0}}
    to speeding — a convention for dividing a model quantity, not a causal split.
 3. **Each meaning of "contribution" ranks the factors differently** (§5). Exceeding the limit
-   has the largest adjusted risk ratio and risk difference; alcohol the largest predictive
-   information, the largest attributed burden and the most deaths; "too fast for conditions"
+   has the largest adjusted risk ratio and risk difference; alcohol the largest attributed burden
+   and the most deaths, and the largest predictive information alone and by Shapley value (but
+   not when removed last, where speeding type loses more); "too fast for conditions"
    is common but weakly associated. Police-recorded drug involvement cannot be ranked.
 4. **Most predictive information is in crash configuration and environment, not behaviour.**
    On held-out years, crash configuration carries
@@ -42,7 +43,47 @@ and **predictive** (out-of-sample prediction).*
    {{contributions/predictive|block=speeding_type|shapley_share|pct:0}}. Behaviours are rare;
    prediction rewards common, informative variables.
 
+## Answers to the Phase-2 questions at a glance
+
+| | Question | Answer (details in) |
+|---|---|---|
+| A | How much of the speeding–fatality association is explained statistically by alcohol and other recorded factors? | For exceeding the limit, alcohol accounts for {{speeding/shapley|exposure=exceeded;outcome=fatal;variant=all_blocks;block=alcohol|shapley_share_of_crude|pct:0}} of the crude log-RR on average over orderings ({{speeding/shapley|exposure=exceeded;outcome=fatal;variant=all_blocks;block=alcohol|min_share_any_order|pct:0}}–{{speeding/shapley|exposure=exceeded;outcome=fatal;variant=all_blocks;block=alcohol|max_share_any_order|pct:0}}); all recorded circumstances together leave {{speeding/shapley|exposure=exceeded;outcome=fatal;variant=all_blocks;block=retained_after_all_blocks|shapley_share_of_crude|pct:0}} (`reports/speeding_confounding.md`) |
+| B | Does exceeding the limit remain independently associated with fatal severity? | Yes: adjusted RR {{speeding/key_models|exposure=exceeded;outcome=fatal;model=all_blocks|rr|ci:1}}; {{speeding/strata|exposure=exceeded;outcome=fatal;stratum=no alcohol|rr|ci:1}} without alcohol; robust to moderate recording bias (same report) |
+| C | Can alcohol and drugs be separated reliably? | Only in a narrow, selected population (tested drivers in fatal crashes, four high-testing states); not in general (`reports/alcohol_drugs_restraints.md`) |
+| D | How much does restraint use change fatality associations within comparable occupants? | Within the same vehicle, belted occupants' risk is {{restraint_behaviour/dpc_by_driver_behaviour|split=all|rr_belted_vs_unbelted|ci:2@rr}} times unbelted occupants', unchanged by the driver's speeding or alcohol (same report) |
+| E | Which combinations show interaction? | Super-additive: exceedance × alcohol, behaviour × belt non-use; sub-multiplicative at crash level, multiplicative for single-vehicle drivers; three-way terms not detected; four-way with drugs not estimable (`reports/multifactor_interactions.md`) |
+| F | How much do contributions depend on units, definitions, specifications and missingness? | Strongly: crash vs driver vs passenger vs pedestrian (alcohol RR from {{multifactor/victims|victim=pedestrian killed (striking driver's behaviour)|rr_alcohol_only|.1f}} to {{multifactor/victims|victim=crash fatal (any driver's behaviour)|rr_alcohol_only|.1f}}); "any speeding" vs exceedance; with or without configuration; police drugs as a covariate; drug unknowns (§2–§5 below) |
+| G | Can a principal cause of an individual death be identified? | No (`reports/case_comparisons.md` §3) |
+| H | How should official statistics be read? | As overlapping counts of deaths *involving* circumstances, recorded with severity-dependent completeness; not additive, not causes (§6 below) |
+
 ---
+
+## 0. Four stages, and which the data identify
+
+*Source: `stages/identifiability`, `stages/death_timing`, `stages/ems_availability`.*
+
+```
+ A  crash occurrence      impairment, speeding, night, road, driver age     NOT identified (no exposure)
+          │  selection: only police-reported crashes (CRSS) / fatal crashes (FARS) are recorded
+ B  configuration/energy  posted limit, recorded speeding, crash type      associations only
+          │                (travel and impact speed not observed)
+ C  injury given crash    belt, age, sex, seat, vehicle, vulnerability      closest to identified
+          │                                                                 (within-vehicle designs)
+ D  post-crash survival   EMS notification/arrival, transport, time of death  NOT identified
+```
+
+Arrows are hypotheses about mechanisms, not relationships the data establish. Stage D is not
+identifiable: EMS times exist only for fatal crashes (FARS), so there are no survivors with
+comparable injuries and different response times, and CRSS has no EMS times. Descriptively,
+{{stages/death_timing|group=all deaths|share_died_at_scene|pct:0}} of the
+{{stages/death_timing|group=all deaths|deaths|,.0f}} deaths in 2016–2024 occurred at the scene
+and {{stages/death_timing|group=all deaths|share_within_1_hour|pct:0}} within an hour of the crash
+(at the scene included) — {{stages/death_timing|group=vehicle occupant, unbelted|share_died_at_scene|pct:0}}
+at the scene for unbelted and {{stages/death_timing|group=vehicle occupant, belted|share_died_at_scene|pct:0}}
+for belted occupants, {{stages/death_timing|group=rural road|share_died_at_scene|pct:0}} on rural
+and {{stages/death_timing|group=urban road|share_died_at_scene|pct:0}} on urban roads. Most of the
+burden is therefore fixed before post-crash care could act, but the data cannot say how many
+later deaths better care would have prevented.
 
 ## 1. Ten quantities that are not the same thing
 
@@ -113,7 +154,7 @@ survey logistic models; every step uses the same crashes.*
 years (log-likelihood gain over the training base rate) and AUROC; intervals from resampling
 test-set PSUs within strata (model fixed).*
 
-{{mdtable:contributions/predictive||block:Block:;r2_alone:Test R² alone:ci:3@r2_alone;r2_drop_when_removed:R² lost when removed from the full model:ci:3@r2_drop_when_removed;shapley_r2:Shapley R²:ci:3@shapley_r2;shapley_share:Shapley share:pct:0;auc_alone:AUROC alone:.3f;logloss_increase:Permutation: log-loss increase:.4f}}
+{{mdtable:contributions/predictive||block:Block:;r2_alone:Test R² alone:ci:3@r2_alone;r2_drop_when_removed:R² lost when removed from the full model:ci:3@r2_drop_when_removed;shapley_r2:Shapley R²:ci:3@shapley_r2;shapley_share:Shapley share:pct:0;auc_alone:AUROC alone:.3f;logloss_increase:Permutation log-loss increase:.4f}}
 
 The full model reaches a test R² of {{contributions/predictive|block=alcohol|full_r2|.3f}} and
 AUROC {{contributions/predictive|block=alcohol|full_auc|.3f}}. *Interpretation.* Alcohol's
@@ -184,24 +225,76 @@ Probability of each rank (joint sampling distribution of the adjusted estimates 
 * **Stable:** on adjusted risk ratio and risk difference, exceeding the limit ranks first with
   probability ≥ {{contributions/rank_probabilities|metric=adjusted RR;factor=exceeded|p_rank_1|.2f}},
   alcohol second, other speeding types last.
-* **Reversed by the metric:** alcohol ranks first on prevalence in fatal crashes, predictive
-  information, Shapley share of attributed burden and deaths involved, because it is about six
-  times as common as exceedance among crashes.
+* **Reversed by the metric:** alcohol ranks first on prevalence in fatal crashes, Shapley share
+  of attributed burden and deaths involved, because it is about six times as common as
+  exceedance among crashes. On predictive information the order depends on the measure: alcohol
+  is ahead alone and by Shapley value, speeding type when each is removed from the full model
+  last, and they tie on permutation importance (intervals overlap).
 * **Not rankable:** police-recorded drug involvement (unidentified association; its adjusted RR
   of {{contributions/ranking|factor=drugs_police|adjusted_rr|.1f}} reflects selective recording
   as much as risk), and restraint, which is an occupant-level quantity: its adjusted risk ratio
-  ({{contributions/ranking|factor=unbelted (occupant)|adjusted_rr|.0f}} across crashes, about 3
-  within vehicles) answers a different question (whether a person survives a crash) from the
+  ({{contributions/ranking|factor=unbelted (occupant)|adjusted_rr|.0f}} across crashes after
+  environment, person and the driver's own behaviour;
+  {{restraint_behaviour/crss_unbelted_nested|step=+ crash configuration|rr|.0f}} after crash
+  configuration as well; about 3 within vehicles) answers a different question (whether a person survives a crash) from the
   crash-level factors (whether a crash is fatal).
 
 **The hypothesised ranking drugs > alcohol > seatbelt non-use > speeding is not defensible.**
 Drugs cannot be placed; seat-belt non-use is not on the same scale; and whether alcohol or
 speeding comes first depends on whether one asks about the risk per crash (exceeding the limit)
 or the number of deaths involved and statistically attributed (alcohol). Generic "speeding"
-ranks low on every metric only because it pools exceeding the limit with "too fast for
+(Phase-1 adjusted RR {{severity/fatal_crude_vs_adjusted|factor=speeding;level=yes|A_adj_rr|.2f}})
+looks much weaker than alcohol only because it pools exceeding the limit with "too fast for
 conditions".
 
-## 6. What would make these quantities causal
+## 6. Implications for interpreting official statistics and for policy (answer to H)
+
+*The evidence ledger (`policy/evidence_ledger`, column `phase2_evidence`, and the new
+"combined speed and alcohol enforcement" row) records these points with their sources. Nothing
+here is an estimated effect of an intervention: the archives contain no enforcement, testing or
+campaign data.*
+
+* **Reading official counts.** "Speeding-related", "alcohol-impaired", "drug-involved" and
+  "unrestrained" deaths are counts of deaths *involving* a recorded circumstance. They overlap
+  (§4a), they are recorded with severity-dependent completeness, and the drug count depends on
+  who is tested. They should not be added, ranked against each other, or read as deaths
+  *caused* by each factor.
+* **Speed enforcement.** The target with a robust association is exceeding the limit
+  (adjusted RR {{contributions/nested_models|factor=exceeded;step=+ driver/vehicle mix|rr|ci:1}};
+  {{speeding/strata|exposure=exceeded;outcome=fatal;stratum=no alcohol|rr|ci:1}} in crashes with
+  no alcohol). Alcohol does not explain it away, so a large overlap with alcohol does not make
+  speed enforcement redundant. "Too fast for conditions" — most recorded speeding — is weakly
+  associated and is not a camera target.
+* **Alcohol enforcement.** Alcohol carries the largest share of statistically attributed burden
+  ({{contributions/burden_shapley|player_set=speeding_alcohol;quantity=Shapley share[alcohol]|estimate|pct:0}}
+  of the joint speeding-and-alcohol fraction) and its association is not explained by speeding.
+  Much of it runs through the type of crash (single-vehicle departures), which is consistent
+  with acting before the crash.
+* **Drug testing.** The data cannot say how much drug-involved driving contributes to deaths.
+  What they do show is that drug "involvement" statistics depend on testing practice: killed
+  drivers are tested three times as often as survivors, and police co-record drugs with alcohol.
+  Better measurement (routine toxicology in crashes of all severities) is a precondition for
+  any evidence-based drug-testing target.
+* **Seat-belt enforcement.** Belt protection given a fatal crash is about two-thirds, does not
+  depend on whether the driver was speeding and is only slightly larger with a drinking driver (`reports/alcohol_drugs_restraints.md`
+  §6). Belts and impaired-driving or speed measures therefore act on different stages; an
+  unbelted occupant of a drunk or speeding driver carries a much larger *excess* risk than either
+  factor alone implies (super-additivity, `reports/multifactor_interactions.md` §4), so
+  combinations matter for targeting even though the ratio-scale effects are sub-multiplicative.
+* **Combined strategies.** The overlap of speeding and alcohol means that the deaths "in scope"
+  of two programmes are not additive: the joint attributable fraction
+  ({{contributions/burden_shapley|player_set=speeding_alcohol;quantity=AF[speeding+alcohol]|estimate|pct:1}})
+  is smaller than the sum of the singles. Whether two programmes have diminishing or increasing
+  returns depends on whether they change the same drivers' behaviour, which the data cannot show.
+  The super-additive combinations (exceedance × alcohol, behaviour × belt non-use) indicate
+  where a given reduction in one factor would remove the most excess risk, *if* the reduction
+  occurred in those combinations.
+* **Targeted campaigns.** Night-time and single-vehicle crashes concentrate exceedance and
+  alcohol (`speeding/type_composition`), and unbelted deaths overlap with both more than
+  independence would imply (`contributions/fars_pairwise_overlap`); the data identify these as
+  high-risk *combinations* but not the effect of any campaign aimed at them.
+
+## 7. What would make these quantities causal
 
 None of the quantities above is a causal effect. Turning the adjusted associations into causal
 effects would require exposure data (to address crash occurrence), measured travel speed,

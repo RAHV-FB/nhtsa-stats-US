@@ -7,10 +7,10 @@ occupant), with the support behind every cell made explicit.  This module is the
 Model
     A survey-weighted logistic regression containing (i) every factor's full categorical main
     effect (so levels outside exposed/reference, e.g. 'unknown' or other speeding types, keep
-    their own coefficient and are never merged into the reference), (ii) one product term
-    for every subset of >= 2 factors (indicators of the exposed group), so the k factors are
-    saturated among themselves, and (iii) the adjustment covariates as categorical main
-    effects.
+    their own coefficient and are never merged into the reference), (ii) a product term for
+    every combination of non-reference levels of every subset of >= 2 factors, so the k factors
+    are saturated among all their observed levels, and (iii) the adjustment covariates as
+    categorical main effects.
 
 Margins
     For each of the 2^k combinations s, M_s = weighted mean over the standardisation
@@ -113,12 +113,25 @@ def subset_keys(on: Sequence[int], k: int) -> list[tuple[str, int]]:
     return out
 
 
-def product_terms(factors: Sequence[Factor]) -> list[tuple[tuple[str, list], ...]]:
-    """One product of exposed-group indicators for every subset of >= 2 factors."""
+def product_terms(
+    factors: Sequence[Factor], levels: dict[str, list] | None = None
+) -> list[tuple[tuple[str, list], ...]]:
+    """Products of level indicators for every subset of >= 2 factors.
+
+    Without ``levels``: one product of the exposed-group indicators per subset.  With
+    ``levels`` (column -> all observed levels, reference first): one product per combination of
+    non-reference levels, so the factors are saturated among *all* their observed levels
+    (e.g. 'unknown' or other speeding types get their own interaction terms instead of being
+    pooled with the reference in the interaction part of the model).
+    """
     out = []
     for r in range(2, len(factors) + 1):
         for comb in itertools.combinations(factors, r):
-            out.append(tuple((f.column, list(f.exposed)) for f in comb))
+            if levels is None:
+                out.append(tuple((f.column, list(f.exposed)) for f in comb))
+                continue
+            for lv in itertools.product(*(levels[f.column][1:] for f in comb)):
+                out.append(tuple((f.column, [v]) for f, v in zip(comb, lv, strict=True)))
     return out
 
 
@@ -211,7 +224,10 @@ def fit_factorial(
         # most frequent value (the choice does not affect standardised margins).
         first = f.reference[0] if f else pd.Series(work[c]).value_counts().index[0]
         categorical[c] = _levels(work, c, first)
-    spec = ModelSpec(categorical=categorical, products=product_terms(factors))
+    spec = ModelSpec(
+        categorical=categorical,
+        products=product_terms(factors, {f.column: categorical[f.column] for f in factors}),
+    )
     model = SurveyLogit(spec, ridge=ridge * len(cells) / len(work))
     model.fit(cells, cells[outcome].to_numpy(dtype=float), cdesign)
     if not model.converged_:

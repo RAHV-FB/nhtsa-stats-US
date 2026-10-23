@@ -273,21 +273,30 @@ the joint PSU-level linearisation.
 ### 12.3 Factorial margins (`analysis/factorial.py`, `analysis/multifactor.py`, `analysis/cases.py`)
 
 For k binary factors, a survey logistic model with all main effects (factor levels other than
-exposed/reference, e.g. unknown, keep their own coefficients), all products of exposed
-indicators, and categorical covariates; 2^k standardised margins from one fit, jointly
+exposed/reference, e.g. unknown, keep their own coefficients), a product term for every
+combination of non-reference levels of every subset of factors (so the factors are saturated
+among all their observed levels, and "unknown" rows never share the interaction reference with
+the reference level), and categorical covariates; 2^k standardised margins from one fit, jointly
 linearised. Contrasts: single-factor RR/RD within every combination of the others; pairwise,
 three- and four-way additive contrasts Σ(−1)^(k−|s|)p_s and their log-scale (multiplicative)
 analogues; excess of the joint RD over the sum of single RDs. A combination whose *recorded*
 cell has fewer than 30 sample units or 10 events is withheld together with every contrast using
-it. Holm adjustment across the registered family, per scale. The case explorer uses main effects
-plus all pairwise products of the case factors (higher-order products are assumed zero; the
-registered multifactor analyses test three-way terms) and withholds model risks, contrasts and
-allocations whenever any required combination is unsupported.
+it. Holm adjustment across the registered family, per scale. The case explorer's model is saturated
+in the case factors (main effects and products for every subset of factors), so it is calibrated
+within every factor cell by construction; it withholds model risks, contrasts and allocations
+whenever any required combination is unsupported. (A first version with pairwise products only
+was mis-calibrated in two large cells — observed/predicted 0.59 and 1.74 — which a calibration
+test caught; higher-order interactions among the case factors are therefore material.)
+
+Nested models (§12.4) add police-reported drugs as a separate step after the other behaviours
+and the driver/vehicle mix, because the police co-record drugs with alcohol; burden and rank
+models exclude them.
 
 ### 12.4 Contribution metrics (`analysis/contributions.py`)
 
-* Nested models on a fixed sample: crude → environment → + other behaviours → + driver/vehicle
-  mix → + configuration; standardised RR/RD and conditional OR per factor.
+* Nested models on a fixed sample: crude → environment → + the other behaviour (speeding type or
+  alcohol) → + driver/vehicle mix → + police-reported drugs → + configuration; standardised
+  RR/RD and conditional OR per factor.
 * Prediction: models fitted on 2016–2021 and evaluated on 2023–2024 (2022 unused: no tuning);
   design-weighted McFadden R² (log-likelihood gain over the training base rate) and AUROC;
   all 2^6 block subsets, giving exact Shapley values of the test R², leave-one-block-out drops

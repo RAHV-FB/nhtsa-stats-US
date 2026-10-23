@@ -33,7 +33,7 @@ census counts and shares), **estimated** (CRSS design-based), **adjusted associa
    {{drugs/crss_bounds|period=2019-2024;scenario=all unknown negative|share_unknown|pct:0}} of
    crashes with unknown drug status are allocated. No defensible point estimate exists, so no
    drug contribution is reported anywhere in Phase 2.
-4. **Where both are measured almost routinely, alcohol is the stronger correlate of dying.** In
+4. **Where both are measured most completely, alcohol is the stronger correlate of dying.** In
    the {{drugs/killed_vs_survived|sample=high-testing states;specification=main effects;term=BAC >= .08 (measured)|n_states|.0f}}
    states that test at least half of both killed and surviving drivers for both alcohol and
    drugs, a driver in a fatal crash with BAC ≥ .08 had
@@ -48,7 +48,10 @@ census counts and shares), **estimated** (CRSS design-based), **adjusted associa
    {{restraint_behaviour/dpc_by_driver_behaviour|split=driver speeding (any);stratum=driver not speeding|rr_belted_vs_unbelted|ci:2@rr}}
    when the driver was not speeding and
    {{restraint_behaviour/dpc_by_driver_behaviour|split=driver speeding (any);stratum=driver speeding|rr_belted_vs_unbelted|ci:2@rr}}
-   when the driver was speeding: belt protection does not depend on how the crash came about.
+   when the driver was speeding — the driver's speeding does not change it — and only slightly
+   more protective with a driver at BAC ≥ .08
+   ({{restraint_behaviour/dpc_by_driver_behaviour|split=driver BAC >= .08 (MI);stratum=driver BAC >= .08|rr_belted_vs_unbelted|ci:2@rr}}).
+   It does differ by *kind of impact* (single- vs multi-vehicle crash).
    Across crashes, by contrast, the unbelted risk ratio in CRSS falls from
    {{restraint_behaviour/crss_unbelted_nested|step=crude|rr|.0f}} to
    {{restraint_behaviour/crss_unbelted_nested|step=+ crash configuration|rr|.0f}} as crash
@@ -226,23 +229,31 @@ not on the behaviour that led to it.
 
 {{mdtable:restraint_behaviour/crss_unbelted_nested||step:Model:;rr:Unbelted vs belted RR:ci:1;rd:Risk difference:ci:4;share_logrr_retained:Share of crude log-RR retained:.2f}}
 
-The across-crash association falls by a third once crash circumstances and the driver's own
-speeding and alcohol are held fixed, and further with crash configuration. Unbelted occupants
+The across-crash risk ratio falls from
+{{restraint_behaviour/crss_unbelted_nested|step=crude|rr|.0f}} to
+{{restraint_behaviour/crss_unbelted_nested|step=+ driver's own speeding and alcohol|rr|.0f}}
+once crash circumstances and the driver's own speeding and alcohol are held fixed (the
+log-RR retains {{restraint_behaviour/crss_unbelted_nested|step=+ driver's own speeding and alcohol|share_logrr_retained|pct:0}}),
+and to {{restraint_behaviour/crss_unbelted_nested|step=+ crash configuration|rr|.0f}} with crash
+configuration. Unbelted occupants
 are disproportionately in crashes with impaired or speeding drivers and in more violent crash
 types. Even fully adjusted, the across-crash ratio is several times the within-vehicle ratio
 (about {{restraint_behaviour/dpc_by_driver_behaviour|split=all|rr_belted_vs_unbelted|.2f}},
 i.e. unbelted about three times the risk), which is what one expects if unmeasured crash
-energy and survivor over-reporting of belt use inflate across-crash comparisons.
+energy and, possibly, survivor over-reporting of belt use inflate across-crash comparisons.
 
 *Competing explanations tested.* (i) "Belt non-use only marks drunk or speeding drivers" —
 rejected for the within-vehicle comparison, which holds the driver and crash fixed and does not
 vary with the driver's behaviour. (ii) "Survivors over-report belt use" — not testable here;
-Phase 1 showed the within-vehicle reduction would fall from 66% to 38% if 10% of 'belted'
-survivors were unbelted (`matched/belt_effect`). The direction is robust; the size is not.
+Phase 1 showed the within-vehicle reduction would fall from
+{{matched/belt_effect|estimand=fatality_risk_reduction_belt_given_fatal_crash|estimate|pct:0}} to
+{{matched/belt_effect|estimand=fatality_risk_reduction_belt_given_fatal_crash_misreport_f10|estimate|pct:0}}
+if 10% of 'belted' survivors were unbelted (`matched/belt_effect`). The direction is robust; the size is not.
 
 **Answer to D.** Among comparable occupants (same vehicle, same crash), belt use is associated
 with roughly a two-thirds lower risk of death given a fatal crash, and this association is
-practically unchanged by the driver's speeding or alcohol. Across crashes the unbelted
+unchanged by the driver's speeding and only slightly larger with a drinking driver; it is
+larger in single-vehicle than in multi-vehicle crashes. Across crashes the unbelted
 association is far larger and shrinks substantially under adjustment, so across-crash ratios
 should not be read as belt effectiveness.
 
