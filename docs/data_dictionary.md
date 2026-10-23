@@ -69,7 +69,38 @@ Row counts per table and year: [`generated/inventory_tables.md`](generated/inven
 | `fars_crash.parquet` | FARS fatal crash | 325,922 | accident + aggregates + `midrvacc` |
 | `fars_person.parquet` | FARS person | 800,688 | person + own vehicle + `miper` + crash covariates |
 
+Phase-2 driver-level files (`processing/drivers.py`, also rebuilt by `nhtsa features`):
+
+| File | Unit | Rows | Built from |
+|---|---|---|---|
+| `crss_driver.parquet` | CRSS in-transport vehicle and its driver | 825,957 | vehicle + driver person record + own-vehicle occupant counts + other drivers' behaviour + crash covariates and design |
+| `fars_driver.parquet` | FARS in-transport vehicle and its driver | 501,389 | as above + measured BAC, alcohol-test status, 10 MI BAC implicates, drug-test status and class positivity (toxicology), prior convictions |
+| `crss_person_link.parquet` | CRSS occupant or non-motorist | 1,154,804 | the vehicle whose driver's behaviour concerns the person: own vehicle (occupants) or striking vehicle `STR_VEH` (non-motorists) |
+
 Column-by-column definitions: [`generated/processed_datasets.md`](generated/processed_datasets.md).
+
+### 3.1 Phase-2 driver-level variables
+
+Every behaviour is the *driver's own*; `drv_*` columns come from the driver's person record.
+
+| Column | Values | Definition |
+|---|---|---|
+| `own_speeding_type` | no / exceeded_limit_or_racing / too_fast_for_conditions / speeding_unspecified / unknown | the vehicle's `SPEEDREL` (2/3, 4, 5, 0; 8/9 unknown) |
+| `own_alcohol_im` (CRSS) | yes / no / unknown | `V_ALCH_IM` (NHTSA imputation) |
+| `own_alcohol_police` | yes / no / unknown | CRSS `VEH_ALCH`; FARS driver `DRINKING` |
+| `own_drugs_police` | yes / no / unknown | driver `DRUGS` (8/9 unknown) |
+| `drv_restraint`, `drv_age_band(_im)`, `drv_sex`, `drv_killed`, `drv_kabco` | | driver's own person fields (CRSS severity imputed) |
+| `n_occupants_veh`, `n_killed_veh`, `n_passengers_killed_veh` | counts | occupants (PER_TYP 1, 2, 9) of this vehicle and deaths among them |
+| `n_killed_outside_veh` | count | crash deaths minus deaths in this vehicle (other vehicles' occupants, non-motorists) |
+| `other_speeding`, `other_alcohol_im` (CRSS), `other_exceeded`, `other_bac08` (FARS) | no_other_vehicle / no / yes / unknown | any *other* in-transport vehicle's driver with the behaviour (tri-state; single-vehicle crashes are `no_other_vehicle`, never "no") |
+| `drv_alc_test_status` (FARS) | tested_result / tested_result_unknown / tested_positive_no_value / not_tested / not_reported / unknown_if_tested | from `ALC_RES` (audit §8) |
+| `drv_bac08_measured` (FARS) | 1 / 0 / null | `ALC_RES` 80-940 vs 0-79 |
+| `drv_p_p08`, `drv_bac08_mi_1..10` (FARS) | share / 0-1 | multiply-imputed driver BAC ≥ .08 (mean over implicates; each implicate) |
+| `drv_drug_test_status` (FARS) | tested / not_tested / not_reported / unknown_if_tested | from the deduplicated toxicology results (2018+ `drugs` table; 2016-17 `DRUGRES1-3`), not the specimen code |
+| `drv_drug_any` (FARS) | 1 / 0 / null | any psychoactive class (narcotic, depressant, stimulant excl. caffeine/nicotine/cotinine, hallucinogen, cannabinoid, dissociative, inhalant) or "positive, type unknown"; 0 only when tested with a known result and no unspecified "other drug"; null otherwise |
+| `drv_drug_<class>` (FARS) | 1 / 0 / null | class positivity (classes comparable only within 2016-2021 and within 2022-2024) |
+| `drv_drug_presumptive_only`, `drv_drug_carboxy_thc_only` | 1 / 0 / null | 2023+ positives only through presumptive screens; 2022+ cannabis only as the inactive metabolite |
+| `prior_speeding_convictions`, `prior_dwi_convictions` (FARS) | count / null | `PREV_SPD`, `PREV_DWI` (0-97) |
 Crash-level "any X" flags use a tri-state rule: 1 if any unit has X, 0 if all units are known
 not to, null otherwise. For body-type flags a vehicle of unknown body type (98/99, and the
 "unknown light-vehicle type" / "unknown truck type" codes where they cannot rule the category

@@ -142,7 +142,15 @@ def processed_dictionary() -> str:
         "harmonised (definitions: `docs/generated/harmonised_variables.md`). Do not edit by hand._",
         "",
     ]
-    for name in ("crss_crash", "crss_person", "fars_crash", "fars_person"):
+    for name in (
+        "crss_crash",
+        "crss_person",
+        "fars_crash",
+        "fars_person",
+        "crss_driver",
+        "fars_driver",
+        "crss_person_link",
+    ):
         path = config.PROCESSED_DIR / f"{name}.parquet"
         if not path.exists():
             continue

@@ -525,3 +525,23 @@ CPUs (`OMP_NUM_THREADS=1`); thread settings, runtime and CPU time are recorded i
 Figures (`outputs/figures/ml/`): `calibration_fatal`, `calibration_ka`, `model_comparison`,
 `temporal_stability_fatal`, `temporal_stability_ka`, `permutation_importance_fatal`,
 `partial_dependence_fatal`.
+
+## Phase 2 models
+
+Phase-2 models are explanatory survey logistic models (no tuning), documented in
+`docs/methodology.md` §12. Validation specific to them:
+
+* **Reproduction of Phase 1.** The speeding lattice's model with the six model-A blocks
+  reproduces the Phase-1 adjusted exceedance RR exactly (`speeding.reproduce_phase1`; 5.22).
+* **Convergence and support.** Every factorial model records convergence and the number of
+  withheld combinations (`multifactor/analyses`); the case explorer withholds unsupported cells.
+* **Calibration of the case model.** For each supported grid case, the mean model prediction for
+  the drivers actually in the cell (`cases/scenarios.predicted_in_cell`) is reported next to the
+  observed weighted rate. Agreement is good for common combinations; the model (main effects and
+  pairwise products) under-predicts some extreme five-factor combinations, which is why observed
+  rates, support and the standardised risk are always shown together.
+* **Predictive contribution.** `contributions/predictive` uses the Phase-1 temporal split
+  (train 2016–2021, test 2023–2024) with a design-weighted pseudo-R² and AUROC; the full logistic
+  model's test AUROC is close to the Phase-1 main-effects survey logistic model with configuration.
+  Uncertainty: PSU-within-stratum bootstrap of the test set with the model fixed (training
+  variability not included).

@@ -1,5 +1,9 @@
 # Research plan
 
+> **Phase 2** (factor attribution, confounding, combinations, measurement of drugs, case
+> comparisons) is planned in [`research_plan_phase2.md`](research_plan_phase2.md). This document
+> remains the Phase-1 plan; its results are unchanged.
+
 Version 1.2 — written after the repository and data audit (see `docs/data_audit.md`) and
 revised as findings emerged (change log at the end).
 
@@ -253,3 +257,9 @@ Behaviours are recorded by police *after* the crash, and recording depends on se
   known driver age; QIE sample excludes crashes of unknown hit-and-run status; evidence-ledger
   segments aligned with the simulator's; report wording corrected where a claim went beyond its
   table.
+* v2.0 — Phase 2 opened (`docs/research_plan_phase2.md`): driver-level datasets and linkage,
+  speeding/alcohol lattices, factorial analyses at crash/driver/occupant level, drug measurement
+  module, restraint by driver behaviour, contribution metrics and rankings, Stage-D assessment,
+  case explorer. Phase-1 modules and outputs are unchanged; `confounding.py` gained a
+  `speeding_type` block and an optional orderings argument (backward compatible), and the policy
+  ledger gained a Phase-2 evidence column and a combined-enforcement row.

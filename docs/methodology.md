@@ -233,3 +233,87 @@ validation → typed Parquet cache (incremental, SHA-256 manifest) → inventory
 checks (build stops on structural failures) → analytic datasets → analysis modules. Each
 output table has a JSON sidecar with the producing module, git commit, inputs and method.
 Random seeds are fixed (`config.RANDOM_SEED`).
+
+## 12. Phase 2: factor attribution, confounding and combinations
+
+Plan and estimands: `docs/research_plan_phase2.md`. Modules (each `nhtsa analyze <name>`):
+`speeding`, `drugs`, `multifactor`, `restraint_behaviour`, `contributions`, `stages`, `cases`.
+
+### 12.1 Observation levels and linkage (`processing/drivers.py`)
+
+Behaviour belongs to a driver, restraint to an occupant, death to a person. The driver files
+carry one row per in-transport vehicle with *its own* driver's speeding type, alcohol and drug
+fields; `crss_person_link` maps every occupant to their own vehicle and every non-motorist to
+the striking vehicle (`STR_VEH`). Occupant analyses take driver behaviour from the linked
+vehicle, never from crash-level "any driver" flags. "Other driver" flags are tri-state with a
+separate `no_other_vehicle` level, so a single-vehicle crash is never coded as "the other driver
+did not speed". FARS drug-test status and class positivity follow the audit recipe (deduplicated
+2018+ `drugs` table; 3-digit codes 2016–2021, 4-digit codes 2022–2024; caffeine, nicotine,
+cotinine, non-psychoactive and unspecified "other" results never count as psychoactive
+positives; a person with only "other" results is indeterminate). Linkage and coding are tested
+in `tests/test_drivers.py` (synthetic and real-data checks, including reproduction of the audit
+test rates).
+
+### 12.2 Lattices for speeding and alcohol (`analysis/speeding.py`)
+
+The Phase-1 lattice estimator (§2.4, `confounding.fit_lattice`) is applied with seven blocks —
+calendar/area, time, light, road environment, driver/vehicle mix, *the other behaviour*
+(alcohol for speeding exposures, speeding type for alcohol) and crash configuration — to three
+exposures (exceeded limit vs no speeding; any speeding vs none; alcohol). All 128 models share
+one sample and one standardisation population, so differences between them are changes in a
+collapsible quantity (standardised log-RR), not artefacts of non-collapsibility or changing
+samples; conditional odds ratios from the same specifications are reported alongside. Shapley
+shares are exact over all 7! orderings, with and without the configuration block. The
+"behaviour change" table reports the reduction in log-RR when the other behaviour is added to
+*every* subset of the remaining blocks, so the dependence of "how much alcohol explains" on
+the rest of the model is visible. Stratum-specific RRs use model-A blocks minus the blocks that
+define the stratum; heterogeneity between two strata is the ratio of their RRs with a CI from
+the joint PSU-level linearisation.
+
+### 12.3 Factorial margins (`analysis/factorial.py`, `analysis/multifactor.py`, `analysis/cases.py`)
+
+For k binary factors, a survey logistic model with all main effects (factor levels other than
+exposed/reference, e.g. unknown, keep their own coefficients), all products of exposed
+indicators, and categorical covariates; 2^k standardised margins from one fit, jointly
+linearised. Contrasts: single-factor RR/RD within every combination of the others; pairwise,
+three- and four-way additive contrasts Σ(−1)^(k−|s|)p_s and their log-scale (multiplicative)
+analogues; excess of the joint RD over the sum of single RDs. A combination whose *recorded*
+cell has fewer than 30 sample units or 10 events is withheld together with every contrast using
+it. Holm adjustment across the registered family, per scale. The case explorer uses main effects
+plus all pairwise products of the case factors (higher-order products are assumed zero; the
+registered multifactor analyses test three-way terms) and withholds model risks, contrasts and
+allocations whenever any required combination is unsupported.
+
+### 12.4 Contribution metrics (`analysis/contributions.py`)
+
+* Nested models on a fixed sample: crude → environment → + other behaviours → + driver/vehicle
+  mix → + configuration; standardised RR/RD and conditional OR per factor.
+* Prediction: models fitted on 2016–2021 and evaluated on 2023–2024 (2022 unused: no tuning);
+  design-weighted McFadden R² (log-likelihood gain over the training base rate) and AUROC;
+  all 2^6 block subsets, giving exact Shapley values of the test R², leave-one-block-out drops
+  and single-block values; uncertainty by resampling PSUs within strata of the test set (model
+  fixed); permutation importance permutes a block's columns jointly.
+* Burden: AF(S) = 1 − M_S/M_obs from one model, where M_S sets the exposed crashes of every
+  factor in S to the reference; singles, joints, overlap (Σ singles − joint) and exact Shapley
+  allocation of the joint AF, all functions of jointly linearised margins.
+* Rank probabilities: the vector of adjusted log-RRs (and RDs) of all crash-level factors from
+  one model has a joint design-based covariance; 20,000 multivariate-normal draws give the
+  probability of each rank.
+* FARS overlap: deaths by combination of crash speeding, any-driver BAC ≥ .08 (expected counts
+  over the 10 implicates), any-driver drug positivity (determinate crashes) and the victim's
+  restraint.
+
+### 12.5 Drug measurement (`analysis/drugs.py`)
+
+Testing and positivity shares are census proportions (FARS). The minimal-selection comparison
+fits a logistic model for "driver died" among drivers tested for both alcohol and drugs, with
+crash-clustered sandwich SEs, in the states testing ≥ 50% of both killed and surviving drivers
+for both substances. CRSS bounds allocate unknown drug status at k × the known prevalence,
+separately among fatal and non-fatal crashes (k ∈ {0, 0.5, 1, 2, 3}) and at the two extremes.
+
+### 12.6 Restraint by driver behaviour (`analysis/restraint_behaviour.py`)
+
+The Phase-1 double-pair comparison (driver / right-front passenger, light vehicles) within
+disjoint strata of the driver's behaviour, crash type and time; crash-cluster bootstrap
+(1,000 replicates); heterogeneity z-test on the log RR. CRSS nested sequence for the unbelted
+RR on a fixed occupant sample.
