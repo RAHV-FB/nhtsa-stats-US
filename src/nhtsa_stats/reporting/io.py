@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import json
 import subprocess
+import sys
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
@@ -46,6 +47,12 @@ def table_path(module: str, name: str) -> Path:
     return config.TABLES_DIR / module / f"{name}.csv"
 
 
+def _caller_module(default: str) -> str:
+    """Name of the package module that called ``save_table`` (provenance for the sidecar)."""
+    name = sys._getframe(2).f_globals.get("__name__", "")
+    return name if name.startswith("nhtsa_stats.") else default
+
+
 def save_table(
     df: pd.DataFrame | pl.DataFrame,
     module: str,
@@ -75,7 +82,7 @@ def save_table(
         "inputs": inputs or [],
         "rows": len(df),
         "columns": list(df.columns),
-        "module": f"nhtsa_stats.analysis.{module}",
+        "module": _caller_module(f"nhtsa_stats.analysis.{module}"),
         "git_commit": git_commit(),
         "generated_utc": datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ"),
         **(extra or {}),

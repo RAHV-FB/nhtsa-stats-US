@@ -206,8 +206,12 @@ COVARIATES = [
 ]
 
 
+# Regroupings built in this module, gated through the registered columns they are built from.
+DERIVED = {"speed_grp": "str_speed_limit", "light_truck": "striking"}
+
+
 def _spec(df: pd.DataFrame, covs: list[str], interactions=()) -> ModelSpec:
-    h.assert_no_leakage(covs, allow_year=True)
+    h.assert_no_leakage([DERIVED.get(c, c) for c in covs], allow_year=True)
     return ModelSpec(
         categorical={c: severity.observed_levels(df, c, LEVELS[c]) for c in covs},
         interactions=list(interactions),
