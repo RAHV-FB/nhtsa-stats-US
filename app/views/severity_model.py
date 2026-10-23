@@ -95,9 +95,20 @@ def render() -> None:
 
         if hasattr(severity_ml, "predict_crash_fatal_risk") and outcome == "fatal":
             with st.expander("Machine-learning comparison model"):
+                # The prediction models are validated on later years, so they take no year input.
+                ml_cond = {k: v for k, v in cond.items() if k != "YEAR"}
                 try:
-                    st.json(severity_ml.predict_crash_fatal_risk(cond))
+                    res = severity_ml.predict_crash_fatal_risk(ml_cond)
                 except Exception as exc:  # model artefacts may be absent
                     st.caption(f"ML model unavailable: {exc}")
+                else:
+                    if res.get("status") == "ok":
+                        st.metric(
+                            f"Predicted probability ({res['model']}, {res['stage']})",
+                            f"{100 * res['probability']:.2f}%",
+                            help=f"95% CI {100 * res['ci_low']:.2f}% – {100 * res['ci_high']:.2f}%",
+                        )
+                        st.caption(res["caveat"])
+                    st.json(res, expanded=False)
     except ImportError:
         pass

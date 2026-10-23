@@ -1,5 +1,12 @@
 {
- "runtime_seconds": 1084.9,
+ "runtime_seconds": 681.6,
+ "cpu_seconds": 720.6,
+ "thread_settings": {
+  "OMP_NUM_THREADS": "1",
+  "OPENBLAS_NUM_THREADS": "1",
+  "POLARS_MAX_THREADS": "2"
+ },
+ "random_forest_n_jobs": 2,
  "n_boot": 200,
  "seed": 20240601,
  "train_years": [
@@ -69,8 +76,7 @@
    "test": 0.13180922349231375
   }
  },
- "processed_file_has_fatal_cc": false,
- "processed_file_mtime_utc": "2026-10-22T17:39:25Z",
+ "processed_file_mtime_utc": "2026-10-22T23:16:15Z",
  "feature_unknown_shares": {
   "region": 0.0,
   "urbanicity": 0.0,
@@ -83,11 +89,11 @@
   "interstate": 8.102466348111806e-05,
   "junction": 0.04280874128185282,
   "work_zone": 0.0,
-  "young_driver": 0.09647905192614815,
-  "older_driver": 0.09658353109747907,
-  "any_motorcycle": 0.0,
-  "any_heavy_truck": 0.0,
-  "speeding": 0.03536300115353534,
+  "young_driver": 0.000844362282592704,
+  "older_driver": 0.000844362282592704,
+  "any_motorcycle": 0.02947165522726352,
+  "any_heavy_truck": 0.037143411522133594,
+  "speeding": 0.0385677398170122,
   "alcohol_im": 0.0,
   "crash_type": 0.0,
   "n_vehicles": 0.0

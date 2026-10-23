@@ -1,0 +1,26 @@
+{
+ "table": "ml/alcohol_imputation_check.csv",
+ "description": "Imputed alcohol (alcohol_im) by fatal status, police-reported vs imputed records",
+ "population": "CRSS police-reported crashes (all severities, national probability sample) with a determinable maximum severity; train 2016-2021, validation 2022, test 2023-2024",
+ "unit": "crash",
+ "outcome": "",
+ "method": "Weighted P(alcohol_im = yes) among fatal and non-fatal training crashes, separately where police-reported alcohol is known and where it was imputed",
+ "inputs": [
+  "data/processed/crss_crash.parquet"
+ ],
+ "rows": 4,
+ "columns": [
+  "period",
+  "alcohol_im_source",
+  "n",
+  "n_events",
+  "weighted_share_of_crashes",
+  "p_alcohol_im_yes_fatal",
+  "p_alcohol_im_yes_not_fatal",
+  "ratio",
+  "quantity"
+ ],
+ "module": "nhtsa_stats.models.severity_ml",
+ "git_commit": "2dd6a99-dirty",
+ "generated_utc": "2026-10-23T00:57:14Z"
+}

@@ -8,11 +8,12 @@
  "inputs": [
   "data/processed/crss_crash.parquet"
  ],
- "rows": 32,
+ "rows": 40,
  "columns": [
   "outcome",
   "stage",
   "variant",
+  "imputed_columns",
   "model",
   "metric",
   "estimate",
@@ -20,9 +21,12 @@
   "ci_low",
   "ci_high",
   "n_boot_valid",
+  "diff_vs_main",
+  "diff_ci_low",
+  "diff_ci_high",
   "quantity"
  ],
  "module": "nhtsa_stats.models.severity_ml",
- "git_commit": "a49b126-dirty",
- "generated_utc": "2026-10-22T18:44:02Z"
+ "git_commit": "2dd6a99-dirty",
+ "generated_utc": "2026-10-23T00:58:05Z"
 }

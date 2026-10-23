@@ -23,10 +23,22 @@ Features (leakage control)
     tests).  Two stages: ``pre_crash`` (``specs.PRE_CRASH`` minus YEAR, plus the numeric
     speed limit and oldest-vehicle age with missing indicators) and
     ``pre_crash+circumstance`` (adds crash type and number of vehicles).  Explicitly
-    excluded: ``hit_and_run`` (post-crash driver behaviour), every outcome or outcome-derived
-    count (n_killed, NUM_INJ, MAX_SEV, *_IM severity fields, kabco...), the sampling
-    stratum ``STRATUM`` (assigned from injury severity), design variables and YEAR.
-    Encoders, imputers and scalers are fitted on the training years only.
+    excluded: ``hit_and_run`` (registered post-crash: leaving the scene), every outcome or
+    outcome-derived count (fatal_cc, n_killed, n_ka, n_sev_unknown, NUM_INJ, MAX_SEV,
+    MAXSEV_IM, kabco...), the sampling stratum ``STRATUM`` (assigned from injury severity),
+    design variables and YEAR.  Tri-state flags enter as yes / no / unknown (unknown is never
+    'no').  Encoders, imputers and scalers are fitted on the training years only.
+    Proxy check: several 'unknown' levels (motorcycle / heavy-vehicle involvement, speeding,
+    time of day) and a missing vehicle age occur mostly in hit-and-run crashes, so they can
+    partly stand in for the excluded post-crash status.  The share is tabulated
+    (``hit_and_run_proxy``), the evaluation is stratified by hit-and-run status (evaluation
+    only, never a feature), and a "proxy-blind" refit, in which those unknowns are imputed
+    from the weighted training marginal, bounds how much performance relies on the proxy.
+    Imputation check: ``alcohol_im`` is NHTSA's imputation where police-reported alcohol is
+    unknown; its fatal / non-fatal gradient among imputed records is tabulated
+    (``alcohol_imputation_check``) because an imputation model that conditions on severity
+    would carry outcome information into the input; the feature-set sensitivity refits with
+    the police-reported field instead.
 Models
     (1) logistic, main effects (tiny ridge, C=100, as in the survey models);
     (2) L2-regularised logistic, C tuned on 2022; (3) logistic + the pre-specified RQ2
@@ -37,8 +49,9 @@ Models
 Evaluation
     On 2023-2024: AUROC, average precision vs prevalence, Brier and Brier skill score, log
     loss, calibration (reliability curve, calibration intercept/slope, calibration-in-the-
-    large, observed/expected, expected calibration error), each weighted (population) and
-    unweighted (sample); by year and subgroup; confusion matrices at thresholds fixed on 2022.
+    large, observed/expected, expected calibration error, observed/expected within tiers of
+    predicted risk), each weighted (population) and unweighted (sample); by year and
+    subgroup; confusion matrices at thresholds fixed on 2022.
     Uncertainty: Rao-Wu rescaled bootstrap of variance PSUs (``PSU_VAR``) within strata
     (``PSUSTRAT``), >= 200 replicates, fixed seed; paired differences between models use the
     same replicates.  Temporal stability: models trained on 2016-2019, evaluated per year
@@ -49,7 +62,19 @@ Evaluation
 Model selection
     Pre-specified on 2022 (never on test): the simplest model, in the order
     logit_main < logit_l2 < logit_interact < hgb < rf, whose weighted 2022 log loss is within
-    1% of the best and whose weighted AUROC is within 0.005 of the best.
+    1% of the best and whose weighted AUROC is within 0.005 of the best.  Final models are
+    those fitted on 2016-2021 (they are not refitted on 2022, so the test years evaluate
+    exactly the saved models).
+Interface
+    ``predict_crash_fatal_risk(conditions)``: the selected model's predicted P(fatal) for a
+    police-reported crash with the given recorded conditions, standardised over the weighted
+    2023-2024 crash mix for every condition not given (structurally linked inputs -- crash
+    type and vehicle count, speed-limit band and mph -- are drawn jointly so no impossible
+    crash enters the average), with a 95% interval (design-based delta method for logistic
+    models, PSU-bootstrap refits for boosting), the range across model classes, the
+    population definition, flags (sparse levels, hit-and-run-proxy unknowns) and a caveat.
+    Unseen category values, non-permitted inputs (e.g. YEAR, hit_and_run), numbers outside
+    the training range and impossible configurations are refused.
 
 Justified interpretation
     "Among police-reported crashes with these recorded circumstances, the model-predicted
@@ -67,7 +92,10 @@ Not justified
 
 from __future__ import annotations
 
+import copy
 import logging
+import os
+import resource
 import time
 from collections.abc import Sequence
 from dataclasses import dataclass, field
@@ -176,11 +204,12 @@ MODEL_LABELS = {
 L2_GRID = (1e-4, 1e-3, 1e-2, 1e-1, 1.0, 10.0)
 HGB_GRID: tuple[dict[str, Any], ...] = tuple(
     {"learning_rate": lr, "max_leaf_nodes": mln, "min_samples_leaf": msl}
-    for lr in (0.05,)
+    for lr in (0.1,)
     for mln in (15, 31)
     for msl in (100, 400)
 )
-RF_GRID: tuple[dict[str, Any], ...] = ({"min_samples_leaf": 50}, {"min_samples_leaf": 200})
+# Random forest: one modest configuration (CPU budget); it is a comparison model only.
+RF_GRID: tuple[dict[str, Any], ...] = ({"min_samples_leaf": 50},)
 SELECTION_LOGLOSS_TOL = 0.01  # relative
 SELECTION_AUC_TOL = 0.005  # absolute
 VEH_AGE_LEVELS = specs.PERSON_LEVELS["veh_age_band"]
@@ -237,13 +266,14 @@ def load_crashes() -> pd.DataFrame:
         "drugs",
         "distracted",
         "alcohol",
+        "hit_and_run",  # post-crash: evaluation subgroups and proxy diagnostics only
     ]
     frame = (
         pl.read_parquet(path, columns=cols)
         .with_columns(h.vehicle_age_band("oldest_vehicle_age").alias("veh_age_band"))
         .to_pandas()
     )
-    for c in [*TRI_COLS, "drugs", "distracted", "alcohol"]:
+    for c in [*TRI_COLS, "drugs", "distracted", "alcohol", "hit_and_run"]:
         frame[c] = data.tri_state(frame[c])
     for c in [*PRE_CRASH_CAT, *CIRCUMSTANCE_CAT, "veh_age_band"]:
         frame[c] = frame[c].astype(object)
@@ -397,17 +427,55 @@ class FittedModel:
         return np.log(p / (1 - p))
 
 
+# Newton-Cholesky (exact Newton steps; p << n here) converges in ~10 iterations to the same
+# penalised pseudo-likelihood optimum as survey.SurveyLogit (tested), faster and more
+# precisely than L-BFGS on levels with few events.
+LOGIT_SOLVER: dict[str, Any] = {"solver": "newton-cholesky", "tol": 1e-8, "max_iter": 200}
+
+
 def _weights(df: pd.DataFrame) -> np.ndarray:
     w = df["WEIGHT"].to_numpy(dtype=float)
     return w / w.mean()
 
 
 def fit_logistic(
-    pre: Preprocessor, df: pd.DataFrame, outcome: str, c: float, name: str, stage: str
+    pre: Preprocessor,
+    df: pd.DataFrame,
+    outcome: str,
+    c: float,
+    name: str,
+    stage: str,
+    x: np.ndarray | None = None,
 ) -> FittedModel:
-    est = LogisticRegression(C=c, tol=1e-8, max_iter=5000)
-    est.fit(pre.onehot(df), df[outcome].to_numpy(), sample_weight=_weights(df))
+    """Survey-weighted (pseudo-ML) logistic regression; ``x`` = precomputed ``pre.onehot(df)``."""
+    est = LogisticRegression(C=c, **LOGIT_SOLVER)
+    x = pre.onehot(df) if x is None else x
+    est.fit(x, df[outcome].to_numpy(), sample_weight=_weights(df))
     return FittedModel(name, outcome, stage, pre, est, "onehot", {"C": c})
+
+
+def fit_logistic_path(
+    pre: Preprocessor,
+    df: pd.DataFrame,
+    outcome: str,
+    cs: Sequence[float],
+    name: str,
+    stage: str,
+    x: np.ndarray | None = None,
+) -> list[FittedModel]:
+    """L2 path over ``cs`` (fitted from weakest to strongest penalty, each warm-started at the
+    previous solution; the optimum does not depend on the starting point)."""
+    x = pre.onehot(df) if x is None else x
+    y, w = df[outcome].to_numpy(), _weights(df)
+    est = LogisticRegression(C=max(cs), warm_start=True, **LOGIT_SOLVER)
+    fits = {}
+    for c in sorted(cs, reverse=True):
+        est.set_params(C=c)
+        est.fit(x, y, sample_weight=w)
+        e = copy.deepcopy(est)
+        e.set_params(warm_start=False)
+        fits[c] = FittedModel(name, outcome, stage, pre, e, "onehot", {"C": c})
+    return [fits[c] for c in cs]
 
 
 def fit_hgb(
@@ -416,10 +484,10 @@ def fit_hgb(
     est = HistGradientBoostingClassifier(
         loss="log_loss",
         l2_regularization=1.0,
-        max_iter=1000,
+        max_iter=500,
         early_stopping=True,
         validation_fraction=0.15,
-        n_iter_no_change=30,
+        n_iter_no_change=20,
         scoring="loss",
         categorical_features=pre.categorical_mask,
         random_state=config.RANDOM_SEED,
@@ -435,7 +503,7 @@ def fit_rf(
     pre: Preprocessor, df: pd.DataFrame, outcome: str, params: dict, stage: str
 ) -> FittedModel:
     est = RandomForestClassifier(
-        n_estimators=150,
+        n_estimators=100,
         max_features="sqrt",
         max_samples=0.5,
         n_jobs=N_JOBS,
@@ -715,9 +783,13 @@ def fit_stage(
 
     pre = Preprocessor(list(STAGES[stage])).fit(train)
     t0 = time.time()
-    keep_best("logit_main", [fit_logistic(pre, train, outcome, RIDGE_C, "logit_main", stage)])
+    x_train = pre.onehot(train)
     keep_best(
-        "logit_l2", [fit_logistic(pre, train, outcome, c, "logit_l2", stage) for c in L2_GRID]
+        "logit_main",
+        [fit_logistic(pre, train, outcome, RIDGE_C, "logit_main", stage, x=x_train)],
+    )
+    keep_best(
+        "logit_l2", fit_logistic_path(pre, train, outcome, L2_GRID, "logit_l2", stage, x_train)
     )
     pre_int = Preprocessor(list(STAGES[stage]), products=stage_products(stage)).fit(train)
     keep_best(
@@ -774,6 +846,10 @@ DOMAINS: list[tuple[str, str, Any]] = [
     ("crash_family=pedestrian_cyclist", "crash_family", "pedestrian_cyclist"),
     ("motorcycle=yes", "any_motorcycle", "yes"),
     ("motorcycle=no", "any_motorcycle", "no"),
+    # Post-crash status used only to stratify the evaluation (never a feature): shows whether
+    # performance holds where 'unknown' inputs cannot stand in for a fleeing driver.
+    ("hit_and_run=no", "hit_and_run", "no"),
+    ("hit_and_run=yes", "hit_and_run", "yes"),
 ]
 UNWEIGHTED_DOMAINS = {"all", "year=2023", "year=2024"}
 CALIBRATION_DOMAINS = {"all", "year=2023", "year=2024"}
@@ -799,15 +875,16 @@ def evaluate(
     preds: dict[tuple[str, str, str], np.ndarray],
     n_boot: int,
     rng: np.random.Generator,
-) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, np.ndarray]:
+) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame, np.ndarray]:
     """Point estimates and cluster-bootstrap CIs on the test years for every model/domain.
 
-    Returns the long metric table, paired-difference table, reliability-curve table and the
-    bootstrap multipliers (reused for the threshold tables)."""
+    Returns the long metric table, paired-difference table, reliability-curve table,
+    calibration-by-risk-tier table and the bootstrap multipliers (reused for the threshold
+    tables)."""
     cidx, cl_stratum = cluster_index(test["PSUSTRAT"].to_numpy(), test["PSU_VAR"].to_numpy())
     n_cl = len(cl_stratum)
     mult = rao_wu_multipliers(cl_stratum, n_boot, rng)
-    rows, curves = [], []
+    rows, curves, tiers = [], [], []
     reps_all: dict[tuple[str, str, str], dict[str, np.ndarray]] = {}
     w_full = test["WEIGHT"].to_numpy()
     for (outcome, stage, model), p in preds.items():
@@ -850,9 +927,66 @@ def evaluate(
                     curves.append(
                         _reliability_rows(gs, grid, mult, outcome, stage, model, weighting)
                     )
+                    tiers.append(_tier_rows(gs, grid, mult, outcome, stage, model, weighting))
     metrics = pd.DataFrame(rows)
     diffs = paired_differences(reps_all, metrics)
-    return metrics, diffs, pd.concat(curves, ignore_index=True), mult
+    return (
+        metrics,
+        diffs,
+        pd.concat(curves, ignore_index=True),
+        pd.concat(tiers, ignore_index=True),
+        mult,
+    )
+
+
+# Risk tiers as ranges of the 20 equal-weight reliability bins (0-based, inclusive).
+RISK_TIERS: dict[str, tuple[int, int]] = {
+    "lowest 50% of predicted risk": (0, 9),
+    "50th-80th percentile": (10, 15),
+    "highest 20%": (16, 19),
+}
+
+
+def _tier_rows(
+    gs: GroupedScores,
+    grid: GroupedScores,
+    mult: np.ndarray,
+    outcome: str,
+    stage: str,
+    model: str,
+    weighting: str,
+) -> pd.DataFrame:
+    """Observed / expected within broad tiers of predicted risk (calibration by risk level;
+    overall O/E and the calibration slope can hide opposite errors at low and high risk)."""
+    wb, yb, eb = gs.reliability(None)
+    _, yr, er = grid.reliability(mult)
+    rows = []
+    for label, (lo, hi) in RISK_TIERS.items():
+        sl = slice(lo, hi + 1)
+        w_t, y_t, e_t = wb[0, sl].sum(), yb[0, sl].sum(), eb[0, sl].sum()
+        with np.errstate(divide="ignore", invalid="ignore"):
+            rep = yr[:, sl].sum(1) / er[:, sl].sum(1)
+        s = _summarise(float(y_t / e_t) if e_t else np.nan, rep)
+        rows.append(
+            {
+                "outcome": outcome,
+                "stage": stage,
+                "model": model,
+                "weighting": weighting,
+                "risk_tier": label,
+                "share_of_crashes": w_t / wb[0].sum(),
+                "share_of_expected_events": e_t / eb[0].sum(),
+                "mean_predicted": e_t / w_t if w_t else np.nan,
+                "observed_rate": y_t / w_t if w_t else np.nan,
+                "oe_ratio": s["estimate"],
+                "oe_low": s["ci_low"],
+                "oe_high": s["ci_high"],
+                "quantity": "estimated (design-weighted)"
+                if weighting == "weighted"
+                else "sample (unweighted)",
+            }
+        )
+    return pd.DataFrame(rows)
 
 
 def _reliability_rows(
@@ -1072,7 +1206,12 @@ def temporal_stability(
 # --------------------------------------------------------------------------------------
 # Interpretation features: every categorical feature, with the speed-limit band and the
 # numeric limit moved jointly, and the oldest-vehicle age (numeric + missing indicator).
-LINKED = {"speed_limit": ["speed_limit", "speed_limit_mph"]}
+# Crash type is moved together with the vehicle count (both derive from VE_FORMS), so donor
+# assignments never create a crash that cannot occur.
+LINKED = {
+    "speed_limit": ["speed_limit", "speed_limit_mph"],
+    "crash_type": ["crash_type", "n_vehicles"],
+}
 
 
 def weighted_sample(df: pd.DataFrame, n: int, rng: np.random.Generator) -> pd.DataFrame:
@@ -1088,6 +1227,21 @@ def interpretation_features(stage: str) -> dict[str, list[str]]:
     return groups
 
 
+# Features whose permutation is conditional on a structurally linked feature.
+CONDITIONAL_PERMUTATION = {"n_vehicles": "crash_type"}
+
+
+def _within_group_draw(groups: np.ndarray, w: np.ndarray, seed: int) -> np.ndarray:
+    """Row indices drawn with probability proportional to ``w`` within each group."""
+    rng = np.random.default_rng(seed)
+    draw = np.empty(len(groups), dtype=np.int64)
+    codes, _ = pd.factorize(groups)
+    for g in np.unique(codes):
+        idx = np.flatnonzero(codes == g)
+        draw[idx] = rng.choice(idx, size=len(idx), replace=True, p=w[idx] / w[idx].sum())
+    return draw
+
+
 def permutation_importance(
     model: FittedModel,
     df: pd.DataFrame,
@@ -1101,16 +1255,25 @@ def permutation_importance(
     The replacement values are drawn with probability proportional to ``WEIGHT`` (independent
     of the outcome and of the other features), so the "permuted" feature follows its
     population distribution; a plain row permutation would impose the CRSS *sample*
-    distribution, which over-represents injury crashes and their circumstances."""
+    distribution, which over-represents injury crashes and their circumstances.
+
+    The vehicle count is replaced by weighted draws *within the same crash type*
+    (``CONDITIONAL_PERMUTATION``): a marginal draw would create crashes that cannot occur
+    (e.g. a single-vehicle rollover with three vehicles), so its importance is conditional
+    on crash type (crash type itself is permuted together with the vehicle count)."""
     y, w = df[outcome].to_numpy(), df["WEIGHT"].to_numpy()
     df = df[[*model.pre.categorical, *model.pre.numeric]]
     base = _point_metrics(model.predict(df), y, w)
     prob = w / w.sum()
     rows = []
     for feat, cols in interpretation_features(model.stage).items():
+        given = CONDITIONAL_PERMUTATION.get(feat)
+        given = given if given in df else None
         d_ll, d_auc = [], []
-        for _ in range(n_repeats):
+        for rep in range(n_repeats):
             draw = rng.choice(len(df), size=len(df), replace=True, p=prob)
+            if given is not None:
+                draw = _within_group_draw(df[given].to_numpy(), w, config.RANDOM_SEED + rep)
             shuffled = df.copy()
             for c in cols:
                 shuffled[c] = df[c].to_numpy()[draw]
@@ -1129,6 +1292,7 @@ def permutation_importance(
                 "auroc_drop": float(np.mean(d_auc)),
                 "auroc_drop_sd": float(np.std(d_auc, ddof=1)),
                 "n_repeats": n_repeats,
+                "replacement": f"weighted draws within {given}" if given else "weighted marginal",
                 "quantity": "model-predicted (predictive importance, not causal)",
             }
         )
@@ -1142,9 +1306,14 @@ def set_feature(
 
     ``speed_limit`` accepts an mph number (band derived) or a band label (mph set to the
     band's representative training value from ``reps``, NaN for unknown / none);
-    ``oldest_vehicle_age`` accepts a number, NaN, or an age-band label (representative age).
+    ``oldest_vehicle_age`` accepts a number, NaN, or an age-band label (representative age);
+    setting ``crash_type`` also moves vehicle counts that the type cannot have to the first
+    compatible count (single-vehicle types -> 1, multi-vehicle types: 1 -> 2).
     """
     out = df.copy()
+    if feature == "crash_type" and "n_vehicles" in out:
+        allowed = compatible_n_vehicles(value)
+        out.loc[~out["n_vehicles"].isin(allowed), "n_vehicles"] = allowed[0]
     if feature == "speed_limit":
         if isinstance(value, str):
             out["speed_limit"] = value
@@ -1232,11 +1401,12 @@ def partial_dependence(
 def _donor_assign(
     ref: pd.DataFrame, var: str, levels: Sequence, rng: np.random.Generator
 ) -> pd.DataFrame:
-    """Values of ``var`` (and linked numeric columns) drawn from ref rows in ``levels``."""
+    """Values of ``var`` (and its linked columns) drawn from ref rows in ``levels``."""
     cols = LINKED.get(var, [var])
     donors = ref[ref[var].isin(list(levels))]
     if donors.empty:
-        donors = pd.DataFrame({var: [levels[0]] * 1, **{c: [np.nan] for c in cols if c != var}})
+        fill = {"n_vehicles": compatible_n_vehicles(levels[0])[0]}
+        donors = pd.DataFrame({var: [levels[0]], **{c: [fill.get(c, np.nan)] for c in cols[1:]}})
     idx = rng.integers(0, len(donors), len(ref))
     return donors[cols].iloc[idx].reset_index(drop=True)
 
@@ -1480,7 +1650,16 @@ def confirm_patterns(
     for cand in candidates:
         if cand["kind"] == "interaction":
             term = ((cand["feature_a"], [cand["level_a"]]), (cand["feature_b"], [cand["level_b"]]))
-            spec = ModelSpec(categorical=base_cat, products=[term])
+            cat = dict(base_cat)
+            pair = {cand["feature_a"], cand["feature_b"]}
+            if "crash_type" in pair:
+                # Crash type fixes the vehicle count for most types; as in analysis/severity.py
+                # the contrast comes from the model without the vehicle count, so the margins
+                # never combine a crash type with an impossible number of vehicles.
+                cat.pop("n_vehicles", None)
+            elif "n_vehicles" in pair:
+                cat.pop("crash_type", None)
+            spec = ModelSpec(categorical=cat, products=[term])
             model = SurveyLogit(spec, ridge=0.01).fit(ev, y, design)
             name = model.names_[-1]
             test = model.wald_test([name])
@@ -1500,6 +1679,7 @@ def confirm_patterns(
             ic_lo, ic_hi = ic["ic"].ci()
             reri_lo, reri_hi = ic["reri"].ci()
             agree = np.sign(ct["coef"]) == np.sign(cand["hgb_logit_dd"])
+            within = bool(np.log(ct["or_low"]) <= cand["hgb_logit_dd"] <= np.log(ct["or_high"]))
             rows.append(
                 {
                     "outcome": outcome,
@@ -1527,6 +1707,8 @@ def confirm_patterns(
                     "df_num": test["q"],
                     "p_value": test["p"],
                     "direction_agrees": bool(agree),
+                    # Is the boosting magnitude (screen data) compatible with the survey CI?
+                    "boosting_within_survey_ci": within,
                     "n": design.n,
                     "n_events": int(y.sum()),
                 }
@@ -1542,6 +1724,7 @@ def confirm_patterns(
             test = model.wald_test(names)
             ct = model.coef_table().set_index("term").loc[names]
             shape = ""
+            compare = ct
             if cand.get("shape_terms"):
                 # Shape without the linear term: band odds ratios vs the reference band.
                 shape_model = SurveyLogit(ModelSpec(categorical=cat), ridge=0.01).fit(ev, y, design)
@@ -1550,6 +1733,8 @@ def confirm_patterns(
                     f"{t}: OR {r.odds_ratio:.3g} ({r.or_low:.3g}-{r.or_high:.3g})"
                     for t, r in sct.iterrows()
                 )
+                compare = sct
+            agreement = term_agreement(cand.get("hgb_terms", {}), compare)
             rows.append(
                 {
                     "outcome": outcome,
@@ -1571,6 +1756,11 @@ def confirm_patterns(
                     "df_num": test["q"],
                     "p_value": test["p"],
                     "direction_agrees": np.nan,
+                    "term_agreement": agreement["detail"],
+                    "terms_confirmed": agreement["confirmed"],
+                    "terms_contradicted": agreement["contradicted"],
+                    "terms_outside_ci": agreement["outside_ci"],
+                    "terms_compared": agreement["compared"],
                     "n": design.n,
                     "n_events": int(y.sum()),
                 }
@@ -1578,20 +1768,69 @@ def confirm_patterns(
     out = pd.DataFrame(rows)
     if not out.empty:
         out["p_holm"] = holm(out["p_value"].to_numpy())
-        out["verdict"] = [
-            (
-                "supported (Holm p<0.05, same direction)"
-                if (r.p_holm < 0.05 and (r.kind != "interaction" or r.direction_agrees))
-                else (
-                    "not supported: significant but opposite direction"
-                    if r.p_holm < 0.05
-                    else "not confirmed (Holm p>=0.05)"
-                )
-            )
-            for r in out.itertuples()
-        ]
+        out["verdict"] = [_verdict(r) for r in out.itertuples()]
         out["quantity"] = "adjusted association (design-based, test years)"
     return out
+
+
+def term_agreement(hgb_terms: dict[str, float], survey: pd.DataFrame) -> dict[str, Any]:
+    """Term-by-term comparison of a boosting shape (log-odds contrasts) with survey-model
+    log odds ratios: 'confirmed' = same sign and the survey CI excludes 0; 'contradicted' =
+    opposite sign and the CI excludes 0; otherwise 'not distinguishable from 0'.  Separately,
+    'outside_ci' counts terms whose boosting value lies outside the survey 95% CI (the
+    boosting magnitude is not reproduced, whatever the sign)."""
+    parts, confirmed, contradicted, outside = [], 0, 0, 0
+    for term, hb in hgb_terms.items():
+        if term not in survey.index:
+            continue
+        r = survey.loc[term]
+        excludes = r["or_low"] > 1 or r["or_high"] < 1
+        if excludes and np.sign(r["coef"]) == np.sign(hb):
+            status = "confirmed"
+            confirmed += 1
+        elif excludes:
+            status = "contradicted"
+            contradicted += 1
+        else:
+            status = "not distinguishable from 0"
+        if not np.log(r["or_low"]) <= hb <= np.log(r["or_high"]):
+            status += "; boosting value outside survey CI"
+            outside += 1
+        parts.append(
+            f"{term}: boosting {hb:+.3f} vs survey {r['coef']:+.3f} "
+            f"(OR {r['odds_ratio']:.3g}, {r['or_low']:.3g}-{r['or_high']:.3g}) -> {status}"
+        )
+    return {
+        "detail": "; ".join(parts),
+        "confirmed": confirmed,
+        "contradicted": contradicted,
+        "outside_ci": outside,
+        "compared": len(parts),
+    }
+
+
+def _verdict(r: Any) -> str:
+    if r.kind == "interaction":
+        within = getattr(r, "boosting_within_survey_ci", True)
+        magnitude = (
+            "; boosting magnitude outside the survey 95% CI"
+            if within is not None and not pd.isna(within) and not bool(within)
+            else ""
+        )
+        if r.p_holm >= 0.05:
+            return "not confirmed (Holm p>=0.05)" + magnitude
+        if r.direction_agrees:
+            return "supported (Holm p<0.05, same direction)" + magnitude
+        return "not supported: significant but opposite direction"
+    if r.p_holm >= 0.05:
+        return "not confirmed (Holm p>=0.05)"
+    outside = getattr(r, "terms_outside_ci", 0)
+    return (
+        "departure from the logistic form supported (Holm p<0.05); boosting shape: "
+        f"{int(r.terms_confirmed)} of {int(r.terms_compared)} terms confirmed, "
+        f"{int(r.terms_contradicted)} contradicted, "
+        f"{int(outside) if pd.notna(outside) else 0} outside the survey 95% CI"
+    )
 
 
 def holm(p: np.ndarray) -> np.ndarray:
@@ -1607,6 +1846,101 @@ def holm(p: np.ndarray) -> np.ndarray:
 
 
 # --------------------------------------------------------------------------------------
+# Unknown values that mostly mark hit-and-run crashes (proxy for a post-crash variable)
+# --------------------------------------------------------------------------------------
+HR_PROXY_SHARE = 0.5  # weighted hit-and-run share above which an 'unknown' is treated as a proxy
+
+
+def hit_and_run_unknown_shares(train: pd.DataFrame) -> pd.DataFrame:
+    """Weighted share of hit-and-run crashes among crashes with each feature unknown/missing.
+
+    A fleeing driver leaves the vehicle's body type, model year, speeding judgement and
+    sometimes the crash time unrecorded, so 'unknown' can stand in for the post-crash
+    hit-and-run status, which is excluded as a feature (training years, weighted)."""
+    w = train["WEIGHT"].to_numpy()
+    hr = (train["hit_and_run"] == "yes").to_numpy()
+    rows = []
+    for c in [*STAGES["pre_crash+circumstance"], *NUMERIC]:
+        miss = (train[c].isna() if c in NUMERIC else train[c] == "unknown").to_numpy()
+        if not miss.any():
+            continue
+        rows.append(
+            {
+                "feature": c,
+                "unknown_kind": "missing value" if c in NUMERIC else "level 'unknown'",
+                "n_unknown": int(miss.sum()),
+                "weighted_share_of_crashes": float(w[miss].sum() / w.sum()),
+                "hit_and_run_share_among_unknown": float((w * hr)[miss].sum() / w[miss].sum()),
+                "hit_and_run_share_among_known": float((w * hr)[~miss].sum() / w[~miss].sum()),
+                "share_of_all_hit_and_run_crashes": float((w * hr)[miss].sum() / (w * hr).sum()),
+            }
+        )
+    out = pd.DataFrame(rows)
+    out["treated_as_proxy"] = out["hit_and_run_share_among_unknown"] > HR_PROXY_SHARE
+    out["quantity"] = "estimated (design-weighted, training years)"
+    return out
+
+
+def imputed_alcohol_check(train: pd.DataFrame, outcome: str = "fatal") -> pd.DataFrame:
+    """Does NHTSA's imputed alcohol (``alcohol_im``) track severity where it was imputed?
+
+    ``alcohol_im`` equals the police-reported value where that is known and is imputed by
+    NHTSA where it is unknown; the imputation model is not documented.  If it ignored crash
+    severity, the fatal / non-fatal ratio of P(alcohol_im = yes) among *imputed* records would
+    be attenuated relative to the ratio among police-reported records; a ratio of similar size
+    is what an imputation conditioning on severity (or on severity-related fields) produces,
+    in which case the imputed values carry outcome information into a model input.
+    Training years, weighted, by period (the police-reported field changed coding in 2019)."""
+    rows = []
+    for period, years in (("2016-2018", (2016, 2017, 2018)), ("2019-2021", (2019, 2020, 2021))):
+        d = train[train["YEAR"].isin(years)]
+        for status, mask in (
+            ("police-reported (known)", d["alcohol"] != "unknown"),
+            ("imputed (police-reported unknown)", d["alcohol"] == "unknown"),
+        ):
+            g = d[mask.to_numpy()]
+            if g.empty:
+                continue
+            w, y = g["WEIGHT"].to_numpy(), g[outcome].to_numpy()
+            yes = (g["alcohol_im"] == "yes").to_numpy()
+            p_k = float((w * yes)[y == 1].sum() / w[y == 1].sum()) if (y == 1).any() else np.nan
+            p_o = float((w * yes)[y == 0].sum() / w[y == 0].sum()) if (y == 0).any() else np.nan
+            rows.append(
+                {
+                    "period": period,
+                    "alcohol_im_source": status,
+                    "n": len(g),
+                    "n_events": int(y.sum()),
+                    "weighted_share_of_crashes": float(w.sum() / d["WEIGHT"].sum()),
+                    f"p_alcohol_im_yes_{outcome}": p_k,
+                    f"p_alcohol_im_yes_not_{outcome}": p_o,
+                    "ratio": p_k / p_o if p_o else np.nan,
+                    "quantity": "estimated (design-weighted, training years); diagnostic only",
+                }
+            )
+    return pd.DataFrame(rows)
+
+
+def blind_unknowns(
+    df: pd.DataFrame, train: pd.DataFrame, cols: Sequence[str], rng: np.random.Generator
+) -> pd.DataFrame:
+    """Replace unknown/missing values of ``cols`` by draws from the weighted training
+    distribution of the known values (independent of the outcome and of other features), so
+    a model cannot use 'unknown' as a stand-in for hit-and-run.  Unknown stays unknown in
+    meaning (it is not recoded to 'no'); it simply carries no information."""
+    out = df.copy()
+    for c in cols:
+        known = (train[c].notna() if c in NUMERIC else train[c] != "unknown").to_numpy()
+        miss = (out[c].isna() if c in NUMERIC else out[c] == "unknown").to_numpy()
+        if not miss.any():
+            continue
+        p = train["WEIGHT"].to_numpy()[known]
+        vals = train[c].to_numpy()[known]
+        out.loc[miss, c] = vals[rng.choice(len(vals), size=int(miss.sum()), p=p / p.sum())]
+    return out
+
+
+# --------------------------------------------------------------------------------------
 # Feature-set sensitivity (fatal, circumstance stage)
 # --------------------------------------------------------------------------------------
 def feature_sensitivity(
@@ -1615,44 +1949,72 @@ def feature_sensitivity(
     outcome: str,
     hgb_params: dict,
     mult: np.ndarray,
+    proxy_cols: Sequence[str] = (),
 ) -> pd.DataFrame:
-    """How much discrimination depends on police-reported behaviours (severity-dependent
-    ascertainment): drop speeding + alcohol; or add the (excluded) drug and distraction
-    fields, whose unknown rates differ by severity."""
+    """Test performance under alternative feature sets.
+
+    * police-reported behaviours (severity-dependent ascertainment): drop speeding + alcohol;
+      police-reported instead of imputed alcohol; add the drug and distraction fields;
+    * 'proxy-blind': unknown values that mostly mark hit-and-run crashes (``proxy_cols``) are
+      imputed from the weighted training marginal in training *and* test data, so the gap to
+      the main feature set bounds how much performance comes from the hit-and-run proxy."""
     stage = "pre_crash+circumstance"
     base = list(STAGES[stage])
-    variants = {
-        "main feature set": base,
-        "without speeding and alcohol_im": [c for c in base if c not in ("speeding", "alcohol_im")],
-        "plus drugs and distracted (police-reported)": [*base, "drugs", "distracted"],
-        "police-reported alcohol instead of alcohol_im": [
-            "alcohol" if c == "alcohol_im" else c for c in base
-        ],
+    variants: dict[str, tuple[list[str], bool]] = {
+        "main feature set": (base, False),
+        "without speeding and alcohol_im": (
+            [c for c in base if c not in ("speeding", "alcohol_im")],
+            False,
+        ),
+        "plus drugs and distracted (police-reported)": ([*base, "drugs", "distracted"], False),
+        "police-reported alcohol instead of alcohol_im": (
+            ["alcohol" if c == "alcohol_im" else c for c in base],
+            False,
+        ),
     }
+    if proxy_cols:
+        variants["proxy-blind: hit-and-run-dominated unknowns imputed"] = (base, True)
     cidx, cl_stratum = cluster_index(test["PSUSTRAT"].to_numpy(), test["PSU_VAR"].to_numpy())
     y, w = test[outcome].to_numpy(), test["WEIGHT"].to_numpy()
-    rows = []
-    for label, feats in variants.items():
+    rng = np.random.default_rng(config.RANDOM_SEED + 5)
+    rows: list[dict] = []
+    main: dict[str, tuple[dict, dict]] = {}
+    for label, (feats, blind) in variants.items():
         check_features([*feats, *NUMERIC], stage)
-        pre = Preprocessor(feats).fit(train)
+        tr, te = train, test
+        if blind:
+            tr = blind_unknowns(train, train, proxy_cols, rng)
+            te = blind_unknowns(test, train, proxy_cols, rng)
+        pre = Preprocessor(feats).fit(tr)
         params = {k: hgb_params[k] for k in ("learning_rate", "max_leaf_nodes", "min_samples_leaf")}
         for m in (
-            fit_logistic(pre, train, outcome, RIDGE_C, "logit_main", stage),
-            fit_hgb(pre, train, outcome, params, stage),
+            fit_logistic(pre, tr, outcome, RIDGE_C, "logit_main", stage),
+            fit_hgb(pre, tr, outcome, params, stage),
         ):
             _, _, point, reps = point_and_boot(
-                m.predict(test), y, w, cidx, len(cl_stratum), mult, calibration=False
+                m.predict(te), y, w, cidx, len(cl_stratum), mult, calibration=False
             )
+            if label == "main feature set":
+                main[m.name] = (point, reps)
             for metric in ("auroc", "average_precision", "brier_skill", "oe_ratio"):
+                # Paired difference from the main feature set (same model class, same
+                # bootstrap replicates of the same test crashes).
+                p0, r0 = main[m.name]
+                diff = _summarise(point[metric] - p0[metric], reps[metric] - r0[metric])
                 rows.append(
                     {
                         "outcome": outcome,
                         "stage": stage,
                         "variant": label,
+                        "imputed_columns": "|".join(proxy_cols) if blind else "",
                         "model": m.name,
                         "metric": metric,
                         **_summarise(point[metric], reps[metric]),
-                        "quantity": "estimated (design-weighted)",
+                        "diff_vs_main": diff["estimate"],
+                        "diff_ci_low": diff["ci_low"],
+                        "diff_ci_high": diff["ci_high"],
+                        "quantity": "estimated (design-weighted); difference paired over "
+                        "bootstrap replicates",
                     }
                 )
     return pd.DataFrame(rows)
@@ -1679,6 +2041,7 @@ def logistic_vcov(model: FittedModel, train: pd.DataFrame, design: SurveyDesign)
 
 
 N_REFITS = 20
+N_REFERENCE = 5000  # weight-proportional 2023-2024 crashes used to standardise predictions
 
 
 def hgb_refits(
@@ -1720,7 +2083,12 @@ CAVEAT = (
     "(speeding, alcohol) are ascertained more thoroughly in severe crashes. The interval "
     "reflects survey sampling uncertainty of the fitted model only (not model "
     "misspecification, measurement error or year-to-year drift); 'model_range' shows how "
-    "much the fitted model classes disagree."
+    "much the fitted model classes disagree. Absolute levels drift between years and are "
+    "less accurate in some subgroups (in the 2023-2024 test years fatal shares were "
+    "under-predicted for motorcycle, pedestrian/cyclist and non-hit-and-run crashes and "
+    "over-predicted for hit-and-run crashes and for the lowest-risk half of crashes, where "
+    "predictions were roughly twice the observed share; see the subgroup and risk-tier "
+    "calibration in docs/model_validation.md)."
 )
 
 
@@ -1832,8 +2200,10 @@ def _scenario(b: dict, cond: dict) -> pd.DataFrame:
             elif linked == "speed_limit_mph":
                 ref[linked] = np.nan
             else:  # no reference crash of this kind: first structurally possible value
-                ref[linked] = compatible_n_vehicles(cond[key])[0] if key == "crash_type" else (
-                    "sv_on_roadway" if cond[key] == "1" else "mv_other"
+                ref[linked] = (
+                    compatible_n_vehicles(cond[key])[0]
+                    if key == "crash_type"
+                    else ("sv_on_roadway" if cond[key] == "1" else "mv_other")
                 )
     return ref
 
@@ -1854,6 +2224,34 @@ def _delta_ci(model: FittedModel, vcov: np.ndarray, ref: pd.DataFrame, df: int) 
     }
 
 
+def support_flags(
+    cond: dict,
+    support: dict[str, dict[str, tuple[int, int]]],
+    unknown_proxy: dict[str, float] | None = None,
+) -> list[str]:
+    """Warnings for requested levels that rest on few training (fatal) crashes, and for
+    'unknown' inputs that mostly occur in hit-and-run crashes (a post-crash status)."""
+    flags = []
+    for k, v in cond.items():
+        if v == "unknown" and k in (unknown_proxy or {}):
+            flags.append(
+                f"proxy: {100 * unknown_proxy[k]:.0f}% of training crashes with {k} unknown "
+                "were hit-and-run crashes (a post-crash status, not a model input); the "
+                "prediction for 'unknown' partly reflects that, not the unrecorded condition"
+            )
+        n, events = support.get(k, {}).get(v, (None, None))
+        if n is None:
+            continue
+        if events < config.MIN_CELL_N:
+            flags.append(
+                f"sparse: {k}={v!r} occurs in {n:,} training crashes with only {events} fatal; "
+                "the prediction for this level is driven mostly by the model's structure"
+            )
+    if "oldest_vehicle_age" in cond and cond["oldest_vehicle_age"] > 30:
+        flags.append("sparse: oldest-vehicle ages above 30 years are rare in the training data")
+    return flags
+
+
 def predict_crash_fatal_risk(
     conditions: dict, *, stage: str | None = None, bundle: dict | None = None
 ) -> dict:
@@ -1868,6 +2266,10 @@ def predict_crash_fatal_risk(
     'pre_crash+circumstance' when crash type / number of vehicles is given, else 'pre_crash'.
     The point estimate comes from the model selected on 2022 for that stage; its interval
     from PSU-bootstrap refits (boosting) or the design-based delta method (logistic).
+    Crash type and vehicle count must be compatible (refused otherwise); when only one is
+    given the other is drawn from reference crashes that share it.  ``flags`` lists
+    requested levels with fewer than 30 training fatal crashes and 'unknown' inputs that
+    mostly occur in hit-and-run crashes.
     """
     b = bundle if bundle is not None else _load_bundle("fatal")
     checked = _validate_conditions(conditions, b, stage)
@@ -1903,6 +2305,7 @@ def predict_crash_fatal_risk(
         "status": "ok",
         "outcome": "fatal",
         **res,
+        "flags": support_flags(cond, b.get("support", {}), b.get("unknown_proxy")),
         "model": primary.name,
         "stage": stage,
         "conditions_used": cond,
@@ -1936,7 +2339,7 @@ def build_interface_bundle(
     train = df[train_mask].reset_index(drop=True)
     tdesign = design_full.subset(train_mask)
     recent = df[df["YEAR"].isin(config.TEST_YEARS).to_numpy()]
-    ref = weighted_sample(recent, 2000, np.random.default_rng(config.RANDOM_SEED + 7))
+    ref = weighted_sample(recent, N_REFERENCE, np.random.default_rng(config.RANDOM_SEED + 7))
     ref = ref[[*STAGES["pre_crash+circumstance"], *NUMERIC]].reset_index(drop=True)
     rng = np.random.default_rng(config.RANDOM_SEED + 11)
     stages = {}
@@ -1977,9 +2380,25 @@ def build_interface_bundle(
             },
         }
         log.info("interface bundle: %s/%s uses %s", outcome, stage, sel)
+    support = {
+        c: {
+            lv: (len(g), int(g[outcome].sum())) for lv, g in train.groupby(c, sort=False)[[outcome]]
+        }
+        for c in STAGES["pre_crash+circumstance"]
+    }
+    proxy = hit_and_run_unknown_shares(train)
+    proxy = proxy[proxy["treated_as_proxy"] & (proxy["unknown_kind"] == "level 'unknown'")]
     return {
         "outcome": outcome,
         "stages": stages,
+        "support": support,
+        "unknown_proxy": dict(
+            zip(
+                proxy["feature"],
+                proxy["hit_and_run_share_among_unknown"].astype(float),
+                strict=True,
+            )
+        ),
         "features": {s: stage_features(s) for s in STAGES},
         "reference": ref,
         "design_df": int(tdesign.df),
@@ -2309,7 +2728,7 @@ def run(n_boot: int = N_BOOT, interpret: bool = True) -> dict[str, Any]:
     # Test evaluation (one test frame: both outcomes are known on the same crashes).
     test = splits["fatal"]["test"]
     assert splits["ka"]["test"]["case_id"].equals(test["case_id"])
-    metrics, diffs, curves, mult = evaluate(test, preds_test, n_boot, rng)
+    metrics, diffs, curves, tiers, mult = evaluate(test, preds_test, n_boot, rng)
     method = (
         f"Weighted (WEIGHT) and unweighted metrics; 95% percentile CIs from {n_boot} Rao-Wu "
         "rescaled bootstrap replicates of PSU_VAR within PSUSTRAT (seed config.RANDOM_SEED)"
@@ -2331,6 +2750,13 @@ def run(n_boot: int = N_BOOT, interpret: bool = True) -> dict[str, Any]:
         "calibration_curves",
         "Reliability curves on test: 20 equal-size risk groups",
         method=method,
+    )
+    _save(
+        tiers,
+        "calibration_by_risk_tier",
+        "Observed/expected on test within tiers of predicted risk (lowest 50%, 50-80%, top 20%)",
+        method="Tiers from the 20 equal-weight reliability groups of each model's test "
+        "predictions; " + method,
     )
     valid = splits["fatal"]["valid"]
     thr = threshold_tables(valid, test, preds_valid, preds_test, mult)
@@ -2368,12 +2794,29 @@ def run(n_boot: int = N_BOOT, interpret: bool = True) -> dict[str, Any]:
     )
     log.info("temporal stability done (%.0fs)", time.time() - t_start)
 
+    proxy = hit_and_run_unknown_shares(splits["fatal"]["train"])
+    _save(
+        proxy,
+        "hit_and_run_proxy",
+        "Share of hit-and-run crashes among crashes with each feature unknown (training years)",
+        method="Weighted shares; hit_and_run is post-crash and used here only as a diagnostic",
+    )
+    alc = imputed_alcohol_check(splits["fatal"]["train"])
+    _save(
+        alc,
+        "alcohol_imputation_check",
+        "Imputed alcohol (alcohol_im) by fatal status, police-reported vs imputed records",
+        method="Weighted P(alcohol_im = yes) among fatal and non-fatal training crashes, "
+        "separately where police-reported alcohol is known and where it was imputed",
+    )
+    proxy_cols = proxy.loc[proxy["treated_as_proxy"], "feature"].tolist()
     sens = feature_sensitivity(
         splits["fatal"]["train"],
         test,
         "fatal",
         hgb_params[("fatal", "pre_crash+circumstance")],
         mult,
+        proxy_cols,
     )
     _save(
         sens,
@@ -2381,19 +2824,25 @@ def run(n_boot: int = N_BOOT, interpret: bool = True) -> dict[str, Any]:
         "Test performance under alternative feature sets (fatal)",
         method=method,
     )
+    log.info("feature sensitivity done (%.0fs)", time.time() - t_start)
 
     out: dict[str, Any] = {
         "metrics": metrics,
         "paired_differences": diffs,
         "thresholds": thr,
+        "calibration_by_risk_tier": tiers,
         "temporal": temporal,
         "selection": sel_info,
         "feature_sensitivity": sens,
+        "hit_and_run_proxy": proxy,
+        "alcohol_imputation_check": alc,
     }
     if interpret:
         out.update(_interpret(df, design_full, splits["fatal"], fitted, rng))
+        log.info("interpretation done (%.0fs)", time.time() - t_start)
         bundle = build_interface_bundle(df, design_full, fitted, selection, metrics)
         joblib.dump(bundle, MODEL_DIR / "interface_fatal.joblib", compress=3)
+        log.info("interface bundle done (%.0fs)", time.time() - t_start)
         _BUNDLES.pop("fatal", None)
         _figures(
             curves,
@@ -2404,8 +2853,15 @@ def run(n_boot: int = N_BOOT, interpret: bool = True) -> dict[str, Any]:
             out["ice"],
             out["top_features"],
         )
+    usage = resource.getrusage(resource.RUSAGE_SELF)
     run_info = {
         "runtime_seconds": round(time.time() - t_start, 1),
+        "cpu_seconds": round(usage.ru_utime + usage.ru_stime, 1),
+        "thread_settings": {
+            k: os.environ.get(k, "unset")
+            for k in ("OMP_NUM_THREADS", "OPENBLAS_NUM_THREADS", "POLARS_MAX_THREADS")
+        },
+        "random_forest_n_jobs": N_JOBS,
         "n_boot": n_boot,
         "seed": config.RANDOM_SEED,
         "train_years": list(config.TRAIN_YEARS),
@@ -2459,6 +2915,7 @@ def _interpret(
             )
         )
     importance = pd.concat(imp_parts, ignore_index=True)
+    log.info("permutation importance and implied interactions done")
     _save(
         importance,
         "permutation_importance",
@@ -2481,6 +2938,7 @@ def _interpret(
         pd_parts.append(p_)
         ice_parts.append(i_)
     pdp = pd.concat(pd_parts, ignore_index=True)
+    log.info("partial dependence done")
     ice = pd.concat(ice_parts, ignore_index=True)
     _save(pdp, "partial_dependence", "Weighted partial dependence (fatal) on 2023-2024 crashes")
     _save(ice, "ice_curves", "ICE curves of the boosted model for numeric features (30 crashes)")
@@ -2496,6 +2954,7 @@ def _interpret(
     hgb = fitted[(outcome, "pre_crash+circumstance", "hgb")]
     ref_valid = weighted_sample(valid, 1000, np.random.default_rng(config.RANDOM_SEED + 3))
     screen, _ = interaction_screen(hgb, ref_valid, train, reps, outcome)
+    log.info("interaction screen done")
     screen["eligible_for_confirmation"] = (~screen["prespecified_pair"]) & (
         screen["cramers_v_train"] <= 0.5
     )
@@ -2529,6 +2988,13 @@ def _interpret(
         ]
         return float(sel["pd_logit"].iloc[0]) if len(sel) else np.nan
 
+    def band_logit(band: str) -> float:
+        return float(np.mean(hgb.predict_logit(_set_level(ref_valid, "veh_age_band", band, reps))))
+
+    age_shape_hgb = {
+        f"veh_age_band[{b}]": band_logit(b) - band_logit(VEH_AGE_LEVELS[0])
+        for b in VEH_AGE_LEVELS[1:5]
+    }
     age_hgb = pd_logit("hgb", "oldest_vehicle_age", 30) - pd_logit("hgb", "oldest_vehicle_age", 18)
     age_lm = pd_logit("logit_main", "oldest_vehicle_age", 30) - pd_logit(
         "logit_main", "oldest_vehicle_age", 18
@@ -2546,6 +3012,7 @@ def _interpret(
             "terms": [f"veh_age_band[{b}]" for b in VEH_AGE_LEVELS[1:5]],
             "shape_terms": [f"veh_age_band[{b}]" for b in VEH_AGE_LEVELS[1:5]],
             "hgb_summary": age_hgb,
+            "hgb_terms": age_shape_hgb,
             "hgb_scale": "boosting PD log-odds, age 30 minus age 18 (logit_main, linear: "
             f"{age_lm:.3f})",
         },
@@ -2569,6 +3036,9 @@ def _interpret(
                 "sl_75plus_in_band",
             ],
             "hgb_summary": sl_hgb["35-30"],
+            "hgb_terms": {
+                f"sl_{b if b < 75 else '75plus'}_in_band": sl_hgb[f"{b}-{a}"] for a, b in within
+            },
             "hgb_scale": "boosting PD log-odds 35 minus 30 mph; all within-band contrasts: "
             + ", ".join(f"{k}: {v:.3f}" for k, v in sl_hgb.items()),
         },

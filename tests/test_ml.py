@@ -11,6 +11,7 @@ from sklearn.metrics import average_precision_score, brier_score_loss, log_loss,
 from nhtsa_stats import config
 from nhtsa_stats.analysis.survey import ModelSpec, SurveyDesign, SurveyLogit, svy_mean
 from nhtsa_stats.models import severity_ml as ml
+from nhtsa_stats.processing import harmonize as h
 
 
 # --------------------------------------------------------------------------------------
@@ -47,6 +48,28 @@ def test_check_features_rejects_leaky_inputs(bad):
         ml.check_features(
             [*ml.stage_features("pre_crash+circumstance"), bad], "pre_crash+circumstance"
         )
+
+
+@pytest.mark.parametrize("stage", list(ml.STAGES))
+def test_registry_assert_no_leakage_called_directly(stage):
+    """The registry check itself (not only the module wrapper) accepts the model inputs and
+    rejects them once a post-crash or outcome variable is added."""
+    sources = [ml.FEATURE_SOURCE.get(f, f) for f in ml.stage_features(stage)]
+    h.assert_no_leakage(sources, allowed=ml.STAGE_TIMINGS[stage])
+    for bad in ("hit_and_run", "fatal_cc", "n_ka", "rollover_any", "YEAR"):
+        with pytest.raises(ValueError):
+            h.assert_no_leakage([*sources, bad], allowed=ml.STAGE_TIMINGS[stage])
+    # Derived numeric inputs map to a registered variable of the same timing.
+    for f, src in ml.FEATURE_SOURCE.items():
+        assert h.REGISTRY[src].timing == "pre_crash", f
+
+
+def test_hit_and_run_is_evaluation_only():
+    """hit_and_run (post-crash) stratifies the evaluation but is never a model input."""
+    assert h.REGISTRY["hit_and_run"].timing == "post_crash"
+    for stage in ml.STAGES:
+        assert "hit_and_run" not in ml.stage_features(stage)
+    assert {"hit_and_run=no", "hit_and_run=yes"} <= {d[0] for d in ml.DOMAINS}
 
 
 def test_pre_crash_stage_rejects_crash_configuration():
@@ -101,6 +124,34 @@ def test_grid_grouping_changes_metrics_negligibly():
     grid = ml.GroupedScores(p, y, w, cl, 1, resolution=ml.BOOT_RESOLUTION).metrics()
     for k in ("auroc", "average_precision", "brier", "log_loss", "calibration_slope"):
         assert grid[k][0] == pytest.approx(exact[k][0], rel=2e-3, abs=2e-4)
+
+
+def test_calibration_by_risk_tier():
+    """Tier O/E equals the direct weighted computation; an error confined to low-risk
+    crashes shows up in the lowest tier although overall O/E stays close to 1."""
+    rng = np.random.default_rng(11)
+    n = 40000
+    p = np.exp(rng.normal(-6, 1.2, n))
+    w = rng.uniform(1, 20, n)
+    q50 = ml.weighted_quantile(p, w, 0.5)[0]
+    true = np.where(p <= q50, 0.5 * p, p)  # low-risk half over-predicted two-fold
+    y = (rng.random(n) < true).astype(float)
+    cl = rng.integers(0, 40, n)
+    cl_stratum = np.repeat(np.arange(20), 2)
+    mult = ml.rao_wu_multipliers(cl_stratum, 200, np.random.default_rng(1))
+    gs = ml.GroupedScores(p, y, w, cl, 40)
+    grid = ml.GroupedScores(p, y, w, cl, 40, resolution=ml.BOOT_RESOLUTION)
+    t = ml._tier_rows(gs, grid, mult, "fatal", "s", "m", "weighted").set_index("risk_tier")
+    assert t["share_of_crashes"].sum() == pytest.approx(1.0)
+    assert t["share_of_expected_events"].sum() == pytest.approx(1.0)
+    low = t.loc["lowest 50% of predicted risk"]
+    assert low["share_of_crashes"] == pytest.approx(0.5, abs=0.01)
+    k = p <= ml.weighted_quantile(p, w, 0.5)[0]
+    direct = (w * y)[k].sum() / (w * p)[k].sum()
+    assert low["oe_ratio"] == pytest.approx(direct, rel=0.05)
+    assert low["oe_low"] <= low["oe_ratio"] <= low["oe_high"]
+    assert low["oe_high"] < 0.9  # the planted two-fold over-prediction is detected
+    assert t.loc["highest 20%", "oe_low"] < 1 < t.loc["highest 20%", "oe_high"]
 
 
 def test_calibration_slope_and_intercept():
@@ -175,8 +226,18 @@ def _synthetic_crashes(n: int = 6000, seed: int = 0) -> pd.DataFrame:
     )
     for c in ml.STAGES["pre_crash+circumstance"]:  # make sure the reference level is present
         df.loc[: len(ml.ALL_LEVELS[c]) - 1, c] = ml.ALL_LEVELS[c]
+    # Crash type and vehicle count are both derived from VE_FORMS: keep them compatible.
+    df["n_vehicles"] = [rng.choice(ml.compatible_n_vehicles(t)) for t in df["crash_type"]]
     df["speed_limit_mph"] = np.where(rng.random(n) < 0.1, np.nan, rng.integers(2, 15, n) * 5.0)
+    df["speed_limit"] = ml.speed_band(df["speed_limit_mph"].to_numpy())
+    df.loc[: len(ml.ALL_LEVELS["speed_limit"]) - 1, "speed_limit"] = ml.ALL_LEVELS["speed_limit"]
     df["oldest_vehicle_age"] = np.where(rng.random(n) < 0.05, np.nan, rng.integers(0, 25, n) * 1.0)
+    # Hit-and-run (post-crash): makes the motorcycle flag and vehicle age mostly unknown.
+    hr = rng.random(n) < 0.15
+    df["hit_and_run"] = np.where(hr, "yes", "no")
+    df.loc[hr & (rng.random(n) < 0.3), "any_motorcycle"] = "unknown"
+    df.loc[~hr & (df["any_motorcycle"] == "unknown"), "any_motorcycle"] = "no"
+    df.loc[hr & (rng.random(n) < 0.3), "oldest_vehicle_age"] = np.nan
     eta = (
         -3.5
         + 1.2 * (df["crash_type"] == "pedestrian")
@@ -224,6 +285,59 @@ def test_sklearn_logistic_equals_survey_logit():
     np.testing.assert_allclose(np.sqrt(np.diag(v)), np.sqrt(np.diag(sv.vcov_)), rtol=2e-3)
 
 
+def test_term_agreement_and_verdicts():
+    survey = pd.DataFrame(
+        {
+            "coef": [0.5, -0.4, 0.05],
+            "odds_ratio": np.exp([0.5, -0.4, 0.05]),
+            "or_low": np.exp([0.2, -0.7, -0.3]),
+            "or_high": np.exp([0.8, -0.1, 0.4]),
+        },
+        index=["a", "b", "c"],
+    )
+    res = ml.term_agreement({"a": 0.3, "b": 0.2, "c": 0.1, "missing": 1.0}, survey)
+    assert (res["confirmed"], res["contradicted"], res["compared"]) == (1, 1, 3)
+    assert "a: boosting +0.300" in res["detail"] and "not distinguishable" in res["detail"]
+    # Magnitude: b's boosting value (+0.2) lies outside the survey CI (-0.7, -0.1); a and c
+    # lie inside theirs.
+    assert res["outside_ci"] == 1
+    assert "b: boosting +0.200" in res["detail"] and "outside survey CI" in res["detail"]
+    big = ml.term_agreement({"a": 1.5}, survey)  # right sign, CI excludes 0, too large
+    assert (big["confirmed"], big["outside_ci"]) == (1, 1)
+    row = pd.Series(
+        {
+            "kind": "non-linearity",
+            "p_holm": 0.01,
+            "direction_agrees": np.nan,
+            "terms_confirmed": 1,
+            "terms_compared": 3,
+            "terms_contradicted": 1,
+            "terms_outside_ci": 2,
+        }
+    )
+    v = ml._verdict(row)
+    assert "1 of 3 terms confirmed" in v and "same direction" not in v
+    assert "2 outside the survey 95% CI" in v
+    inter = pd.Series({"kind": "interaction", "p_holm": 0.01, "direction_agrees": False})
+    assert ml._verdict(inter).startswith("not supported")
+    weak = pd.Series({**inter.to_dict(), "p_holm": 0.2})
+    assert ml._verdict(weak) == "not confirmed (Holm p>=0.05)"
+    for flag in (False, np.bool_(False)):
+        same = pd.Series(
+            {
+                "kind": "interaction",
+                "p_holm": 0.01,
+                "direction_agrees": True,
+                "boosting_within_survey_ci": flag,
+            }
+        )
+        assert ml._verdict(same) == (
+            "supported (Holm p<0.05, same direction); boosting magnitude outside the survey 95% CI"
+        )
+    ok = pd.Series({**same.to_dict(), "boosting_within_survey_ci": np.bool_(True)})
+    assert ml._verdict(ok) == "supported (Holm p<0.05, same direction)"
+
+
 def test_holm():
     adj = ml.holm(np.array([0.01, 0.04, 0.03]))
     np.testing.assert_allclose(adj, [0.03, 0.06, 0.06])
@@ -250,9 +364,15 @@ def tiny_bundle():
             "baseline": float(lm.predict(df).mean()),
             "test_performance": {},
         }
+    support = {
+        c: {lv: (len(g), int(g["fatal"].sum())) for lv, g in df.groupby(c)}
+        for c in ml.STAGES["pre_crash+circumstance"]
+    }
     return {
         "outcome": "fatal",
         "stages": stages,
+        "support": support,
+        "unknown_proxy": {"any_motorcycle": 0.97},
         "features": {s: ml.stage_features(s) for s in ml.STAGES},
         "reference": df[ml.stage_features("pre_crash+circumstance")].iloc[:500],
         "design_df": design.df,
@@ -294,6 +414,191 @@ def test_predict_returns_probability_interval_and_labels(tiny_bundle):
     assert low["probability"] < r["probability"]
     pre = f({"speeding": "yes"}, bundle=tiny_bundle)
     assert pre["stage"] == "pre_crash"
+
+
+def test_predict_refuses_impossible_crash_configuration(tiny_bundle):
+    f = ml.predict_crash_fatal_risk
+    r = f({"crash_type": "sv_off_roadway", "n_vehicles": "2"}, bundle=tiny_bundle)
+    assert r["status"] == "refused"
+    assert f({"crash_type": "mv_head_on", "n_vehicles": "1"}, bundle=tiny_bundle)["status"] == (
+        "refused"
+    )
+    ok = f({"crash_type": "pedestrian", "n_vehicles": "1"}, bundle=tiny_bundle)
+    assert ok["status"] == "ok"
+
+
+def test_scenario_marginalises_only_over_possible_crashes(tiny_bundle):
+    """Unspecified structurally linked inputs are drawn from compatible reference crashes."""
+    sv = ml._scenario(tiny_bundle, {"crash_type": "sv_rollover_first"})
+    assert set(sv["n_vehicles"]) == {"1"}
+    one = ml._scenario(tiny_bundle, {"n_vehicles": "1"})
+    assert not one["crash_type"].str.startswith("mv_").any()
+    multi = ml._scenario(tiny_bundle, {"n_vehicles": "3+"})
+    assert not multi["crash_type"].str.startswith("sv_").any()
+    # Unrelated inputs keep the reference mix.
+    ref = tiny_bundle["reference"]
+    assert (sv["weather"].to_numpy() == ref["weather"].to_numpy()).all()
+
+
+def test_support_and_proxy_flags(tiny_bundle):
+    support = {"weather": {"fog": (900, 4), "clear": (50_000, 900)}}
+    flags = ml.support_flags({"weather": "fog"}, support)
+    assert len(flags) == 1 and flags[0].startswith("sparse")
+    assert ml.support_flags({"weather": "clear"}, support) == []
+    proxy = ml.support_flags({"any_motorcycle": "unknown"}, {}, {"any_motorcycle": 0.95})
+    assert len(proxy) == 1 and "hit-and-run" in proxy[0]
+    r = ml.predict_crash_fatal_risk({"any_motorcycle": "unknown"}, bundle=tiny_bundle)
+    assert r["status"] == "ok"
+    assert any(x.startswith("proxy") for x in r["flags"])
+
+
+def test_set_feature_keeps_crash_configuration_possible():
+    df = _synthetic_crashes(3000, seed=8)
+    sv = ml.set_feature(df, "crash_type", "sv_off_roadway")
+    assert set(sv["n_vehicles"]) == {"1"}
+    mv = ml.set_feature(df, "crash_type", "mv_angle")
+    assert "1" not in set(mv["n_vehicles"])
+    keep = (df["n_vehicles"] != "1").to_numpy()
+    assert (mv.loc[keep, "n_vehicles"] == df.loc[keep, "n_vehicles"]).all()
+    ped = ml.set_feature(df, "crash_type", "pedestrian")
+    assert (ped["n_vehicles"] == df["n_vehicles"]).all()
+    # Donor assignment carries the vehicle count with the crash type.
+    d = ml._donor_assign(df, "crash_type", ["sv_rollover_first"], np.random.default_rng(0))
+    assert set(d["n_vehicles"]) == {"1"}
+
+
+def test_hit_and_run_proxy_shares_and_blinding():
+    df = _synthetic_crashes(8000, seed=5)
+    shares = ml.hit_and_run_unknown_shares(df).set_index("feature")
+    # Synthetic: unknown motorcycle status and missing vehicle age occur mostly with hit-and-run.
+    assert shares.loc["any_motorcycle", "hit_and_run_share_among_unknown"] > 0.9
+    assert shares.loc["any_motorcycle", "treated_as_proxy"]
+    assert shares.loc["oldest_vehicle_age", "treated_as_proxy"]
+    assert not shares.loc["weather", "treated_as_proxy"]
+    cols = ["any_motorcycle", "oldest_vehicle_age"]
+    blind = ml.blind_unknowns(df, df, cols, np.random.default_rng(0))
+    assert not (blind["any_motorcycle"] == "unknown").any()
+    assert blind["oldest_vehicle_age"].notna().all()
+    known = df["any_motorcycle"] != "unknown"
+    assert (blind.loc[known, "any_motorcycle"] == df.loc[known, "any_motorcycle"]).all()
+    assert set(blind["any_motorcycle"]) <= {"yes", "no"}
+    # Other columns untouched; the input frame is not modified.
+    assert (blind["weather"] == df["weather"]).all()
+    assert (df["any_motorcycle"] == "unknown").any()
+
+
+def test_weighted_permutation_importance_ranks_signal_above_noise():
+    df = _synthetic_crashes(8000, seed=6)
+    stage = "pre_crash+circumstance"
+    pre = ml.Preprocessor(list(ml.STAGES[stage])).fit(df)
+    m = ml.fit_logistic(pre, df, "fatal", ml.RIDGE_C, "logit_main", stage)
+    imp = ml.permutation_importance(m, df, "fatal", 2, np.random.default_rng(0))
+    imp = imp.set_index("feature")
+    assert imp.loc["crash_type", "log_loss_increase"] > 0
+    assert imp.loc["crash_type", "log_loss_increase"] > 5 * abs(
+        imp.loc["region", "log_loss_increase"]
+    )
+    assert set(ml.interpretation_features(stage)) == set(imp.index)
+    assert imp.loc["n_vehicles", "replacement"] == "weighted draws within crash_type"
+    assert imp.loc["region", "replacement"] == "weighted marginal"
+
+
+def test_vehicle_count_permutation_stays_within_crash_type():
+    """Replacement vehicle counts come from crashes of the same type, so the permuted data
+    contain no impossible crash (e.g. a single-vehicle type with several vehicles)."""
+    df = _synthetic_crashes(5000, seed=8)
+    w = df["WEIGHT"].to_numpy()
+    draw = ml._within_group_draw(df["crash_type"].to_numpy(), w, 0)
+    assert (df["crash_type"].to_numpy()[draw] == df["crash_type"].to_numpy()).all()
+    permuted = df["n_vehicles"].to_numpy()[draw]
+    ok = [n in ml.compatible_n_vehicles(t) for t, n in zip(df["crash_type"], permuted, strict=True)]
+    assert all(ok)
+    # Deterministic for a given seed; weights matter (heavier rows are drawn more often).
+    np.testing.assert_array_equal(draw, ml._within_group_draw(df["crash_type"].to_numpy(), w, 0))
+    heavy = np.where(np.arange(len(df)) == 0, 1e6, 1.0)
+    d2 = ml._within_group_draw(df["crash_type"].to_numpy(), heavy, 1)
+    group0 = (df["crash_type"] == df["crash_type"].iloc[0]).to_numpy()
+    assert (d2[group0] == 0).mean() > 0.99
+
+
+def test_imputed_alcohol_check():
+    """The diagnostic contrasts the fatal / non-fatal gradient of alcohol_im among
+    police-reported and imputed records (synthetic: imputation that uses the outcome)."""
+    rng = np.random.default_rng(9)
+    n = 20000
+    fatal = (rng.random(n) < 0.05).astype(float)
+    police = np.where(rng.random(n) < 0.3, "unknown", np.where(rng.random(n) < 0.1, "yes", "no"))
+    imputed = np.where(rng.random(n) < np.where(fatal == 1, 0.3, 0.05), "yes", "no")
+    df = pd.DataFrame(
+        {
+            "YEAR": rng.choice([2016, 2017, 2018, 2019, 2020, 2021], n),
+            "WEIGHT": rng.uniform(1, 50, n),
+            "fatal": fatal,
+            "alcohol": police,
+            "alcohol_im": np.where(police == "unknown", imputed, police),
+        }
+    )
+    out = ml.imputed_alcohol_check(df)
+    assert len(out) == 4 and set(out["period"]) == {"2016-2018", "2019-2021"}
+    imp = out[out["alcohol_im_source"].str.startswith("imputed")]
+    rep = out[out["alcohol_im_source"].str.startswith("police")]
+    assert (imp["ratio"] > 3).all()  # outcome-dependent imputation shows a strong gradient
+    assert (rep["ratio"].between(0.5, 2)).all()  # police-reported values independent of fatal
+    shares = out.groupby("period")["weighted_share_of_crashes"].sum()
+    np.testing.assert_allclose(shares, 1.0)
+
+
+def test_build_interface_bundle_with_boosting_refits():
+    """End-to-end bundle on synthetic data: logistic (delta-method) and boosted (refit)
+    intervals, level support and the hit-and-run proxy table."""
+    df = _synthetic_crashes(5000, seed=7)
+    df["YEAR"] = np.where(np.arange(len(df)) % 4 == 0, 2023, 2018)
+    df["case_id"] = np.arange(len(df))
+    design = SurveyDesign.from_frame(df, weight="WEIGHT", strata="PSUSTRAT", cluster="PSU_VAR")
+    train = df[df["YEAR"].isin(config.TRAIN_YEARS)].reset_index(drop=True)
+    fitted = {}
+    for stage in ml.STAGES:
+        pre = ml.Preprocessor(list(ml.STAGES[stage])).fit(train)
+        pre_i = ml.Preprocessor(list(ml.STAGES[stage]), products=ml.stage_products(stage))
+        pre_i.fit(train)
+        fitted["fatal", stage, "logit_main"] = ml.fit_logistic(
+            pre, train, "fatal", ml.RIDGE_C, "logit_main", stage
+        )
+        fitted["fatal", stage, "logit_l2"] = ml.fit_logistic(
+            pre, train, "fatal", 1.0, "logit_l2", stage
+        )
+        fitted["fatal", stage, "logit_interact"] = ml.fit_logistic(
+            pre_i, train, "fatal", ml.RIDGE_C, "logit_interact", stage
+        )
+        params = {"learning_rate": 0.1, "max_leaf_nodes": 7, "min_samples_leaf": 50}
+        fitted["fatal", stage, "hgb"] = ml.fit_hgb(pre, train, "fatal", params, stage)
+    selection = {("fatal", "pre_crash"): "logit_main", ("fatal", "pre_crash+circumstance"): "hgb"}
+    cols = [
+        "outcome",
+        "stage",
+        "model",
+        "domain",
+        "weighting",
+        "metric",
+        "estimate",
+        "ci_low",
+        "ci_high",
+    ]
+    metrics = pd.DataFrame(columns=cols)
+    b = ml.build_interface_bundle(df, design, fitted, selection, metrics, n_refits=3)
+    assert b["stages"]["pre_crash"]["interval"]["kind"] == "delta"
+    assert b["stages"]["pre_crash+circumstance"]["interval"]["kind"] == "refits"
+    assert len(b["stages"]["pre_crash+circumstance"]["interval"]["estimators"]) == 3
+    assert "any_motorcycle" in b["unknown_proxy"]
+    assert (
+        b["support"]["crash_type"]["pedestrian"][0] == (train["crash_type"] == "pedestrian").sum()
+    )
+    r = ml.predict_crash_fatal_risk({"crash_type": "pedestrian"}, bundle=b)
+    assert r["status"] == "ok" and r["model"] == "hgb"
+    assert 0 < r["ci_low"] <= r["probability"] <= r["ci_high"] < 1
+    assert set(r["model_range"]["by_model"]) == {"logit_main", "logit_l2", "logit_interact", "hgb"}
+    p = ml.predict_crash_fatal_risk({"speeding": "yes"}, bundle=b)
+    assert p["stage"] == "pre_crash" and p["model"] == "logit_main"
 
 
 def test_figures_render_from_tables(tmp_path, monkeypatch):
@@ -434,7 +739,12 @@ def test_real_data_smoke():
     assert df.loc[df["MAXSEV_IM"].isin([5, 6, 8]), "fatal"].isna().all()
     for stage in ml.STAGES:
         ml.check_features(ml.stage_features(stage), stage)
+    # Tri-state flags keep 'unknown' (never folded into 'no').
+    for c in ("any_motorcycle", "any_heavy_truck", "speeding"):
+        assert set(df[c]) == {"yes", "no", "unknown"}
     known = df["fatal"].notna()
+    shares = ml.hit_and_run_unknown_shares(df[df["YEAR"].isin(config.TRAIN_YEARS) & known])
+    assert shares["hit_and_run_share_among_unknown"].between(0, 1).all()
     train = df[df["YEAR"].isin(config.TRAIN_YEARS) & known].sample(40_000, random_state=0)
     test = df[(df["YEAR"] == 2023) & known]
     pre = ml.Preprocessor(list(ml.STAGES["pre_crash+circumstance"])).fit(train)
@@ -447,4 +757,7 @@ def test_real_data_smoke():
         r = ml.predict_crash_fatal_risk({"crash_type": "pedestrian", "light": "dark_not_lighted"})
         assert r["status"] == "ok"
         assert 0 < r["ci_low"] <= r["probability"] <= r["ci_high"] < 1
+        assert r["population"] and r["caveat"] and isinstance(r["flags"], list)
         assert ml.predict_crash_fatal_risk({"light": "purple"})["status"] == "refused"
+        impossible = {"crash_type": "sv_rollover_first", "n_vehicles": "3+"}
+        assert ml.predict_crash_fatal_risk(impossible)["status"] == "refused"

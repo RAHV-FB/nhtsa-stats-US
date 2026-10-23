@@ -40,7 +40,7 @@ pre_crash+circumstance,n_vehicles,n_vehicles,crash_circumstance,,categorical,2|1
 pre_crash+circumstance,speed_limit_mph,speed_limit,pre_crash,,numeric (+ missing indicator),
 pre_crash+circumstance,oldest_vehicle_age,oldest_vehicle_age,pre_crash,,numeric (+ missing indicator),
 excluded,YEAR,,,calendar year: not a feature under temporal validation,,
-excluded,hit_and_run,,,registered crash_circumstance but is driver behaviour after the crash,,
+excluded,hit_and_run,,,registered post_crash: leaving the scene happens after the crash,,
 excluded,fatal,,,outcome,,
 excluded,ka,,,outcome,,
 excluded,injury,,,outcome,,

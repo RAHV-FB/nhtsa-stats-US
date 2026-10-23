@@ -8,7 +8,7 @@
  "inputs": [
   "data/processed/crss_crash.parquet"
  ],
- "rows": 56,
+ "rows": 52,
  "columns": [
   "outcome",
   "stage",
@@ -22,6 +22,6 @@
   "chosen"
  ],
  "module": "nhtsa_stats.models.severity_ml",
- "git_commit": "a49b126",
- "generated_utc": "2026-10-22T18:41:04Z"
+ "git_commit": "2dd6a99-dirty",
+ "generated_utc": "2026-10-23T00:55:54Z"
 }

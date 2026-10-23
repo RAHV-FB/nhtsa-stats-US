@@ -20,9 +20,10 @@
   "auroc_drop",
   "auroc_drop_sd",
   "n_repeats",
+  "replacement",
   "quantity"
  ],
  "module": "nhtsa_stats.models.severity_ml",
- "git_commit": "a49b126-dirty",
- "generated_utc": "2026-10-22T18:46:52Z"
+ "git_commit": "2dd6a99-dirty",
+ "generated_utc": "2026-10-23T01:00:28Z"
 }

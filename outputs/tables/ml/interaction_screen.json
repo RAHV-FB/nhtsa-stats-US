@@ -23,6 +23,6 @@
   "eligible_for_confirmation"
  ],
  "module": "nhtsa_stats.models.severity_ml",
- "git_commit": "a49b126-dirty",
- "generated_utc": "2026-10-22T18:48:09Z"
+ "git_commit": "2dd6a99-dirty",
+ "generated_utc": "2026-10-23T01:01:29Z"
 }

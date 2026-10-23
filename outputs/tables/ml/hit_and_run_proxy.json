@@ -1,0 +1,26 @@
+{
+ "table": "ml/hit_and_run_proxy.csv",
+ "description": "Share of hit-and-run crashes among crashes with each feature unknown (training years)",
+ "population": "CRSS police-reported crashes (all severities, national probability sample) with a determinable maximum severity; train 2016-2021, validation 2022, test 2023-2024",
+ "unit": "crash",
+ "outcome": "",
+ "method": "Weighted shares; hit_and_run is post-crash and used here only as a diagnostic",
+ "inputs": [
+  "data/processed/crss_crash.parquet"
+ ],
+ "rows": 14,
+ "columns": [
+  "feature",
+  "unknown_kind",
+  "n_unknown",
+  "weighted_share_of_crashes",
+  "hit_and_run_share_among_unknown",
+  "hit_and_run_share_among_known",
+  "share_of_all_hit_and_run_crashes",
+  "treated_as_proxy",
+  "quantity"
+ ],
+ "module": "nhtsa_stats.models.severity_ml",
+ "git_commit": "2dd6a99-dirty",
+ "generated_utc": "2026-10-23T00:57:13Z"
+}

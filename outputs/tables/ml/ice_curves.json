@@ -18,6 +18,6 @@
   "probability"
  ],
  "module": "nhtsa_stats.models.severity_ml",
- "git_commit": "a49b126-dirty",
- "generated_utc": "2026-10-22T18:47:01Z"
+ "git_commit": "2dd6a99-dirty",
+ "generated_utc": "2026-10-23T01:00:33Z"
 }

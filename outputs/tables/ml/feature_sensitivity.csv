@@ -1,33 +1,41 @@
-outcome,stage,variant,model,metric,estimate,boot_se,ci_low,ci_high,n_boot_valid,quantity
-fatal,pre_crash+circumstance,main feature set,logit_main,auroc,0.904329,0.00499341,0.894775,0.913368,200,estimated (design-weighted)
-fatal,pre_crash+circumstance,main feature set,logit_main,average_precision,0.132469,0.01022,0.112928,0.153066,200,estimated (design-weighted)
-fatal,pre_crash+circumstance,main feature set,logit_main,brier_skill,0.071796,0.00653349,0.0585498,0.0845,200,estimated (design-weighted)
-fatal,pre_crash+circumstance,main feature set,logit_main,oe_ratio,1.01112,0.0405575,0.94069,1.08694,200,estimated (design-weighted)
-fatal,pre_crash+circumstance,main feature set,hgb,auroc,0.919785,0.00429146,0.91126,0.927715,200,estimated (design-weighted)
-fatal,pre_crash+circumstance,main feature set,hgb,average_precision,0.164541,0.0101409,0.144247,0.184507,200,estimated (design-weighted)
-fatal,pre_crash+circumstance,main feature set,hgb,brier_skill,0.0937071,0.00601912,0.0816092,0.104802,200,estimated (design-weighted)
-fatal,pre_crash+circumstance,main feature set,hgb,oe_ratio,1.02044,0.0371983,0.952856,1.09617,200,estimated (design-weighted)
-fatal,pre_crash+circumstance,without speeding and alcohol_im,logit_main,auroc,0.89014,0.00571357,0.87931,0.900348,200,estimated (design-weighted)
-fatal,pre_crash+circumstance,without speeding and alcohol_im,logit_main,average_precision,0.116688,0.00818447,0.102192,0.132502,200,estimated (design-weighted)
-fatal,pre_crash+circumstance,without speeding and alcohol_im,logit_main,brier_skill,0.0631073,0.00515647,0.0532528,0.0724257,200,estimated (design-weighted)
-fatal,pre_crash+circumstance,without speeding and alcohol_im,logit_main,oe_ratio,1.02934,0.0473039,0.942409,1.11478,200,estimated (design-weighted)
-fatal,pre_crash+circumstance,without speeding and alcohol_im,hgb,auroc,0.90525,0.00491563,0.896515,0.914723,200,estimated (design-weighted)
-fatal,pre_crash+circumstance,without speeding and alcohol_im,hgb,average_precision,0.143641,0.00907986,0.126513,0.161018,200,estimated (design-weighted)
-fatal,pre_crash+circumstance,without speeding and alcohol_im,hgb,brier_skill,0.0814319,0.0059707,0.0702878,0.0918572,200,estimated (design-weighted)
-fatal,pre_crash+circumstance,without speeding and alcohol_im,hgb,oe_ratio,1.04237,0.0435313,0.967317,1.12942,200,estimated (design-weighted)
-fatal,pre_crash+circumstance,plus drugs and distracted (police-reported),logit_main,auroc,0.910577,0.00475868,0.901414,0.919614,200,estimated (design-weighted)
-fatal,pre_crash+circumstance,plus drugs and distracted (police-reported),logit_main,average_precision,0.1434,0.0103124,0.125349,0.164945,200,estimated (design-weighted)
-fatal,pre_crash+circumstance,plus drugs and distracted (police-reported),logit_main,brier_skill,0.077441,0.00737679,0.0650928,0.0906399,200,estimated (design-weighted)
-fatal,pre_crash+circumstance,plus drugs and distracted (police-reported),logit_main,oe_ratio,0.845103,0.0368007,0.780679,0.918966,200,estimated (design-weighted)
-fatal,pre_crash+circumstance,plus drugs and distracted (police-reported),hgb,auroc,0.924571,0.00422071,0.915924,0.931963,200,estimated (design-weighted)
-fatal,pre_crash+circumstance,plus drugs and distracted (police-reported),hgb,average_precision,0.176661,0.0111354,0.157553,0.199741,200,estimated (design-weighted)
-fatal,pre_crash+circumstance,plus drugs and distracted (police-reported),hgb,brier_skill,0.101341,0.00779831,0.0873532,0.11615,200,estimated (design-weighted)
-fatal,pre_crash+circumstance,plus drugs and distracted (police-reported),hgb,oe_ratio,0.890127,0.0349322,0.825493,0.968196,200,estimated (design-weighted)
-fatal,pre_crash+circumstance,police-reported alcohol instead of alcohol_im,logit_main,auroc,0.907152,0.00625313,0.894506,0.917764,200,estimated (design-weighted)
-fatal,pre_crash+circumstance,police-reported alcohol instead of alcohol_im,logit_main,average_precision,0.143294,0.0109102,0.124802,0.167467,200,estimated (design-weighted)
-fatal,pre_crash+circumstance,police-reported alcohol instead of alcohol_im,logit_main,brier_skill,0.0795136,0.0078354,0.0647885,0.0952705,200,estimated (design-weighted)
-fatal,pre_crash+circumstance,police-reported alcohol instead of alcohol_im,logit_main,oe_ratio,0.859681,0.0464232,0.77915,0.961593,200,estimated (design-weighted)
-fatal,pre_crash+circumstance,police-reported alcohol instead of alcohol_im,hgb,auroc,0.922788,0.00522879,0.912309,0.931583,200,estimated (design-weighted)
-fatal,pre_crash+circumstance,police-reported alcohol instead of alcohol_im,hgb,average_precision,0.178629,0.0125742,0.154516,0.20442,200,estimated (design-weighted)
-fatal,pre_crash+circumstance,police-reported alcohol instead of alcohol_im,hgb,brier_skill,0.101872,0.00901831,0.0835577,0.11852,200,estimated (design-weighted)
-fatal,pre_crash+circumstance,police-reported alcohol instead of alcohol_im,hgb,oe_ratio,0.895775,0.0448986,0.815388,0.979311,200,estimated (design-weighted)
+outcome,stage,variant,imputed_columns,model,metric,estimate,boot_se,ci_low,ci_high,n_boot_valid,diff_vs_main,diff_ci_low,diff_ci_high,quantity
+fatal,pre_crash+circumstance,main feature set,,logit_main,auroc,0.902883,0.00509587,0.892782,0.912474,200,0,0,0,estimated (design-weighted); difference paired over bootstrap replicates
+fatal,pre_crash+circumstance,main feature set,,logit_main,average_precision,0.131659,0.0100417,0.112346,0.152103,200,0,0,0,estimated (design-weighted); difference paired over bootstrap replicates
+fatal,pre_crash+circumstance,main feature set,,logit_main,brier_skill,0.0712442,0.006388,0.0582377,0.0835362,200,0,0,0,estimated (design-weighted); difference paired over bootstrap replicates
+fatal,pre_crash+circumstance,main feature set,,logit_main,oe_ratio,1.0156,0.0405526,0.943558,1.09276,200,0,0,0,estimated (design-weighted); difference paired over bootstrap replicates
+fatal,pre_crash+circumstance,main feature set,,hgb,auroc,0.920581,0.00450691,0.911599,0.928919,200,0,0,0,estimated (design-weighted); difference paired over bootstrap replicates
+fatal,pre_crash+circumstance,main feature set,,hgb,average_precision,0.164939,0.0112905,0.143353,0.187561,200,0,0,0,estimated (design-weighted); difference paired over bootstrap replicates
+fatal,pre_crash+circumstance,main feature set,,hgb,brier_skill,0.0927187,0.00674013,0.0796392,0.106658,200,0,0,0,estimated (design-weighted); difference paired over bootstrap replicates
+fatal,pre_crash+circumstance,main feature set,,hgb,oe_ratio,1.03631,0.0367429,0.970792,1.11247,200,0,0,0,estimated (design-weighted); difference paired over bootstrap replicates
+fatal,pre_crash+circumstance,without speeding and alcohol_im,,logit_main,auroc,0.88897,0.00580361,0.877599,0.899261,200,-0.0139129,-0.0184761,-0.00989969,estimated (design-weighted); difference paired over bootstrap replicates
+fatal,pre_crash+circumstance,without speeding and alcohol_im,,logit_main,average_precision,0.1167,0.00826402,0.102595,0.132926,200,-0.0149585,-0.0229165,-0.00697781,estimated (design-weighted); difference paired over bootstrap replicates
+fatal,pre_crash+circumstance,without speeding and alcohol_im,,logit_main,brier_skill,0.0631719,0.00515137,0.0536285,0.0727907,200,-0.00807231,-0.0129017,-0.00277705,estimated (design-weighted); difference paired over bootstrap replicates
+fatal,pre_crash+circumstance,without speeding and alcohol_im,,logit_main,oe_ratio,1.03174,0.0473501,0.944524,1.11788,200,0.0161413,-0.0124473,0.0464043,estimated (design-weighted); difference paired over bootstrap replicates
+fatal,pre_crash+circumstance,without speeding and alcohol_im,,hgb,auroc,0.90432,0.00502577,0.894176,0.914291,200,-0.0162605,-0.0225065,-0.0109328,estimated (design-weighted); difference paired over bootstrap replicates
+fatal,pre_crash+circumstance,without speeding and alcohol_im,,hgb,average_precision,0.143071,0.00926087,0.12546,0.161757,200,-0.0218684,-0.0289766,-0.0146076,estimated (design-weighted); difference paired over bootstrap replicates
+fatal,pre_crash+circumstance,without speeding and alcohol_im,,hgb,brier_skill,0.0799326,0.00583993,0.0686612,0.0903198,200,-0.0127862,-0.0162716,-0.00923095,estimated (design-weighted); difference paired over bootstrap replicates
+fatal,pre_crash+circumstance,without speeding and alcohol_im,,hgb,oe_ratio,1.05341,0.0437723,0.976939,1.13416,200,0.0171048,-0.00862484,0.0458942,estimated (design-weighted); difference paired over bootstrap replicates
+fatal,pre_crash+circumstance,plus drugs and distracted (police-reported),,logit_main,auroc,0.907645,0.00486484,0.898514,0.917133,200,0.00476271,0.00170715,0.00797117,estimated (design-weighted); difference paired over bootstrap replicates
+fatal,pre_crash+circumstance,plus drugs and distracted (police-reported),,logit_main,average_precision,0.140828,0.0101693,0.122416,0.161008,200,0.00916928,0.00456227,0.0150704,estimated (design-weighted); difference paired over bootstrap replicates
+fatal,pre_crash+circumstance,plus drugs and distracted (police-reported),,logit_main,brier_skill,0.0764997,0.00726971,0.0636452,0.0893789,200,0.00525541,0.000819131,0.0114115,estimated (design-weighted); difference paired over bootstrap replicates
+fatal,pre_crash+circumstance,plus drugs and distracted (police-reported),,logit_main,oe_ratio,0.864577,0.0360892,0.800844,0.940772,200,-0.15102,-0.191461,-0.103129,estimated (design-weighted); difference paired over bootstrap replicates
+fatal,pre_crash+circumstance,plus drugs and distracted (police-reported),,hgb,auroc,0.922953,0.00421352,0.914677,0.930486,200,0.00237187,-0.000501165,0.00553009,estimated (design-weighted); difference paired over bootstrap replicates
+fatal,pre_crash+circumstance,plus drugs and distracted (police-reported),,hgb,average_precision,0.178953,0.0112562,0.158351,0.201703,200,0.0140138,0.00681509,0.0230457,estimated (design-weighted); difference paired over bootstrap replicates
+fatal,pre_crash+circumstance,plus drugs and distracted (police-reported),,hgb,brier_skill,0.101671,0.00722215,0.0880631,0.116142,200,0.0089525,0.00436546,0.0153882,estimated (design-weighted); difference paired over bootstrap replicates
+fatal,pre_crash+circumstance,plus drugs and distracted (police-reported),,hgb,oe_ratio,0.920945,0.0348546,0.858475,1.00402,200,-0.115362,-0.152602,-0.077853,estimated (design-weighted); difference paired over bootstrap replicates
+fatal,pre_crash+circumstance,police-reported alcohol instead of alcohol_im,,logit_main,auroc,0.902853,0.0060536,0.890145,0.913668,200,-2.94172e-05,-0.00608629,0.00648844,estimated (design-weighted); difference paired over bootstrap replicates
+fatal,pre_crash+circumstance,police-reported alcohol instead of alcohol_im,,logit_main,average_precision,0.136943,0.0100223,0.119656,0.158588,200,0.00528396,-0.00802056,0.0190101,estimated (design-weighted); difference paired over bootstrap replicates
+fatal,pre_crash+circumstance,police-reported alcohol instead of alcohol_im,,logit_main,brier_skill,0.0758054,0.00705389,0.0621838,0.0897221,200,0.00456117,-0.00522604,0.013924,estimated (design-weighted); difference paired over bootstrap replicates
+fatal,pre_crash+circumstance,police-reported alcohol instead of alcohol_im,,logit_main,oe_ratio,0.87872,0.041183,0.804951,0.968549,200,-0.136877,-0.214214,-0.0440551,estimated (design-weighted); difference paired over bootstrap replicates
+fatal,pre_crash+circumstance,police-reported alcohol instead of alcohol_im,,hgb,auroc,0.919416,0.00532975,0.909304,0.929149,200,-0.00116508,-0.00654119,0.00544176,estimated (design-weighted); difference paired over bootstrap replicates
+fatal,pre_crash+circumstance,police-reported alcohol instead of alcohol_im,,hgb,average_precision,0.171794,0.0126153,0.147206,0.199813,200,0.00685515,-0.0118787,0.0264342,estimated (design-weighted); difference paired over bootstrap replicates
+fatal,pre_crash+circumstance,police-reported alcohol instead of alcohol_im,,hgb,brier_skill,0.0946717,0.00891509,0.0771144,0.11249,200,0.00195293,-0.0136242,0.0146742,estimated (design-weighted); difference paired over bootstrap replicates
+fatal,pre_crash+circumstance,police-reported alcohol instead of alcohol_im,,hgb,oe_ratio,0.917248,0.0398753,0.848883,0.992647,200,-0.119059,-0.192892,-0.0410746,estimated (design-weighted); difference paired over bootstrap replicates
+fatal,pre_crash+circumstance,proxy-blind: hit-and-run-dominated unknowns imputed,tod|any_motorcycle|any_heavy_truck|speeding|oldest_vehicle_age,logit_main,auroc,0.900817,0.0055171,0.889217,0.91138,200,-0.00206615,-0.00359047,-0.000509093,estimated (design-weighted); difference paired over bootstrap replicates
+fatal,pre_crash+circumstance,proxy-blind: hit-and-run-dominated unknowns imputed,tod|any_motorcycle|any_heavy_truck|speeding|oldest_vehicle_age,logit_main,average_precision,0.128735,0.00984198,0.110899,0.147279,200,-0.0029236,-0.00630252,-0.000160287,estimated (design-weighted); difference paired over bootstrap replicates
+fatal,pre_crash+circumstance,proxy-blind: hit-and-run-dominated unknowns imputed,tod|any_motorcycle|any_heavy_truck|speeding|oldest_vehicle_age,logit_main,brier_skill,0.0694559,0.00614427,0.057471,0.0805332,200,-0.00178834,-0.00395303,3.08073e-05,estimated (design-weighted); difference paired over bootstrap replicates
+fatal,pre_crash+circumstance,proxy-blind: hit-and-run-dominated unknowns imputed,tod|any_motorcycle|any_heavy_truck|speeding|oldest_vehicle_age,logit_main,oe_ratio,1.02222,0.0411363,0.945508,1.10201,200,0.00662547,-0.00218769,0.0147109,estimated (design-weighted); difference paired over bootstrap replicates
+fatal,pre_crash+circumstance,proxy-blind: hit-and-run-dominated unknowns imputed,tod|any_motorcycle|any_heavy_truck|speeding|oldest_vehicle_age,hgb,auroc,0.918541,0.00482463,0.909571,0.927531,200,-0.00203992,-0.00399429,0.000181111,estimated (design-weighted); difference paired over bootstrap replicates
+fatal,pre_crash+circumstance,proxy-blind: hit-and-run-dominated unknowns imputed,tod|any_motorcycle|any_heavy_truck|speeding|oldest_vehicle_age,hgb,average_precision,0.153947,0.010514,0.134517,0.174954,200,-0.0109924,-0.0153227,-0.00746393,estimated (design-weighted); difference paired over bootstrap replicates
+fatal,pre_crash+circumstance,proxy-blind: hit-and-run-dominated unknowns imputed,tod|any_motorcycle|any_heavy_truck|speeding|oldest_vehicle_age,hgb,brier_skill,0.0855343,0.00652049,0.0728921,0.0974068,200,-0.00718445,-0.00979732,-0.00477755,estimated (design-weighted); difference paired over bootstrap replicates
+fatal,pre_crash+circumstance,proxy-blind: hit-and-run-dominated unknowns imputed,tod|any_motorcycle|any_heavy_truck|speeding|oldest_vehicle_age,hgb,oe_ratio,1.05037,0.0383803,0.984749,1.13288,200,0.0140672,0.00408321,0.0237483,estimated (design-weighted); difference paired over bootstrap replicates
