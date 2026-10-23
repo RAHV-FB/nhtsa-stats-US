@@ -242,6 +242,42 @@ def test_crss_totals_partition_and_outcome_resolution():
     )
 
 
+def test_crss_partition_cells_have_design_se_and_flags():
+    from nhtsa_stats.analysis.survey import SurveyDesign, svy_total
+
+    crash, person = _synthetic_fars()
+    crss = _synthetic_crss(n=4000)
+    b = e.baseline_from_frames(crash, person, (2022, 2024), crss_crash=crss)
+    design = SurveyDesign.from_frame(crss)
+    win = crss["YEAR"].isin([2022, 2023, 2024]).to_numpy()
+    ka = (crss["ka_im"] == 1).to_numpy(float)
+    cm = e.crash_membership(crss, "CRSS")
+    only_speeding = (
+        cm["speeding"]
+        * (1 - cm["speeding_exceeded_limit"])
+        * (1 - cm["alcohol"])
+        * (1 - cm["drugs"])
+    ).to_numpy()
+    est = svy_total(design, ka * only_speeding, win)
+    cell = fs("speeding")
+    assert b.ka_crashes.cells[cell] == pytest.approx(est.estimate / 3)
+    assert b.ka_crashes.se[cell] == pytest.approx(est.se / 3)
+    fr = b.partitions_frame().set_index(["measure", "cell"])
+    small = [c for c, n in b.ka_crashes.n.items() if 0 < n < config.MIN_CELL_N]
+    empty = [c for c, n in b.ka_crashes.n.items() if n == 0]
+    assert small and empty, "fixture should contain small and empty KA cells"
+    for c in small:
+        row = fr.loc[("ka_crashes", e._key(c))]
+        assert row["flag"] == "suppressed" and np.isnan(row["per_year"])
+    for c in empty:  # e.g. limit-exceeding but not speeding: structurally empty
+        row = fr.loc[("ka_crashes", e._key(c))]
+        assert row["flag"] == "no_sample_records" and row["per_year"] == 0
+    # census (FARS) cells are never flagged; the JSON round trip keeps the SEs
+    assert (fr.loc["deaths", "flag"] == "").all()
+    b2 = e.EmpiricalBaseline.from_dict(b.to_dict())
+    assert b2.ka_crashes.se[cell] == pytest.approx(b.ka_crashes.se[cell])
+
+
 def test_crss_small_cells_are_suppressed():
     crash, person = _synthetic_fars()
     crss = _synthetic_crss(n=200)
@@ -320,6 +356,86 @@ def test_read_associations_missing_and_present(tmp_path, monkeypatch):
     assert out["belt.fatality_reduction"].value == 0.66
     assert out["belt.fatality_reduction.misreport_f10"].value == 0.38
     assert not any("within_vehicle" in k for k in out)
+    # tables written after the processed data are not flagged
+    assert all(q.flag == "" for q in out.values())
+
+
+def test_associations_older_than_processed_data_are_flagged(tmp_path, monkeypatch):
+    import os
+
+    tables, processed = tmp_path / "tables", tmp_path / "processed"
+    monkeypatch.setattr(config, "TABLES_DIR", tables)
+    monkeypatch.setattr(config, "PROCESSED_DIR", processed)
+    sev = tables / "severity" / "fatal_crude_vs_adjusted.csv"
+    _write_csv(
+        pd.DataFrame(
+            {
+                "factor": ["speeding"],
+                "level": ["yes"],
+                "n": [100],
+                "A_adj_rr": [1.8],
+                "A_adj_rr_low": [1.5],
+                "A_adj_rr_high": [2.2],
+            }
+        ),
+        sev,
+    )
+    processed.mkdir()
+    for name in ("crss_crash", "fars_person"):
+        (processed / f"{name}.parquet").write_bytes(b"")
+    os.utime(sev, (1_000_000, 1_000_000))  # upstream table older than the data rebuild
+    out, notes = e.read_associations()
+    assert out["severity.fatal_adj_rr.speeding"].flag == e.STALE
+    assert any(n.startswith("STALE") and "severity" in n for n in notes)
+    os.utime(sev, None)  # re-written after the rebuild: no flag
+    out, notes = e.read_associations()
+    assert out["severity.fatal_adj_rr.speeding"].flag == ""
+    assert not any(n.startswith("STALE") for n in notes)
+
+
+def test_lpv_definition_matches_project_and_belt_population():
+    from nhtsa_stats.processing.harmonize import LPV_BODY_GROUPS
+
+    assert set(e.LPV_BODIES) == set(LPV_BODY_GROUPS)
+    person = pd.DataFrame(
+        {
+            "ptype": ["driver", "passenger", "driver", "driver", "passenger"],
+            "body": ["light_unknown_type", "car", "truck_unknown_type", "car", "car"],
+            "seat": ["front_left", "third_row_plus", "front_left", "front_left", "second_row"],
+            "age": [40, 40, 40, np.nan, 12],
+            "age_im": [40, 40, 40, 35, 12],
+            "restraint": ["none"] * 5,
+        }
+    )
+    assert e.unrestrained_lpv_mask(person).tolist() == [True, False, False, False, False]
+    # CRSS uses NHTSA's imputed age, so the record with unrecorded age is counted there
+    assert e.unrestrained_lpv_mask(person, "age_im").tolist() == [True, False, False, True, False]
+
+
+def test_crss_person_baseline_uses_imputed_age():
+    rng = np.random.default_rng(5)
+    n = 400
+    crss_p = pd.DataFrame(
+        {
+            "YEAR": rng.choice([2022, 2023, 2024], n),
+            "WEIGHT": rng.uniform(5, 50, n),
+            "PSUSTRAT": rng.integers(0, 4, n),
+            "PSU_VAR": rng.integers(0, 3, n),
+            "ptype": "driver",
+            "body": "car",
+            "seat": "front_left",
+            "age": np.where(np.arange(n) < 100, np.nan, 30.0),
+            "age_im": 30.0,
+            "restraint": "none",
+            "killed_or_serious": rng.choice([0.0, 1.0], n),
+            "killed_or_serious_cc": 0.0,
+        }
+    )
+    q = e._crss_person_baseline(crss_p, (2022, 2023, 2024))
+    assert q["crss.persons_per_year.unrestrained_lpv"].value == pytest.approx(
+        crss_p["WEIGHT"].sum() / 3
+    )
+    assert q["crss.persons_per_year.unrestrained_lpv"].n == n
 
 
 # --------------------------------------------------------------------------------------
@@ -752,6 +868,31 @@ def test_enforcement_field_search(tmp_path):
     assert not out["measures_intervention_or_cost"].any()
     assert out.set_index("column").loc["MVIOLATN", "last_year"] == 2017
     assert "vehicle" in out.set_index("column").loc["BASEPRICE", "meaning"]
+
+
+def test_enforcement_field_search_test_fields_and_meanings(tmp_path):
+    cols = ["DRUGS", "DRUGSPEC", "DRUGRES1", "ALC_RES", "ALC_DET", "WRK_ZONE", "FIRST_MO", "HOUR"]
+    inv = pd.DataFrame(
+        {"source": "FARS", "year": 2020, "table": "person", "column": cols},
+    )
+    p = tmp_path / "inv.csv"
+    inv.to_csv(p, index=False)
+    out = e.enforcement_field_search(str(p)).set_index("column")
+    assert "HOUR" not in out.index and len(out) == len(cols) - 1
+    assert "police-reported drug involvement" in out.loc["DRUGS", "meaning"]
+    assert "toxicology" in out.loc["DRUGSPEC", "meaning"]
+    assert "test result" in out.loc["DRUGRES1", "meaning"]
+    assert not out["meaning"].str.contains("unclassified").any()
+
+
+def test_real_inventory_every_match_is_interpreted():
+    p = config.AUDIT_DIR / "column_inventory.csv"
+    if not p.exists():
+        pytest.skip("column inventory not built")
+    out = e.enforcement_field_search()
+    assert len(out) > 0
+    assert not out["meaning"].str.contains("unclassified").any()
+    assert not out["measures_intervention_or_cost"].any()
 
 
 # --------------------------------------------------------------------------------------

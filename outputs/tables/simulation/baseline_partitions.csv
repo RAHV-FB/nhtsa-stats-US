@@ -1,81 +1,81 @@
-measure,cell,per_year,n_records,kind,source
-deaths,none,16284.1,56359,observed,data/processed/fars_person.parquet + fars_crash.parquet
-deaths,unrestrained_lpv,3326.03,11826,observed,data/processed/fars_person.parquet + fars_crash.parquet
-deaths,drugs,1330.77,4542,observed,data/processed/fars_person.parquet + fars_crash.parquet
-deaths,drugs+unrestrained_lpv,604.1,2039,observed,data/processed/fars_person.parquet + fars_crash.parquet
-deaths,alcohol,4571.87,34188,observed,data/processed/fars_person.parquet + fars_crash.parquet
-deaths,alcohol+unrestrained_lpv,1898.97,9603,observed,data/processed/fars_person.parquet + fars_crash.parquet
-deaths,alcohol+drugs,734.233,3192,observed,data/processed/fars_person.parquet + fars_crash.parquet
-deaths,alcohol+drugs+unrestrained_lpv,463.9,1761,observed,data/processed/fars_person.parquet + fars_crash.parquet
-deaths,speeding_exceeded_limit,0,0,observed,data/processed/fars_person.parquet + fars_crash.parquet
-deaths,speeding_exceeded_limit+unrestrained_lpv,0,0,observed,data/processed/fars_person.parquet + fars_crash.parquet
-deaths,drugs+speeding_exceeded_limit,0,0,observed,data/processed/fars_person.parquet + fars_crash.parquet
-deaths,drugs+speeding_exceeded_limit+unrestrained_lpv,0,0,observed,data/processed/fars_person.parquet + fars_crash.parquet
-deaths,alcohol+speeding_exceeded_limit,0,0,observed,data/processed/fars_person.parquet + fars_crash.parquet
-deaths,alcohol+speeding_exceeded_limit+unrestrained_lpv,0,0,observed,data/processed/fars_person.parquet + fars_crash.parquet
-deaths,alcohol+drugs+speeding_exceeded_limit,0,0,observed,data/processed/fars_person.parquet + fars_crash.parquet
-deaths,alcohol+drugs+speeding_exceeded_limit+unrestrained_lpv,0,0,observed,data/processed/fars_person.parquet + fars_crash.parquet
-deaths,speeding,2762.87,10320,observed,data/processed/fars_person.parquet + fars_crash.parquet
-deaths,speeding+unrestrained_lpv,951.4,3662,observed,data/processed/fars_person.parquet + fars_crash.parquet
-deaths,drugs+speeding,318.8,1133,observed,data/processed/fars_person.parquet + fars_crash.parquet
-deaths,drugs+speeding+unrestrained_lpv,177.733,624,observed,data/processed/fars_person.parquet + fars_crash.parquet
-deaths,alcohol+speeding,1531.47,8581,observed,data/processed/fars_person.parquet + fars_crash.parquet
-deaths,alcohol+speeding+unrestrained_lpv,871.6,3889,observed,data/processed/fars_person.parquet + fars_crash.parquet
-deaths,alcohol+drugs+speeding,268.867,1090,observed,data/processed/fars_person.parquet + fars_crash.parquet
-deaths,alcohol+drugs+speeding+unrestrained_lpv,200.933,719,observed,data/processed/fars_person.parquet + fars_crash.parquet
-deaths,speeding+speeding_exceeded_limit,1582.3,5740,observed,data/processed/fars_person.parquet + fars_crash.parquet
-deaths,speeding+speeding_exceeded_limit+unrestrained_lpv,631.433,2408,observed,data/processed/fars_person.parquet + fars_crash.parquet
-deaths,drugs+speeding+speeding_exceeded_limit,288.4,1019,observed,data/processed/fars_person.parquet + fars_crash.parquet
-deaths,drugs+speeding+speeding_exceeded_limit+unrestrained_lpv,160.9,563,observed,data/processed/fars_person.parquet + fars_crash.parquet
-deaths,alcohol+speeding+speeding_exceeded_limit,929.033,4910,observed,data/processed/fars_person.parquet + fars_crash.parquet
-deaths,alcohol+speeding+speeding_exceeded_limit+unrestrained_lpv,660.567,2769,observed,data/processed/fars_person.parquet + fars_crash.parquet
-deaths,alcohol+drugs+speeding+speeding_exceeded_limit,242.267,976,observed,data/processed/fars_person.parquet + fars_crash.parquet
-deaths,alcohol+drugs+speeding+speeding_exceeded_limit+unrestrained_lpv,207.433,722,observed,data/processed/fars_person.parquet + fars_crash.parquet
-fatal_crashes,none,18470.2,64212,observed,data/processed/fars_crash.parquet
-fatal_crashes,drugs,1733.67,5889,observed,data/processed/fars_crash.parquet
-fatal_crashes,alcohol,5972.77,41003,observed,data/processed/fars_crash.parquet
-fatal_crashes,alcohol+drugs,1054.67,4366,observed,data/processed/fars_crash.parquet
-fatal_crashes,speeding_exceeded_limit,0,0,observed,data/processed/fars_crash.parquet
-fatal_crashes,drugs+speeding_exceeded_limit,0,0,observed,data/processed/fars_crash.parquet
-fatal_crashes,alcohol+speeding_exceeded_limit,0,0,observed,data/processed/fars_crash.parquet
-fatal_crashes,alcohol+drugs+speeding_exceeded_limit,0,0,observed,data/processed/fars_crash.parquet
-fatal_crashes,speeding,3399.9,12787,observed,data/processed/fars_crash.parquet
-fatal_crashes,drugs+speeding,445.267,1573,observed,data/processed/fars_crash.parquet
-fatal_crashes,alcohol+speeding,2172.43,11319,observed,data/processed/fars_crash.parquet
-fatal_crashes,alcohol+drugs+speeding,421.4,1611,observed,data/processed/fars_crash.parquet
-fatal_crashes,speeding+speeding_exceeded_limit,1988.87,7296,observed,data/processed/fars_crash.parquet
-fatal_crashes,drugs+speeding+speeding_exceeded_limit,381.933,1352,observed,data/processed/fars_crash.parquet
-fatal_crashes,alcohol+speeding+speeding_exceeded_limit,1394.13,6799,observed,data/processed/fars_crash.parquet
-fatal_crashes,alcohol+drugs+speeding+speeding_exceeded_limit,394.067,1485,observed,data/processed/fars_crash.parquet
-ka_crashes,none,132681,14046,estimated,data/processed/crss_crash.parquet
-ka_crashes,drugs,2678.71,282,estimated,data/processed/crss_crash.parquet
-ka_crashes,alcohol,21490.3,2234,estimated,data/processed/crss_crash.parquet
-ka_crashes,alcohol+drugs,2690.03,304,estimated,data/processed/crss_crash.parquet
-ka_crashes,speeding_exceeded_limit,0,0,estimated,data/processed/crss_crash.parquet
-ka_crashes,drugs+speeding_exceeded_limit,0,0,estimated,data/processed/crss_crash.parquet
-ka_crashes,alcohol+speeding_exceeded_limit,0,0,estimated,data/processed/crss_crash.parquet
-ka_crashes,alcohol+drugs+speeding_exceeded_limit,0,0,estimated,data/processed/crss_crash.parquet
-ka_crashes,speeding,19530.1,2095,estimated,data/processed/crss_crash.parquet
-ka_crashes,drugs+speeding,542.437,62,estimated,data/processed/crss_crash.parquet
-ka_crashes,alcohol+speeding,5135.98,511,estimated,data/processed/crss_crash.parquet
-ka_crashes,alcohol+drugs+speeding,609.005,66,estimated,data/processed/crss_crash.parquet
-ka_crashes,speeding+speeding_exceeded_limit,5713.84,641,estimated,data/processed/crss_crash.parquet
-ka_crashes,drugs+speeding+speeding_exceeded_limit,369.115,46,estimated,data/processed/crss_crash.parquet
-ka_crashes,alcohol+speeding+speeding_exceeded_limit,1938.4,219,estimated,data/processed/crss_crash.parquet
-ka_crashes,alcohol+drugs+speeding+speeding_exceeded_limit,438.14,50,estimated,data/processed/crss_crash.parquet
-crashes,none,5.18666e+06,130137,estimated,data/processed/crss_crash.parquet
-crashes,drugs,22214.2,727,estimated,data/processed/crss_crash.parquet
-crashes,alcohol,266948,7986,estimated,data/processed/crss_crash.parquet
-crashes,alcohol+drugs,20254.4,697,estimated,data/processed/crss_crash.parquet
-crashes,speeding_exceeded_limit,0,0,estimated,data/processed/crss_crash.parquet
-crashes,drugs+speeding_exceeded_limit,0,0,estimated,data/processed/crss_crash.parquet
-crashes,alcohol+speeding_exceeded_limit,0,0,estimated,data/processed/crss_crash.parquet
-crashes,alcohol+drugs+speeding_exceeded_limit,0,0,estimated,data/processed/crss_crash.parquet
-crashes,speeding,486281,12528,estimated,data/processed/crss_crash.parquet
-crashes,drugs+speeding,3401.34,124,estimated,data/processed/crss_crash.parquet
-crashes,alcohol+speeding,47211.9,1462,estimated,data/processed/crss_crash.parquet
-crashes,alcohol+drugs+speeding,2911.02,123,estimated,data/processed/crss_crash.parquet
-crashes,speeding+speeding_exceeded_limit,37466.1,1445,estimated,data/processed/crss_crash.parquet
-crashes,drugs+speeding+speeding_exceeded_limit,971.376,64,estimated,data/processed/crss_crash.parquet
-crashes,alcohol+speeding+speeding_exceeded_limit,7445.71,352,estimated,data/processed/crss_crash.parquet
-crashes,alcohol+drugs+speeding+speeding_exceeded_limit,1271.19,71,estimated,data/processed/crss_crash.parquet
+measure,cell,per_year,se,n_records,flag,kind,source
+deaths,none,16284.1,,56359,,observed,data/processed/fars_person.parquet + fars_crash.parquet
+deaths,unrestrained_lpv,3326.03,,11826,,observed,data/processed/fars_person.parquet + fars_crash.parquet
+deaths,drugs,1330.77,,4542,,observed,data/processed/fars_person.parquet + fars_crash.parquet
+deaths,drugs+unrestrained_lpv,604.1,,2039,,observed,data/processed/fars_person.parquet + fars_crash.parquet
+deaths,alcohol,4571.87,,34188,,observed,data/processed/fars_person.parquet + fars_crash.parquet
+deaths,alcohol+unrestrained_lpv,1898.97,,9603,,observed,data/processed/fars_person.parquet + fars_crash.parquet
+deaths,alcohol+drugs,734.233,,3192,,observed,data/processed/fars_person.parquet + fars_crash.parquet
+deaths,alcohol+drugs+unrestrained_lpv,463.9,,1761,,observed,data/processed/fars_person.parquet + fars_crash.parquet
+deaths,speeding_exceeded_limit,0,,0,,observed,data/processed/fars_person.parquet + fars_crash.parquet
+deaths,speeding_exceeded_limit+unrestrained_lpv,0,,0,,observed,data/processed/fars_person.parquet + fars_crash.parquet
+deaths,drugs+speeding_exceeded_limit,0,,0,,observed,data/processed/fars_person.parquet + fars_crash.parquet
+deaths,drugs+speeding_exceeded_limit+unrestrained_lpv,0,,0,,observed,data/processed/fars_person.parquet + fars_crash.parquet
+deaths,alcohol+speeding_exceeded_limit,0,,0,,observed,data/processed/fars_person.parquet + fars_crash.parquet
+deaths,alcohol+speeding_exceeded_limit+unrestrained_lpv,0,,0,,observed,data/processed/fars_person.parquet + fars_crash.parquet
+deaths,alcohol+drugs+speeding_exceeded_limit,0,,0,,observed,data/processed/fars_person.parquet + fars_crash.parquet
+deaths,alcohol+drugs+speeding_exceeded_limit+unrestrained_lpv,0,,0,,observed,data/processed/fars_person.parquet + fars_crash.parquet
+deaths,speeding,2762.87,,10320,,observed,data/processed/fars_person.parquet + fars_crash.parquet
+deaths,speeding+unrestrained_lpv,951.4,,3662,,observed,data/processed/fars_person.parquet + fars_crash.parquet
+deaths,drugs+speeding,318.8,,1133,,observed,data/processed/fars_person.parquet + fars_crash.parquet
+deaths,drugs+speeding+unrestrained_lpv,177.733,,624,,observed,data/processed/fars_person.parquet + fars_crash.parquet
+deaths,alcohol+speeding,1531.47,,8581,,observed,data/processed/fars_person.parquet + fars_crash.parquet
+deaths,alcohol+speeding+unrestrained_lpv,871.6,,3889,,observed,data/processed/fars_person.parquet + fars_crash.parquet
+deaths,alcohol+drugs+speeding,268.867,,1090,,observed,data/processed/fars_person.parquet + fars_crash.parquet
+deaths,alcohol+drugs+speeding+unrestrained_lpv,200.933,,719,,observed,data/processed/fars_person.parquet + fars_crash.parquet
+deaths,speeding+speeding_exceeded_limit,1582.3,,5740,,observed,data/processed/fars_person.parquet + fars_crash.parquet
+deaths,speeding+speeding_exceeded_limit+unrestrained_lpv,631.433,,2408,,observed,data/processed/fars_person.parquet + fars_crash.parquet
+deaths,drugs+speeding+speeding_exceeded_limit,288.4,,1019,,observed,data/processed/fars_person.parquet + fars_crash.parquet
+deaths,drugs+speeding+speeding_exceeded_limit+unrestrained_lpv,160.9,,563,,observed,data/processed/fars_person.parquet + fars_crash.parquet
+deaths,alcohol+speeding+speeding_exceeded_limit,929.033,,4910,,observed,data/processed/fars_person.parquet + fars_crash.parquet
+deaths,alcohol+speeding+speeding_exceeded_limit+unrestrained_lpv,660.567,,2769,,observed,data/processed/fars_person.parquet + fars_crash.parquet
+deaths,alcohol+drugs+speeding+speeding_exceeded_limit,242.267,,976,,observed,data/processed/fars_person.parquet + fars_crash.parquet
+deaths,alcohol+drugs+speeding+speeding_exceeded_limit+unrestrained_lpv,207.433,,722,,observed,data/processed/fars_person.parquet + fars_crash.parquet
+fatal_crashes,none,18470.2,,64212,,observed,data/processed/fars_crash.parquet
+fatal_crashes,drugs,1733.67,,5889,,observed,data/processed/fars_crash.parquet
+fatal_crashes,alcohol,5972.77,,41003,,observed,data/processed/fars_crash.parquet
+fatal_crashes,alcohol+drugs,1054.67,,4366,,observed,data/processed/fars_crash.parquet
+fatal_crashes,speeding_exceeded_limit,0,,0,,observed,data/processed/fars_crash.parquet
+fatal_crashes,drugs+speeding_exceeded_limit,0,,0,,observed,data/processed/fars_crash.parquet
+fatal_crashes,alcohol+speeding_exceeded_limit,0,,0,,observed,data/processed/fars_crash.parquet
+fatal_crashes,alcohol+drugs+speeding_exceeded_limit,0,,0,,observed,data/processed/fars_crash.parquet
+fatal_crashes,speeding,3399.9,,12787,,observed,data/processed/fars_crash.parquet
+fatal_crashes,drugs+speeding,445.267,,1573,,observed,data/processed/fars_crash.parquet
+fatal_crashes,alcohol+speeding,2172.43,,11319,,observed,data/processed/fars_crash.parquet
+fatal_crashes,alcohol+drugs+speeding,421.4,,1611,,observed,data/processed/fars_crash.parquet
+fatal_crashes,speeding+speeding_exceeded_limit,1988.87,,7296,,observed,data/processed/fars_crash.parquet
+fatal_crashes,drugs+speeding+speeding_exceeded_limit,381.933,,1352,,observed,data/processed/fars_crash.parquet
+fatal_crashes,alcohol+speeding+speeding_exceeded_limit,1394.13,,6799,,observed,data/processed/fars_crash.parquet
+fatal_crashes,alcohol+drugs+speeding+speeding_exceeded_limit,394.067,,1485,,observed,data/processed/fars_crash.parquet
+ka_crashes,none,132681,6893.51,14046,,estimated,data/processed/crss_crash.parquet
+ka_crashes,drugs,2678.71,345.435,282,,estimated,data/processed/crss_crash.parquet
+ka_crashes,alcohol,21490.3,1236.01,2234,,estimated,data/processed/crss_crash.parquet
+ka_crashes,alcohol+drugs,2690.03,333.775,304,,estimated,data/processed/crss_crash.parquet
+ka_crashes,speeding_exceeded_limit,0,0,0,no_sample_records,estimated,data/processed/crss_crash.parquet
+ka_crashes,drugs+speeding_exceeded_limit,0,0,0,no_sample_records,estimated,data/processed/crss_crash.parquet
+ka_crashes,alcohol+speeding_exceeded_limit,0,0,0,no_sample_records,estimated,data/processed/crss_crash.parquet
+ka_crashes,alcohol+drugs+speeding_exceeded_limit,0,0,0,no_sample_records,estimated,data/processed/crss_crash.parquet
+ka_crashes,speeding,19530.1,1901.3,2095,,estimated,data/processed/crss_crash.parquet
+ka_crashes,drugs+speeding,542.437,108.871,62,,estimated,data/processed/crss_crash.parquet
+ka_crashes,alcohol+speeding,5135.98,617.684,511,,estimated,data/processed/crss_crash.parquet
+ka_crashes,alcohol+drugs+speeding,609.005,97.3516,66,,estimated,data/processed/crss_crash.parquet
+ka_crashes,speeding+speeding_exceeded_limit,5713.84,601.488,641,,estimated,data/processed/crss_crash.parquet
+ka_crashes,drugs+speeding+speeding_exceeded_limit,369.115,86.5229,46,,estimated,data/processed/crss_crash.parquet
+ka_crashes,alcohol+speeding+speeding_exceeded_limit,1938.4,302.241,219,,estimated,data/processed/crss_crash.parquet
+ka_crashes,alcohol+drugs+speeding+speeding_exceeded_limit,438.14,93.2245,50,,estimated,data/processed/crss_crash.parquet
+crashes,none,5.18666e+06,331687,130137,,estimated,data/processed/crss_crash.parquet
+crashes,drugs,22214.2,2156.02,727,,estimated,data/processed/crss_crash.parquet
+crashes,alcohol,266948,18416.3,7986,,estimated,data/processed/crss_crash.parquet
+crashes,alcohol+drugs,20254.4,2838.38,697,,estimated,data/processed/crss_crash.parquet
+crashes,speeding_exceeded_limit,0,0,0,no_sample_records,estimated,data/processed/crss_crash.parquet
+crashes,drugs+speeding_exceeded_limit,0,0,0,no_sample_records,estimated,data/processed/crss_crash.parquet
+crashes,alcohol+speeding_exceeded_limit,0,0,0,no_sample_records,estimated,data/processed/crss_crash.parquet
+crashes,alcohol+drugs+speeding_exceeded_limit,0,0,0,no_sample_records,estimated,data/processed/crss_crash.parquet
+crashes,speeding,486281,60523,12528,,estimated,data/processed/crss_crash.parquet
+crashes,drugs+speeding,3401.34,654.458,124,,estimated,data/processed/crss_crash.parquet
+crashes,alcohol+speeding,47211.9,7883.83,1462,,estimated,data/processed/crss_crash.parquet
+crashes,alcohol+drugs+speeding,2911.02,503.524,123,,estimated,data/processed/crss_crash.parquet
+crashes,speeding+speeding_exceeded_limit,37466.1,4191.01,1445,,estimated,data/processed/crss_crash.parquet
+crashes,drugs+speeding+speeding_exceeded_limit,971.376,239.938,64,,estimated,data/processed/crss_crash.parquet
+crashes,alcohol+speeding+speeding_exceeded_limit,7445.71,955.005,352,,estimated,data/processed/crss_crash.parquet
+crashes,alcohol+drugs+speeding+speeding_exceeded_limit,1271.19,325.137,71,,estimated,data/processed/crss_crash.parquet

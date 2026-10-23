@@ -8,7 +8,7 @@
  "inputs": [
   "data/processed/crss_crash.parquet"
  ],
- "rows": 84,
+ "rows": 86,
  "columns": [
   "factor",
   "level",
@@ -24,6 +24,6 @@
   "flag"
  ],
  "module": "nhtsa_stats.analysis.trends",
- "git_commit": "9071ab7-dirty",
- "generated_utc": "2026-10-22T17:52:29Z"
+ "git_commit": "5ab7170-dirty",
+ "generated_utc": "2026-10-22T23:51:53Z"
 }

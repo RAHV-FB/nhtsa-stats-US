@@ -8,9 +8,13 @@ Research question
     weekday) crashes and crashes involving a driver aged 65+ (vs none).
 
 Population
-    CRSS police-reported crashes 2016-2024 with known maximum severity (MAX_SEV 0-4;
-    n = 458,907).  Unit: crash.  Outcomes: ``fatal`` (K vs O/C/B/A) and ``ka`` (K or A vs
-    O/C/B).
+    CRSS police-reported crashes 2016-2024 with a determinable NHTSA-imputed maximum severity
+    (MAXSEV_IM 0-4; n = 467,008, 9,958 fatal).  Unit: crash.  Outcomes: ``fatal`` (K vs
+    O/C/B/A) and ``ka`` (K or A vs O/C/B), both from the imputed severity, whose weighted fatal
+    totals reproduce the FARS census.  Outcome-definition sensitivity: the strict complete-case
+    ``fatal_cc`` (MAX_SEV; negative only when no person's severity is unknown; determined for
+    n = 431,402) for the crude and fully adjusted models of every exposure
+    (``outcome_definition_sensitivity``).
 
 Method
     For every subset S of the covariate blocks of an exposure, a survey-weighted logistic
@@ -39,10 +43,10 @@ Method
     so the penalised fit is identical; verified in tests/test_confounding.py).
 
 Light condition and night
-    Darkness is part of what "night" is: about 94% of night crashes (weighted) are in darkness
-    and only ~2.5% are coded daylight (``night_light_overlap``), whereas 81% of daytime crashes
-    are in daylight.  Adjusting for light therefore (i) removes the part of the night
-    association that runs through darkness itself, and (ii) relies on the logistic model to
+    Darkness is part of what "night" is: about 93.5% of night crashes (weighted) are in
+    darkness and only ~2.5% are coded daylight (``night_light_overlap``), whereas 81% of
+    daytime crashes are in daylight.  Adjusting for light therefore (i) removes the part of the
+    night association that runs through darkness itself, and (ii) relies on the logistic model to
     extrapolate the night effect into night x daylight cells that barely exist.  The
     module reports results with and without the light block, the night-by-light overlap table,
     and a within-darkness comparison (night vs evening/early-morning crashes in the dark),
@@ -94,7 +98,13 @@ OUTCOMES: tuple[str, ...] = ("fatal", "ka")
 # coefficients of zero-event levels finite and shrinks any level with >= 1,000 crashes by <1%.
 RIDGE = 0.01
 CRSS_INPUT = "data/processed/crss_crash.parquet"
-POPULATION = "CRSS police-reported crashes 2016-2024 with known maximum severity (MAX_SEV 0-4)"
+POPULATION = (
+    "CRSS police-reported crashes 2016-2024 with a determinable NHTSA-imputed maximum severity "
+    "(MAXSEV_IM 0-4)"
+)
+# Outcome-definition sensitivity: strict complete-case fatal outcome (MAX_SEV; negative only
+# when no person's severity is unknown), fitted on the crashes where it is determined.
+CC_OUTCOME = "fatal_cc"
 
 # --------------------------------------------------------------------------------------
 # Covariate blocks and exposures
@@ -251,10 +261,10 @@ def load_frame() -> tuple[pd.DataFrame, SurveyDesign]:
         raise ValueError("fatal and ka must be known on the same crashes")
     df[NIGHT_COLUMN] = df["night"].map({1: "night", 0: "day"}).fillna("unknown").astype(object)
     df["YEAR"] = df["YEAR"].astype(int)
-    keep = [*analysis_columns(), NIGHT_COLUMN, "night", "fatal", "ka"]
+    keep = [*analysis_columns(), NIGHT_COLUMN, "night", "fatal", "ka", CC_OUTCOME]
     df = df[keep].copy()
-    df["fatal"] = df["fatal"].astype(float)
-    df["ka"] = df["ka"].astype(float)
+    for c in ("fatal", "ka", CC_OUTCOME):
+        df[c] = df[c].astype(float)
     # Categorical dtype (declared levels) makes cell compression and design matrices fast.
     for c in [*analysis_columns(), NIGHT_COLUMN]:
         df[c] = pd.Categorical(df[c], categories=declared_levels(c))
@@ -764,8 +774,17 @@ def analyse_exposure(
     outcome: str,
     cache_dir: Path | None = None,
     fingerprint: str | None = None,
-) -> dict[str, pd.DataFrame]:
+) -> tuple[dict[str, pd.DataFrame], dict[frozenset[str], SubsetFit]]:
     lattice = cached_lattice(df, design, exposure, outcome, cache_dir, fingerprint)
+    return tables_from_lattice(lattice, design, exposure, outcome), lattice
+
+
+def tables_from_lattice(
+    lattice: dict[frozenset[str], SubsetFit],
+    design: SurveyDesign,
+    exposure: Exposure,
+    outcome: str,
+) -> dict[str, pd.DataFrame]:
     ms = lattice_marginset(lattice, design)
     shap = [shapley_table(lattice, ms, exposure, outcome)]
     if "light" in exposure.blocks:
@@ -775,6 +794,75 @@ def analyse_exposure(
         "shapley": pd.concat(shap, ignore_index=True),
         "lattice": lattice_table(lattice, ms, exposure, outcome),
     }
+
+
+def summary_models(exposure: Exposure) -> dict[str, frozenset[str]]:
+    """Crude, all blocks and (where light is a block) all blocks except light."""
+    out = {"crude": frozenset(), "all_blocks": frozenset(exposure.blocks)}
+    if "light" in exposure.blocks:
+        out["all_blocks_without_light"] = frozenset(b for b in exposure.blocks if b != "light")
+    return out
+
+
+def outcome_definition_sensitivity(
+    df: pd.DataFrame,
+    design: SurveyDesign,
+    exposure: Exposure,
+    primary: dict[str, SubsetFit],
+) -> pd.DataFrame:
+    """Crude and fully adjusted standardised RRs under the imputed (``fatal``) and the
+    complete-case (``fatal_cc``) outcome, and their ratio.
+
+    The complete-case models are fitted on the crashes whose complete-case outcome is
+    determined (about 92%); both sets of margins are linearised on the same 67 PSUs, so the
+    ratio of the two RRs has a design-based CI that includes their covariance.
+    """
+    mask = df[CC_OUTCOME].notna().to_numpy()
+    sub, sub_design = df.loc[mask].reset_index(drop=True), design.subset(mask)
+    cd = cluster_design(design)
+    t = cd.tcrit()
+    models = summary_models(exposure)
+    cc_fits = {k: fit_subset(sub, sub_design, exposure, b, CC_OUTCOME) for k, b in models.items()}
+    crude_i, crude_c = primary["crude"], cc_fits["crude"]
+    rows = []
+    for label, blocks in models.items():
+        fi, fc = primary[label], cc_fits[label]
+        ms = MarginSet(
+            {"i": fi.log_rr, "c": fc.log_rr, "i0": crude_i.log_rr, "c0": crude_c.log_rr},
+            {"i": fi.t_log_rr, "c": fc.t_log_rr, "i0": crude_i.t_log_rr, "c0": crude_c.t_log_rr},
+            cd,
+        )
+        rec = {
+            "exposure": exposure.name,
+            "model": label,
+            "blocks": subset_key(blocks),
+            "n_imputed": len(df),
+            "n_complete_case": int(mask.sum()),
+        }
+        for tag, key, f in (("imputed", "i", fi), ("cc", "c", fc)):
+            lr, se = linear_contrast(ms, {key: 1.0})
+            ret, ret_se = ratio_contrast(ms, {key: 1.0}, {key + "0": 1.0})
+            rec.update(
+                {
+                    f"rr_{tag}": np.exp(lr),
+                    f"rr_{tag}_low": np.exp(lr - t * se),
+                    f"rr_{tag}_high": np.exp(lr + t * se),
+                    f"adj_rate_exposed_{tag}": f.m_exposed,
+                    f"adj_rate_reference_{tag}": f.m_reference,
+                    f"share_logrr_retained_{tag}": ret if blocks else 1.0,
+                    f"share_retained_{tag}_low": ret - t * ret_se if blocks else np.nan,
+                    f"share_retained_{tag}_high": ret + t * ret_se if blocks else np.nan,
+                    f"converged_{tag}": f.converged,
+                }
+            )
+        d, d_se = linear_contrast(ms, {"c": 1.0, "i": -1.0})
+        rec.update(
+            rr_ratio_cc_over_imputed=np.exp(d),
+            rr_ratio_low=np.exp(d - t * d_se),
+            rr_ratio_high=np.exp(d + t * d_se),
+        )
+        rows.append(rec)
+    return pd.DataFrame(rows)
 
 
 def check_leakage() -> None:
@@ -807,7 +895,7 @@ def run(
     exposures: Sequence[str] | None = None,
     cache_dir: Path | None = None,
 ) -> dict[str, pd.DataFrame]:
-    """Fit all lattices and write the tables (about 2,000 model fits; ~1 h on 2 cores)."""
+    """Fit all lattices and write the tables (about 2,070 model fits; 1-2.5 h on 2 cores)."""
     check_leakage()
     fingerprint = data_fingerprint()
     df, design = load_frame()
@@ -848,10 +936,15 @@ def run(
             LATTICE_METHOD,
         ),
     )
+    primary: dict[str, dict[str, SubsetFit]] = {}
     for oc in outcomes:
         parts: dict[str, list[pd.DataFrame]] = {"sequential": [], "shapley": [], "lattice": []}
         for name in names:
-            res = analyse_exposure(df, design, EXPOSURES[name], oc, cache_dir, fingerprint)
+            ex = EXPOSURES[name]
+            res, lattice = analyse_exposure(df, design, ex, oc, cache_dir, fingerprint)
+            if oc == "fatal":
+                primary[name] = {k: lattice[s] for k, s in summary_models(ex).items()}
+            del lattice
             for k, v in res.items():
                 parts[k].append(v)
         for k, frames in parts.items():
@@ -875,6 +968,29 @@ def run(
                 ),
                 extra={"exposures": {n: EXPOSURES[n].label for n in names}},
             )
+    if primary:
+        out["outcome_definition_sensitivity"] = pd.concat(
+            [
+                outcome_definition_sensitivity(df, design, EXPOSURES[n], primary[n])
+                for n in names
+                if n in primary
+            ],
+            ignore_index=True,
+        )
+        save_table(
+            out["outcome_definition_sensitivity"],
+            MODULE,
+            "outcome_definition_sensitivity",
+            **_meta(
+                "Crude and fully adjusted standardised risk ratios (all blocks; all blocks "
+                "except light) under the NHTSA-imputed fatal outcome and the complete-case "
+                "fatal outcome (fatal_cc), with the ratio of the two RRs and the share of the "
+                "crude log-RR retained under each",
+                LATTICE_METHOD + "; the complete-case models use the crashes whose "
+                "complete-case outcome is determined",
+                outcome="fatal (MAXSEV_IM); fatal_cc (MAX_SEV complete case)",
+            ),
+        )
     save_json(
         {
             "exposures": {n: EXPOSURES[n].label for n in names},
@@ -883,6 +999,8 @@ def run(
             "n_crashes": len(df),
             "n_fatal": int(df["fatal"].sum()),
             "n_ka": int(df["ka"].sum()),
+            "n_complete_case": int(df[CC_OUTCOME].notna().sum()),
+            "n_fatal_complete_case": int(df[CC_OUTCOME].sum()),
             "design_df": design.df,
             "ridge": RIDGE,
             "stochastic_components": "none (deterministic estimators)",

@@ -4,11 +4,11 @@
  "population": "",
  "unit": "column",
  "outcome": "",
- "method": "regex 'CAMERA|ENFORC|CITAT|CHECKPOINT|COST|PRICE|DOLLAR|TICKET|FINE|PENAL|VIOL|POLIC|TEST|DRUGTST|ALC_?ST|ATST|DSTATUS|SPEC_USE|EMER_USE|PREV_|SP_JUR|L_STATUS|A_LIC|BUDGET|PATROL|RADAR|LIDAR|SOBRI|BREATH|CAMPAIGN|EMERGENCYBRAKING' over column names (label *NAME columns excluded)",
+ "method": "regex 'CAMERA|ENFORC|CITAT|CHECKPOINT|COST|PRICE|DOLLAR|TICKET|FINE|PENAL|VIOL|POLIC|TEST|DRUG|ALC_?ST|ALCTES|ALC_RES|ALC_DET|ATST|DSTATUS|SPEC_USE|EMER_USE|PREV_|FIRST_(?:MO|YR)|LAST_(?:MO|YR)|SP_JUR|L_STATUS|L_COMPL|L_RESTRI|L_ENDORS|CDL_STAT|A_LIC|BUDGET|PATROL|RADAR|LIDAR|SOBRI|BREATH|CAMPAIGN|ZONE|EMERGENCYBRAKING' over column names (label *NAME columns excluded)",
  "inputs": [
   "outputs/audit/column_inventory.csv"
  ],
- "rows": 29,
+ "rows": 53,
  "columns": [
   "column",
   "sources",
@@ -19,8 +19,8 @@
   "measures_intervention_or_cost"
  ],
  "module": "nhtsa_stats.simulation.engine",
- "git_commit": "a49b126-dirty",
- "generated_utc": "2026-10-22T18:44:10Z",
+ "git_commit": "b1a011e-dirty",
+ "generated_utc": "2026-10-23T00:28:17Z",
  "n_columns_scanned": 1712,
  "n_tables_scanned": 67,
  "conclusion": "No field measures camera deployment, enforcement intensity, checkpoints, roadside testing of the driving population, campaigns or costs."

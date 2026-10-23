@@ -1,0 +1,43 @@
+{
+ "table": "confounding/outcome_definition_sensitivity.csv",
+ "description": "Crude and fully adjusted standardised risk ratios (all blocks; all blocks except light) under the NHTSA-imputed fatal outcome and the complete-case fatal outcome (fatal_cc), with the ratio of the two RRs and the share of the crude log-RR retained under each",
+ "population": "CRSS police-reported crashes 2016-2024 with a determinable NHTSA-imputed maximum severity (MAXSEV_IM 0-4)",
+ "unit": "crash",
+ "outcome": "fatal (MAXSEV_IM); fatal_cc (MAX_SEV complete case)",
+ "method": "Survey-weighted logistic models (exposure + every subset of covariate blocks; ridge 0.01 on mean-1 weights; exact cell compression); standardised predictive margins over all crashes; risk ratio = margin(all exposed) / margin(all reference); Taylor-linearised influence summed within 67 PSUs / 25 strata, t with 42 df; shares and Shapley values by the delta method across models; the complete-case models use the crashes whose complete-case outcome is determined",
+ "inputs": [
+  "data/processed/crss_crash.parquet"
+ ],
+ "rows": 12,
+ "columns": [
+  "exposure",
+  "model",
+  "blocks",
+  "n_imputed",
+  "n_complete_case",
+  "rr_imputed",
+  "rr_imputed_low",
+  "rr_imputed_high",
+  "adj_rate_exposed_imputed",
+  "adj_rate_reference_imputed",
+  "share_logrr_retained_imputed",
+  "share_retained_imputed_low",
+  "share_retained_imputed_high",
+  "converged_imputed",
+  "rr_cc",
+  "rr_cc_low",
+  "rr_cc_high",
+  "adj_rate_exposed_cc",
+  "adj_rate_reference_cc",
+  "share_logrr_retained_cc",
+  "share_retained_cc_low",
+  "share_retained_cc_high",
+  "converged_cc",
+  "rr_ratio_cc_over_imputed",
+  "rr_ratio_low",
+  "rr_ratio_high"
+ ],
+ "module": "nhtsa_stats.analysis.confounding",
+ "git_commit": "6b7e0c5-dirty",
+ "generated_utc": "2026-10-23T00:20:39Z"
+}

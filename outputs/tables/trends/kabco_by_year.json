@@ -3,7 +3,7 @@
  "description": "Estimated police-reported crashes by maximum KABCO severity and year; shares of known severity, K/(KABC), K/(K+A)",
  "population": "CRSS police-reported crashes 2016-2024 (all, incl. unknown severity)",
  "unit": "crash",
- "outcome": "MAX_SEV",
+ "outcome": "kabco = NHTSA-imputed maximum severity MAXSEV_IM (U = undeterminable, codes 5/6/8)",
  "method": "Weighted totals; ratios linearised jointly (25 strata / 67 PSUs, t 42 df); logit CIs",
  "inputs": [
   "data/processed/crss_crash.parquet"
@@ -62,6 +62,6 @@
   "unknown_share_of_all_high"
  ],
  "module": "nhtsa_stats.analysis.trends",
- "git_commit": "9071ab7-dirty",
- "generated_utc": "2026-10-22T17:52:29Z"
+ "git_commit": "5ab7170-dirty",
+ "generated_utc": "2026-10-22T23:51:53Z"
 }

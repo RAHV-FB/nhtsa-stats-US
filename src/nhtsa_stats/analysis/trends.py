@@ -1,16 +1,25 @@
 """The post-2020 rise in crash severity (RQ5, docs/research_plan.md).
 
 Research question
-    The weighted fatal share of police-reported crashes (CRSS) rose from about 0.48% in
-    2016-2019 to about 0.63% in 2020-2024, and FARS deaths peaked in 2021.  How much of the
-    rise is accounted for by a changed *mix* of crash circumstances (composition), and how much
-    by higher severity *within* circumstances?  Could a fall in the reporting of minor crashes
-    (a denominator change) have produced an apparent rise?
+    The weighted fatal share of police-reported crashes (CRSS, NHTSA-imputed severity) rose
+    from about 0.51% in 2016-2019 to about 0.64% in 2020-2024, and FARS deaths peaked in 2021.
+    How much of the rise is accounted for by a changed *mix* of crash circumstances
+    (composition), and how much by higher severity *within* circumstances?  Could a fall in the
+    reporting of minor crashes (a denominator change) have produced an apparent rise?
 
 Population and unit
     CRSS police-reported crashes 2016-2024 (unit: crash), outcomes ``fatal`` (K vs O/C/B/A) and
-    ``ka`` (K or A vs O/C/B) where maximum severity is known; FARS fatal crashes and deaths
-    2016-2024 (census) for corroboration.
+    ``ka`` (K or A vs O/C/B) from NHTSA's imputed maximum severity (MAXSEV_IM; codes 5/6/8
+    excluded), whose weighted fatal totals reproduce the FARS census; FARS fatal crashes and
+    deaths 2016-2024 (census) for corroboration.
+
+Outcome definitions
+    Every CRSS analysis is repeated on the strict complete-case outcome ``fatal_cc`` (MAX_SEV;
+    a crash counts as non-fatal only when no person's severity is unknown).  Its weighted fatal
+    total falls short of FARS by a year-dependent amount (largest in 2017 and 2019, smallest in
+    2023-2024), so it inflates rises measured from 2019 and keeps the 2023-2024 shares higher
+    than the imputed outcome does.  ``outcome_definitions_by_year`` and the ``fatal_cc`` rows of
+    every table show where conclusions differ.
 
 Methods
     (a) Year-specific crude weighted fatal shares, and shares *standardised* to the pooled
@@ -35,8 +44,12 @@ Methods
     (d) Denominator check: KABCO distribution by year, fatal share among injury (K/KABC) and
         among K+A crashes (insensitive to the reporting of property-damage-only crashes), and an
         exact split of the change in the log fatal share into the change in the number of fatal
-        crashes (numerator) and in the number of reported crashes (denominator), with FARS
-        fatal-crash counts as an independent census of the numerator.
+        crashes (numerator) and in the number of reported crashes (denominator), under both
+        outcome definitions.  FARS fatal-crash counts are the census numerator.  CRSS weights
+        are calibrated to FARS through the imputed severity, so the agreement of the imputed
+        numerator with FARS is by construction (not independent corroboration); the
+        informative CRSS quantities are the denominator and the KABCO mix, and the
+        complete-case numerator shows how far an unimputed count departs from the census.
     (e) FARS composition of fatal crashes and deaths by year (speeding, multiply-imputed driver
         BAC >= .08 with Rubin's rules, pedestrians, motorcyclists, unrestrained light-vehicle
         occupants), with counts and changes 2019 -> 2021 -> 2024.
@@ -101,7 +114,18 @@ MODULE = "trends"
 RIDGE = 0.01  # as in the severity module (mean-1 normalised weights)
 P0_YEARS: tuple[int, ...] = (2016, 2017, 2018, 2019)
 P1_YEARS: tuple[int, ...] = (2020, 2021, 2022, 2023, 2024)
-OUTCOMES: tuple[str, ...] = ("fatal", "ka")
+# ``fatal`` / ``ka``: NHTSA-imputed maximum severity (MAXSEV_IM; primary).  ``fatal_cc``: strict
+# complete-case outcome (MAX_SEV; negative only when no person's severity is unknown), the
+# outcome-definition sensitivity.  Its weighted fatal total falls short of the FARS census by a
+# year-dependent amount, so every trend analysis is repeated on it.
+OUTCOMES: tuple[str, ...] = ("fatal", "ka", "fatal_cc")
+# Numerator / denominator keys of the two fatal-outcome definitions in ``kabco_marginset``.
+DEFINITIONS: dict[str, tuple[str, str]] = {"fatal": ("K", "N"), "fatal_cc": ("Kcc", "Ncc")}
+DEFINITION_LABELS = {
+    "fatal": "NHTSA-imputed maximum severity (MAXSEV_IM)",
+    "fatal_cc": "complete-case maximum severity (MAX_SEV; crashes with a person of unknown "
+    "severity excluded unless fatal)",
+}
 BASE_COVARIATES = [v for v in specs.PRE_CRASH if v != "YEAR"]
 COVARIATE_SETS: dict[str, list[str]] = {
     "A": BASE_COVARIATES,
@@ -485,6 +509,15 @@ def decomposition_table(dec: Decomposition, design: SurveyDesign) -> pd.DataFram
             }
         )
     out = pd.DataFrame(rows)
+    # Shares of the change are ratios with the total change as denominator: unstable when the
+    # total change itself is not distinguishable from zero.
+    tot = out.set_index("quantity").loc["total_change"]
+    share_rows = out["units"].str.startswith("proportion of")
+    out["flag"] = np.where(
+        share_rows & (tot["low"] <= 0 <= tot["high"]),
+        "total change CI includes 0: shares unstable",
+        "",
+    )
     out["covariates"] = ",".join(dec.covariates)
     out["n_P0"], out["events_P0"] = dec.fit0.n, dec.fit0.n_events
     out["n_P1"], out["events_P1"] = dec.fit1.n, dec.fit1.n_events
@@ -643,6 +676,10 @@ def within_by_subgroup(dec: Decomposition, df: pd.DataFrame, design: SurveyDesig
         rr = estimate(ms, lambda m: m["q1"] / m["q0"], "ratio")
         rd = estimate(ms, lambda m: 100 * (m["q1"] - m["q0"]), "lin")
         crr = estimate(ms, lambda m: m["o1"] / m["o0"], "ratio")
+        rse = max(
+            estimate(ms, lambda m: m["o0"], "lin")["se"] / vals["o0"] if vals["o0"] else np.inf,
+            estimate(ms, lambda m: m["o1"], "lin")["se"] / vals["o1"] if vals["o1"] else np.inf,
+        )
         n0, n1 = int((g & dec.in0).sum()), int((g & dec.in1).sum())
         e0, e1 = int(y[g & dec.in0].sum()), int(y[g & dec.in1].sum())
         rows.append(
@@ -667,7 +704,12 @@ def within_by_subgroup(dec: Decomposition, df: pd.DataFrame, design: SurveyDesig
                 "within_rd_pp": rd["estimate"],
                 "within_rd_low": rd["low"],
                 "within_rd_high": rd["high"],
-                "flag": "suppressed" if min(e0, e1) < 5 or min(n0, n1) < config.MIN_CELL_N else "",
+                "max_rse_observed_share": rse,
+                "flag": (
+                    "suppressed"
+                    if min(e0, e1) < 5 or min(n0, n1) < config.MIN_CELL_N
+                    else ("unstable" if rse > config.MAX_RSE else "")
+                ),
             }
         )
     return pd.DataFrame(rows)
@@ -809,15 +851,20 @@ def prevalence_change(df: pd.DataFrame, design: SurveyDesign) -> pd.DataFrame:
 # (d) KABCO distribution and the numerator / denominator split
 # --------------------------------------------------------------------------------------
 def kabco_marginset(df: pd.DataFrame, design: SurveyDesign) -> MarginSet:
-    """Weighted totals of crashes by year and maximum severity class (U = unknown)."""
+    """Weighted totals of crashes by year and maximum severity class (U = unknown), plus the
+    complete-case fatal numerator ``Kcc`` and denominator ``Ncc`` when ``fatal_cc`` is present."""
     yr = df["YEAR"].to_numpy()
     kab = df["kabco"].to_numpy()
+    cc = df["fatal_cc"].to_numpy(dtype=float) if "fatal_cc" in df else None
     vals, tots = {}, {}
     for yy in sorted(set(yr)):
         dom = yr == yy
         for cls, code in KABCO.items():
             vals[f"{cls}|{yy}"], tots[f"{cls}|{yy}"] = total_lin(design, kab == code, dom)
         vals[f"U|{yy}"], tots[f"U|{yy}"] = total_lin(design, np.isnan(kab), dom)
+        if cc is not None:
+            vals[f"Kcc|{yy}"], tots[f"Kcc|{yy}"] = total_lin(design, cc == 1, dom)
+            vals[f"Ncc|{yy}"], tots[f"Ncc|{yy}"] = total_lin(design, np.isfinite(cc), dom)
     return MarginSet(vals, tots, cluster_design(design))
 
 
@@ -825,11 +872,20 @@ def _known(m: dict[str, float], yy: int) -> float:
     return sum(m[f"{c}|{yy}"] for c in KABCO)
 
 
-def _period_mean(m: dict[str, float], cls: str, years: Sequence[int]) -> float:
-    """Annual average of one class ('N' = all known severities; 'KA', 'KABC' = sums)."""
+def _annual(m: dict[str, float], cls: str, yy: int) -> float:
+    """Weighted crashes of one class in one year: 'N' = all known (imputed) severities,
+    'Kcc' / 'Ncc' = complete-case fatal / determined crashes, otherwise a sum of KABCO
+    letters ('K', 'KA', 'KABC', ...)."""
     if cls == "N":
-        return float(np.mean([_known(m, yy) for yy in years]))
-    return float(np.mean([sum(m[f"{c}|{yy}"] for c in cls) for yy in years]))
+        return _known(m, yy)
+    if cls in ("Kcc", "Ncc"):
+        return m[f"{cls}|{yy}"]
+    return sum(m[f"{c}|{yy}"] for c in cls)
+
+
+def _period_mean(m: dict[str, float], cls: str, years: Sequence[int]) -> float:
+    """Annual average of one class (see ``_annual``)."""
+    return float(np.mean([_annual(m, cls, yy) for yy in years]))
 
 
 def kabco_by_year(ms: MarginSet, df: pd.DataFrame) -> pd.DataFrame:
@@ -869,165 +925,285 @@ def kabco_by_year(ms: MarginSet, df: pd.DataFrame) -> pd.DataFrame:
     return pd.DataFrame(rows)
 
 
-def numerator_denominator(ms: MarginSet, fars_counts: pd.Series) -> pd.DataFrame:
+# Comparisons for the numerator / denominator split: the two periods, each later year against
+# 2016-2019, and the FARS corroboration years (pre-pandemic 2019, FARS peak 2021, latest 2024).
+COMPARISONS: dict[str, tuple[tuple[int, ...], tuple[int, ...]]] = {
+    "2020-2024 vs 2016-2019": (P0_YEARS, P1_YEARS),
+    **{f"{yy} vs 2016-2019": (P0_YEARS, (yy,)) for yy in P1_YEARS},
+    "2021 vs 2019": ((2019,), (2021,)),
+    "2024 vs 2021": ((2021,), (2024,)),
+    "2024 vs 2019": ((2019,), (2024,)),
+}
+
+
+def numerator_denominator(
+    ms: MarginSet, fars_counts: pd.Series, outcomes: Sequence[str] = ("fatal",)
+) -> pd.DataFrame:
     """Exact split: log(share1/share0) = log(K1/K0) - log(N1/N0), annual averages.
 
-    K = crashes with a fatality, N = crashes with known maximum severity (the fatal-share
-    denominator).  Comparisons: 2020-24 vs 2016-19 and each year 2020-2024 vs 2016-19.
+    K = crashes with a fatality, N = crashes whose outcome is determinable under the outcome
+    definition (the fatal-share denominator): ``fatal`` = imputed MAXSEV_IM, ``fatal_cc`` =
+    complete case.  ``base`` and ``comparison`` are the earlier and later years of each entry
+    of ``COMPARISONS``.  KABCO-class rows exist for the imputed definition only.
     """
     rows = []
-    comparisons = {"2020-2024 vs 2016-2019": P1_YEARS}
-    comparisons.update({f"{yy} vs 2016-2019": (yy,) for yy in P1_YEARS})
-    for comp, yrs in comparisons.items():
+    for oc in outcomes:
+        kk, nn = DEFINITIONS[oc]
+        for comp, (base, yrs) in COMPARISONS.items():
 
-        def k(m, ys=yrs):
-            return _period_mean(m, "K", ys)
+            def k(m, ys=yrs, c=kk):
+                return _period_mean(m, c, ys)
 
-        def n(m, ys=yrs):
-            return _period_mean(m, "N", ys)
+            def n(m, ys=yrs, c=nn):
+                return _period_mean(m, c, ys)
 
-        def k0(m):
-            return _period_mean(m, "K", P0_YEARS)
+            def k0(m, ys=base, c=kk):
+                return _period_mean(m, c, ys)
 
-        def n0(m):
-            return _period_mean(m, "N", P0_YEARS)
+            def n0(m, ys=base, c=nn):
+                return _period_mean(m, c, ys)
 
-        items: list[tuple[str, str, str, Callable, str]] = [
-            ("fatal_crashes_per_year_P0", "estimated", "crashes/year", k0, "lin"),
-            ("fatal_crashes_per_year_comparison", "estimated", "crashes/year", k, "lin"),
-            ("crashes_known_severity_per_year_P0", "estimated", "crashes/year", n0, "lin"),
-            ("crashes_known_severity_per_year_comparison", "estimated", "crashes/year", n, "lin"),
-            ("fatal_share_P0", "estimated", "proportion", lambda m: k0(m) / n0(m), "share"),
-            ("fatal_share_comparison", "estimated", "proportion", lambda m: k(m) / n(m), "share"),
-            (
-                "ratio_fatal_share",
-                "estimated",
-                "ratio",
-                lambda m: (k(m) / n(m)) / (k0(m) / n0(m)),
-                "ratio",
-            ),
-            (
-                "ratio_fatal_crashes_numerator",
-                "estimated",
-                "ratio",
-                lambda m: k(m) / k0(m),
-                "ratio",
-            ),
-            (
-                "ratio_reported_crashes_denominator",
-                "estimated",
-                "ratio",
-                lambda m: n(m) / n0(m),
-                "ratio",
-            ),
-            (
-                "numerator_share_of_log_rise",
-                "estimated",
-                "proportion of log ratio",
-                lambda m: np.log(k(m) / k0(m)) / np.log((k(m) / n(m)) / (k0(m) / n0(m))),
-                "lin",
-            ),
-            (
-                "denominator_share_of_log_rise",
-                "estimated",
-                "proportion of log ratio",
-                lambda m: -np.log(n(m) / n0(m)) / np.log((k(m) / n(m)) / (k0(m) / n0(m))),
-                "lin",
-            ),
-            (
-                "hypothetical_share_if_denominator_constant",
-                "hypothetical",
-                "proportion",
-                lambda m: k(m) / n0(m),
-                "share",
-            ),
-        ]
-        for cls in KABCO:
-            items.append(
+            fars0 = float(fars_counts.loc[list(base)].mean())
+            fars1 = float(fars_counts.loc[list(yrs)].mean())
+            items: list[tuple[str, str, str, Callable, str]] = [
+                ("fatal_crashes_per_year_base", "estimated", "crashes/year", k0, "lin"),
+                ("fatal_crashes_per_year_comparison", "estimated", "crashes/year", k, "lin"),
+                ("crashes_known_outcome_per_year_base", "estimated", "crashes/year", n0, "lin"),
                 (
-                    f"change_{cls}_crashes_per_year",
+                    "crashes_known_outcome_per_year_comparison",
                     "estimated",
                     "crashes/year",
-                    lambda m, c=cls, ys=yrs: _period_mean(m, c, ys) - _period_mean(m, c, P0_YEARS),
+                    n,
                     "lin",
-                )
-            )
-            items.append(
+                ),
+                ("fatal_share_base", "estimated", "proportion", lambda m: k0(m) / n0(m), "share"),
                 (
-                    f"ratio_{cls}_crashes",
+                    "fatal_share_comparison",
+                    "estimated",
+                    "proportion",
+                    lambda m: k(m) / n(m),
+                    "share",
+                ),
+                (
+                    "ratio_fatal_share",
                     "estimated",
                     "ratio",
-                    lambda m, c=cls, ys=yrs: _period_mean(m, c, ys) / _period_mean(m, c, P0_YEARS),
+                    lambda m: (k(m) / n(m)) / (k0(m) / n0(m)),
                     "ratio",
+                ),
+                (
+                    "ratio_fatal_crashes_numerator",
+                    "estimated",
+                    "ratio",
+                    lambda m: k(m) / k0(m),
+                    "ratio",
+                ),
+                (
+                    "ratio_reported_crashes_denominator",
+                    "estimated",
+                    "ratio",
+                    lambda m: n(m) / n0(m),
+                    "ratio",
+                ),
+                (
+                    "numerator_share_of_log_rise",
+                    "estimated",
+                    "proportion of log ratio",
+                    lambda m: np.log(k(m) / k0(m)) / np.log((k(m) / n(m)) / (k0(m) / n0(m))),
+                    "lin",
+                ),
+                (
+                    "denominator_share_of_log_rise",
+                    "estimated",
+                    "proportion of log ratio",
+                    lambda m: -np.log(n(m) / n0(m)) / np.log((k(m) / n(m)) / (k0(m) / n0(m))),
+                    "lin",
+                ),
+                (
+                    "hypothetical_share_if_denominator_constant",
+                    "hypothetical",
+                    "proportion",
+                    lambda m: k(m) / n0(m),
+                    "share",
+                ),
+                # FARS: census numerator.  CIs reflect the CRSS quantities only.
+                (
+                    "ratio_fatal_share_FARS_numerator_CRSS_denominator",
+                    "estimated (FARS census count / CRSS estimate)",
+                    "ratio",
+                    lambda m, r=fars1 / fars0: r / (n(m) / n0(m)),
+                    "ratio",
+                ),
+                (
+                    "ratio_numerator_change_CRSS_vs_FARS",
+                    "estimated (CRSS estimate / FARS census count)",
+                    "ratio",
+                    lambda m, r=fars1 / fars0: (k(m) / k0(m)) / r,
+                    "ratio",
+                ),
+            ]
+            if oc == "fatal":
+                for cls in KABCO:
+                    items.append(
+                        (
+                            f"change_{cls}_crashes_per_year",
+                            "estimated",
+                            "crashes/year",
+                            lambda m, c=cls, ys=yrs, b=base: (
+                                _period_mean(m, c, ys) - _period_mean(m, c, b)
+                            ),
+                            "lin",
+                        )
+                    )
+                    items.append(
+                        (
+                            f"ratio_{cls}_crashes",
+                            "estimated",
+                            "ratio",
+                            lambda m, c=cls, ys=yrs, b=base: (
+                                _period_mean(m, c, ys) / _period_mean(m, c, b)
+                            ),
+                            "ratio",
+                        )
+                    )
+                # Conditional shares that do not involve O (property-damage-only) or C crashes.
+                items += [
+                    (
+                        "ratio_K_share_of_injury_KABC",
+                        "estimated",
+                        "ratio",
+                        lambda m, ys=yrs, b=base: (
+                            (_period_mean(m, "K", ys) / _period_mean(m, "KABC", ys))
+                            / (_period_mean(m, "K", b) / _period_mean(m, "KABC", b))
+                        ),
+                        "ratio",
+                    ),
+                    (
+                        "ratio_K_share_of_KA",
+                        "estimated",
+                        "ratio",
+                        lambda m, ys=yrs, b=base: (
+                            (_period_mean(m, "K", ys) / _period_mean(m, "KA", ys))
+                            / (_period_mean(m, "K", b) / _period_mean(m, "KA", b))
+                        ),
+                        "ratio",
+                    ),
+                ]
+            else:
+                # How the complete-case trend differs from the imputed one (same sample, so
+                # the two definitions are linearised jointly).
+                items.append(
+                    (
+                        "ratio_fatal_share_relative_to_imputed",
+                        "estimated",
+                        "ratio",
+                        lambda m, ys=yrs, b=base: (
+                            (
+                                (_period_mean(m, "Kcc", ys) / _period_mean(m, "Ncc", ys))
+                                / (_period_mean(m, "Kcc", b) / _period_mean(m, "Ncc", b))
+                            )
+                            / (
+                                (_period_mean(m, "K", ys) / _period_mean(m, "N", ys))
+                                / (_period_mean(m, "K", b) / _period_mean(m, "N", b))
+                            )
+                        ),
+                        "ratio",
+                    )
                 )
-            )
-        for name, label, units, f, scale in items:
+            for name, label, units, f, scale in items:
+                rows.append(
+                    {
+                        "outcome": oc,
+                        "comparison": comp,
+                        "quantity": name,
+                        "label": label,
+                        "units": units,
+                        **estimate(ms, f, scale),
+                    }
+                )
             rows.append(
                 {
+                    "outcome": oc,
                     "comparison": comp,
-                    "quantity": name,
-                    "label": label,
-                    "units": units,
-                    **estimate(ms, f, scale),
+                    "quantity": "FARS_ratio_fatal_crashes (census)",
+                    "label": "observed",
+                    "units": "ratio",
+                    "estimate": fars1 / fars0,
+                    "se": 0.0,
+                    "low": np.nan,
+                    "high": np.nan,
                 }
             )
-        fars0 = float(fars_counts.loc[list(P0_YEARS)].mean())
-        fars1 = float(fars_counts.loc[list(yrs)].mean())
-        # Conditional shares that do not involve O (property-damage-only) or C crashes, and the
-        # fatal share with the FARS census count as numerator (CI: CRSS denominator only).
-        extra: list[tuple[str, str, str, Callable, str]] = [
-            (
-                "ratio_K_share_of_injury_KABC",
-                "estimated",
-                "ratio",
-                lambda m, ys=yrs: (
-                    (_period_mean(m, "K", ys) / _period_mean(m, "KABC", ys))
-                    / (_period_mean(m, "K", P0_YEARS) / _period_mean(m, "KABC", P0_YEARS))
+    out = pd.DataFrame(rows)
+    out["definition"] = out["outcome"].map(DEFINITION_LABELS)
+    return out
+
+
+def outcome_definitions_by_year(ms: MarginSet, fars_counts: pd.Series) -> pd.DataFrame:
+    """Weighted fatal crashes and fatal shares by year under the imputed and the complete-case
+    definitions, each against the FARS census count, and the ratio of the two shares.
+
+    The imputed CRSS fatal total is calibrated to FARS (weights), so its agreement with FARS
+    is by construction; the complete-case total shows the year-dependent shortfall.
+    """
+    years = sorted({int(k.split("|")[1]) for k in ms.values})
+    rows = []
+    for yy in years:
+        fars = float(fars_counts.loc[yy])
+        rec: dict = {"YEAR": yy, "FARS_fatal_crashes": fars}
+        for oc, (kk, nn) in DEFINITIONS.items():
+            tag = "imputed" if oc == "fatal" else "cc"
+            parts = {
+                "weighted_fatal_crashes": (lambda m, c=kk, y=yy: _annual(m, c, y), "lin"),
+                "weighted_known_outcome_crashes": (
+                    lambda m, c=nn, y=yy: _annual(m, c, y),
+                    "lin",
                 ),
-                "ratio",
-            ),
-            (
-                "ratio_K_share_of_KA",
-                "estimated",
-                "ratio",
-                lambda m, ys=yrs: (
-                    (_period_mean(m, "K", ys) / _period_mean(m, "KA", ys))
-                    / (_period_mean(m, "K", P0_YEARS) / _period_mean(m, "KA", P0_YEARS))
+                "fatal_to_FARS": (
+                    lambda m, c=kk, y=yy, f=fars: _annual(m, c, y) / f,
+                    "ratio",
                 ),
-                "ratio",
-            ),
-            (
-                "ratio_fatal_share_FARS_numerator_CRSS_denominator",
-                "estimated (FARS census count / CRSS estimate)",
-                "ratio",
-                lambda m, ys=yrs, r=fars1 / fars0: (
-                    r / (_period_mean(m, "N", ys) / _period_mean(m, "N", P0_YEARS))
+                "fatal_share": (
+                    lambda m, c=kk, d=nn, y=yy: _annual(m, c, y) / _annual(m, d, y),
+                    "share",
                 ),
-                "ratio",
-            ),
-        ]
-        for name, label, units, f, scale in extra:
-            rows.append(
-                {
-                    "comparison": comp,
-                    "quantity": name,
-                    "label": label,
-                    "units": units,
-                    **estimate(ms, f, scale),
-                }
-            )
-        rows.append(
-            {
-                "comparison": comp,
-                "quantity": "FARS_ratio_fatal_crashes (census)",
-                "label": "observed",
-                "units": "ratio",
-                "estimate": fars1 / fars0,
-                "se": 0.0,
-                "low": np.nan,
-                "high": np.nan,
+                "fatal_share_rr_vs_2016_19": (
+                    lambda m, c=kk, d=nn, y=yy: (
+                        (_annual(m, c, y) / _annual(m, d, y))
+                        / (_period_mean(m, c, P0_YEARS) / _period_mean(m, d, P0_YEARS))
+                    ),
+                    "ratio",
+                ),
             }
+            for name, (f, scale) in parts.items():
+                e = estimate(ms, f, scale)
+                rec[f"{name}_{tag}"] = e["estimate"]
+                rec[f"{name}_{tag}_low"] = e["low"]
+                rec[f"{name}_{tag}_high"] = e["high"]
+        e = estimate(
+            ms,
+            lambda m, y=yy: (
+                (_annual(m, "Kcc", y) / _annual(m, "Ncc", y))
+                / (_annual(m, "K", y) / _annual(m, "N", y))
+            ),
+            "ratio",
         )
+        rec.update(
+            share_ratio_cc_over_imputed=e["estimate"],
+            share_ratio_cc_over_imputed_low=e["low"],
+            share_ratio_cc_over_imputed_high=e["high"],
+        )
+        e = estimate(
+            ms,
+            lambda m, y=yy: 1 - _annual(m, "Ncc", y) / (_annual(m, "N", y) + m[f"U|{y}"]),
+            "share",
+        )
+        rec.update(
+            cc_undetermined_share_of_all=e["estimate"],
+            cc_undetermined_share_low=e["low"],
+            cc_undetermined_share_high=e["high"],
+        )
+        rows.append(rec)
     return pd.DataFrame(rows)
 
 
@@ -1080,8 +1256,15 @@ def fars_composition() -> tuple[pd.DataFrame, pd.DataFrame]:
         bac, bac_se, bac_df = rubin_share(flags)
         tcrit = float(stats.t.ppf(0.975, bac_df)) if np.isfinite(bac_df) else 1.96
         spd = g["speeding"].to_numpy(dtype=float)
+        # Speeding: share of all fatal crashes with speeding recorded (unknown counted in the
+        # denominator, a lower bound) and share among crashes with known speeding status.
         spd_share, spd_lo, spd_hi = _srs_share(spd == 1)
-        known = lv["restraint"].isin(["belted", "none"]).to_numpy()
+        spd_known = np.isfinite(spd)
+        spdk_share, spdk_lo, spdk_hi = _srs_share(spd[spd_known] == 1)
+        # Unrestrained share among LPV occupant deaths with known restraint use (belted, child
+        # restraint or none); 'unknown' and 'not applicable' (e.g. riding in a cargo area) are
+        # excluded from the denominator and counted separately.
+        known = lv["restraint"].isin(["belted", "none", "child_restraint"]).to_numpy()
         unr = (lv["restraint"] == "none").to_numpy()
         if known.any():
             lvk = lv[known].reset_index(drop=True)
@@ -1099,10 +1282,12 @@ def fars_composition() -> tuple[pd.DataFrame, pd.DataFrame]:
                 "deaths": int(g["FATALS"].sum()),
                 "speeding_crashes": int((spd == 1).sum()),
                 "speeding_unknown_crashes": int(np.isnan(spd).sum()),
-                "speeding_share": spd_share,
-                "speeding_share_low": spd_lo,
-                "speeding_share_high": spd_hi,
-                "speeding_share_of_known": float(np.nanmean(spd)),
+                "speeding_recorded_share_of_all": spd_share,
+                "speeding_recorded_share_of_all_low": spd_lo,
+                "speeding_recorded_share_of_all_high": spd_hi,
+                "speeding_share_of_known": spdk_share,
+                "speeding_share_of_known_low": spdk_lo,
+                "speeding_share_of_known_high": spdk_hi,
                 "crashes_with_mi_bac_record": len(m),
                 "bac08_share_mi": bac,
                 "bac08_share_low": bac - tcrit * bac_se,
@@ -1117,8 +1302,9 @@ def fars_composition() -> tuple[pd.DataFrame, pd.DataFrame]:
                 "motorcyclist_deaths": int(mc_d.sum()),
                 "lpv_occupant_deaths": len(lv),
                 "lpv_unrestrained_deaths": int(unr.sum()),
-                "lpv_restraint_unknown_deaths": int(
-                    (~lv["restraint"].isin(["belted", "none", "child_restraint"])).sum()
+                "lpv_restraint_unknown_deaths": int((lv["restraint"] == "unknown").sum()),
+                "lpv_restraint_not_applicable_deaths": int(
+                    (lv["restraint"] == "not_applicable").sum()
                 ),
                 "lpv_unrestrained_share_of_known": unr_share,
                 "lpv_unrestrained_share_low": unr_lo,
@@ -1162,7 +1348,8 @@ def fars_changes(comp: pd.DataFrame) -> pd.DataFrame:
             rec[f"change_{a}_{b}"] = float(d)
             rec[f"pct_change_{a}_{b}"] = float(100 * d / c.loc[a, col])
             rec[f"share_of_total_change_{a}_{b}"] = float(d / dt) if dt else np.nan
-            rec[f"share_of_total_{a}"] = float(c.loc[a, col] / c.loc[a, total])
+        for yy in (2019, 2021, 2024):
+            rec[f"share_of_total_{yy}"] = float(c.loc[yy, col] / c.loc[yy, total])
         rows.append(rec)
     out = pd.DataFrame(rows)
     out["label"] = np.where(out["indicator"] == "bac08_crashes_mi", "estimated (MI)", "observed")
@@ -1196,6 +1383,10 @@ def _save(df: pd.DataFrame, name: str, description: str, method: str, outcome: s
     )
 
 
+OUTCOME_NOTE = (
+    "fatal, ka (NHTSA-imputed severity, primary); fatal_cc (complete-case sensitivity; see "
+    "column 'outcome')"
+)
 LIN_METHOD = (
     "Survey-weighted (pseudo-ML) logistic models, ridge 0.01; predictive margins; Taylor "
     "linearisation with coefficient influence, summed within 67 PSUs / 25 strata; t with 42 df"
@@ -1215,8 +1406,8 @@ def run(outcomes: Sequence[str] = OUTCOMES, sensitivity: bool = True) -> dict[st
     # (d) KABCO distribution, numerator / denominator.
     ms_k = kabco_marginset(df_all, design_all)
     out["kabco_by_year"] = kabco_by_year(ms_k, df_all)
-    nd = numerator_denominator(ms_k, fars_counts)
-    out["numerator_denominator"] = nd
+    out["numerator_denominator"] = numerator_denominator(ms_k, fars_counts, tuple(DEFINITIONS))
+    out["outcome_definitions_by_year"] = outcome_definitions_by_year(ms_k, fars_counts)
 
     decomp_tabs, detail_f, detail_c, within, annual = [], [], [], [], []
     for oc in outcomes:
@@ -1265,12 +1456,21 @@ def run(outcomes: Sequence[str] = OUTCOMES, sensitivity: bool = True) -> dict[st
             ),
             decompose(df, design, SPEEDING_BY_TYPE, "fatal", "sens_B_speeding_by_type"),
         ]
-        dfi, dsi = outcome_frame(df_all, design_all, "fatal_cc")
-        sens_im = decompose(
-            dfi, dsi, COVARIATE_SETS["B"], "fatal_cc", "sens_B_outcome_complete_case"
+        # The complete-case outcome runs through the main loop (OUTCOMES); its shortfall
+        # against FARS differs most between 2019 and 2021, so that comparison is repeated.
+        dfc, dsc = outcome_frame(df_all, design_all, "fatal_cc")
+        sens_cc = decompose(
+            dfc,
+            dsc,
+            COVARIATE_SETS["B"],
+            "fatal_cc",
+            "sens_B_2019_vs_2021",
+            p0_years=(2019,),
+            p1_years=(2021,),
         )
         decomp_tabs += [decomposition_table(d, design) for d in sens]
-        decomp_tabs.append(decomposition_table(sens_im, dsi))
+        decomp_tabs.append(decomposition_table(sens_cc, dsc))
+        del dfc, dsc, sens_cc
         for d in (sens[0], sens[-1]):
             by_factor, by_term = detailed_composition(d, df, design)
             detail_f.append(by_factor)
@@ -1311,51 +1511,95 @@ def run(outcomes: Sequence[str] = OUTCOMES, sensitivity: bool = True) -> dict[st
             "Estimated police-reported crashes by maximum KABCO severity and year; shares of known "
             "severity, K/(KABC), K/(K+A)",
             "Weighted totals; ratios linearised jointly (25 strata / 67 PSUs, t 42 df); logit CIs",
-            "MAX_SEV",
+            "kabco = NHTSA-imputed maximum severity MAXSEV_IM (U = undeterminable, codes 5/6/8)",
             dict(population="CRSS police-reported crashes 2016-2024 (all, incl. unknown severity)"),
         ),
         "numerator_denominator": (
             "Exact split of the change in the log fatal share into the change in fatal crashes "
-            "(numerator) and in crashes with known severity (denominator), annual averages vs "
-            "2016-2019; FARS census ratio for the numerator",
-            "Weighted totals, joint linearisation; FARS observed counts",
-            "fatal",
-            dict(inputs=[CRSS_INPUT, "data/processed/fars_crash.parquet"]),
+            "(numerator) and in crashes with a determinable outcome (denominator), annual "
+            "averages, under both outcome definitions; comparisons: 2020-24 and each later year "
+            "vs 2016-19, 2021 vs 2019, 2024 vs 2021, 2024 vs 2019; FARS census ratio for the "
+            "numerator",
+            "Weighted totals, joint linearisation (CIs cover CRSS sampling only); FARS observed "
+            "counts",
+            "fatal (imputed MAXSEV_IM); fatal_cc (complete-case MAX_SEV)",
+            dict(
+                inputs=[CRSS_INPUT, "data/processed/fars_crash.parquet"],
+                extra={"definitions": DEFINITION_LABELS},
+            ),
+        ),
+        "outcome_definitions_by_year": (
+            "Weighted CRSS fatal crashes and fatal shares by year under the imputed and the "
+            "complete-case outcome, each against the FARS census count; complete-case / imputed "
+            "share ratio; share of crashes whose complete-case outcome is undetermined",
+            "Weighted totals and ratios, joint linearisation (25 strata / 67 PSUs, t 42 df); "
+            "FARS counts observed (CIs cover CRSS sampling only)",
+            "fatal (imputed MAXSEV_IM); fatal_cc (complete-case MAX_SEV)",
+            dict(
+                population="CRSS police-reported crashes 2016-2024 (all); FARS fatal crashes",
+                inputs=[CRSS_INPUT, "data/processed/fars_crash.parquet"],
+                extra={
+                    "definitions": DEFINITION_LABELS,
+                    "labels": {
+                        "FARS_fatal_crashes": "observed",
+                        "other columns": "estimated (CRSS design-based)",
+                    },
+                },
+            ),
         ),
         "decomposition": (
             "Oaxaca-Blinder-type decomposition of the change in the fatal (KA) share between "
             "2016-19 and 2020-24 into composition and within-circumstance effects (both "
             "references and their average), plus sensitivity analyses",
             LIN_METHOD + "; separate period models; cross-period predictive margins",
-            "fatal; ka (NHTSA-imputed severity); fatal_cc (complete-case sensitivity)",
-            dict(extra={"covariate_sets": SET_LABELS}),
+            OUTCOME_NOTE,
+            dict(extra={"covariate_sets": SET_LABELS, "definitions": DEFINITION_LABELS}),
         ),
         "decomposition_detailed_by_factor": (
             "Detailed composition effect by factor (Yun weights on 2016-19 coefficients)",
             LIN_METHOD + "; delta method over coefficients, period means and margins",
-            "fatal; ka",
-            {},
+            OUTCOME_NOTE,
+            dict(extra={"labels": "adjusted association (statistical accounting)"}),
         ),
         "decomposition_detailed_by_term": (
             "Detailed composition effect by single design-matrix term (reference-dependent)",
             LIN_METHOD,
-            "fatal; ka",
-            {},
+            OUTCOME_NOTE,
+            dict(extra={"labels": "adjusted association (statistical accounting)"}),
         ),
         "within_by_subgroup": (
             "Within-circumstance change by subgroup: pooled subgroup crashes predicted under the "
             "2020-24 vs the 2016-19 model (common mix), with crude period shares",
             LIN_METHOD,
-            "fatal; ka",
-            {},
+            OUTCOME_NOTE,
+            dict(
+                extra={
+                    "labels": {
+                        "observed_share_*, crude_rr*": "estimated",
+                        "std_share_*, within_rr*, within_rd*": "model-predicted (standardised)",
+                    },
+                    "flag": "suppressed: <5 events or n<30 in a period; unstable: RSE>30%",
+                }
+            ),
         ),
         "annual_shares": (
             "Yearly crude fatal (KA) shares, shares standardised to the pooled 2016-24 covariate "
             "distribution (models A, B with year), and composition-only expected shares under "
             "the 2016-19 model",
             LIN_METHOD,
-            "fatal; ka",
-            {},
+            OUTCOME_NOTE,
+            dict(
+                extra={
+                    "labels": {
+                        "weighted_crashes_*, crude_*": "estimated",
+                        "adjA_*, adjB_*": "model-predicted (standardised to pooled 2016-24 mix)",
+                        "expectedA_*, expectedB_*": "hypothetical (2016-19 model applied to "
+                        "each year's crashes: composition-only expectation)",
+                        "obs_over_expected*": "estimated / hypothetical",
+                    },
+                    "rr_vs_2016_19": "ratio to the unweighted mean of the 2016-2019 yearly values",
+                }
+            ),
         ),
         "prevalence_change": (
             "Weighted prevalence of each circumstance level among crashes, 2016-19 vs 2020-24",

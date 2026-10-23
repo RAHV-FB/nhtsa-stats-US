@@ -114,6 +114,11 @@ def test_programme_eac_pv_and_renewals():
     assert cf["total"].sum() == pytest.approx(p.total_undiscounted(12))
     s = p.summary(12)
     assert s["present_value"] == pytest.approx(pv)
+    # non-integer service life: renewals at 2.5, 5.0, 7.5 are discounted at their exact times
+    q = c.ProgrammeCosts(1000.0, 100.0, 2.5, 0.05)
+    cfq = q.cash_flows(9)
+    assert cfq["discounted"].sum() == pytest.approx(q.present_value(9))
+    assert cfq.loc[cfq["year"] == 2, "capital"].item() == pytest.approx(1000.0)
 
 
 def test_missing_and_invalid_cost_inputs():

@@ -195,17 +195,23 @@ class ProgrammeCosts:
         return float(pv)
 
     def cash_flows(self, horizon_years: int) -> pd.DataFrame:
-        """Year-by-year undiscounted and discounted cash flows (year 0 = investment)."""
+        """Year-by-year undiscounted and discounted cash flows (year 0 = investment).
+
+        A renewal at a fractional time t (non-integer service life) is listed in year
+        floor(t) but discounted at t, so ``discounted`` sums to ``present_value``.
+        """
         r = float(self.discount_rate)  # type: ignore[arg-type]
         h = int(horizon_years)
-        cap = np.zeros(h + 1)
+        k = float(self.initial_investment)  # type: ignore[arg-type]
+        cap, cap_pv = np.zeros(h + 1), np.zeros(h + 1)
         for t in self.capital_times(h):
-            cap[math.floor(t)] += float(self.initial_investment)  # type: ignore[arg-type]
+            cap[math.floor(t)] += k
+            cap_pv[math.floor(t)] += k * (1 + r) ** (-t)
         op = np.r_[0.0, np.full(h, float(self.annual_operating))]  # type: ignore[arg-type]
         df = pd.DataFrame({"year": np.arange(h + 1), "capital": cap, "operating": op})
         df["total"] = df["capital"] + df["operating"]
         df["discount_factor"] = (1 + r) ** (-df["year"].astype(float))
-        df["discounted"] = df["total"] * df["discount_factor"]
+        df["discounted"] = cap_pv + df["operating"] * df["discount_factor"]
         df["label"] = self.label
         return df
 

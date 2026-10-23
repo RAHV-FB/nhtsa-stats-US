@@ -72,6 +72,7 @@ from scipy import optimize
 from nhtsa_stats import config
 from nhtsa_stats.analysis import data
 from nhtsa_stats.analysis.survey import SurveyDesign, svy_total
+from nhtsa_stats.processing.harmonize import LPV_BODY_GROUPS
 from nhtsa_stats.reporting.io import save_table, table_path
 
 log = logging.getLogger(__name__)
@@ -98,9 +99,11 @@ class MissingAssumptionError(ValueError):
 # ======================================================================================
 ALL = "all"
 EXCEEDED = "exceeded_limit_or_racing"
-LPV_BODIES = ("car", "suv", "pickup", "van", "light_truck_other")
-# Seats and ages of the FARS within-vehicle belt analysis (matched module), so that the belt
-# estimate is applied to the population it was estimated in.
+# Light passenger vehicles as in the rest of the project (harmonize.LPV_BODY_GROUPS, which
+# includes BODY_TYP 49 'light_unknown_type'), and the seats and ages of the FARS
+# within-vehicle belt analysis (matched module), so that the belt estimate is applied to the
+# population it was estimated in.
+LPV_BODIES: tuple[str, ...] = tuple(LPV_BODY_GROUPS)
 BELT_SEATS = ("front_left", "front_other", "second_row")
 BELT_MIN_AGE = 13
 
@@ -167,7 +170,9 @@ SEGMENTS: dict[str, SegmentDef] = {
         "same definition among CRSS occupants (estimated persons, not crashes)",
         "moderate",
         "Police-reported restraint; deaths with unknown restraint status are NOT counted. "
-        "CRSS belt use among survivors is largely self-reported and likely over-reported.",
+        "CRSS belt use among survivors is largely self-reported and likely over-reported. "
+        "The primary belt estimate (double-pair comparison) comes from driver/right-front "
+        "pairs; applying it to other front and second-row occupants is an extrapolation.",
     ),
 }
 CRASH_SEGMENTS: tuple[str, ...] = ("speeding", "speeding_exceeded_limit", "alcohol", "drugs")
@@ -204,9 +209,13 @@ def crash_membership(crash: pd.DataFrame, source: Literal["FARS", "CRSS"]) -> pd
     return m
 
 
-def belt_eligible_mask(person: pd.DataFrame) -> np.ndarray:
-    """LPV drivers/passengers in the seats and ages of the within-vehicle belt analysis."""
-    age = pd.to_numeric(person["age"], errors="coerce")
+def belt_eligible_mask(person: pd.DataFrame, age_col: str = "age") -> np.ndarray:
+    """LPV drivers/passengers in the seats and ages of the within-vehicle belt analysis.
+
+    ``age_col``: FARS has no imputed age (``age``, unknown excluded, as in the matched
+    module); for CRSS the project convention is NHTSA's imputed age (``age_im``).
+    """
+    age = pd.to_numeric(person[age_col], errors="coerce")
     return (
         person["ptype"].isin(["driver", "passenger"]).to_numpy()
         & person["body"].isin(LPV_BODIES).to_numpy()
@@ -215,8 +224,8 @@ def belt_eligible_mask(person: pd.DataFrame) -> np.ndarray:
     )
 
 
-def unrestrained_lpv_mask(person: pd.DataFrame) -> np.ndarray:
-    return belt_eligible_mask(person) & _flag(person["restraint"], "none")
+def unrestrained_lpv_mask(person: pd.DataFrame, age_col: str = "age") -> np.ndarray:
+    return belt_eligible_mask(person, age_col) & _flag(person["restraint"], "none")
 
 
 # ======================================================================================
@@ -257,7 +266,8 @@ class Partition:
 
     ``cells`` maps each combination of segments (a frozenset; empty = in none of them) to the
     mean annual count of deaths / crashes in exactly that combination.  With a probabilistic
-    membership (FARS alcohol) a cell is the expected count over imputations.
+    membership (FARS alcohol) a cell is the expected count over imputations.  For a CRSS
+    (``estimated``) partition ``se`` holds the design-based standard error of each cell.
     """
 
     measure: str
@@ -266,6 +276,7 @@ class Partition:
     kind: Provenance
     source: str
     n: dict[frozenset[str], int] = field(default_factory=dict)
+    se: dict[frozenset[str], float] = field(default_factory=dict)
 
     def _check(self, seg: str) -> None:
         if seg != ALL and seg not in self.segments:
@@ -338,6 +349,7 @@ class Partition:
             "source": self.source,
             "cells": {_key(c): v for c, v in self.cells.items()},
             "n": {_key(c): v for c, v in self.n.items()},
+            "se": {_key(c): v for c, v in self.se.items()},
         }
 
     @classmethod
@@ -349,15 +361,43 @@ class Partition:
             kind=d["kind"],
             source=d["source"],
             n={_unkey(k): int(v) for k, v in d.get("n", {}).items()},
+            se={_unkey(k): float(v) for k, v in d.get("se", {}).items()},
         )
 
+    def cell_flag(self, cell: frozenset[str]) -> str:
+        """Reliability flag of a sample-based (``estimated``) cell; '' for census counts."""
+        if self.kind != "estimated":
+            return ""
+        n = self.n.get(cell)
+        if n == 0:
+            return "no_sample_records"  # e.g. structurally empty (limit-exceeding, not speeding)
+        if n is not None and n < config.MIN_CELL_N:
+            return "suppressed"
+        v, se = self.cells[cell], self.se.get(cell)
+        if se is not None and (v <= 0 or se / v > config.MAX_RSE):
+            return "unstable"
+        return ""
+
     def to_frame(self) -> pd.DataFrame:
+        """Cells for publication: sample-based cells with n < 30 are suppressed (value blank)
+        and RSE > 30% flagged unstable.  The full cells stay in ``to_dict`` because the
+        engine's arithmetic needs every cell to reproduce the total."""
+        flags = [self.cell_flag(c) for c in self.cells]
+        vals = [
+            math.nan if f == "suppressed" else v
+            for f, v in zip(flags, self.cells.values(), strict=True)
+        ]
+        ses = [self.se.get(c, math.nan) for c in self.cells]
         return pd.DataFrame(
             {
                 "measure": self.measure,
                 "cell": [_key(c) for c in self.cells],
-                "per_year": list(self.cells.values()),
+                "per_year": vals,
+                "se": [
+                    math.nan if f == "suppressed" else x for f, x in zip(flags, ses, strict=True)
+                ],
                 "n_records": [self.n.get(c) for c in self.cells],
+                "flag": flags,
                 "kind": self.kind,
                 "source": self.source,
             }
@@ -373,11 +413,14 @@ def build_partition(
     measure: str,
     kind: Provenance,
     source: str,
+    design: SurveyDesign | None = None,
 ) -> Partition:
     """Cross-classify weighted records by (probabilistic) segment membership.
 
     Each record contributes ``weight * prod_{s in cell} m_s * prod_{s not in cell} (1 - m_s)`` to
-    each cell -- exact expected counts when at most one membership is probabilistic.
+    each cell -- exact expected counts when at most one membership is probabilistic.  With a
+    survey ``design`` (``weight`` = design weight x domain/outcome indicator) the design-based
+    SE of every cell total is computed as well.
     """
     mm = membership[list(segments)].to_numpy(dtype=float)
     if np.any((mm < 0) | (mm > 1)) or np.any(~np.isfinite(mm)):
@@ -385,13 +428,17 @@ def build_partition(
     w = np.asarray(weight, dtype=float)
     cells: dict[frozenset[str], float] = {}
     ns: dict[frozenset[str], int] = {}
+    ses: dict[frozenset[str], float] = {}
     for combo in itertools.product((0, 1), repeat=len(segments)):
         pick = np.array(combo, dtype=bool)
         prob = np.prod(np.where(pick, mm, 1.0 - mm), axis=1)
         key = frozenset(s for s, c in zip(segments, combo, strict=True) if c)
-        cells[key] = float((w * prob).sum() / n_years)
+        z = w * prob
+        cells[key] = float(z.sum() / n_years)
         ns[key] = int(((prob > 0) & (w > 0)).sum())
-    return Partition(measure, tuple(segments), cells, kind, source, ns)
+        if design is not None:
+            ses[key] = float(np.sqrt(design.vcov_total(z)[0, 0]) / n_years)
+    return Partition(measure, tuple(segments), cells, kind, source, ns, ses)
 
 
 @dataclass
@@ -539,13 +586,18 @@ def _fars_quantities(
             src_c if seg != "unrestrained_lpv" else src_p,
             int((km[seg] > 0).sum()),
             reliability=d.reliability,
-            note=("expected value over 10 BAC implicates; " if expect else "") + d.note,
+            note=(
+                "expected value over 10 BAC implicates (n = deaths with a non-zero probability); "
+                if expect
+                else ""
+            )
+            + d.note,
         )
         add(
             f"fars.share_of_deaths.{seg}",
             dv / total,
             "share of all deaths",
-            src_c,
+            src_c if seg != "unrestrained_lpv" else src_p,
             None,
             reliability=d.reliability,
         )
@@ -790,10 +842,17 @@ def _crss_crash_baseline(
             )
     w = design.weight * in_win
     ka_part = build_partition(
-        cm, w * ka, CRASH_SEGMENTS, k, measure="ka_crashes", kind="estimated", source=src
+        cm,
+        w * ka,
+        CRASH_SEGMENTS,
+        k,
+        measure="ka_crashes",
+        kind="estimated",
+        source=src,
+        design=design,
     )
     crash_part = build_partition(
-        cm, w, CRASH_SEGMENTS, k, measure="crashes", kind="estimated", source=src
+        cm, w, CRASH_SEGMENTS, k, measure="crashes", kind="estimated", source=src, design=design
     )
     rows = []
     for y in years:
@@ -817,7 +876,8 @@ def _crss_person_baseline(crss_person: pd.DataFrame, years: tuple[int, ...]) -> 
     src = "data/processed/crss_person.parquet"
     ka_col = crss_outcome_column(crss_person.columns, "killed_or_serious")
     design = SurveyDesign.from_frame(crss_person)
-    dom = crss_person["YEAR"].isin(years).to_numpy() & unrestrained_lpv_mask(crss_person)
+    age_col = "age_im" if "age_im" in crss_person.columns else "age"
+    dom = crss_person["YEAR"].isin(years).to_numpy() & unrestrained_lpv_mask(crss_person, age_col)
     ka = _flag(crss_person[ka_col], 1).astype(float)
     note = (
         "LOW reliability: belt use of surviving occupants is largely self-reported and likely "
@@ -876,6 +936,16 @@ def _read_output(module: str, name: str) -> pd.DataFrame | None:
     return pd.read_csv(p) if p.exists() else None
 
 
+STALE = "stale_upstream"
+
+
+def _is_stale(module: str, name: str, processed: str) -> bool:
+    """True when the upstream output table was written before the processed data file it is
+    computed from (i.e. the data were rebuilt and the upstream module not re-run since)."""
+    out, src = table_path(module, name), config.PROCESSED_DIR / f"{processed}.parquet"
+    return out.exists() and src.exists() and out.stat().st_mtime < src.stat().st_mtime
+
+
 def _match(df: pd.DataFrame, **match: str) -> pd.Series | None:
     m = np.ones(len(df), dtype=bool)
     for col, v in match.items():
@@ -916,6 +986,13 @@ def read_associations(require_severity: bool = True) -> tuple[dict[str, Quantity
             if r is None or pd.isna(r.get(c_est)):
                 notes.append(f"severity/{name}.csv has no row {match}")
                 continue
+            stale = _is_stale("severity", name, "crss_crash")
+            msg = (
+                f"STALE: outputs/tables/severity/{name}.csv is older than "
+                "data/processed/crss_crash.parquet -- re-run the severity module, then this one"
+            )
+            if stale and msg not in notes:
+                notes.append(msg)
             out[f"severity.{outcome}_adj_rr.{seg}"] = Quantity(
                 f"severity.{outcome}_adj_rr.{seg}",
                 float(r[c_est]),
@@ -926,6 +1003,7 @@ def read_associations(require_severity: bool = True) -> tuple[dict[str, Quantity
                 high=float(r[c_hi]),
                 n=int(r["n"]) if "n" in r and pd.notna(r["n"]) else None,
                 reliability="moderate",
+                flag=STALE if stale else "",
                 note="CRSS survey logistic model A (pre-crash adjustment set), standardised "
                 "margins; conditional on a crash; not a causal effect; police-reported exposure "
                 "ascertained more thoroughly in severe crashes",
@@ -935,9 +1013,15 @@ def read_associations(require_severity: bool = True) -> tuple[dict[str, Quantity
         "not estimated by the severity module)"
     )
     belt = _read_output("matched", "belt_effect")
+    belt_stale = _is_stale("matched", "belt_effect", "fars_person")
     if belt is None:
         notes.append("matched/belt_effect.csv absent: belt effectiveness must be user-supplied")
     else:
+        if belt_stale:
+            notes.append(
+                "STALE: outputs/tables/matched/belt_effect.csv is older than "
+                "data/processed/fars_person.parquet -- re-run the matched module, then this one"
+            )
         for _, r in belt.iterrows():
             est = str(r["estimand"])
             if not est.startswith("fatality_risk_reduction_belt_given_fatal_crash"):
@@ -954,6 +1038,7 @@ def read_associations(require_severity: bool = True) -> tuple[dict[str, Quantity
                 high=float(r["high"]),
                 n=int(r["n_vehicles"]) if pd.notna(r.get("n_vehicles")) else None,
                 reliability="moderate" if not suffix else "low",
+                flag=STALE if belt_stale else "",
                 note=f"FARS within-vehicle design ({r['method']}); "
                 + (
                     "primary estimate; survivor misreporting of belt use would bias it upward"
@@ -1017,6 +1102,7 @@ def build_baseline(
                 "body",
                 "seat",
                 "age",
+                "age_im",
                 "restraint",
                 "killed_or_serious",
                 "killed_or_serious_im",
@@ -2451,6 +2537,7 @@ def conditional_threshold_table(
                     "assumptions": "belt estimate (conditional on a fatal crash) applies causally "
                     "to converters; static baseline",
                     "source": q.source,
+                    "input_flag": q.flag,
                 }
             )
     for seg in ("speeding", "speeding_exceeded_limit", "alcohol"):
@@ -2483,6 +2570,7 @@ def conditional_threshold_table(
                         else ""
                     ),
                     "source": q.source,
+                    "input_flag": q.flag,
                 }
             )
     out = pd.DataFrame(rows)
@@ -2522,9 +2610,10 @@ def overlap_table(baseline: EmpiricalBaseline) -> pd.DataFrame:
 # Inventory check: does the database contain any enforcement / cost information?
 # ======================================================================================
 INVENTORY_PATTERN = re.compile(
-    r"CAMERA|ENFORC|CITAT|CHECKPOINT|COST|PRICE|DOLLAR|TICKET|FINE|PENAL|VIOL|POLIC|TEST|DRUGTST|"
-    r"ALC_?ST|ATST|DSTATUS|SPEC_USE|EMER_USE|PREV_|SP_JUR|L_STATUS|A_LIC|BUDGET|PATROL|RADAR|"
-    r"LIDAR|SOBRI|BREATH|CAMPAIGN|EMERGENCYBRAKING",
+    r"CAMERA|ENFORC|CITAT|CHECKPOINT|COST|PRICE|DOLLAR|TICKET|FINE|PENAL|VIOL|POLIC|TEST|DRUG|"
+    r"ALC_?ST|ALCTES|ALC_RES|ALC_DET|ATST|DSTATUS|SPEC_USE|EMER_USE|PREV_|FIRST_(?:MO|YR)|"
+    r"LAST_(?:MO|YR)|SP_JUR|L_STATUS|L_COMPL|L_RESTRI|L_ENDORS|CDL_STAT|A_LIC|BUDGET|PATROL|RADAR|"
+    r"LIDAR|SOBRI|BREATH|CAMPAIGN|ZONE|EMERGENCYBRAKING",
     re.IGNORECASE,
 )
 INVENTORY_MEANING: list[tuple[str, str]] = [
@@ -2533,7 +2622,20 @@ INVENTORY_MEANING: list[tuple[str, str]] = [
         "alcohol test given to a crash-involved person (post-crash; testing depends on injury severity) -- not roadside screening of the driving population",
     ),
     ("ATST_TYP", "type of alcohol test given to a crash-involved person (post-crash)"),
+    ("ALC_RES", "alcohol test result (BAC) of a crash-involved person (post-crash)"),
+    ("ALC_DET", "method by which police determined a crash-involved person's alcohol involvement"),
+    ("ALCTES", "alcohol test given / result of a crash-involved person (derived; post-crash)"),
     ("DRUGTST", "drug test type for a crash-involved person (post-crash)"),
+    ("DRUGRES", "drug test result of a crash-involved person (post-crash toxicology)"),
+    ("DRUG_DET", "method by which police determined a crash-involved person's drug involvement"),
+    (
+        "DRUG",
+        "toxicology record of a crash-involved person (specimen, method, quantity, unit; post-crash)",
+    ),
+    (
+        "DRUGS",
+        "police-reported drug involvement of a crash-involved person (an exposure, not enforcement)",
+    ),
     ("DSTATUS", "drug test status of a crash-involved person (post-crash)"),
     (
         "MVIOLATN",
@@ -2547,7 +2649,19 @@ INVENTORY_MEANING: list[tuple[str, str]] = [
         "PREV_",
         "prior convictions/suspensions/crashes of crash-involved drivers (FARS): driver history without an exposure denominator",
     ),
+    (
+        "FIRST_",
+        "date of the first prior crash/suspension/conviction of a crash-involved driver (driver history)",
+    ),
+    (
+        "LAST_",
+        "date of the last prior crash/suspension/conviction of a crash-involved driver (driver history)",
+    ),
     ("L_STATUS", "licence status of a crash-involved driver"),
+    ("L_COMPL", "licence compliance with class of vehicle, crash-involved driver"),
+    ("L_RESTRI", "licence restrictions of a crash-involved driver"),
+    ("L_ENDORS", "licence endorsements of a crash-involved driver"),
+    ("CDL_STAT", "commercial driver licence status of a crash-involved driver"),
     ("A_LIC", "auxiliary licence compliance/status of a crash-involved driver"),
     ("SPEC_USE", "vehicle in special use (e.g. police vehicle, taxi) -- not enforcement activity"),
     ("EMER_USE", "emergency use of a vehicle at the time of the crash"),
@@ -2561,6 +2675,11 @@ INVENTORY_MEANING: list[tuple[str, str]] = [
         "back-up camera fitted to the vehicle (VIN decode) -- not an enforcement camera",
     ),
     ("EMERGENCYBRAKING", "automatic emergency braking fitted to the vehicle (VIN decode)"),
+    (
+        "ZONE",
+        "location attribute of the crash (work zone; school zone for pedestrian/cyclist crashes) "
+        "-- not enforcement activity",
+    ),
 ]
 
 
@@ -2582,6 +2701,9 @@ def enforcement_field_search(inventory_path: str | None = None) -> pd.DataFrame:
     )
 
     def meaning(col: str) -> str:
+        exact = dict(INVENTORY_MEANING)
+        if col in exact:
+            return exact[col]
         for prefix, text in INVENTORY_MEANING:
             if prefix in col:
                 return text
@@ -2639,7 +2761,10 @@ def run(window: tuple[int, int] = DEFAULT_WINDOW) -> dict[str, Any]:
         "all crashes (CRSS, estimated) cross-classified by target-segment membership",
         unit="deaths or crashes per year",
         method="Cells = combinations of segments; FARS alcohol membership is the mean over "
-        "10 BAC implicates, so cells are expected counts",
+        "10 BAC implicates, so cells are expected counts. CRSS cells: design-based SE "
+        "(Taylor linearisation, 42 df); value blanked and flagged 'suppressed' if n<30 "
+        "sampled records, 'unstable' if RSE>30%, 'no_sample_records' if empty (the engine "
+        "uses every cell, see baseline.json)",
         extra=meta,
         **common,
     )
@@ -2798,11 +2923,29 @@ def write_summary(
         for r in cond.itertuples()
     ]
     assoc_lines = [
-        f"| {k} | {_fmt(x.value, 3)} ({_fmt(x.low, 3)}-{_fmt(x.high, 3)}) | {x.source} |"
+        f"| {k} | {_fmt(x.value, 3)} ({_fmt(x.low, 3)}-{_fmt(x.high, 3)})"
+        f"{' [' + x.flag + ']' if x.flag else ''} | {x.source} |"
         for k, x in a.items()
     ]
+    stale_notes = [n for n in base.notes if n.startswith("STALE")]
+    stale_text = (
+        "\n**Warning -- upstream tables older than the processed data** (the rows flagged "
+        "`stale_upstream` above, and every number derived from them, must be regenerated "
+        "after re-running the upstream module):\n\n"
+        + "\n".join(f"* {n}" for n in stale_notes)
+        + "\n"
+        if stale_notes
+        else ""
+    )
     ann = base.annual
     ka_q = q.get("crss.ka_crashes_per_year")
+    cf, ff = q.get("crss.fatal_crashes_per_year"), q.get("fars.fatal_crashes_per_year")
+    covered = (
+        cf is not None
+        and ff is not None
+        and None not in (cf.low, cf.high, ff.value)
+        and cf.low <= ff.value <= cf.high  # type: ignore[operator]
+    )
     checks = [
         f"* FARS deaths partition (32 cells) sums to {_fmt(base.deaths.total())} deaths/yr = "
         f"`fars.deaths_per_year` {qv('fars.deaths_per_year')}; fatal-crash partition sums to "
@@ -2810,7 +2953,8 @@ def write_summary(
         f"* CRSS KA partition sums to {_fmt(base.ka_crashes.total() if base.ka_crashes else None)}"
         f" = `crss.ka_crashes_per_year` {_fmt(ka_q.value if ka_q else None)}.",
         f"* CRSS design-based estimate of fatal crashes {ci('crss.fatal_crashes_per_year')} "
-        f"contains the FARS census count {qv('fars.fatal_crashes_per_year')} (NHTSA-imputed "
+        + ("contains" if covered else "does NOT contain")
+        + f" the FARS census count {qv('fars.fatal_crashes_per_year')} (NHTSA-imputed "
         "severity is calibrated to FARS).",
         "* FARS alcohol segment for 2022 (expected value over implicates): "
         + _fmt(float(ann.loc[ann["YEAR"] == 2022, "deaths_alcohol"].iloc[0]))
@@ -2870,7 +3014,7 @@ Adjusted associations carried into Layer A (not causal; conditional on a crash):
 | Quantity | Estimate (95% CI) | Source |
 |---|---|---|
 {chr(10).join(assoc_lines)}
-
+{stale_text}
 ## 2. Overlap between segments (observed) -- `segment_overlap.csv`, `baseline_partitions.csv`
 
 | Segments | Deaths/yr in both | Share of first also in second | Share of second also in first |

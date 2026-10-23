@@ -20,17 +20,18 @@
   "change_2019_2021",
   "pct_change_2019_2021",
   "share_of_total_change_2019_2021",
-  "share_of_total_2019",
   "change_2021_2024",
   "pct_change_2021_2024",
   "share_of_total_change_2021_2024",
-  "share_of_total_2021",
   "change_2019_2024",
   "pct_change_2019_2024",
   "share_of_total_change_2019_2024",
+  "share_of_total_2019",
+  "share_of_total_2021",
+  "share_of_total_2024",
   "label"
  ],
  "module": "nhtsa_stats.analysis.trends",
- "git_commit": "9071ab7-dirty",
- "generated_utc": "2026-10-22T17:52:29Z"
+ "git_commit": "5ab7170-dirty",
+ "generated_utc": "2026-10-22T23:51:53Z"
 }

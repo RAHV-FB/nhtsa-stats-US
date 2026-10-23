@@ -3,12 +3,12 @@
  "description": "Within-circumstance change by subgroup: pooled subgroup crashes predicted under the 2020-24 vs the 2016-19 model (common mix), with crude period shares",
  "population": "CRSS police-reported crashes 2016-2024 with known maximum severity",
  "unit": "crash",
- "outcome": "fatal; ka",
+ "outcome": "fatal, ka (NHTSA-imputed severity, primary); fatal_cc (complete-case sensitivity; see column 'outcome')",
  "method": "Survey-weighted (pseudo-ML) logistic models, ridge 0.01; predictive margins; Taylor linearisation with coefficient influence, summed within 67 PSUs / 25 strata; t with 42 df",
  "inputs": [
   "data/processed/crss_crash.parquet"
  ],
- "rows": 68,
+ "rows": 102,
  "columns": [
   "analysis",
   "outcome",
@@ -30,9 +30,15 @@
   "within_rd_pp",
   "within_rd_low",
   "within_rd_high",
+  "max_rse_observed_share",
   "flag"
  ],
  "module": "nhtsa_stats.analysis.trends",
- "git_commit": "9071ab7-dirty",
- "generated_utc": "2026-10-22T17:52:29Z"
+ "git_commit": "5ab7170-dirty",
+ "generated_utc": "2026-10-22T23:51:53Z",
+ "labels": {
+  "observed_share_*, crude_rr*": "estimated",
+  "std_share_*, within_rr*, within_rd*": "model-predicted (standardised)"
+ },
+ "flag": "suppressed: <5 events or n<30 in a period; unstable: RSE>30%"
 }

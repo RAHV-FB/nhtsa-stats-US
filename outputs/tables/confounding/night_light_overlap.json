@@ -1,7 +1,7 @@
 {
  "table": "confounding/night_light_overlap.csv",
  "description": "Weighted light-condition distribution within night, day and unknown-hour crashes (positivity check for adjusting night for light)",
- "population": "CRSS police-reported crashes 2016-2024 with known maximum severity (MAX_SEV 0-4)",
+ "population": "CRSS police-reported crashes 2016-2024 with a determinable NHTSA-imputed maximum severity (MAXSEV_IM 0-4)",
  "unit": "crash",
  "outcome": "",
  "method": "Weighted shares",
@@ -17,6 +17,6 @@
   "weighted_share_of_period"
  ],
  "module": "nhtsa_stats.analysis.confounding",
- "git_commit": "762f7ce-dirty",
- "generated_utc": "2026-10-22T23:20:30Z"
+ "git_commit": "283b036-dirty",
+ "generated_utc": "2026-10-23T00:20:01Z"
 }

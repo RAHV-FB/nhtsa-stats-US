@@ -1,18 +1,41 @@
 column,sources,tables,first_year,last_year,meaning,measures_intervention_or_cost
+ALC_DET,FARS,person,2016,2021,method by which police determined a crash-involved person's alcohol involvement,False
+ALC_RES,"CRSS,FARS",person,2016,2024,alcohol test result (BAC) of a crash-involved person (post-crash),False
 ALC_STATUS,"CRSS,FARS",person,2016,2024,alcohol test given to a crash-involved person (post-crash; testing depends on injury severity) -- not roadside screening of the driving population,False
 ATST_TYP,"CRSS,FARS",person,2016,2024,type of alcohol test given to a crash-involved person (post-crash),False
+A_ALCTES,FARS,per_aux,2016,2024,alcohol test given / result of a crash-involved person (derived; post-crash),False
 A_LIC_C,FARS,veh_aux,2016,2024,auxiliary licence compliance/status of a crash-involved driver,False
 A_LIC_S,FARS,veh_aux,2016,2024,auxiliary licence compliance/status of a crash-involved driver,False
 BACKUPCAMERA,"CRSS,FARS",vpicdecode,2016,2024,back-up camera fitted to the vehicle (VIN decode) -- not an enforcement camera,False
 BACKUPCAMERAID,"CRSS,FARS",vpicdecode,2016,2024,back-up camera fitted to the vehicle (VIN decode) -- not an enforcement camera,False
 BASEPRICE,"CRSS,FARS",vpicdecode,2016,2024,"vehicle base price decoded from the VIN (vPIC) -- a vehicle attribute, not a programme cost",False
+CDL_STAT,FARS,vehicle,2016,2024,commercial driver licence status of a crash-involved driver,False
+DRUGACTQTY,FARS,drugs,2023,2024,"toxicology record of a crash-involved person (specimen, method, quantity, unit; post-crash)",False
+DRUGMETHOD,FARS,drugs,2023,2024,"toxicology record of a crash-involved person (specimen, method, quantity, unit; post-crash)",False
+DRUGQTY,FARS,drugs,2023,2024,"toxicology record of a crash-involved person (specimen, method, quantity, unit; post-crash)",False
+DRUGRES,FARS,drugs,2018,2024,drug test result of a crash-involved person (post-crash toxicology),False
+DRUGRES1,"CRSS,FARS",person,2016,2017,drug test result of a crash-involved person (post-crash toxicology),False
+DRUGRES2,"CRSS,FARS",person,2016,2017,drug test result of a crash-involved person (post-crash toxicology),False
+DRUGRES3,"CRSS,FARS",person,2016,2017,drug test result of a crash-involved person (post-crash toxicology),False
+DRUGS,"CRSS,FARS",person,2016,2024,"police-reported drug involvement of a crash-involved person (an exposure, not enforcement)",False
+DRUGSPEC,FARS,drugs,2018,2024,"toxicology record of a crash-involved person (specimen, method, quantity, unit; post-crash)",False
 DRUGTST1,"CRSS,FARS",person,2016,2017,drug test type for a crash-involved person (post-crash),False
 DRUGTST2,"CRSS,FARS",person,2016,2017,drug test type for a crash-involved person (post-crash),False
 DRUGTST3,"CRSS,FARS",person,2016,2017,drug test type for a crash-involved person (post-crash),False
+DRUGUOM,FARS,drugs,2023,2024,"toxicology record of a crash-involved person (specimen, method, quantity, unit; post-crash)",False
+DRUG_DET,FARS,person,2016,2021,method by which police determined a crash-involved person's drug involvement,False
 DSTATUS,"CRSS,FARS",person,2016,2024,drug test status of a crash-involved person (post-crash),False
 EMER_USE,"CRSS,FARS","person,vehicle",2016,2024,emergency use of a vehicle at the time of the crash,False
+FIRST_MO,FARS,vehicle,2016,2024,date of the first prior crash/suspension/conviction of a crash-involved driver (driver history),False
+FIRST_YR,FARS,vehicle,2016,2024,date of the first prior crash/suspension/conviction of a crash-involved driver (driver history),False
+LAST_MO,FARS,vehicle,2016,2024,date of the last prior crash/suspension/conviction of a crash-involved driver (driver history),False
+LAST_YR,FARS,vehicle,2016,2024,date of the last prior crash/suspension/conviction of a crash-involved driver (driver history),False
+L_COMPL,FARS,vehicle,2016,2024,"licence compliance with class of vehicle, crash-involved driver",False
+L_ENDORS,FARS,vehicle,2016,2024,licence endorsements of a crash-involved driver,False
+L_RESTRI,FARS,vehicle,2016,2024,licence restrictions of a crash-involved driver,False
 L_STATUS,FARS,vehicle,2016,2024,licence status of a crash-involved driver,False
 MVIOLATN,"CRSS,FARS",violatn,2016,2019,violations charged to a crash-involved driver (consequence of the crash; not enforcement intensity),False
+PBSZONE,"CRSS,FARS",pbtype,2016,2024,location attribute of the crash (work zone; school zone for pedestrian/cyclist crashes) -- not enforcement activity,False
 PEDESTRIANAUTOEMERGENCYBRAKING,"CRSS,FARS",vpicdecode,2016,2024,automatic emergency braking fitted to the vehicle (VIN decode),False
 PEDESTRIANAUTOEMERGENCYBRAKINGID,"CRSS,FARS",vpicdecode,2016,2024,automatic emergency braking fitted to the vehicle (VIN decode),False
 PREV_ACC,FARS,vehicle,2016,2024,prior convictions/suspensions/crashes of crash-involved drivers (FARS): driver history without an exposure denominator,False
@@ -28,3 +51,4 @@ REARAUTOMATICEMERGENCYBRAKINGID,"CRSS,FARS",vpicdecode,2016,2024,automatic emerg
 SPEC_USE,"CRSS,FARS","person,vehicle",2016,2024,"vehicle in special use (e.g. police vehicle, taxi) -- not enforcement activity",False
 SP_JUR,FARS,accident,2016,2024,"special jurisdiction of the crash site (e.g. national park, military base)",False
 VIOLATION,"CRSS,FARS",violatn,2020,2024,violations charged to a crash-involved driver (consequence of the crash; not enforcement intensity),False
+WRK_ZONE,"CRSS,FARS",accident,2016,2024,location attribute of the crash (work zone; school zone for pedestrian/cyclist crashes) -- not enforcement activity,False

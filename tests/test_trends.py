@@ -178,6 +178,7 @@ def test_fars_changes_arithmetic():
     assert ch.loc["speeding_crashes", "change_2019_2021"] == 15
     assert ch.loc["speeding_crashes", "share_of_total_change_2019_2021"] == pytest.approx(0.5)
     assert ch.loc["fatal_crashes", "pct_change_2019_2024"] == pytest.approx(20.0)
+    assert ch.loc["speeding_crashes", "share_of_total_2024"] == pytest.approx(40.0 / 120.0)
 
 
 def test_leakage_and_covariate_sets():
@@ -201,3 +202,90 @@ def test_real_data_decomposition_smoke():
     within = _row(tab, "within_effect_ref_P0")["estimate"]
     assert comp + within == pytest.approx(_row(tab, "total_change")["estimate"])
     assert bool(tab["converged"].all())
+
+
+def _kabco_frame(n: int = 30000, seed: int = 2) -> tuple[pd.DataFrame, SurveyDesign]:
+    """Synthetic KABCO by year with a complete-case outcome that is undetermined for some
+    non-fatal crashes (more often in 2016-2019, as with a shrinking unknown-severity share)."""
+    rng = np.random.default_rng(seed)
+    years = rng.choice(list(T.P0_YEARS + T.P1_YEARS), n)
+    later = years >= 2020
+    kab = np.where(
+        later,
+        rng.choice(5, n, p=[0.66, 0.15, 0.12, 0.05, 0.02]),
+        rng.choice(5, n, p=[0.70, 0.15, 0.10, 0.04, 0.01]),
+    ).astype(float)
+    kab[rng.random(n) < 0.02] = np.nan
+    cc = np.where(kab == 4, 1.0, np.where(np.isnan(kab), np.nan, 0.0))
+    undetermined = (kab < 4) & (rng.random(n) < np.where(later, 0.05, 0.15))
+    cc[undetermined] = np.nan
+    df = pd.DataFrame({"YEAR": years, "kabco": kab, "fatal_cc": cc})
+    stratum = rng.integers(0, 4, n)
+    design = SurveyDesign.from_arrays(
+        rng.uniform(1, 3, n), stratum, stratum * 10 + rng.integers(0, 3, n)
+    )
+    return df, design
+
+
+def test_numerator_denominator_complete_case_and_definition_table():
+    df, design = _kabco_frame()
+    ms = T.kabco_marginset(df, design)
+    years = list(T.P0_YEARS + T.P1_YEARS)
+    fars = pd.Series(np.linspace(1000.0, 1200.0, len(years)), index=years)
+    nd = T.numerator_denominator(ms, fars, ("fatal", "fatal_cc"))
+    assert set(nd["comparison"]) == set(T.COMPARISONS)
+    for oc in ("fatal", "fatal_cc"):
+        for comp in T.COMPARISONS:
+            q = nd[(nd["outcome"] == oc) & (nd["comparison"] == comp)].set_index("quantity")[
+                "estimate"
+            ]
+            assert q["ratio_fatal_share"] == pytest.approx(
+                q["ratio_fatal_crashes_numerator"] / q["ratio_reported_crashes_denominator"]
+            )
+            assert q["numerator_share_of_log_rise"] + q["denominator_share_of_log_rise"] == (
+                pytest.approx(1.0)
+            )
+            assert q["ratio_numerator_change_CRSS_vs_FARS"] == pytest.approx(
+                q["ratio_fatal_crashes_numerator"] / q["FARS_ratio_fatal_crashes (census)"]
+            )
+    # KABCO-class rows only for the imputed definition.
+    assert "ratio_O_crashes" not in set(nd.loc[nd["outcome"] == "fatal_cc", "quantity"])
+    p = nd[nd["comparison"] == "2021 vs 2019"].set_index(["outcome", "quantity"])["estimate"]
+    assert p[("fatal_cc", "ratio_fatal_share_relative_to_imputed")] == pytest.approx(
+        p[("fatal_cc", "ratio_fatal_share")] / p[("fatal", "ratio_fatal_share")]
+    )
+    # Direct weighted computation of one year's shares and FARS ratios.
+    by_year = T.outcome_definitions_by_year(ms, fars).set_index("YEAR")
+    w = design.weight
+    d = (df["YEAR"] == 2019).to_numpy()
+    kab, cc = df["kabco"].to_numpy(), df["fatal_cc"].to_numpy()
+    k_im = w[d & (kab == 4)].sum()
+    n_im = w[d & np.isfinite(kab)].sum()
+    k_cc = w[d & (cc == 1)].sum()
+    n_cc = w[d & np.isfinite(cc)].sum()
+    row = by_year.loc[2019]
+    assert row["fatal_share_imputed"] == pytest.approx(k_im / n_im)
+    assert row["fatal_share_cc"] == pytest.approx(k_cc / n_cc)
+    assert row["fatal_to_FARS_cc"] == pytest.approx(k_cc / fars.loc[2019])
+    assert row["share_ratio_cc_over_imputed"] == pytest.approx((k_cc / n_cc) / (k_im / n_im))
+    assert row["cc_undetermined_share_of_all"] == pytest.approx(1 - n_cc / w[d].sum())
+    # Undetermined non-fatal crashes inflate the complete-case share.
+    assert row["share_ratio_cc_over_imputed_low"] > 1.0
+    assert (by_year["fatal_share_cc_low"] < by_year["fatal_share_cc"]).all()
+
+
+def test_decomposition_flags_unstable_shares_when_change_is_null():
+    df, design = _two_periods(n=20000, seed=21)
+    tab = T.decomposition_table(_decompose(df, design), design)
+    tot = _row(tab, "total_change")
+    assert tot["low"] < 0 < tot["high"]  # no change between the periods (this seed)
+    assert set(tab.loc[tab["flag"] != "", "quantity"]) == {
+        "composition_share_of_change_ref_P0",
+        "composition_share_of_change_ref_P1",
+        "composition_share_of_change_average",
+        "composition_share_of_log_rr_ref_P0",
+    }
+    # A clear change carries no flag.
+    df, design = _two_periods(n=80000, seed=4, z_share=(0.1, 0.4))
+    tab = T.decomposition_table(_decompose(df, design), design)
+    assert (tab["flag"] == "").all()

@@ -17,10 +17,12 @@
   "deaths",
   "speeding_crashes",
   "speeding_unknown_crashes",
-  "speeding_share",
-  "speeding_share_low",
-  "speeding_share_high",
+  "speeding_recorded_share_of_all",
+  "speeding_recorded_share_of_all_low",
+  "speeding_recorded_share_of_all_high",
   "speeding_share_of_known",
+  "speeding_share_of_known_low",
+  "speeding_share_of_known_high",
   "crashes_with_mi_bac_record",
   "bac08_share_mi",
   "bac08_share_low",
@@ -36,6 +38,7 @@
   "lpv_occupant_deaths",
   "lpv_unrestrained_deaths",
   "lpv_restraint_unknown_deaths",
+  "lpv_restraint_not_applicable_deaths",
   "lpv_unrestrained_share_of_known",
   "lpv_unrestrained_share_low",
   "lpv_unrestrained_share_high",
@@ -44,6 +47,6 @@
   "rural_road_crashes"
  ],
  "module": "nhtsa_stats.analysis.trends",
- "git_commit": "9071ab7",
- "generated_utc": "2026-10-22T17:52:29Z"
+ "git_commit": "5ab7170-dirty",
+ "generated_utc": "2026-10-22T23:51:53Z"
 }

@@ -166,6 +166,31 @@ def test_exposure_definitions_exclude_the_exposure_itself():
     C.check_leakage()
 
 
+def test_outcome_definition_sensitivity_identical_and_selective_outcomes():
+    df, design = _synthetic(n=20000, seed=7)
+    primary = {
+        k: C.fit_subset(df, design, TOY, s, "fatal") for k, s in C.summary_models(TOY).items()
+    }
+    # Identical outcome on every crash: identical RRs, ratio exactly 1 with no spread.
+    df["fatal_cc"] = df["fatal"]
+    tab = C.outcome_definition_sensitivity(df, design, TOY, primary).set_index("model")
+    assert list(tab.index) == ["crude", "all_blocks"]
+    np.testing.assert_allclose(tab["rr_cc"], tab["rr_imputed"], rtol=1e-8)
+    np.testing.assert_allclose(tab["rr_ratio_cc_over_imputed"], 1.0, atol=1e-8)
+    np.testing.assert_allclose(tab["rr_ratio_high"] - tab["rr_ratio_low"], 0.0, atol=1e-6)
+    assert tab.loc["crude", "share_logrr_retained_cc"] == 1.0
+    full = tab.loc["all_blocks"]
+    assert full["share_retained_cc_low"] < full["share_logrr_retained_cc"]
+    assert full["share_logrr_retained_cc"] < full["share_retained_cc_high"]
+    # Undetermined only among non-fatal exposed crashes: the complete-case RR is inflated.
+    rng = np.random.default_rng(1)
+    drop = (df["night_period"] == "night").to_numpy() & (df["fatal"] == 0).to_numpy()
+    df["fatal_cc"] = np.where(drop & (rng.random(len(df)) < 0.3), np.nan, df["fatal"])
+    tab = C.outcome_definition_sensitivity(df, design, TOY, primary).set_index("model")
+    assert tab.loc["crude", "n_complete_case"] < tab.loc["crude", "n_imputed"]
+    assert tab.loc["crude", "rr_ratio_low"] > 1.2
+
+
 def test_category_levels_rejects_undeclared_values():
     df = pd.DataFrame({"light": ["daylight", "dark_lighted", "moonlight"]})
     with pytest.raises(ValueError):

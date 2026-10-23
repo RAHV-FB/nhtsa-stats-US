@@ -1,7 +1,7 @@
 {
  "table": "confounding/night_within_dark.csv",
  "description": "Night vs day standardised risk ratio among crashes in darkness only",
- "population": "CRSS police-reported crashes 2016-2024 with known maximum severity (MAX_SEV 0-4)",
+ "population": "CRSS police-reported crashes 2016-2024 with a determinable NHTSA-imputed maximum severity (MAXSEV_IM 0-4)",
  "unit": "crash",
  "outcome": "fatal; ka",
  "method": "Survey-weighted logistic models (exposure + every subset of covariate blocks; ridge 0.01 on mean-1 weights; exact cell compression); standardised predictive margins over all crashes; risk ratio = margin(all exposed) / margin(all reference); Taylor-linearised influence summed within 67 PSUs / 25 strata, t with 42 df; shares and Shapley values by the delta method across models",
@@ -23,6 +23,6 @@
   "rr_high"
  ],
  "module": "nhtsa_stats.analysis.confounding",
- "git_commit": "762f7ce-dirty",
- "generated_utc": "2026-10-22T23:20:34Z"
+ "git_commit": "283b036-dirty",
+ "generated_utc": "2026-10-23T00:20:05Z"
 }

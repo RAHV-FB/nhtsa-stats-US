@@ -20,20 +20,24 @@ The 36 FARS/CRSS archives were searched for any field that records an interventi
 (`outputs/audit/column_inventory.csv`; 1,712 source-table-column combinations in 67
 source-tables, label `*NAME` columns excluded) for the patterns *camera, enforcement,
 citation, checkpoint, cost, price, dollar, ticket, fine, penalty, violation, police, test,
-alcohol/drug test status, special use, emergency use, prior convictions, special jurisdiction,
-licence status, budget, patrol, radar/lidar, sobriety, breath, campaign*. The 29 matching
-column names and their meaning are in `outputs/tables/simulation/inventory_enforcement_cost_fields.csv`:
+alcohol/drug test status, result and determination method, drug toxicology, special use,
+emergency use, prior convictions and their dates, special jurisdiction, licence status /
+compliance / restrictions / endorsements, budget, patrol, radar/lidar, sobriety, breath,
+campaign, work/school zone*. The 53 matching column names and their meaning are in
+`outputs/tables/simulation/inventory_enforcement_cost_fields.csv` (every match is
+interpreted; a test fails if one is left unclassified):
 
 | Matched fields | What they are | Why they cannot measure an intervention |
 |---|---|---|
-| `ALC_STATUS`, `ATST_TYP`, `DRUGTST1-3`, `DSTATUS` | alcohol/drug tests given to persons *involved in the crash* | post-crash; testing depends on injury severity and state; says nothing about roadside screening of drivers who did not crash |
+| `ALC_STATUS`, `ATST_TYP`, `ALC_RES`, `A_ALCTES`, `DRUGTST1-3`, `DSTATUS`, `DRUGRES*`, FARS `drugs` table (`DRUGSPEC`, `DRUGMETHOD`, `DRUGQTY`, `DRUGACTQTY`, `DRUGUOM`) | alcohol/drug tests and results of persons *involved in the crash* | post-crash; testing depends on injury severity and state; says nothing about roadside screening of drivers who did not crash |
+| `ALC_DET`, `DRUG_DET`, `DRUGS` | how police determined alcohol/drug involvement; police-reported drug involvement | describe the crash-involved person (an exposure), not enforcement |
 | `MVIOLATN`, `VIOLATION` | violations charged to a crash-involved driver | a consequence of the crash, not enforcement intensity |
-| `PREV_ACC`, `PREV_DWI`, `PREV_SPD`, `PREV_SUS*`, `PREV_OTH` (FARS) | prior crashes / convictions / suspensions of crash-involved drivers | driver history without an exposure denominator; no information on enforcement levels |
-| `L_STATUS`, `A_LIC_C`, `A_LIC_S` | licence status/compliance of the driver | driver attribute |
+| `PREV_ACC`, `PREV_DWI`, `PREV_SPD`, `PREV_SUS*`, `PREV_OTH`, `FIRST_MO/YR`, `LAST_MO/YR` (FARS) | prior crashes / convictions / suspensions of crash-involved drivers and their dates | driver history without an exposure denominator; no information on enforcement levels |
+| `L_STATUS`, `L_COMPL`, `L_RESTRI`, `L_ENDORS`, `CDL_STAT`, `A_LIC_C`, `A_LIC_S` | licence status/compliance/restrictions of the driver | driver attribute |
 | `SPEC_USE`, `EMER_USE` | vehicle in special use (e.g. police car) / emergency use | describes the crashed vehicle, not enforcement activity |
-| `SP_JUR` | special jurisdiction of the crash site | location attribute |
+| `SP_JUR`, `WRK_ZONE`, `PBSZONE` | special jurisdiction, work zone, school zone (pedestrian/cyclist crashes) of the crash site | location attributes; no enforcement presence or intensity |
 | `BASEPRICE` (vPIC) | vehicle base price decoded from the VIN | vehicle attribute, not a programme cost |
-| `BACKUPCAMERA`, `*AUTOEMERGENCYBRAKING` (vPIC) | vehicle equipment | not enforcement cameras |
+| `BACKUPCAMERA*`, `*AUTOEMERGENCYBRAKING*` (vPIC) | vehicle equipment | not enforcement cameras |
 
 **Conclusion:** no field measures camera deployment, enforcement intensity, checkpoints,
 roadside testing of the driving population, publicity campaigns, or any programme cost.
@@ -90,17 +94,29 @@ Segments (definitions in `engine.SEGMENTS`):
 | `speeding_exceeded_limit` | any vehicle coded exceeded limit / racing | same | moderate (lower bound) |
 | `alcohol` | expected value over 10 BAC implicates of 1[driver BAC ≥ .08] | imputed police-reported involvement (`ALCHL_IM`) | moderate; definitions differ |
 | `drugs` | any driver with police-reported drug involvement | same | **low** |
-| `unrestrained_lpv` | killed LPV drivers/passengers aged ≥ 13, front or 2nd row, restraint "none" (population of the belt estimate) | same, persons | moderate (FARS), low (CRSS) |
+| `unrestrained_lpv` | killed LPV drivers/passengers (LPV = `harmonize.LPV_BODY_GROUPS`, including BODY_TYP 49 "light vehicle, unknown type"), aged ≥ 13, front or 2nd row, restraint "none" (population of the belt estimate) | same, persons; age is NHTSA's imputed age (`age_im`) | moderate (FARS), low (CRSS) |
 
 Unknown status is never counted as "no" *or* "yes": deaths in crashes with unknown status are
 outside the segment and reported separately (`fars.deaths_per_year.<segment>.status_unknown`),
-so segment counts are lower bounds.
+so segment counts are lower bounds. (For `speeding_exceeded_limit`, "speeding, specifics
+unknown" is reported with the unknowns.)
+
+**Freshness of the imported associations.** If an upstream table
+(`severity/*.csv`, `matched/belt_effect.csv`) is older than the processed data file it is
+computed from, the association is flagged `stale_upstream` in `baseline.csv`, a `STALE` note
+is added to the baseline and `SUMMARY.md` shows a warning: re-run the upstream module and then
+`engine.run()`.
 
 **Overlap.** Segments overlap (e.g. 4,912 deaths/yr are in crashes that are both
 speeding-related and alcohol-involved, 2022–2024; `segment_overlap.csv`). Layer A therefore
 stores *partitions*: deaths, fatal crashes (FARS) and KA/all crashes (CRSS) cross-classified
 by membership of every segment (32 or 16 cells; `baseline_partitions.csv`). With the
-probabilistic alcohol membership, a cell is the expected count over the imputations.
+probabilistic alcohol membership, a cell is the expected count over the imputations. CRSS
+cells carry a design-based SE; in the published CSV a cell based on fewer than 30 sampled
+records is suppressed (value blank), one with RSE > 30% is flagged `unstable`, and an empty
+cell (e.g. limit-exceeding but not speeding-related, which cannot occur) is flagged
+`no_sample_records`. The engine itself uses every cell (from `baseline.json`), so that the
+cells reproduce the segment totals.
 
 ## 4. Layer B — mechanisms
 
@@ -157,11 +173,13 @@ share of unbelted deaths prevented = conversion_share · min(1, belt_effectivene
 
 `belt_effectiveness` defaults to the Layer A within-vehicle estimate (FARS double-pair
 comparison, proportional reduction in P(death) given a fatal crash: 0.658, 95% CI
-0.646–0.671, `matched/belt_effect.csv`), passed as a triangular parameter over its CI and
+0.645–0.670, `matched/belt_effect.csv`), passed as a triangular parameter over its CI and
 labelled with its source; misreporting variants are available through
 `belt_effectiveness_param(baseline, "misreport_f10")` etc. If neither the estimate nor a user
-value exists, a `MissingAssumptionError` is raised. Fatal and KA crashes prevented are not
-defined (a prevented death need not prevent the crash).
+value exists, a `MissingAssumptionError` is raised. The double-pair estimate comes from
+driver / right-front-passenger pairs in multi-occupant vehicles; applying it to other front
+and second-row occupants (who are in the target segment) is an extrapolation. Fatal and KA
+crashes prevented are not defined (a prevented death need not prevent the crash).
 
 ### 4.5 `GenericIntervention`
 
@@ -290,7 +308,9 @@ compensation or exposure change beyond what the parameters encode.
 
 > **Every input below is invented for illustration. None is an estimate, a recommendation or
 > a claim about any real programme. Prices are in abstract currency units (CU).** The
-> baseline is the saved 2022–2024 Layer A (`EmpiricalBaseline.load()`).
+> baseline is the saved 2022–2024 Layer A (`EmpiricalBaseline.load()`); the outputs quoted
+> change whenever the baseline is rebuilt, and those using an adjusted RR also when the
+> severity module is re-run.
 
 ### Example 1 — speed cameras on limit-exceeding crashes
 
@@ -366,7 +386,7 @@ above those values.
 ### Example 4 — seat-belt enforcement
 
 `RestraintEnforcement(conversion_share=Param(0.1, 0.05, 0.2))` with the Layer A belt estimate:
-669 deaths/yr (corner range 328–1,362); with the 10% misreporting variant of the belt
+669 deaths/yr (corner range 328–1,361); with the 10% misreporting variant of the belt
 estimate (0.379): 385. The answer is driven by the conversion share (an assumption) and by
 survivor misreporting of belt use (a measurement question).
 

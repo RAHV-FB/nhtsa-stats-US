@@ -1,7 +1,7 @@
 {
  "table": "confounding/sequential_fatal.csv",
  "description": "Sequential adjustment of standardised risk ratios (night, rural PSU, weekend, driver 65+) under pre-specified block orderings: RR, RD and share of the crude log-RR retained",
- "population": "CRSS police-reported crashes 2016-2024 with known maximum severity (MAX_SEV 0-4)",
+ "population": "CRSS police-reported crashes 2016-2024 with a determinable NHTSA-imputed maximum severity (MAXSEV_IM 0-4)",
  "unit": "crash",
  "outcome": "fatal",
  "method": "Survey-weighted logistic models (exposure + every subset of covariate blocks; ridge 0.01 on mean-1 weights; exact cell compression); standardised predictive margins over all crashes; risk ratio = margin(all exposed) / margin(all reference); Taylor-linearised influence summed within 67 PSUs / 25 strata, t with 42 df; shares and Shapley values by the delta method across models",
@@ -37,8 +37,8 @@
   "flag"
  ],
  "module": "nhtsa_stats.analysis.confounding",
- "git_commit": "a8620e3-dirty",
- "generated_utc": "2026-10-22T18:11:30Z",
+ "git_commit": "283b036-dirty",
+ "generated_utc": "2026-10-23T00:20:05Z",
  "exposures": {
   "night": "Night (21:00-05:59) vs day (06:00-20:59); time-of-day bands are not adjusted for because they define the exposure",
   "rural": "Crash in a rural vs urban CRSS PSU (area-level URBANICITY, not crash-site rurality)",

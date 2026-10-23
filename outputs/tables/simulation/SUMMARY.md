@@ -6,7 +6,7 @@ Generated from the output tables in this directory; every number below is copied
 **What this is.** Tooling, not inference. The database contains no camera, enforcement,
 checkpoint, roadside-testing, campaign or cost data (searched: 1712
 source-table-column combinations in 67 source-tables of
-`outputs/audit/column_inventory.csv`, label columns excluded; 29 enforcement/cost-like
+`outputs/audit/column_inventory.csv`, label columns excluded; 53 enforcement/cost-like
 column names matched, none of which measures an intervention or a cost --
 `inventory_enforcement_cost_fields.csv`). So no intervention effect is estimated here. The
 engine combines an **empirical baseline** (Layer A) with **user assumptions** (Layer C)
@@ -34,8 +34,8 @@ value over the 10 BAC implicates; KA crashes are CRSS design-based estimates, 95
 
 | Segment | Reliability | Deaths/yr | Share of all deaths | Deaths/yr with unknown status (not counted) | CRSS KA crashes/yr | Share of segment deaths to prevent per 1% of all deaths |
 |---|---|---|---|---|---|---|
-| speeding | moderate | 11,786 | 28.7% | 3,033 | 34,277 (95% CI 29,285-39,269) | 3.5% |
-| speeding_exceeded_limit | moderate | 4,702 | 11.5% | 5,297 | 8,460 (95% CI 6,666-10,253) | 8.7% |
+| speeding | moderate | 11,786 | 28.7% | 3,310 | 34,277 (95% CI 29,285-39,269) | 3.5% |
+| speeding_exceeded_limit | moderate | 4,702 | 11.5% | 5,574 | 8,460 (95% CI 6,666-10,253) | 8.7% |
 | alcohol | moderate | 12,581 | 30.7% | none (BAC imputed) | 32,302 (95% CI 28,676-35,928) | 3.3% |
 | drugs | low | 4,998 | 12.2% | 22,086 | 7,327 (95% CI 5,802-8,853) | 8.2% |
 | unrestrained_lpv | moderate | 10,155 | 24.8% | 2,470 | n/a (persons) | 4.0% |
@@ -51,16 +51,22 @@ Adjusted associations carried into Layer A (not causal; conditional on a crash):
 
 | Quantity | Estimate (95% CI) | Source |
 |---|---|---|
-| severity.fatal_adj_rr.speeding | 1.832 (1.495-2.245) | outputs/tables/severity/fatal_crude_vs_adjusted.csv (A_adj_rr; {'factor': 'speeding', 'level': 'yes'}) |
-| severity.fatal_adj_rr.alcohol | 4.437 (3.706-5.311) | outputs/tables/severity/fatal_crude_vs_adjusted.csv (A_adj_rr; {'factor': 'alcohol_im', 'level': 'yes'}) |
-| severity.fatal_adj_rr.speeding_exceeded_limit | 5.383 (4.498-6.442) | outputs/tables/severity/fatal_speeding_type.csv (adj_rr; {'level': 'exceeded_limit_or_racing'}) |
-| severity.ka_adj_rr.speeding | 1.619 (1.389-1.887) | outputs/tables/severity/ka_crude_vs_adjusted.csv (A_adj_rr; {'factor': 'speeding', 'level': 'yes'}) |
-| severity.ka_adj_rr.alcohol | 2.767 (2.513-3.046) | outputs/tables/severity/ka_crude_vs_adjusted.csv (A_adj_rr; {'factor': 'alcohol_im', 'level': 'yes'}) |
-| belt.fatality_reduction | 0.658 (0.646-0.671) | outputs/tables/matched/belt_effect.csv (fatality_risk_reduction_belt_given_fatal_crash) |
-| belt.fatality_reduction.misreport_f05 | 0.525 (0.511-0.539) | outputs/tables/matched/belt_effect.csv (fatality_risk_reduction_belt_given_fatal_crash_misreport_f05) |
-| belt.fatality_reduction.misreport_f10 | 0.379 (0.363-0.395) | outputs/tables/matched/belt_effect.csv (fatality_risk_reduction_belt_given_fatal_crash_misreport_f10) |
-| belt.fatality_reduction.misreport_f20 | 0.044 (0.021-0.066) | outputs/tables/matched/belt_effect.csv (fatality_risk_reduction_belt_given_fatal_crash_misreport_f20) |
-| belt.fatality_reduction.complete_restraint_vehicles | 0.659 (0.647-0.671) | outputs/tables/matched/belt_effect.csv (fatality_risk_reduction_belt_given_fatal_crash_complete_restraint_vehicles) |
+| severity.fatal_adj_rr.speeding | 1.832 (1.495-2.245) [stale_upstream] | outputs/tables/severity/fatal_crude_vs_adjusted.csv (A_adj_rr; {'factor': 'speeding', 'level': 'yes'}) |
+| severity.fatal_adj_rr.alcohol | 4.437 (3.706-5.311) [stale_upstream] | outputs/tables/severity/fatal_crude_vs_adjusted.csv (A_adj_rr; {'factor': 'alcohol_im', 'level': 'yes'}) |
+| severity.fatal_adj_rr.speeding_exceeded_limit | 5.383 (4.498-6.442) [stale_upstream] | outputs/tables/severity/fatal_speeding_type.csv (adj_rr; {'level': 'exceeded_limit_or_racing'}) |
+| severity.ka_adj_rr.speeding | 1.619 (1.389-1.887) [stale_upstream] | outputs/tables/severity/ka_crude_vs_adjusted.csv (A_adj_rr; {'factor': 'speeding', 'level': 'yes'}) |
+| severity.ka_adj_rr.alcohol | 2.767 (2.513-3.046) [stale_upstream] | outputs/tables/severity/ka_crude_vs_adjusted.csv (A_adj_rr; {'factor': 'alcohol_im', 'level': 'yes'}) |
+| belt.fatality_reduction | 0.658 (0.645-0.670) | outputs/tables/matched/belt_effect.csv (fatality_risk_reduction_belt_given_fatal_crash) |
+| belt.fatality_reduction.misreport_f05 | 0.525 (0.510-0.538) | outputs/tables/matched/belt_effect.csv (fatality_risk_reduction_belt_given_fatal_crash_misreport_f05) |
+| belt.fatality_reduction.misreport_f10 | 0.379 (0.362-0.394) | outputs/tables/matched/belt_effect.csv (fatality_risk_reduction_belt_given_fatal_crash_misreport_f10) |
+| belt.fatality_reduction.misreport_f20 | 0.044 (0.020-0.064) | outputs/tables/matched/belt_effect.csv (fatality_risk_reduction_belt_given_fatal_crash_misreport_f20) |
+| belt.fatality_reduction.complete_restraint_vehicles | 0.660 (0.647-0.673) | outputs/tables/matched/belt_effect.csv (fatality_risk_reduction_belt_given_fatal_crash_complete_restraint_vehicles) |
+
+**Warning -- upstream tables older than the processed data** (the rows flagged `stale_upstream` above, and every number derived from them, must be regenerated after re-running the upstream module):
+
+* STALE: outputs/tables/severity/fatal_crude_vs_adjusted.csv is older than data/processed/crss_crash.parquet -- re-run the severity module, then this one
+* STALE: outputs/tables/severity/fatal_speeding_type.csv is older than data/processed/crss_crash.parquet -- re-run the severity module, then this one
+* STALE: outputs/tables/severity/ka_crude_vs_adjusted.csv is older than data/processed/crss_crash.parquet -- re-run the severity module, then this one
 
 ## 2. Overlap between segments (observed) -- `segment_overlap.csv`, `baseline_partitions.csv`
 
@@ -101,20 +107,20 @@ per 1% of all deaths would be:
 | Segment | Empirical input | Input value | Required change |
 |---|---|---|---|
 | unrestrained_lpv | belt.fatality_reduction (estimate) | 0.658 | 6.1% |
-| unrestrained_lpv | belt.fatality_reduction (ci_low) | 0.646 | 6.3% |
-| unrestrained_lpv | belt.fatality_reduction (ci_high) | 0.671 | 6.0% |
+| unrestrained_lpv | belt.fatality_reduction (ci_low) | 0.645 | 6.3% |
+| unrestrained_lpv | belt.fatality_reduction (ci_high) | 0.670 | 6.0% |
 | unrestrained_lpv | belt.fatality_reduction.misreport_f05 (estimate) | 0.525 | 7.7% |
-| unrestrained_lpv | belt.fatality_reduction.misreport_f05 (ci_low) | 0.511 | 7.9% |
-| unrestrained_lpv | belt.fatality_reduction.misreport_f05 (ci_high) | 0.539 | 7.5% |
+| unrestrained_lpv | belt.fatality_reduction.misreport_f05 (ci_low) | 0.510 | 7.9% |
+| unrestrained_lpv | belt.fatality_reduction.misreport_f05 (ci_high) | 0.538 | 7.5% |
 | unrestrained_lpv | belt.fatality_reduction.misreport_f10 (estimate) | 0.379 | 10.7% |
-| unrestrained_lpv | belt.fatality_reduction.misreport_f10 (ci_low) | 0.363 | 11.1% |
-| unrestrained_lpv | belt.fatality_reduction.misreport_f10 (ci_high) | 0.395 | 10.2% |
+| unrestrained_lpv | belt.fatality_reduction.misreport_f10 (ci_low) | 0.362 | 11.2% |
+| unrestrained_lpv | belt.fatality_reduction.misreport_f10 (ci_high) | 0.394 | 10.3% |
 | unrestrained_lpv | belt.fatality_reduction.misreport_f20 (estimate) | 0.044 | 92.6% |
-| unrestrained_lpv | belt.fatality_reduction.misreport_f20 (ci_low) | 0.021 | 188.5% (not attainable: > 100%) |
-| unrestrained_lpv | belt.fatality_reduction.misreport_f20 (ci_high) | 0.066 | 61.0% |
-| unrestrained_lpv | belt.fatality_reduction.complete_restraint_vehicles (estimate) | 0.659 | 6.1% |
+| unrestrained_lpv | belt.fatality_reduction.misreport_f20 (ci_low) | 0.020 | 205.4% (not attainable: > 100%) |
+| unrestrained_lpv | belt.fatality_reduction.misreport_f20 (ci_high) | 0.064 | 63.1% |
+| unrestrained_lpv | belt.fatality_reduction.complete_restraint_vehicles (estimate) | 0.660 | 6.1% |
 | unrestrained_lpv | belt.fatality_reduction.complete_restraint_vehicles (ci_low) | 0.647 | 6.2% |
-| unrestrained_lpv | belt.fatality_reduction.complete_restraint_vehicles (ci_high) | 0.671 | 6.0% |
+| unrestrained_lpv | belt.fatality_reduction.complete_restraint_vehicles (ci_high) | 0.673 | 6.0% |
 | speeding | severity.fatal_adj_rr.speeding (estimate) | 1.832 | 7.7% |
 | speeding | severity.fatal_adj_rr.speeding (ci_low) | 1.495 | 10.5% |
 | speeding | severity.fatal_adj_rr.speeding (ci_high) | 2.245 | 6.3% |

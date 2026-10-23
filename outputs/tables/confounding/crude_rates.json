@@ -1,7 +1,7 @@
 {
  "table": "confounding/crude_rates.csv",
  "description": "Observed weighted fatal / KA shares by exposure level (crude numerators and denominators; flag: suppressed n<30, unstable RSE>30%)",
- "population": "CRSS police-reported crashes 2016-2024 with known maximum severity (MAX_SEV 0-4)",
+ "population": "CRSS police-reported crashes 2016-2024 with a determinable NHTSA-imputed maximum severity (MAXSEV_IM 0-4)",
  "unit": "crash",
  "outcome": "fatal; ka",
  "method": "Weighted proportions, Taylor-linearised SEs, logit CIs",
@@ -25,6 +25,6 @@
   "flag"
  ],
  "module": "nhtsa_stats.analysis.confounding",
- "git_commit": "762f7ce-dirty",
- "generated_utc": "2026-10-22T23:20:30Z"
+ "git_commit": "283b036-dirty",
+ "generated_utc": "2026-10-23T00:20:01Z"
 }

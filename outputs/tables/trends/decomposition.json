@@ -3,12 +3,12 @@
  "description": "Oaxaca-Blinder-type decomposition of the change in the fatal (KA) share between 2016-19 and 2020-24 into composition and within-circumstance effects (both references and their average), plus sensitivity analyses",
  "population": "CRSS police-reported crashes 2016-2024 with known maximum severity",
  "unit": "crash",
- "outcome": "fatal; ka; fatal_im (sensitivity)",
+ "outcome": "fatal, ka (NHTSA-imputed severity, primary); fatal_cc (complete-case sensitivity; see column 'outcome')",
  "method": "Survey-weighted (pseudo-ML) logistic models, ridge 0.01; predictive margins; Taylor linearisation with coefficient influence, summed within 67 PSUs / 25 strata; t with 42 df; separate period models; cross-period predictive margins",
  "inputs": [
   "data/processed/crss_crash.parquet"
  ],
- "rows": 180,
+ "rows": 220,
  "columns": [
   "analysis",
   "outcome",
@@ -19,6 +19,7 @@
   "se",
   "low",
   "high",
+  "flag",
   "covariates",
   "n_P0",
   "events_P0",
@@ -27,10 +28,14 @@
   "converged"
  ],
  "module": "nhtsa_stats.analysis.trends",
- "git_commit": "9071ab7-dirty",
- "generated_utc": "2026-10-22T17:52:29Z",
+ "git_commit": "5ab7170-dirty",
+ "generated_utc": "2026-10-22T23:51:53Z",
  "covariate_sets": {
   "A": "pre-crash circumstances (PRE_CRASH without year)",
   "B": "pre-crash circumstances + crash configuration (crash type, vehicles)"
+ },
+ "definitions": {
+  "fatal": "NHTSA-imputed maximum severity (MAXSEV_IM)",
+  "fatal_cc": "complete-case maximum severity (MAX_SEV; crashes with a person of unknown severity excluded unless fatal)"
  }
 }
