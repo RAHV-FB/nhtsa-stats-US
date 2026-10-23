@@ -203,6 +203,12 @@ def crude_vs_adjusted(outcome: str = "fatal", years: Sequence[int] | None = None
     res = pd.concat(out, ignore_index=True)
     res.insert(0, "outcome", outcome)
     res["adj_flag"] = _adjusted_flags(res)
+    # A level (or reference) with no events has no finite log-RR: the ridge keeps the fit
+    # finite but its contrast and CI would be arbitrary and spuriously precise.
+    no_events = res["n_events"].eq(0) | res.groupby("factor")["n_events"].transform("first").eq(0)
+    adj_cols = [c for c in res.columns if c.startswith(("A_adj_r", "Ax_adj_r", "B_adj_r"))]
+    res.loc[no_events, adj_cols] = np.nan
+    res.loc[no_events, "adj_flag"] = "no events in level or reference: not estimable"
     # Attenuation: share of the crude log-RR that remains after adjustment.
     with np.errstate(divide="ignore", invalid="ignore"):
         res["A_logrr_retained"] = np.log(res["A_adj_rr"]) / np.log(res["crude_rr"])
