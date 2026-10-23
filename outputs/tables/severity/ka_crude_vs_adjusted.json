@@ -8,7 +8,7 @@
  "inputs": [
   "data/processed/crss_crash.parquet"
  ],
- "rows": 87,
+ "rows": 90,
  "columns": [
   "outcome",
   "level",
@@ -27,6 +27,7 @@
   "crude_rr_high",
   "factor",
   "A_adj_rate",
+  "A_adj_rate_rse",
   "A_adj_rate_low",
   "A_adj_rate_high",
   "A_adj_rr",
@@ -36,6 +37,7 @@
   "A_adj_rd_low",
   "A_adj_rd_high",
   "B_adj_rate",
+  "B_adj_rate_rse",
   "B_adj_rate_low",
   "B_adj_rate_high",
   "B_adj_rr",
@@ -44,10 +46,22 @@
   "B_adj_rd",
   "B_adj_rd_low",
   "B_adj_rd_high",
+  "Ax_adj_rate",
+  "Ax_adj_rate_rse",
+  "Ax_adj_rate_low",
+  "Ax_adj_rate_high",
+  "Ax_adj_rr",
+  "Ax_adj_rr_low",
+  "Ax_adj_rr_high",
+  "Ax_adj_rd",
+  "Ax_adj_rd_low",
+  "Ax_adj_rd_high",
+  "Ax_excluded",
+  "adj_flag",
   "A_logrr_retained",
   "B_logrr_retained"
  ],
  "module": "nhtsa_stats.analysis.severity",
- "git_commit": "9074d23-dirty",
- "generated_utc": "2026-10-22T17:07:23Z"
+ "git_commit": "2dd6a99-dirty",
+ "generated_utc": "2026-10-23T00:35:16Z"
 }

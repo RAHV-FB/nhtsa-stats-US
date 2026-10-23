@@ -8,9 +8,10 @@
  "inputs": [
   "data/processed/crss_crash.parquet"
  ],
- "rows": 15,
+ "rows": 18,
  "columns": [
   "pair",
+  "prespecified",
   "A",
   "B",
   "covariate_set",
@@ -104,6 +105,6 @@
   "product_p_bh"
  ],
  "module": "nhtsa_stats.analysis.interactions",
- "git_commit": "8211d77-dirty",
- "generated_utc": "2026-10-22T17:01:54Z"
+ "git_commit": "2dd6a99-dirty",
+ "generated_utc": "2026-10-23T00:42:02Z"
 }

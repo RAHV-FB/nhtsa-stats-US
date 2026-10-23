@@ -547,7 +547,49 @@ non-fatal crashes, the speeding fraction shrinks towards zero; the alcohol fract
 
 ## 12. Prediction models
 
-<!-- SECTION: ml -->
+*Sources: `ml/metrics_test`, `ml/paired_differences`, `ml/calibration_by_risk_tier`,
+`ml/temporal_stability`, `ml/pattern_confirmation`; full validation report and model cards in
+`docs/model_validation.md`. Labels: model-predicted; the metrics are design-weighted estimates
+on held-out years.*
+
+Prediction models were trained on 2016–2021, tuned and selected on 2022, and evaluated once on
+2023–2024, years used for no modelling choice. Inputs exclude anything recorded after the crash
+and the calendar year, enforced by the same leakage gate as the statistical models. There are
+two input stages: pre-crash circumstances only, and pre-crash circumstances plus crash
+configuration. The outcome is a fatal crash among police-reported crashes; prevalence in the
+test years was {{ml/metrics_test|outcome=fatal;stage=pre_crash+circumstance;model=hgb;domain=all;weighting=weighted;metric=prevalence|estimate|cipct:2@ci}}.
+
+* **Discrimination.** With crash configuration, gradient-boosted trees reach an AUROC of
+  {{ml/metrics_test|outcome=fatal;stage=pre_crash+circumstance;model=hgb;domain=all;weighting=weighted;metric=auroc|estimate|ci:3@ci}} against {{ml/metrics_test|outcome=fatal;stage=pre_crash+circumstance;model=logit_main;domain=all;weighting=weighted;metric=auroc|estimate|ci:3@ci}} for a
+  main-effects survey logistic model. From pre-crash circumstances alone the figures are
+  {{ml/metrics_test|outcome=fatal;stage=pre_crash;model=hgb;domain=all;weighting=weighted;metric=auroc|estimate|ci:3@ci}} and {{ml/metrics_test|outcome=fatal;stage=pre_crash;model=logit_main;domain=all;weighting=weighted;metric=auroc|estimate|ci:3@ci}}. Adding crash
+  configuration raises the boosted model's AUROC by
+  {{ml/paired_differences|outcome=fatal;stage=pre_crash+circumstance;model=hgb;comparison=circumstance stage vs pre_crash;metric=auroc|estimate|ci:3@ci}}.
+* **Usefulness for picking out fatal crashes is limited.** Average precision is
+  {{ml/metrics_test|outcome=fatal;stage=pre_crash+circumstance;model=hgb;domain=all;weighting=weighted;metric=average_precision|estimate|.3f}} against a base rate of
+  {{ml/metrics_test|outcome=fatal;stage=pre_crash+circumstance;model=hgb;domain=all;weighting=weighted;metric=prevalence|estimate|.3f}}: even among the crashes ranked riskiest, most are not fatal.
+* **Calibration.** Overall, observed ÷ predicted fatal crashes is
+  {{ml/metrics_test|outcome=fatal;stage=pre_crash+circumstance;model=hgb;domain=all;weighting=weighted;metric=oe_ratio|estimate|ci:2@ci}}, but this hides miscalibration by risk level: among the half
+  of crashes with the lowest predicted risk it is {{ml/calibration_by_risk_tier|outcome=fatal;stage=pre_crash+circumstance;model=hgb;weighting=weighted;risk_tier=lowest 50% of predicted risk|oe_ratio|ci:2@oe}}
+  (predictions about twice the observed share), and among the riskiest fifth
+  {{ml/calibration_by_risk_tier|outcome=fatal;stage=pre_crash+circumstance;model=hgb;weighting=weighted;risk_tier=highest 20%|oe_ratio|ci:2@oe}}. Logistic models show the same pattern.
+* **Drift.** A model trained on 2016–2019 under-predicts fatal crashes after 2020
+  (observed ÷ predicted {{ml/temporal_stability|outcome=fatal;stage=pre_crash+circumstance;model=hgb;eval_year=2020;metric=oe_ratio|estimate|ci:2@ci}} in 2020, {{ml/temporal_stability|outcome=fatal;stage=pre_crash+circumstance;model=hgb;eval_year=2022;metric=oe_ratio|estimate|ci:2@ci}} in 2022, {{ml/temporal_stability|outcome=fatal;stage=pre_crash+circumstance;model=hgb;eval_year=2024;metric=oe_ratio|estimate|ci:2@ci}} in 2024), in line
+  with finding 8.
+* **Interactions.** The 13 pre-specified interaction terms of finding 5 add almost nothing to
+  prediction (AUROC {{ml/paired_differences|outcome=fatal;stage=pre_crash+circumstance;model=logit_interact;comparison=vs logit_main;metric=auroc|estimate|+.3f}}). Screening the boosted
+  model on 2016–2022 suggested two further interactions that were then confirmed on 2023–2024
+  (survey-weighted, Holm-adjusted): intersection × head-on collision (ratio of odds ratios
+  {{ml/pattern_confirmation|candidate=junction=intersection x crash_type=mv_head_on (refs non_junction, mv_rear_end)|ratio_of_or|.2f}})
+  and speeding × angle collision
+  ({{ml/pattern_confirmation|candidate=speeding=yes x crash_type=mv_angle (refs no, mv_rear_end)|ratio_of_or|.2f}}). Both are
+  exploratory and non-causal.
+
+*Limitations.* Predictive accuracy is not evidence that any input causes fatal outcomes.
+Several "unknown" inputs mostly mark hit-and-run crashes, and imputed alcohol may carry
+information about severity (`docs/limitations.md` §2–3); excluding the hit-and-run proxies
+changes test discrimination only slightly (`docs/model_validation.md`). Intervals reflect
+test-set sampling only, not model selection or training-sample variability.
 
 ## 13. What is not supported by these data
 

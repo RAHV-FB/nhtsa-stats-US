@@ -10,13 +10,14 @@
   "data/interim/CRSS/vehicle",
   "data/processed/crss_crash.parquet"
  ],
- "rows": 35,
+ "rows": 36,
  "columns": [
   "victim",
   "outcome",
   "factor",
   "level",
   "adj_rate",
+  "adj_rate_rse",
   "adj_rate_low",
   "adj_rate_high",
   "adj_rr",
@@ -34,6 +35,6 @@
   "flag"
  ],
  "module": "nhtsa_stats.analysis.vulnerable",
- "git_commit": "8211d77-dirty",
- "generated_utc": "2026-10-22T16:59:18Z"
+ "git_commit": "2dd6a99-dirty",
+ "generated_utc": "2026-10-23T00:57:45Z"
 }

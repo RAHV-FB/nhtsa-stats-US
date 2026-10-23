@@ -13,7 +13,7 @@
   "outputs/tables/severity/*.csv",
   "outputs/tables/matched/belt_effect.csv"
  ],
- "rows": 61,
+ "rows": 62,
  "columns": [
   "name",
   "value",
@@ -29,8 +29,8 @@
   "note"
  ],
  "module": "nhtsa_stats.simulation.engine",
- "git_commit": "b1a011e-dirty",
- "generated_utc": "2026-10-23T00:28:17Z",
+ "git_commit": "2dd6a99-dirty",
+ "generated_utc": "2026-10-23T00:57:55Z",
  "baseline": {
   "window": [
    2022,
@@ -755,72 +755,86 @@
   "associations": {
    "severity.fatal_adj_rr.speeding": {
     "name": "severity.fatal_adj_rr.speeding",
-    "value": 1.83211,
+    "value": 1.82118,
     "kind": "adjusted_association",
     "source": "outputs/tables/severity/fatal_crude_vs_adjusted.csv (A_adj_rr; {'factor': 'speeding', 'level': 'yes'})",
     "unit": "adjusted risk ratio of a fatal outcome given a police-reported crash",
-    "low": 1.4949,
-    "high": 2.24538,
+    "low": 1.51169,
+    "high": 2.19402,
     "se": null,
-    "n": 48851,
+    "n": 49410,
     "reliability": "moderate",
-    "flag": "stale_upstream",
+    "flag": "",
     "note": "CRSS survey logistic model A (pre-crash adjustment set), standardised margins; conditional on a crash; not a causal effect; police-reported exposure ascertained more thoroughly in severe crashes"
    },
    "severity.fatal_adj_rr.alcohol": {
     "name": "severity.fatal_adj_rr.alcohol",
-    "value": 4.43676,
+    "value": 4.24382,
     "kind": "adjusted_association",
     "source": "outputs/tables/severity/fatal_crude_vs_adjusted.csv (A_adj_rr; {'factor': 'alcohol_im', 'level': 'yes'})",
     "unit": "adjusted risk ratio of a fatal outcome given a police-reported crash",
-    "low": 3.70632,
-    "high": 5.31114,
+    "low": 3.57604,
+    "high": 5.03631,
     "se": null,
-    "n": 29623,
+    "n": 29993,
     "reliability": "moderate",
-    "flag": "stale_upstream",
+    "flag": "",
     "note": "CRSS survey logistic model A (pre-crash adjustment set), standardised margins; conditional on a crash; not a causal effect; police-reported exposure ascertained more thoroughly in severe crashes"
    },
    "severity.fatal_adj_rr.speeding_exceeded_limit": {
     "name": "severity.fatal_adj_rr.speeding_exceeded_limit",
-    "value": 5.38338,
+    "value": 5.21631,
     "kind": "adjusted_association",
     "source": "outputs/tables/severity/fatal_speeding_type.csv (adj_rr; {'level': 'exceeded_limit_or_racing'})",
     "unit": "adjusted risk ratio of a fatal outcome given a police-reported crash",
-    "low": 4.49839,
-    "high": 6.44247,
+    "low": 4.33693,
+    "high": 6.27398,
     "se": null,
-    "n": 5830,
+    "n": 5884,
     "reliability": "moderate",
-    "flag": "stale_upstream",
+    "flag": "",
     "note": "CRSS survey logistic model A (pre-crash adjustment set), standardised margins; conditional on a crash; not a causal effect; police-reported exposure ascertained more thoroughly in severe crashes"
    },
    "severity.ka_adj_rr.speeding": {
     "name": "severity.ka_adj_rr.speeding",
-    "value": 1.61896,
+    "value": 1.56173,
     "kind": "adjusted_association",
     "source": "outputs/tables/severity/ka_crude_vs_adjusted.csv (A_adj_rr; {'factor': 'speeding', 'level': 'yes'})",
     "unit": "adjusted risk ratio of a ka outcome given a police-reported crash",
-    "low": 1.3893,
-    "high": 1.88659,
+    "low": 1.36184,
+    "high": 1.79096,
     "se": null,
-    "n": 48851,
+    "n": 49410,
     "reliability": "moderate",
-    "flag": "stale_upstream",
+    "flag": "",
     "note": "CRSS survey logistic model A (pre-crash adjustment set), standardised margins; conditional on a crash; not a causal effect; police-reported exposure ascertained more thoroughly in severe crashes"
    },
    "severity.ka_adj_rr.alcohol": {
     "name": "severity.ka_adj_rr.alcohol",
-    "value": 2.76657,
+    "value": 2.7405,
     "kind": "adjusted_association",
     "source": "outputs/tables/severity/ka_crude_vs_adjusted.csv (A_adj_rr; {'factor': 'alcohol_im', 'level': 'yes'})",
     "unit": "adjusted risk ratio of a ka outcome given a police-reported crash",
-    "low": 2.5125,
-    "high": 3.04632,
+    "low": 2.50231,
+    "high": 3.00136,
     "se": null,
-    "n": 29623,
+    "n": 29993,
     "reliability": "moderate",
-    "flag": "stale_upstream",
+    "flag": "",
+    "note": "CRSS survey logistic model A (pre-crash adjustment set), standardised margins; conditional on a crash; not a causal effect; police-reported exposure ascertained more thoroughly in severe crashes"
+   },
+   "severity.ka_adj_rr.speeding_exceeded_limit": {
+    "name": "severity.ka_adj_rr.speeding_exceeded_limit",
+    "value": 3.38992,
+    "kind": "adjusted_association",
+    "source": "outputs/tables/severity/ka_speeding_type.csv (adj_rr; {'level': 'exceeded_limit_or_racing'})",
+    "unit": "adjusted risk ratio of a ka outcome given a police-reported crash",
+    "low": 3.03163,
+    "high": 3.79056,
+    "se": null,
+    "n": 5884,
+    "reliability": "moderate",
+    "flag": "",
     "note": "CRSS survey logistic model A (pre-crash adjustment set), standardised margins; conditional on a crash; not a causal effect; police-reported exposure ascertained more thoroughly in severe crashes"
    },
    "belt.fatality_reduction": {
@@ -1268,10 +1282,6 @@
    }
   },
   "notes": [
-   "STALE: outputs/tables/severity/fatal_crude_vs_adjusted.csv is older than data/processed/crss_crash.parquet -- re-run the severity module, then this one",
-   "STALE: outputs/tables/severity/fatal_speeding_type.csv is older than data/processed/crss_crash.parquet -- re-run the severity module, then this one",
-   "STALE: outputs/tables/severity/ka_crude_vs_adjusted.csv is older than data/processed/crss_crash.parquet -- re-run the severity module, then this one",
-   "severity/ka_speeding_type.csv absent: ka association for speeding_exceeded_limit unavailable",
    "drugs: no adjusted severity association (exposure measurement depends on severity; not estimated by the severity module)"
   ]
  }

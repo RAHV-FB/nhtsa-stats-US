@@ -12,8 +12,8 @@ Timing classes: `pre_crash` and `crash_circumstance` may enter severity models; 
 | any_pedestrian | crash_circumstance | crash |  |
 | collision | crash_circumstance | crash |  |
 | crash_type | crash_circumstance | crash |  |
-| hit_and_run | crash_circumstance | crash | driver behaviour after the crash; excluded from models |
 | n_vehicles | crash_circumstance | crash |  |
+| other_vehicle_body | crash_circumstance | person | body group of the other vehicle in a two-vehicle crash (implies the crash configuration) |
 | other_vehicle_heavy | crash_circumstance | vehicle |  |
 | PSUSTRAT | design | crash |  |
 | PSU_VAR | design | crash |  |
@@ -21,18 +21,23 @@ Timing classes: `pre_crash` and `crash_circumstance` may enter severity models; 
 | YEAR | design | crash | survey/calendar year |
 | case_id | id | crash |  |
 | fatal | outcome | crash |  |
-| fatal_im | outcome | crash |  |
+| fatal_cc | outcome | crash | complete-case sensitivity |
 | injury | outcome | crash |  |
 | ka | outcome | crash |  |
-| ka_im | outcome | crash |  |
+| ka_cc | outcome | crash | complete-case sensitivity |
 | kabco | outcome | crash |  |
 | killed | outcome | person |  |
+| killed_cc | outcome | person | complete-case sensitivity |
 | killed_or_serious | outcome | person |  |
+| killed_or_serious_cc | outcome | person | complete-case sensitivity |
 | n_injured | outcome | crash |  |
 | n_killed | outcome | crash |  |
+| n_sev_injured_unknown | outcome | crash | persons with INJ_SEV 5 |
+| n_sev_unknown | outcome | crash | persons with INJ_SEV 9 (unknown) |
 | airbag_deployed | post_crash | person |  |
 | ejected | post_crash | person | consequence of crash forces and restraint |
 | fire_any | post_crash | crash |  |
+| hit_and_run | post_crash | crash | driver behaviour after the crash (leaving the scene) |
 | rollover_any | post_crash | crash | crash outcome mechanism |
 | towed_any | post_crash | crash | towing is decided after the crash |
 | age | pre_crash | person |  |
@@ -49,6 +54,7 @@ Timing classes: `pre_crash` and `crash_circumstance` may enter severity models; 
 | interstate | pre_crash | crash |  |
 | junction | pre_crash | crash |  |
 | light | pre_crash | crash |  |
+| location | pre_crash | person | non-motorist's location at the crash |
 | night | pre_crash | crash |  |
 | older_driver | pre_crash | crash |  |
 | oldest_vehicle_age | pre_crash | crash |  |
@@ -60,6 +66,10 @@ Timing classes: `pre_crash` and `crash_circumstance` may enter severity models; 
 | sex | pre_crash | person |  |
 | speed_limit | pre_crash | crash |  |
 | speeding | pre_crash | crash | police judgement recorded after the crash |
+| speeding_type | pre_crash | crash | exceeded limit/racing vs too fast for conditions vs unspecified |
+| str_speed_limit | pre_crash | person | posted limit of the striking vehicle's road |
+| str_speeding | pre_crash | person | striking vehicle speeding-related (police) |
+| striking | pre_crash | person | body type of the striking vehicle |
 | surface | pre_crash | crash |  |
 | tod | pre_crash | crash |  |
 | urbanicity | pre_crash | crash | CRSS area-level (PSU) urban/rural |
@@ -172,8 +182,7 @@ models sold early); null outside [-1, 60].
 
 SPEEDREL: 0 no; 2 racing, 3 exceeded limit, 4 too fast for conditions, 5 specifics
 unknown (all = yes); 8 no driver present / unknown if driver present; 9 unknown.
-Code 8 is treated as 'no' (no driver to speed is the dominant case) -- see harmonisation
-doc; sensitivity analyses treat it as unknown.
+Code 8 is unknown: it cannot distinguish a driverless vehicle from an unknown driver.
 
 ### `speeding_type(col: 'str' = 'SPEEDREL') -> 'pl.Expr'`
 
@@ -224,16 +233,20 @@ Restraint use restricted to occupants of belt-equipped vehicles in belted seatin
 From 2017 code 20 means "none used *or* not applicable", and from 2019 every motorcyclist has
 REST_USE = 20 (helmets moved to HELM_USE).  Belt information is therefore only meaningful for
 occupants of vehicles with BODY_TYP 1-79 (light vehicles, buses, trucks) seated in rows 1-4
-(SEAT_POS 11-49); everyone else (motorcycles 80-89, other 90-97, cargo/exterior/trailing
-positions 50-56, unknown body/seat) is ``not_applicable``.  See docs/audit/person_injury_restraint.md §4.6.
+(SEAT_POS 11-49) or in an unrecorded seat (98/99: the occupant is inside the vehicle, so
+the recorded belt use still applies); everyone else (motorcycles 80-89, other 90-97,
+cargo/exterior/trailing positions 50-56, unknown body) is ``not_applicable``.  See
+docs/audit/person_injury_restraint.md §4.6.
 
-### `helmet_use(rest_col: 'str' = 'REST_USE', helm_col: 'str' = 'HELM_USE', year: 'str' = 'YEAR') -> 'pl.Expr'`
+### `helmet_use(rest_col: 'str' = 'REST_USE', helm_col: 'str' = 'HELM_USE', year: 'str' = 'YEAR', body_col: 'str' = 'BODY_TYP') -> 'pl.Expr'`
 
 Motorcycle helmet use harmonised across the 2019 move from REST_USE to HELM_USE.
 
 2016-2018 (REST_USE) and 2019+ (HELM_USE): 5 DOT-compliant helmet, 16 other helmet,
 19 helmet unknown if DOT-compliant -> helmet; 17 no helmet -> none; 29 / 98 / 99 ->
 unknown; everything else (20 not applicable, 96 non-occupant, belt codes) -> not_applicable.
+Defined for motorcycle riders (BODY_TYP 80-89) only; before 2019 REST_USE 98/99 would
+otherwise make every other occupant's helmet 'unknown'.
 
 ### `ejected(col: 'str' = 'EJECTION') -> 'pl.Expr'`
 
@@ -257,8 +270,10 @@ no driver present; 9 unknown.  ALCHL_IM / V_ALCH_IM use 1/2 only (imputed).
 | suv | 14, 15, 16, 19 |
 | van | 20, 21, 22, 28, 29 |
 | pickup | 30, 31, 32, 33, 34, 39 |
-| light_truck_other | 40, 41, 42, 45, 48, 49 |
+| light_truck_other | 40, 41, 42, 45, 48 |
+| light_unknown_type | 49 |
 | bus | 50, 51, 52, 55, 58, 59 |
 | medium_heavy_truck | 60, 61, 62, 63, 64, 66, 67, 71, 72, 78 |
 | motorcycle | 80, 81, 82, 83, 84, 85, 86, 87, 88, 89 |
-| other | 65, 73, 79, 90, 91, 92, 93, 94, 95, 96, 97 |
+| truck_unknown_type | 73, 79 |
+| other | 65, 90, 91, 92, 93, 94, 95, 96, 97 |

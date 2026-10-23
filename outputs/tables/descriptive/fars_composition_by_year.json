@@ -30,6 +30,6 @@
   "pct_lpv_deaths_restraint_unknown"
  ],
  "module": "nhtsa_stats.analysis.descriptive",
- "git_commit": "c7fbd45-dirty",
- "generated_utc": "2026-10-22T16:46:00Z"
+ "git_commit": "683ab9e-dirty",
+ "generated_utc": "2026-10-23T00:31:19Z"
 }

@@ -29,6 +29,6 @@
   "stratum"
  ],
  "module": "nhtsa_stats.analysis.exposure",
- "git_commit": "ad92e63-dirty",
- "generated_utc": "2026-10-22T18:31:57Z"
+ "git_commit": "2dd6a99-dirty",
+ "generated_utc": "2026-10-23T00:47:41Z"
 }

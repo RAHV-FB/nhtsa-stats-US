@@ -1,0 +1,32 @@
+{
+ "table": "severity/fatal_excluding_hit_and_run.csv",
+ "description": "Model-A adjusted risk ratios for the fatal outcome, crashes involving a hit-and-run vehicle excluded (removes 'unknown' levels that mainly mark a driver who fled)",
+ "population": "CRSS police-reported crashes 2016-2024 without a hit-and-run vehicle",
+ "unit": "crash",
+ "outcome": "fatal",
+ "method": "Model A refitted on the restricted population (domain of the full design); standardised margins; linearised CIs",
+ "inputs": [
+  "data/processed/crss_crash.parquet"
+ ],
+ "rows": 68,
+ "columns": [
+  "outcome",
+  "factor",
+  "level",
+  "adj_rate",
+  "adj_rate_rse",
+  "adj_rate_low",
+  "adj_rate_high",
+  "adj_rr",
+  "adj_rr_low",
+  "adj_rr_high",
+  "adj_rd",
+  "adj_rd_low",
+  "adj_rd_high",
+  "n_crashes",
+  "share_excluded_weighted"
+ ],
+ "module": "nhtsa_stats.analysis.severity",
+ "git_commit": "2dd6a99-dirty",
+ "generated_utc": "2026-10-23T00:38:17Z"
+}

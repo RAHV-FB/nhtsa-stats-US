@@ -1,31 +1,37 @@
 kabco,field,label,n,pct_unknown,pct_unknown_se,pct_yes,pct_yes_among_known
-0,speeding,Speeding-related (any vehicle),221666,3.5154,0.539435,9.01818,9.34676
+0,speeding,Speeding-related (any vehicle),221666,3.7791,0.541683,9.01818,9.37237
 0,alcohol,Alcohol involved (police-reported ALCOHOL),221666,28.1506,3.38267,3.13225,4.35947
 0,drugs,"Drug involvement (any driver, police-reported)",221666,39.4645,3.74641,0.717966,1.18602
-0,distracted,Distracted driver (any driver),221666,43.9011,3.25001,13.2294,23.5823
-0,young_driver,Driver 15-20 involved (age known),221666,9.98355,0.687311,18.5659,20.625
-0,speed_limit,Posted speed limit,221666,14.5947,2.84391,,
-1,speeding,Speeding-related (any vehicle),101881,2.80651,0.558629,12.1206,12.4705
+0,distracted,Distracted driver (any driver),221666,44.0308,3.24468,13.2294,23.6369
+0,young_driver,Driver 15-20 involved (CRSS: NHTSA-imputed age),221666,0.0131748,0.00250013,20.1787,20.1813
+0,speed_limit,Posted speed limit,221666,12.9185,2.70898,,
+1,speeding,Speeding-related (any vehicle),101881,2.94355,0.559372,12.1206,12.4882
 1,alcohol,Alcohol involved (police-reported ALCOHOL),101881,26.0616,3.19192,3.77616,5.10717
 1,drugs,"Drug involvement (any driver, police-reported)",101881,40.4256,3.35908,1.18801,1.99417
-1,distracted,Distracted driver (any driver),101881,44.739,2.5648,15.9879,28.9316
-1,young_driver,Driver 15-20 involved (age known),101881,7.19011,0.553683,19.1132,20.5939
-1,speed_limit,Posted speed limit,101881,16.1377,3.46228,,
-2,speeding,Speeding-related (any vehicle),76217,2.96561,0.401918,13.3305,13.7379
+1,distracted,Distracted driver (any driver),101881,44.8161,2.56543,15.9879,28.972
+1,young_driver,Driver 15-20 involved (CRSS: NHTSA-imputed age),101881,0.0236211,0.00406559,20.2583,20.2631
+1,speed_limit,Posted speed limit,101881,15.0471,3.34872,,
+2,speeding,Speeding-related (any vehicle),76217,3.19904,0.405263,13.3305,13.771
 2,alcohol,Alcohol involved (police-reported ALCOHOL),76217,25.0507,3.10459,7.39844,9.87126
 2,drugs,"Drug involvement (any driver, police-reported)",76217,38.7828,3.50397,2.00834,3.28068
-2,distracted,Distracted driver (any driver),76217,41.3234,3.15975,13.7267,23.3938
-2,young_driver,Driver 15-20 involved (age known),76217,5.40018,0.492121,19.2094,20.306
-2,speed_limit,Posted speed limit,76217,9.54965,1.60741,,
-3,speeding,Speeding-related (any vehicle),49333,3.36792,0.520446,16.9167,17.5063
+2,distracted,Distracted driver (any driver),76217,41.4645,3.15289,13.7267,23.4502
+2,young_driver,Driver 15-20 involved (CRSS: NHTSA-imputed age),76217,0.0590205,0.0097583,20.0081,20.0199
+2,speed_limit,Posted speed limit,76217,8.59567,1.55857,,
+3,speeding,Speeding-related (any vehicle),49333,3.77326,0.528292,16.9167,17.5801
 3,alcohol,Alcohol involved (police-reported ALCOHOL),49333,28.7218,2.94726,13.2343,18.5671
 3,drugs,"Drug involvement (any driver, police-reported)",49333,42.1246,3.34535,3.91731,6.76852
-3,distracted,Distracted driver (any driver),49333,47.7281,2.82988,10.912,20.8754
-3,young_driver,Driver 15-20 involved (age known),49333,5.14985,0.450553,15.2136,16.0396
-3,speed_limit,Posted speed limit,49333,13.4931,2.74883,,
-4,speeding,Speeding-related (any vehicle),9810,4.86591,0.721385,21.0358,22.1117
+3,distracted,Distracted driver (any driver),49333,48.0001,2.82507,10.912,20.9846
+3,young_driver,Driver 15-20 involved (CRSS: NHTSA-imputed age),49333,0.132211,0.0249833,15.9858,16.007
+3,speed_limit,Posted speed limit,49333,12.6066,2.68151,,
+4,speeding,Speeding-related (any vehicle),9810,5.46526,0.720444,21.0358,22.2519
 4,alcohol,Alcohol involved (police-reported ALCOHOL),9810,47.3858,2.80449,17.6914,33.6248
 4,drugs,"Drug involvement (any driver, police-reported)",9810,53.0207,3.21222,8.09153,17.2236
-4,distracted,Distracted driver (any driver),9810,62.2248,1.85707,7.23576,19.1548
-4,young_driver,Driver 15-20 involved (age known),9810,4.38054,0.483732,12.8729,13.4626
-4,speed_limit,Posted speed limit,9810,6.72432,1.54656,,
+4,distracted,Distracted driver (any driver),9810,62.4571,1.84243,7.23576,19.2733
+4,young_driver,Driver 15-20 involved (CRSS: NHTSA-imputed age),9810,0.151198,0.0678024,13.715,13.7357
+4,speed_limit,Posted speed limit,9810,6.40396,1.53232,,
+9,speeding,Speeding-related (any vehicle),8166,20.3627,3.00651,7.24199,9.09371
+9,alcohol,Alcohol involved (police-reported ALCOHOL),8166,87.7186,2.25049,1.8747,15.2645
+9,drugs,"Drug involvement (any driver, police-reported)",8166,89.9097,2.23206,0.223993,2.21988
+9,distracted,Distracted driver (any driver),8166,77.2567,5.27476,6.04406,26.5751
+9,young_driver,Driver 15-20 involved (CRSS: NHTSA-imputed age),8166,0.0945556,0.046729,15.3912,15.4058
+9,speed_limit,Posted speed limit,8166,33.5681,5.70774,,

@@ -2,7 +2,7 @@
 
 _Generated from `data/processed/*.parquet` by `nhtsa_stats.reporting.docs_gen`. Upper-case columns are raw NHTSA fields carried through unchanged (meanings: `outputs/audit/codebook.csv`); lower-case columns are harmonised (definitions: `docs/generated/harmonised_variables.md`). Do not edit by hand._
 
-## `crss_crash` — 468,993 rows × 84 columns
+## `crss_crash` — 468,993 rows × 87 columns
 
 | column | type | % null | values | timing |
 |---|---|---|---|---|
@@ -43,14 +43,15 @@ _Generated from `data/processed/*.parquet` by `nhtsa_stats.reporting.docs_gen`. 
 | `HOUR_IM` | Int64 | 0.0 | 0 – 23 | raw |
 | `WKDY_IM` | Int64 | 0.0 | 1 – 7 | raw |
 | `YEAR` | Int64 | 0.0 | 2016 – 2024 | design |
-| `speeding` | Int8 | 3.5 | 0 – 1 | pre_crash |
-| `hit_and_run` | Int8 | 0.0 | 0 – 1 | crash_circumstance |
-| `distracted` | Int8 | 45.8 | 0 – 1 | pre_crash |
+| `speeding` | Int8 | 3.9 | 0 – 1 | pre_crash |
+| `speeding_type` | String | 0.0 | exceeded_limit_or_racing, no, speeding_unspecified, too_fast_for_conditions, unknown | pre_crash |
+| `hit_and_run` | Int8 | 0.0 | 0 – 1 | post_crash |
+| `distracted` | Int8 | 46.0 | 0 – 1 | pre_crash |
 | `rollover_any` | Int8 | 0.0 | 0 – 1 | post_crash |
 | `fire_any` | Int8 | 0.0 | 0 – 1 | post_crash |
-| `any_motorcycle` | Int8 | 0.0 | 0 – 1 | pre_crash |
-| `any_heavy_truck` | Int8 | 0.0 | 0 – 1 | pre_crash |
-| `any_light_truck` | Int8 | 0.0 | 0 – 1 |  |
+| `any_motorcycle` | Int8 | 2.9 | 0 – 1 | pre_crash |
+| `any_heavy_truck` | Int8 | 3.7 | 0 – 1 | pre_crash |
+| `any_light_truck` | Int8 | 6.5 | 0 – 1 |  |
 | `speed_limit_mph` | Int64 | 15.5 | 5 – 90 |  |
 | `speed_limit_zero` | Boolean | 0.0 | 2 distinct |  |
 | `surface` | String | 0.0 | dry, other, snow_ice, unknown, wet | pre_crash |
@@ -61,9 +62,11 @@ _Generated from `data/processed/*.parquet` by `nhtsa_stats.reporting.docs_gen`. 
 | `any_nonmotorist` | Int8 | 0.0 | 0 – 1 |  |
 | `n_killed` | UInt32 | 0.0 | 0 – 6 | outcome |
 | `n_ka` | UInt32 | 0.0 | 0 – 9 |  |
+| `n_sev_unknown` | UInt32 | 0.0 | 0 – 12 | outcome |
+| `n_sev_injured_unknown` | UInt32 | 0.0 | 0 – 7 | outcome |
 | `n_occupants` | UInt32 | 0.0 | 0 – 75 |  |
-| `young_driver` | Int8 | 9.6 | 0 – 1 | pre_crash |
-| `older_driver` | Int8 | 9.7 | 0 – 1 | pre_crash |
+| `young_driver` | Int8 | 0.1 | 0 – 1 | pre_crash |
+| `older_driver` | Int8 | 0.1 | 0 – 1 | pre_crash |
 | `drugs` | Int8 | 42.5 | 0 – 1 | pre_crash |
 | `driver_pr_alcohol` | Int8 | 29.7 | 0 – 1 |  |
 | `n_drivers` | UInt32 | 0.1 | 1 – 15 |  |
@@ -79,19 +82,19 @@ _Generated from `data/processed/*.parquet` by `nhtsa_stats.reporting.docs_gen`. 
 | `n_vehicles` | String | 0.0 | 1, 2, 3+ | crash_circumstance |
 | `speed_limit` | String | 0.0 | 30-35, 40-45, 50-55, 60-65, 70+, <=25, none_nontrafficway, unknown | pre_crash |
 | `crash_type` | String | 0.0 | cyclist, mv_angle, mv_head_on, mv_other, mv_rear_end, mv_sideswipe, pedestrian, sv_off_roadway, sv_on_roadway, sv_rollov | crash_circumstance |
-| `fatal` | Int8 | 2.2 | 0 – 1 | outcome |
-| `ka` | Int8 | 2.2 | 0 – 1 | outcome |
-| `injury` | Int8 | 1.8 | 0 – 1 | outcome |
-| `kabco` | Int8 | 2.2 | 0 – 4 | outcome |
-| `fatal_im` | Int8 | 0.4 | 0 – 1 | outcome |
-| `ka_im` | Int8 | 0.4 | 0 – 1 | outcome |
+| `fatal` | Int8 | 0.4 | 0 – 1 | outcome |
+| `ka` | Int8 | 0.4 | 0 – 1 | outcome |
+| `injury` | Int8 | 0.0 | 0 – 1 | outcome |
+| `kabco` | Int8 | 0.4 | 0 – 4 | outcome |
+| `fatal_cc` | Int8 | 8.0 | 0 – 1 | outcome |
+| `ka_cc` | Int8 | 7.6 | 0 – 1 | outcome |
 | `alcohol` | Int8 | 30.4 | 0 – 1 | pre_crash |
 | `alcohol_im` | Int8 | 0.0 | 0 – 1 | pre_crash |
 | `region` | String | 0.0 | midwest, northeast, south, west | pre_crash |
 | `urbanicity` | String | 0.0 | rural, urban | pre_crash |
 | `interstate` | Int8 | 0.0 | 0 – 1 | pre_crash |
 
-## `crss_person` — 1,154,804 rows × 82 columns
+## `crss_person` — 1,154,804 rows × 83 columns
 
 | column | type | % null | values | timing |
 |---|---|---|---|---|
@@ -123,10 +126,10 @@ _Generated from `data/processed/*.parquet` by `nhtsa_stats.reporting.docs_gen`. 
 | `ptype` | String | 0.0 | cyclist, driver, other_nonmotorist, passenger, pedestrian |  |
 | `age` | Int64 | 6.3 | 0 – 120 | pre_crash |
 | `sex` | String | 0.0 | female, male, unknown | pre_crash |
-| `killed` | Int8 | 3.7 | 0 – 1 | outcome |
-| `killed_or_serious` | Int8 | 3.7 | 0 – 1 | outcome |
-| `injured` | Int8 | 3.5 | 0 – 1 |  |
-| `kabco` | Int8 | 3.7 | 0 – 4 | outcome |
+| `killed` | Int8 | 0.2 | 0 – 1 | outcome |
+| `killed_or_serious` | Int8 | 0.2 | 0 – 1 | outcome |
+| `injured` | Int8 | 0.0 | 0 – 1 |  |
+| `kabco` | Int8 | 0.2 | 0 – 4 | outcome |
 | `seat` | String | 0.0 | cargo_exterior_other, front_left, front_other, second_row, third_row_plus, unknown | pre_crash |
 | `restraint` | String | 0.0 | belted, child_restraint, none, not_applicable, unknown | pre_crash |
 | `helmet` | String | 0.0 | helmet, none, not_applicable, unknown | pre_crash |
@@ -137,9 +140,10 @@ _Generated from `data/processed/*.parquet` by `nhtsa_stats.reporting.docs_gen`. 
 | `bac_measured` | Float64 | 99.1 | 0.0 – 0.92 |  |
 | `airbag_deployed` | Int8 | 12.2 | 0 – 1 | post_crash |
 | `age_band` | String | 0.0 | 0-14, 15-20, 21-24, 25-34, 35-44, 45-54, 55-64, 65-74, 75+, unknown | pre_crash |
-| `killed_im` | Int8 | 0.2 | 0 – 1 |  |
-| `killed_or_serious_im` | Int8 | 0.2 | 0 – 1 |  |
-| `body` | String | 3.8 | bus, car, light_truck_other, medium_heavy_truck, motorcycle, other, pickup, suv, unknown, van | pre_crash |
+| `age_im` | Int64 | 0.0 | 0 – 120 |  |
+| `killed_cc` | Int8 | 3.7 | 0 – 1 | outcome |
+| `killed_or_serious_cc` | Int8 | 3.7 | 0 – 1 | outcome |
+| `body` | String | 3.8 | bus, car, light_truck_other, light_unknown_type, medium_heavy_truck, motorcycle, other, pickup, suv, truck_unknown_type, | pre_crash |
 | `veh_age` | Int64 | 7.0 | 0 – 60 |  |
 | `veh_age_band` | String | 3.8 | 0-3, 13-17, 18+, 4-7, 8-12, unknown | pre_crash |
 | `veh_speeding` | Int8 | 5.8 | 0 – 1 | pre_crash |
@@ -168,17 +172,17 @@ _Generated from `data/processed/*.parquet` by `nhtsa_stats.reporting.docs_gen`. 
 | `n_vehicles` | String | 0.0 | 1, 2, 3+ | crash_circumstance |
 | `crash_type` | String | 0.0 | cyclist, mv_angle, mv_head_on, mv_other, mv_rear_end, mv_sideswipe, pedestrian, sv_off_roadway, sv_on_roadway, sv_rollov | crash_circumstance |
 | `collision` | String | 0.0 | angle, head_on, not_mv_collision, other_mv, rear_end, sideswipe, unknown | crash_circumstance |
-| `speeding` | Int8 | 3.3 | 0 – 1 | pre_crash |
+| `speeding` | Int8 | 3.5 | 0 – 1 | pre_crash |
 | `alcohol` | Int8 | 29.1 | 0 – 1 | pre_crash |
 | `alcohol_im` | Int8 | 0.0 | 0 – 1 | pre_crash |
-| `any_heavy_truck` | Int8 | 0.0 | 0 – 1 | pre_crash |
-| `any_motorcycle` | Int8 | 0.0 | 0 – 1 | pre_crash |
-| `crash_fatal` | Int8 | 1.3 | 0 – 1 |  |
-| `crash_ka` | Int8 | 1.3 | 0 – 1 |  |
-| `other_vehicle_body` | String | 0.0 | bus, car, light_truck_other, medium_heavy_truck, motorcycle, none_or_multi, other, pickup, suv, unknown, van |  |
-| `role` | String | 0.0 | cyclist, driver, front_passenger, other_nonmotorist, other_passenger, pedestrian, rear_passenger | pre_crash |
+| `any_heavy_truck` | Int8 | 3.4 | 0 – 1 | pre_crash |
+| `any_motorcycle` | Int8 | 2.6 | 0 – 1 | pre_crash |
+| `crash_fatal` | Int8 | 0.4 | 0 – 1 |  |
+| `crash_ka` | Int8 | 0.4 | 0 – 1 |  |
+| `other_vehicle_body` | String | 0.0 | bus, car, light_truck_other, light_unknown_type, medium_heavy_truck, motorcycle, none_or_multi, other, pickup, suv, truc | crash_circumstance |
+| `role` | String | 0.0 | cargo_exterior_passenger, cyclist, driver, front_passenger, other_nonmotorist, passenger_seat_unknown, pedestrian, rear_ | pre_crash |
 
-## `fars_crash` — 325,922 rows × 66 columns
+## `fars_crash` — 325,922 rows × 69 columns
 
 | column | type | % null | values | timing |
 |---|---|---|---|---|
@@ -206,14 +210,15 @@ _Generated from `data/processed/*.parquet` by `nhtsa_stats.reporting.docs_gen`. 
 | `LGT_COND` | Int64 | 0.0 | 1 – 9 | raw |
 | `WEATHER` | Int64 | 0.0 | 1 – 99 | raw |
 | `YEAR` | Int64 | 0.0 | 2016 – 2024 | design |
-| `speeding` | Int8 | 6.6 | 0 – 1 | pre_crash |
-| `hit_and_run` | Int8 | 0.1 | 0 – 1 | crash_circumstance |
-| `distracted` | Int8 | 64.7 | 0 – 1 | pre_crash |
+| `speeding` | Int8 | 7.2 | 0 – 1 | pre_crash |
+| `speeding_type` | String | 0.0 | exceeded_limit_or_racing, no, speeding_unspecified, too_fast_for_conditions, unknown | pre_crash |
+| `hit_and_run` | Int8 | 0.1 | 0 – 1 | post_crash |
+| `distracted` | Int8 | 65.0 | 0 – 1 | pre_crash |
 | `rollover_any` | Int8 | 0.0 | 0 – 1 | post_crash |
 | `fire_any` | Int8 | 0.0 | 0 – 1 | post_crash |
-| `any_motorcycle` | Int8 | 0.0 | 0 – 1 | pre_crash |
-| `any_heavy_truck` | Int8 | 0.0 | 0 – 1 | pre_crash |
-| `any_light_truck` | Int8 | 0.0 | 0 – 1 |  |
+| `any_motorcycle` | Int8 | 2.8 | 0 – 1 | pre_crash |
+| `any_heavy_truck` | Int8 | 2.9 | 0 – 1 | pre_crash |
+| `any_light_truck` | Int8 | 2.8 | 0 – 1 |  |
 | `speed_limit_mph` | Int64 | 3.3 | 5 – 85 |  |
 | `speed_limit_zero` | Boolean | 0.0 | 2 distinct |  |
 | `surface` | String | 0.0 | dry, other, snow_ice, unknown, wet | pre_crash |
@@ -225,6 +230,8 @@ _Generated from `data/processed/*.parquet` by `nhtsa_stats.reporting.docs_gen`. 
 | `any_nonmotorist` | Int8 | 0.0 | 0 – 1 |  |
 | `n_killed` | UInt32 | 0.0 | 1 – 20 | outcome |
 | `n_ka` | UInt32 | 0.0 | 1 – 56 |  |
+| `n_sev_unknown` | UInt32 | 0.0 | 0 – 20 | outcome |
+| `n_sev_injured_unknown` | UInt32 | 0.0 | 0 – 60 | outcome |
 | `n_occupants` | UInt32 | 0.0 | 0 – 133 |  |
 | `young_driver` | Int8 | 4.0 | 0 – 1 | pre_crash |
 | `older_driver` | Int8 | 3.9 | 0 – 1 | pre_crash |
@@ -291,12 +298,12 @@ _Generated from `data/processed/*.parquet` by `nhtsa_stats.reporting.docs_gen`. 
 | `bac_measured` | Float64 | 65.8 | 0.0 – 0.93 |  |
 | `airbag_deployed` | Int8 | 15.1 | 0 – 1 | post_crash |
 | `age_band` | String | 0.0 | 0-14, 15-20, 21-24, 25-34, 35-44, 45-54, 55-64, 65-74, 75+, unknown | pre_crash |
-| `body` | String | 10.0 | bus, car, light_truck_other, medium_heavy_truck, motorcycle, other, pickup, suv, unknown, van | pre_crash |
+| `body` | String | 10.0 | bus, car, light_truck_other, light_unknown_type, medium_heavy_truck, motorcycle, other, pickup, suv, truck_unknown_type, | pre_crash |
 | `veh_age` | Int64 | 11.9 | 0 – 60 |  |
 | `veh_age_band` | String | 10.0 | 0-3, 13-17, 18+, 4-7, 8-12, unknown | pre_crash |
-| `veh_speeding` | Int8 | 14.0 | 0 – 1 | pre_crash |
+| `veh_speeding` | Int8 | 14.1 | 0 – 1 | pre_crash |
 | `veh_alcohol` | Int8 | 10.0 | 0 – 1 | pre_crash |
-| `distracted` | Int8 | 61.9 | 0 – 1 | pre_crash |
+| `distracted` | Int8 | 62.0 | 0 – 1 | pre_crash |
 | `veh_speed_limit_mph` | Int64 | 14.0 | 5 – 85 |  |
 | `veh_rollover` | Int8 | 10.0 | 0 – 1 |  |
 | `DEATHS` | Int64 | 10.0 | 0 – 18 | raw |
@@ -319,7 +326,7 @@ _Generated from `data/processed/*.parquet` by `nhtsa_stats.reporting.docs_gen`. 
 | `weekend` | Int8 | 0.0 | 0 – 1 | pre_crash |
 | `n_vehicles` | String | 0.0 | 1, 2, 3+ | crash_circumstance |
 | `crash_type` | String | 0.0 | cyclist, mv_angle, mv_head_on, mv_other, mv_rear_end, mv_sideswipe, pedestrian, sv_off_roadway, sv_on_roadway, sv_rollov | crash_circumstance |
-| `speeding` | Int8 | 5.9 | 0 – 1 | pre_crash |
+| `speeding` | Int8 | 6.6 | 0 – 1 | pre_crash |
 | `FATALS` | Int64 | 0.0 | 1 – 20 | raw |
-| `other_vehicle_body` | String | 0.0 | bus, car, light_truck_other, medium_heavy_truck, motorcycle, none_or_multi, other, pickup, suv, unknown, van |  |
-| `role` | String | 0.0 | cyclist, driver, front_passenger, other_nonmotorist, other_passenger, parked_vehicle_occupant, pedestrian, rear_passenge | pre_crash |
+| `other_vehicle_body` | String | 0.0 | bus, car, light_truck_other, light_unknown_type, medium_heavy_truck, motorcycle, none_or_multi, other, pickup, suv, truc | crash_circumstance |
+| `role` | String | 0.0 | cargo_exterior_passenger, cyclist, driver, front_passenger, other_nonmotorist, parked_vehicle_occupant, passenger_seat_u | pre_crash |

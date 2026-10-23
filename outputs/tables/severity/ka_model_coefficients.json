@@ -4,11 +4,11 @@
  "population": "CRSS police-reported crashes 2016-2024 with known maximum severity",
  "unit": "crash",
  "outcome": "ka",
- "method": "Pseudo-ML logistic regression; Taylor-linearised variance (25 strata, 67 PSUs); model A = PRE_CRASH covariates, model B = A + crash type + number of vehicles",
+ "method": "Pseudo-ML logistic regression; Taylor-linearised variance (25 strata, 67 PSUs); model A = PRE_CRASH covariates (mutually adjusted), model B = A + crash type + number of vehicles",
  "inputs": [
   "data/processed/crss_crash.parquet"
  ],
- "rows": 125,
+ "rows": 131,
  "columns": [
   "term",
   "coef",
@@ -21,10 +21,10 @@
   "model"
  ],
  "module": "nhtsa_stats.analysis.severity",
- "git_commit": "9074d23-dirty",
- "generated_utc": "2026-10-22T17:07:23Z",
- "n": 458907,
- "events": 59143,
+ "git_commit": "2dd6a99-dirty",
+ "generated_utc": "2026-10-23T00:35:16Z",
+ "n": 467008,
+ "events": 60345,
  "design_df": 42,
  "converged": [
   true,

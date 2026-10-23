@@ -1,0 +1,39 @@
+{
+ "table": "severity/fatal_cc_speeding_type.csv",
+ "description": "Adjusted risk ratios for crash outcome 'fatal_cc' by police-reported speeding type",
+ "population": "CRSS police-reported crashes 2016-2024 with known maximum severity",
+ "unit": "crash",
+ "outcome": "fatal_cc",
+ "method": "Model A with speeding replaced by speeding type; standardised margins; linearised CIs",
+ "inputs": [
+  "data/processed/crss_crash.parquet"
+ ],
+ "rows": 5,
+ "columns": [
+  "outcome",
+  "factor",
+  "level",
+  "adj_rate",
+  "adj_rate_rse",
+  "adj_rate_low",
+  "adj_rate_high",
+  "adj_rr",
+  "adj_rr_low",
+  "adj_rr_high",
+  "adj_rd",
+  "adj_rd_low",
+  "adj_rd_high",
+  "n",
+  "n_events",
+  "rate",
+  "crude_rr",
+  "crude_rr_low",
+  "crude_rr_high",
+  "share_on_dry",
+  "share_on_wet",
+  "share_on_snow_ice"
+ ],
+ "module": "nhtsa_stats.analysis.severity",
+ "git_commit": "2dd6a99-dirty",
+ "generated_utc": "2026-10-23T00:37:52Z"
+}
