@@ -266,9 +266,9 @@ crashes were 0.5 instead, the corrected ratio would be
 {{measurement/qba_grid|exposure=exceeded_limit;se_fatal=0.8;se_nonfatal=0.8;specificity=1|rr_observed|.1f}} against no speeding) is less exposed to this. With
 recording sensitivity 0.8 in fatal crashes, the corrected ratio is still
 {{measurement/qba_grid|exposure=exceeded_limit;se_fatal=0.8;se_nonfatal=0.2;specificity=1|rr_corrected|.1f}} if limit exceedance in non-fatal crashes were recorded
-with sensitivity 0.2, and it vanishes only near 0.1
-({{measurement/qba_grid|exposure=exceeded_limit;se_fatal=0.8;se_nonfatal=0.1;specificity=1|rr_corrected|.2f}}), that is, if exceedance in non-fatal crashes went
-unrecorded about seven times in eight.
+with sensitivity 0.2 and {{measurement/qba_grid|exposure=exceeded_limit;se_fatal=0.8;se_nonfatal=0.1;specificity=1|rr_corrected|.2f}} at 0.1; it falls below 1 only
+between 0.1 and 0.05 ({{measurement/qba_grid|exposure=exceeded_limit;se_fatal=0.8;se_nonfatal=0.05;specificity=1|rr_corrected|.2f}}), that is, only if exceedance in
+non-fatal crashes were recorded about a tenth as completely as in fatal crashes.
 
 *Policy relevance.* Automated speed enforcement acts on exceeding the posted limit — the
 component with the strong association. The much larger "too fast for conditions" category is

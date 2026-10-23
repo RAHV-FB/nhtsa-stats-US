@@ -23,6 +23,6 @@
   "deaths_pedestrian"
  ],
  "module": "nhtsa_stats.analysis.descriptive",
- "git_commit": "683ab9e-dirty",
- "generated_utc": "2026-10-23T00:31:19Z"
+ "git_commit": "def32ba",
+ "generated_utc": "2026-10-23T02:18:34Z"
 }

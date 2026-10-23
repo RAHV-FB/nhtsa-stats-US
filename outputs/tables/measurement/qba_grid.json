@@ -9,7 +9,7 @@
   "data/processed/*.parquet",
   "data/interim/FARS/drugs"
  ],
- "rows": 128,
+ "rows": 224,
  "columns": [
   "exposure",
   "se_fatal",
@@ -20,6 +20,6 @@
   "bias_factor"
  ],
  "module": "nhtsa_stats.analysis.measurement",
- "git_commit": "2dd6a99-dirty",
- "generated_utc": "2026-10-23T00:39:04Z"
+ "git_commit": "def32ba",
+ "generated_utc": "2026-10-23T02:19:22Z"
 }

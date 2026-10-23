@@ -19,8 +19,8 @@
   "measures_intervention_or_cost"
  ],
  "module": "nhtsa_stats.simulation.engine",
- "git_commit": "2dd6a99-dirty",
- "generated_utc": "2026-10-23T00:57:55Z",
+ "git_commit": "def32ba",
+ "generated_utc": "2026-10-23T02:19:49Z",
  "n_columns_scanned": 1712,
  "n_tables_scanned": 67,
  "conclusion": "No field measures camera deployment, enforcement intensity, checkpoints, roadside testing of the driving population, campaigns or costs."

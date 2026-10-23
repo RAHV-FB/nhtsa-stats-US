@@ -1,6 +1,6 @@
 {
  "table": "descriptive/frequency_vs_severity.csv",
- "description": "Factor prevalence among all crashes (CRSS) vs among fatal crashes (CRSS and FARS), crude fatal rate and over-representation ratio",
+ "description": "Factor prevalence among all crashes (CRSS) vs among fatal crashes (CRSS and FARS), crude fatal rate and over-representation ratio; for driver-age flags the FARS share is among crashes with known driver age (CRSS uses NHTSA's imputed age) and the unknown level has no ratio",
  "population": "CRSS 2016-2024 (denominators); FARS 2016-2024 (fatal crashes)",
  "unit": "crash",
  "outcome": "fatal (MAXSEV_IM=4)",
@@ -32,6 +32,6 @@
   "overrep_high"
  ],
  "module": "nhtsa_stats.analysis.descriptive",
- "git_commit": "683ab9e-dirty",
- "generated_utc": "2026-10-23T00:31:19Z"
+ "git_commit": "def32ba",
+ "generated_utc": "2026-10-23T02:18:34Z"
 }

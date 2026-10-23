@@ -165,10 +165,6 @@ Vehicle category from BODY_TYP (98 not reported / 99 unknown -> unknown).
 Pickup codes 30-32 (compact/standard/camper pickup) were merged into 34 'light pickup'
 from 2017; grouping them removes that break.
 
-### `is_light_passenger_vehicle(col: 'str' = 'BODY_TYP') -> 'pl.Expr'`
-
-
-
 ### `vehicle_age(model_year: 'str' = 'MOD_YEAR', year: 'str' = 'YEAR') -> 'pl.Expr'`
 
 Crash year minus model year (model year 9998/9999 unknown); -1 allowed (next-year

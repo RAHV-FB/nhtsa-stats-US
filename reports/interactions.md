@@ -76,9 +76,10 @@ crashes per 1,000 (Holm p 6.7e-09).
 excess is 59 (37–81) per 1,000
 (Holm p 3e-05), giving a
 standardised fatal risk of 112 (88–135)
-per 1,000. The two scales answer different questions: on the ratio scale alcohol raises the
-risk of a motorcycle crash by no more than it raises other crashes' risk, but because
-motorcycle crashes start from a much higher baseline, that same factor adds far more deaths.
+per 1,000. The two scales answer different questions. On the ratio scale, alcohol involvement is
+associated with a *smaller* relative excess in motorcycle crashes than in other crashes (the
+combination is sub-multiplicative), but because motorcycle crashes start from a much higher
+baseline, the absolute excess associated with alcohol is far larger.
 A model that is "only multiplicative" would understate how many deaths concentrate in this
 combination.
 
@@ -90,11 +91,21 @@ of risk ratios is 1.24 (1.02–1.51)
 The multiplicative excess counts as supported only if its Holm-adjusted p-value is small; the
 pattern would be consistent with mass incompatibility growing with speed.
 
-**Several commonly assumed amplifiers are not supported.** Speeding in unlit darkness
-(ratio of RRs 0.94 (0.73–1.20)) and a
-young driver late at night
-(1.19 (0.97–1.46)) show no excess on
-the ratio scale. Rural area × unlit darkness
+**Several commonly assumed amplifiers are not detected for the fatal outcome.** Speeding in
+unlit darkness (ratio of RRs 0.94 (0.73–1.20))
+and a young driver late at night
+(1.19 (0.97–1.46)) show no detectable
+excess on the ratio scale; the intervals do not exclude a moderate one, so this is absence of
+evidence, not evidence of absence. For fatal-or-serious (KA) crashes, speeding in unlit darkness
+shows an additive excess of
+15.5 (8.7–22.2) per 1,000 (Holm p
+0.0003) and a ratio of risk ratios of
+1.24 (1.05–1.45) (Holm p
+0.063). A young driver late
+at night has a ratio of risk ratios of
+1.14 (1.02–1.28) for KA crashes (Holm p
+0.12). Behavioural
+factors are recorded more thoroughly in severe crashes, which can create such patterns. Rural area × unlit darkness
 (0.62 (0.51–0.77)), weekend × late night
 (0.72 (0.63–0.83)) and 50+ mph road ×
 unlit darkness (0.62 (0.53–0.72))
@@ -104,7 +115,7 @@ more severe than the separate factors imply.
 **Speeding on wet roads is less severe than expected.** The additive interaction is
 -3.5 (-5.2 to -1.8) per 1,000. Police
 "speeding-related" is mostly "too fast for conditions", which concentrates on wet and icy roads
-and carries no excess severity (`reports/findings.md`, finding 3), so the pair mixes two
+and carries no detectable excess fatal risk (`reports/findings.md`, finding 3), so the pair mixes two
 different exposures. The exploratory analysis below separates drivers who exceeded the limit.
 
 ## Exploratory pairs (not in the registered family)
@@ -126,16 +137,22 @@ They are outside the Holm family and are hypothesis-generating; p-values are una
   standardised fatal risk of 221 (191–252)
   per 1,000. On the ratio scale the combination is
   1.23 (1.01–1.50): the speed
-  environment multiplies pedestrian risk by roughly the factor it multiplies other risks, but
-  from a much higher baseline.
+  environment multiplies pedestrian risk by a somewhat larger factor than other risks
+  (exploratory, unadjusted p 0.04; KA
+  1.13 (1.02–1.25)), and from a much higher baseline.
 * **Exceeding the limit on wet roads.** On the ratio scale, the risk ratio for limit
   exceedance on wet roads (4.75 (3.37–6.69))
   is compared with that on dry roads (5.26 (4.39–6.32)).
   On the additive scale the excess on wet roads is
   -7.1 (-12.3 to -1.8) per 1,000; crashes on wet
-  roads start from a lower baseline. The apparently protective speeding × wet pattern therefore
-  reflects the mix of speeding types and the lower wet-road baseline, not a lower danger of
-  exceeding the limit in the wet.
+  roads start from a lower baseline. The ratio-scale estimate,
+  0.90 (0.68–1.20), is imprecise: it is compatible both with no
+  wet-road difference and with the deficit of the registered speeding × wet pair. For
+  fatal-or-serious crashes the deficit is present on both scales (ratio of RRs
+  0.78 (0.62–0.98); additive
+  -26.3 (-44.0 to -8.6) per 1,000). So the mix of speeding types and the
+  lower wet-road baseline explain part of the protective-looking speeding × wet pattern, but a
+  smaller excess for exceeding the limit on wet roads cannot be ruled out.
 * **Exceeding the limit on 50+ mph roads**: ratio of RRs
   0.61 (0.48–0.77); below 1
   means the relative excess of exceeding the limit is smaller on roads that are already fast.

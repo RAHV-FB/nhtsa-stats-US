@@ -7,6 +7,14 @@
   "pct_occupants": 93.56015611742745,
   "kind": "observed (FARS census)"
  },
+ "speeding_exceeded_limit": {
+  "deaths_per_year": 4702.333333333333,
+  "fatal_crashes_per_year": 4159.0,
+  "pct_male": 75.15417877649394,
+  "pct_age_15_34": 52.49875948110867,
+  "pct_occupants": 94.59842631317785,
+  "kind": "observed (FARS census)"
+ },
  "alcohol_bac08": {
   "deaths_per_year": 12581.133333333333,
   "kind": "observed census x multiply-imputed BAC (expected value)"
@@ -44,11 +52,11 @@
   "kind": "observed (FARS census)"
  },
  "unrestrained_lpv_occupants": {
-  "deaths_per_year": 10364.666666666666,
-  "restraint_unknown_deaths_per_year": 2685.6666666666665,
-  "pct_male": 71.66977551939281,
-  "pct_age_15_34": 45.2820479835338,
-  "pct_night": 41.33594905769602,
+  "deaths_per_year": 10155.0,
+  "restraint_unknown_deaths_per_year": 2470.0,
+  "pct_male": 71.92187756441818,
+  "pct_age_15_34": 45.41605120630231,
+  "pct_night": 41.31626456589529,
   "kind": "observed (FARS census; restraint police-reported)"
  },
  "unhelmeted_motorcyclists": {

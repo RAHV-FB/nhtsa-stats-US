@@ -30,6 +30,6 @@
   "attainable"
  ],
  "module": "nhtsa_stats.simulation.engine",
- "git_commit": "2dd6a99-dirty",
- "generated_utc": "2026-10-23T00:57:55Z"
+ "git_commit": "def32ba",
+ "generated_utc": "2026-10-23T02:19:49Z"
 }

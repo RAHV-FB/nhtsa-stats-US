@@ -29,8 +29,8 @@
   "note"
  ],
  "module": "nhtsa_stats.simulation.engine",
- "git_commit": "2dd6a99-dirty",
- "generated_utc": "2026-10-23T00:57:55Z",
+ "git_commit": "def32ba",
+ "generated_utc": "2026-10-23T02:19:48Z",
  "baseline": {
   "window": [
    2022,
@@ -152,7 +152,7 @@
    "fars.deaths_per_year.alcohol": {
     "name": "fars.deaths_per_year.alcohol",
     "value": 12581.133333333331,
-    "kind": "observed",
+    "kind": "observed_x_imputation",
     "source": "data/processed/fars_crash.parquet",
     "unit": "deaths/year (mean 2022-2024)",
     "low": null,
@@ -166,7 +166,7 @@
    "fars.share_of_deaths.alcohol": {
     "name": "fars.share_of_deaths.alcohol",
     "value": 0.30685691056910563,
-    "kind": "observed",
+    "kind": "observed_x_imputation",
     "source": "data/processed/fars_crash.parquet",
     "unit": "share of all deaths",
     "low": null,
@@ -180,7 +180,7 @@
    "fars.fatal_crashes_per_year.alcohol": {
     "name": "fars.fatal_crashes_per_year.alcohol",
     "value": 11409.466666666665,
-    "kind": "observed",
+    "kind": "observed_x_imputation",
     "source": "data/processed/fars_crash.parquet",
     "unit": "fatal crashes/year (mean 2022-2024)",
     "low": null,
@@ -320,7 +320,7 @@
    "fars.deaths_per_year.overlap.speeding&alcohol": {
     "name": "fars.deaths_per_year.overlap.speeding&alcohol",
     "value": 4912.166666666666,
-    "kind": "observed",
+    "kind": "observed_x_imputation",
     "source": "data/processed/fars_person.parquet",
     "unit": "deaths/year in both segments",
     "low": null,
@@ -362,7 +362,7 @@
    "fars.deaths_per_year.overlap.speeding_exceeded_limit&alcohol": {
     "name": "fars.deaths_per_year.overlap.speeding_exceeded_limit&alcohol",
     "value": 2039.3,
-    "kind": "observed",
+    "kind": "observed_x_imputation",
     "source": "data/processed/fars_person.parquet",
     "unit": "deaths/year in both segments",
     "low": null,
@@ -404,7 +404,7 @@
    "fars.deaths_per_year.overlap.alcohol&drugs": {
     "name": "fars.deaths_per_year.overlap.alcohol&drugs",
     "value": 2117.633333333333,
-    "kind": "observed",
+    "kind": "observed_x_imputation",
     "source": "data/processed/fars_person.parquet",
     "unit": "deaths/year in both segments",
     "low": null,
@@ -418,7 +418,7 @@
    "fars.deaths_per_year.overlap.alcohol&unrestrained_lpv": {
     "name": "fars.deaths_per_year.overlap.alcohol&unrestrained_lpv",
     "value": 4303.4,
-    "kind": "observed",
+    "kind": "observed_x_imputation",
     "source": "data/processed/fars_person.parquet",
     "unit": "deaths/year in both segments",
     "low": null,

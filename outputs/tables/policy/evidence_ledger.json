@@ -15,6 +15,7 @@
   "prevalence_all_crashes",
   "prevalence_fatal_crashes",
   "fars_deaths_per_year_in_segment",
+  "fars_deaths_per_year_note",
   "adjusted_severity_rr",
   "measurement_robustness",
   "interactions",
@@ -25,7 +26,7 @@
   "numeric_estimate_possible",
   "evidence_grade_target_association"
  ],
- "module": "nhtsa_stats.analysis.policy",
- "git_commit": "2dd6a99-dirty",
- "generated_utc": "2026-10-23T00:57:53Z"
+ "module": "nhtsa_stats.simulation.evidence",
+ "git_commit": "def32ba",
+ "generated_utc": "2026-10-23T02:19:47Z"
 }

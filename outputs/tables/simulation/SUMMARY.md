@@ -12,7 +12,8 @@ column names matched, none of which measures an intervention or a cost --
 engine combines an **empirical baseline** (Layer A) with **user assumptions** (Layer C)
 through explicit **mechanisms** (Layer B); every simulated output is labelled
 `kind = "hypothetical"` and carries the assumptions used (Layer D). No default effect sizes
-or prices exist anywhere in the code. Assumptions and worked hypothetical examples:
+or prices exist in the code, except that belt effectiveness defaults to the FARS within-vehicle
+estimate (treated as causal by assumption) when the user supplies none. Assumptions and worked hypothetical examples:
 `docs/policy_assumptions.md`.
 
 ## 1. Layer A baseline (2022-2024, window means) -- `baseline.csv`, `baseline.json`
