@@ -27,6 +27,6 @@
   "evidence_grade_target_association"
  ],
  "module": "nhtsa_stats.simulation.evidence",
- "git_commit": "def32ba",
- "generated_utc": "2026-10-23T02:19:47Z"
+ "git_commit": "ef704fd",
+ "generated_utc": "2026-10-23T03:46:09Z"
 }

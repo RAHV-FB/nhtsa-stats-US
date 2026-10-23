@@ -105,6 +105,6 @@
   "product_p_bh"
  ],
  "module": "nhtsa_stats.analysis.interactions",
- "git_commit": "2dd6a99-dirty",
- "generated_utc": "2026-10-23T00:42:02Z"
+ "git_commit": "ef704fd",
+ "generated_utc": "2026-10-23T02:37:05Z"
 }

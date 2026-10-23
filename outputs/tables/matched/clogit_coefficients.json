@@ -34,8 +34,8 @@
   "info_loglike"
  ],
  "module": "nhtsa_stats.analysis.matched",
- "git_commit": "283b036-dirty",
- "generated_utc": "2026-10-23T00:13:32Z",
+ "git_commit": "ef704fd",
+ "generated_utc": "2026-10-23T03:37:20Z",
  "belt_discordant_sets": {
   "sets_discordant_exposure": 14006,
   "persons_exposed": 43486,

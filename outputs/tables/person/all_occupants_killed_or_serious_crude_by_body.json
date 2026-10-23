@@ -24,6 +24,6 @@
   "flag"
  ],
  "module": "nhtsa_stats.analysis.person",
- "git_commit": "34fa793-dirty",
- "generated_utc": "2026-10-22T23:54:42Z"
+ "git_commit": "ef704fd",
+ "generated_utc": "2026-10-23T03:24:42Z"
 }

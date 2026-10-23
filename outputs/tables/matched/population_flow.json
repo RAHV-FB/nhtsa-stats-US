@@ -17,6 +17,6 @@
   "crashes"
  ],
  "module": "nhtsa_stats.analysis.matched",
- "git_commit": "283b036-dirty",
- "generated_utc": "2026-10-23T00:06:10Z"
+ "git_commit": "ef704fd",
+ "generated_utc": "2026-10-23T03:30:34Z"
 }

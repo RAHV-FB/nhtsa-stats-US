@@ -48,6 +48,6 @@
   "p_ic"
  ],
  "module": "nhtsa_stats.analysis.person",
- "git_commit": "5ab7170-dirty",
- "generated_utc": "2026-10-22T23:52:30Z"
+ "git_commit": "ef704fd",
+ "generated_utc": "2026-10-23T03:23:00Z"
 }

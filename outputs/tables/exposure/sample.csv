@@ -1,3 +1,3 @@
 definition,qualifying_crashes,drivers,two_vehicle_crashes_no_nonmotorist,weighted_share_excluded_hit_and_run,candidate_crashes_excl_hit_and_run,share_qualifying_unweighted,share_qualifying_weighted,weighted_qualifying_crashes_per_year
-C1 action-based (primary),223862,447724,279730,0.1217,249721,0.896448,0.899962,3.1814e+06
-violations charged (sensitivity),103463,206926,279730,0.1217,249721,0.414314,0.405957,1.43507e+06
+C1 action-based (primary),223856,447712,279730,0.1217,249710,0.896464,0.899982,3.1813e+06
+violations charged (sensitivity),103460,206920,279730,0.1217,249710,0.414321,0.405971,1.43505e+06

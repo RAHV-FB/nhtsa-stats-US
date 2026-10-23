@@ -99,7 +99,7 @@ lpv,killed_or_serious,any_heavy_truck[unknown],-0.0925412,0.183818,-0.503438,0.6
 lpv,killed_or_serious,speeding[yes],0.52084,0.0773989,6.72929,3.54945e-08,1.68344,1.44,1.96804,A
 lpv,killed_or_serious,speeding[unknown],0.255477,0.0913563,2.79649,0.00776012,1.29108,1.0737,1.55246,A
 lpv,killed_or_serious,alcohol_im[yes],0.992798,0.0428117,23.1899,1.45595e-25,2.69878,2.4754,2.94231,A
-lpv,killed_or_serious,Intercept,-6.49542,0.141125,-46.026,1.42835e-37,0.00151034,0.00113602,0.00200799,B
+lpv,killed_or_serious,Intercept,-6.49542,0.141125,-46.026,1.42836e-37,0.00151034,0.00113602,0.00200799,B
 lpv,killed_or_serious,age_band[8-14],-0.313229,0.0559364,-5.59973,1.49238e-06,0.731083,0.653043,0.818449,B
 lpv,killed_or_serious,age_band[15-20],-0.216615,0.0377368,-5.74015,9.38619e-07,0.80524,0.746193,0.868959,B
 lpv,killed_or_serious,age_band[21-24],-0.138705,0.0241517,-5.74306,9.29649e-07,0.870485,0.829075,0.913964,B
@@ -129,14 +129,14 @@ lpv,killed_or_serious,veh_age_band[13-17],0.332796,0.0252507,13.1797,1.62048e-16
 lpv,killed_or_serious,veh_age_band[18+],0.50747,0.0333555,15.214,1.08506e-18,1.66108,1.55295,1.77675,B
 lpv,killed_or_serious,veh_age_band[unknown],0.654989,0.241507,2.71209,0.00964791,1.92512,1.18247,3.13419,B
 lpv,killed_or_serious,other_vehicle_body[car],0.00164137,0.0437737,0.0374966,0.970267,1.00164,0.916954,1.09415,B
-lpv,killed_or_serious,other_vehicle_body[suv],0.208089,0.0429796,4.84158,1.77765e-05,1.23132,1.12902,1.34289,B
-lpv,killed_or_serious,other_vehicle_body[pickup],0.435735,0.0440404,9.894,1.54081e-12,1.5461,1.41462,1.6898,B
-lpv,killed_or_serious,other_vehicle_body[van],0.298093,0.0642437,4.64003,3.39505e-05,1.34729,1.18346,1.53379,B
+lpv,killed_or_serious,other_vehicle_body[suv],0.208089,0.0429797,4.84157,1.7777e-05,1.23132,1.12902,1.34289,B
+lpv,killed_or_serious,other_vehicle_body[pickup],0.435735,0.0440404,9.89399,1.54085e-12,1.5461,1.41462,1.6898,B
+lpv,killed_or_serious,other_vehicle_body[van],0.298093,0.0642438,4.64003,3.39507e-05,1.34729,1.18346,1.53379,B
 lpv,killed_or_serious,other_vehicle_body[light_truck_other],-0.0260971,0.230931,-0.113008,0.910562,0.97424,0.61132,1.55261,B
-lpv,killed_or_serious,other_vehicle_body[light_unknown_type],-0.188523,0.111384,-1.69255,0.0979475,0.828181,0.66146,1.03692,B
+lpv,killed_or_serious,other_vehicle_body[light_unknown_type],-0.188523,0.111384,-1.69255,0.0979476,0.828181,0.66146,1.03692,B
 lpv,killed_or_serious,other_vehicle_body[motorcycle],-0.538033,0.261698,-2.05593,0.0460389,0.583896,0.344328,0.990143,B
 lpv,killed_or_serious,other_vehicle_body[bus],-0.22268,0.11035,-2.01794,0.0500157,0.800371,0.640584,1.00002,B
-lpv,killed_or_serious,other_vehicle_body[medium_heavy_truck],0.300697,0.0790996,3.8015,0.000458699,1.3508,1.1515,1.58459,B
+lpv,killed_or_serious,other_vehicle_body[medium_heavy_truck],0.300697,0.0790996,3.8015,0.0004587,1.3508,1.1515,1.58459,B
 lpv,killed_or_serious,other_vehicle_body[truck_unknown_type],0.0832279,0.244476,0.340435,0.735226,1.08679,0.663555,1.77998,B
 lpv,killed_or_serious,other_vehicle_body[other],1.02971,0.201706,5.10501,7.56522e-06,2.80025,1.86386,4.20708,B
 lpv,killed_or_serious,other_vehicle_body[unknown],-0.468029,0.164865,-2.83887,0.00694726,0.626236,0.448997,0.873438,B
@@ -209,4 +209,4 @@ lpv,killed_or_serious,crash_type[sv_rollover_first],3.62963,0.258436,14.0446,1.8
 lpv,killed_or_serious,crash_type[pedestrian],1.0134,0.215863,4.69462,2.8511e-05,2.75494,1.78205,4.25897,B
 lpv,killed_or_serious,crash_type[cyclist],0.221206,0.374376,0.590865,0.557778,1.24758,0.58607,2.65575,B
 lpv,killed_or_serious,n_vehicles[1],-1.42967,0.209229,-6.83301,2.52023e-08,0.239389,0.156938,0.365159,B
-lpv,killed_or_serious,n_vehicles[3+],0.515835,0.0470508,10.9634,6.7121e-14,1.67504,1.5233,1.84188,B
+lpv,killed_or_serious,n_vehicles[3+],0.515835,0.0470508,10.9634,6.71198e-14,1.67504,1.5233,1.84188,B

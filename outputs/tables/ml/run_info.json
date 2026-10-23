@@ -1,10 +1,10 @@
 {
- "runtime_seconds": 681.6,
- "cpu_seconds": 720.6,
+ "runtime_seconds": 463.4,
+ "cpu_seconds": 12211.5,
  "thread_settings": {
-  "OMP_NUM_THREADS": "1",
-  "OPENBLAS_NUM_THREADS": "1",
-  "POLARS_MAX_THREADS": "2"
+  "OMP_NUM_THREADS": "unset",
+  "OPENBLAS_NUM_THREADS": "unset",
+  "POLARS_MAX_THREADS": "unset"
  },
  "random_forest_n_jobs": 2,
  "n_boot": 200,
@@ -76,7 +76,7 @@
    "test": 0.13180922349231375
   }
  },
- "processed_file_mtime_utc": "2026-10-22T23:16:15Z",
+ "processed_file_mtime_utc": "2026-10-23T02:24:24Z",
  "feature_unknown_shares": {
   "region": 0.0,
   "urbanicity": 0.0,

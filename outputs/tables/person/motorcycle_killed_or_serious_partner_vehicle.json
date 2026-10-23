@@ -53,8 +53,8 @@
   "B_flag"
  ],
  "module": "nhtsa_stats.analysis.person",
- "git_commit": "34fa793-dirty",
- "generated_utc": "2026-10-23T00:03:38Z",
+ "git_commit": "ef704fd",
+ "generated_utc": "2026-10-23T03:28:04Z",
  "n": 16053,
  "events": 4917,
  "params_A": 84,

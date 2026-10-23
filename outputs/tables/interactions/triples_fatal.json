@@ -111,6 +111,6 @@
   "flag"
  ],
  "module": "nhtsa_stats.analysis.interactions",
- "git_commit": "2dd6a99-dirty",
- "generated_utc": "2026-10-23T00:47:17Z"
+ "git_commit": "ef704fd",
+ "generated_utc": "2026-10-23T02:42:50Z"
 }

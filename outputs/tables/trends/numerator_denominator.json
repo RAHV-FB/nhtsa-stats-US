@@ -23,8 +23,8 @@
   "definition"
  ],
  "module": "nhtsa_stats.analysis.trends",
- "git_commit": "5ab7170-dirty",
- "generated_utc": "2026-10-22T23:51:53Z",
+ "git_commit": "ef704fd",
+ "generated_utc": "2026-10-23T03:18:34Z",
  "definitions": {
   "fatal": "NHTSA-imputed maximum severity (MAXSEV_IM)",
   "fatal_cc": "complete-case maximum severity (MAX_SEV; crashes with a person of unknown severity excluded unless fatal)"

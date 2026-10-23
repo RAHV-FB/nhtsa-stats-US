@@ -37,8 +37,8 @@
   "flag"
  ],
  "module": "nhtsa_stats.analysis.confounding",
- "git_commit": "6b7e0c5-dirty",
- "generated_utc": "2026-10-23T00:20:06Z",
+ "git_commit": "ef704fd",
+ "generated_utc": "2026-10-23T03:15:58Z",
  "exposures": {
   "night": "Night (21:00-05:59) vs day (06:00-20:59); time-of-day bands are not adjusted for because they define the exposure",
   "rural": "Crash in a rural vs urban CRSS PSU (area-level URBANICITY, not crash-site rurality)",

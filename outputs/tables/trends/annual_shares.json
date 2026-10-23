@@ -51,8 +51,8 @@
   "flag"
  ],
  "module": "nhtsa_stats.analysis.trends",
- "git_commit": "5ab7170-dirty",
- "generated_utc": "2026-10-22T23:51:53Z",
+ "git_commit": "ef704fd",
+ "generated_utc": "2026-10-23T03:18:34Z",
  "labels": {
   "weighted_crashes_*, crude_*": "estimated",
   "adjA_*, adjB_*": "model-predicted (standardised to pooled 2016-24 mix)",

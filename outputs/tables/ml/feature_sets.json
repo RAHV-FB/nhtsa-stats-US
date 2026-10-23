@@ -19,6 +19,6 @@
   "declared_levels"
  ],
  "module": "nhtsa_stats.models.severity_ml",
- "git_commit": "2dd6a99-dirty",
- "generated_utc": "2026-10-23T00:52:23Z"
+ "git_commit": "ef704fd",
+ "generated_utc": "2026-10-23T03:38:22Z"
 }

@@ -32,6 +32,6 @@
   "overrep_high"
  ],
  "module": "nhtsa_stats.analysis.descriptive",
- "git_commit": "def32ba",
- "generated_utc": "2026-10-23T02:18:34Z"
+ "git_commit": "ef704fd",
+ "generated_utc": "2026-10-23T02:24:40Z"
 }

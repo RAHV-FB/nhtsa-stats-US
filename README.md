@@ -36,8 +36,13 @@ uv run pytest                     # unit + data-integrity tests
 uv run streamlit run app/streamlit_app.py   # research interface
 ```
 
-`nhtsa all` takes roughly 30–60 minutes on a laptop (most of it survey-weighted model
-fitting). Individual steps:
+A clean `nhtsa all` from the raw archives took 84 minutes on a 4-core machine: about 3
+minutes to build the datasets, then the analyses, dominated by the confounding lattices
+(34 min), person-level models (12 min), severity and interaction models (9 min each), the
+prediction models (8 min) and the within-vehicle bootstraps (7 min). Expect longer when other
+processes compete for the cores. The pipeline is deterministic: a clean rebuild reproduces
+the processed datasets exactly and the output tables to the last digit or so (multi-threaded
+numerical libraries can change the final digits). Individual steps:
 
 | Command | What it does | Output |
 |---|---|---|

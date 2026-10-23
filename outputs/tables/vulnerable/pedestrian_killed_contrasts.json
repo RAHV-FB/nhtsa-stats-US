@@ -35,6 +35,6 @@
   "flag"
  ],
  "module": "nhtsa_stats.analysis.vulnerable",
- "git_commit": "2dd6a99-dirty",
- "generated_utc": "2026-10-23T00:57:42Z"
+ "git_commit": "ef704fd",
+ "generated_utc": "2026-10-23T03:38:17Z"
 }

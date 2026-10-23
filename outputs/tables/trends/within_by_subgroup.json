@@ -34,8 +34,8 @@
   "flag"
  ],
  "module": "nhtsa_stats.analysis.trends",
- "git_commit": "5ab7170-dirty",
- "generated_utc": "2026-10-22T23:51:53Z",
+ "git_commit": "ef704fd",
+ "generated_utc": "2026-10-23T03:18:34Z",
  "labels": {
   "observed_share_*, crude_rr*": "estimated",
   "std_share_*, within_rr*, within_rd*": "model-predicted (standardised)"

@@ -21,8 +21,8 @@
   "model"
  ],
  "module": "nhtsa_stats.analysis.severity",
- "git_commit": "2dd6a99-dirty",
- "generated_utc": "2026-10-23T00:35:16Z",
+ "git_commit": "ef704fd",
+ "generated_utc": "2026-10-23T02:28:34Z",
  "n": 467008,
  "events": 60345,
  "design_df": 42,

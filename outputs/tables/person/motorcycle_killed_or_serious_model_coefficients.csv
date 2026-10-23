@@ -88,7 +88,7 @@ motorcycle,killed_or_serious,any_heavy_truck[unknown],-0.245267,0.325838,-0.7527
 motorcycle,killed_or_serious,speeding[yes],0.608677,0.0794623,7.65995,1.67899e-09,1.838,1.56567,2.15769,A
 motorcycle,killed_or_serious,speeding[unknown],0.372851,0.0896975,4.15676,0.000155366,1.45187,1.21147,1.73997,A
 motorcycle,killed_or_serious,alcohol_im[yes],0.684915,0.0559641,12.2385,1.94105e-15,1.9836,1.77176,2.22077,A
-motorcycle,killed_or_serious,Intercept,-2.63767,0.194762,-13.543,6.39647e-17,0.0715278,0.0482811,0.105967,B
+motorcycle,killed_or_serious,Intercept,-2.63767,0.194762,-13.543,6.39646e-17,0.0715278,0.0482811,0.105967,B
 motorcycle,killed_or_serious,helmet[none],0.250942,0.0524714,4.78245,2.15064e-05,1.28524,1.1561,1.4288,B
 motorcycle,killed_or_serious,helmet[unknown],-0.290969,0.0762257,-3.8172,0.000437597,0.747539,0.640953,0.871849,B
 motorcycle,killed_or_serious,age_band[0-14],-0.265913,0.189564,-1.40276,0.168037,0.766505,0.522846,1.12372,B
@@ -113,7 +113,7 @@ motorcycle,killed_or_serious,other_vehicle_body[suv],0.121573,0.120137,1.01195,0
 motorcycle,killed_or_serious,other_vehicle_body[pickup],0.427021,0.110587,3.86141,0.000383103,1.53268,1.22611,1.91591,B
 motorcycle,killed_or_serious,other_vehicle_body[van],0.284304,0.107406,2.64701,0.0113841,1.32884,1.06988,1.65047,B
 motorcycle,killed_or_serious,other_vehicle_body[light_truck_other],-0.385807,0.470317,-0.820313,0.416669,0.679901,0.263172,1.75651,B
-motorcycle,killed_or_serious,other_vehicle_body[light_unknown_type],-0.30007,0.143494,-2.09117,0.0426005,0.740766,0.55452,0.989567,B
+motorcycle,killed_or_serious,other_vehicle_body[light_unknown_type],-0.30007,0.143494,-2.09117,0.0426006,0.740766,0.55452,0.989567,B
 motorcycle,killed_or_serious,other_vehicle_body[motorcycle],-0.518564,0.148951,-3.48144,0.00117742,0.595375,0.440802,0.804151,B
 motorcycle,killed_or_serious,other_vehicle_body[bus],-0.222105,0.572331,-0.388071,0.699924,0.800831,0.252305,2.54188,B
 motorcycle,killed_or_serious,other_vehicle_body[medium_heavy_truck],0.301338,0.29644,1.01652,0.315201,1.35167,0.743117,2.45857,B

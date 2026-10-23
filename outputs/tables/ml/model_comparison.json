@@ -42,6 +42,6 @@
   "selected_on_2022"
  ],
  "module": "nhtsa_stats.models.severity_ml",
- "git_commit": "2dd6a99-dirty",
- "generated_utc": "2026-10-23T00:56:32Z"
+ "git_commit": "ef704fd",
+ "generated_utc": "2026-10-23T03:41:24Z"
 }

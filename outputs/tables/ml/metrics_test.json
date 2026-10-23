@@ -27,6 +27,6 @@
   "quantity"
  ],
  "module": "nhtsa_stats.models.severity_ml",
- "git_commit": "2dd6a99-dirty",
- "generated_utc": "2026-10-23T00:56:31Z"
+ "git_commit": "ef704fd",
+ "generated_utc": "2026-10-23T03:41:23Z"
 }
