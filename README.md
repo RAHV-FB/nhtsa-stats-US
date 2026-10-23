@@ -87,7 +87,37 @@ tests/                    unit tests (synthetic fixtures) and data tests (real c
 
 ## Findings
 
-See `reports/findings.md`. A summary is added below once all analyses are final.
+Full report with sources, intervals and caveats: `reports/findings.md` (interactive version in
+the app). In brief — all conditional on a police-reported crash, and associations, not effects:
+
+1. **Frequency is not danger.** Pedestrian crashes are about 1% of police-reported crashes but
+   about 19% of fatal ones; rain, wet roads, intersections and teenage drivers are common in
+   crashes but under-represented among fatal ones.
+2. **Adjustment changes the picture.** Much of the night-time excess is accounted for by
+   darkness, alcohol, road type and crash configuration; rain-crashes are no less severe than
+   others on the same road surface; interstates are safer than other roads with the same speed
+   limit; crashes involving drivers aged 65+ are more severe once their low-risk settings are
+   held constant.
+3. **"Speeding" is two things.** Exceeding the limit is associated with about five times the
+   fatal risk; "too fast for conditions", the larger category, shows little or no excess.
+4. **The most robust associations involve objective circumstances**: motorcycles, pedestrians,
+   the speed environment, unlit darkness and heavy trucks; alcohol under every coding.
+5. **Some combinations amplify each other**, notably pedestrians in unlit darkness; others
+   often assumed to (speeding in darkness, young drivers at night) are not detected for the
+   fatal outcome.
+6. **Involvement is not severity.** Teenage drivers are over-represented as the culpable party
+   in two-vehicle crashes, but their crashes are less severe.
+7. **Belts.** Within the same vehicle in fatal crashes, belted front-seat occupants died about
+   two-thirds less often than unbelted ones; the size of that estimate depends strongly on how
+   truthfully surviving occupants report belt use.
+8. **The post-2020 rise** in the fatal share of crashes is only partly (roughly 30–50%)
+   accounted for by the recorded crash mix; about half of the rise in the share reflects fewer
+   reported non-fatal crashes.
+9. **Measurement.** Police-recorded behaviours are recorded more completely in severe crashes;
+   drug and distraction fields cannot support severity or trend analysis.
+10. **Interventions.** The data identify no intervention effect; the policy tools show where
+    deaths concentrate and what an intervention would have to achieve, under stated
+    assumptions (`reports/policy_analysis.md`).
 
 ## What this project cannot tell you
 

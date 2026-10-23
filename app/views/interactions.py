@@ -110,7 +110,7 @@ def render() -> None:
             )
     st.subheader("Observed cells (CRSS, weighted)")
     kind_note("estimated")
-    st.dataframe(pd.DataFrame(rows), hide_index=True, use_container_width=True)
+    st.dataframe(pd.DataFrame(rows), hide_index=True, width="stretch")
     known = np.isfinite(ia) & np.isfinite(ib)
     oe = {}
     for tag, dom in (("all crashes", known), ("fatal crashes", known & (y == 1))):

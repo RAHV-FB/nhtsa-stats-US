@@ -56,4 +56,4 @@ def render() -> None:
                     df = output_table(mod, name.removesuffix(".csv"))
                     if df is not None:
                         st.caption(f"Supporting table: `outputs/tables/{tab}`")
-                        st.dataframe(df.head(12), height=240, use_container_width=True)
+                        st.dataframe(df.head(12), height=240, width="stretch")

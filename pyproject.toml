@@ -17,7 +17,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-app = ["streamlit>=1.40", "altair>=5"]
+app = ["streamlit>=1.60", "altair>=5"]
 
 [dependency-groups]
 dev = ["pytest>=8", "ruff>=0.6", "mypy>=1.11", "pytest-cov>=5"]

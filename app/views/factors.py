@@ -62,7 +62,7 @@ def render() -> None:
         x_title=f"% of crashes that were {'fatal' if outcome == 'fatal' else 'fatal or serious'} (95% CI)",
         sort=list(shown["level"]),
     )
-    st.altair_chart(chart, use_container_width=True)
+    st.altair_chart(chart, width="stretch")
     nice = tab.assign(
         share_of_crashes=tab["share_of_crashes"].map(fmt_pct),
         rate=tab["rate"].map(lambda v: fmt_pct(v, 3)),
@@ -72,7 +72,7 @@ def render() -> None:
         ],
         crashes_per_year=tab["crashes_per_year"].round(-2).astype(int),
     )[["level", "sample_n", "events", "crashes_per_year", "share_of_crashes", "rate", "ci", "flag"]]
-    st.dataframe(nice, hide_index=True, use_container_width=True)
+    st.dataframe(nice, hide_index=True, width="stretch")
     st.caption(
         "sample_n = unweighted CRSS crashes; crashes_per_year = weighted national estimate (police-reported); "
         "CIs from Taylor linearisation over 67 PSUs in 25 strata (t, 42 df)."
@@ -142,7 +142,7 @@ def render() -> None:
     )
     st.altair_chart(
         alt.layer(rules, pts, ref).properties(height=max(48 * len(a), 160)),
-        use_container_width=True,
+        width="stretch",
     )
     st.caption(
         f"Reference level: **{a['level'].iloc[0]}**. Model A adjusts for year, region, area, time, weekend, light, "
@@ -151,4 +151,4 @@ def render() -> None:
         "Standardised risk ratios (g-computation); conditional on a reported crash; not causal effects."
     )
     with st.expander("Table"):
-        st.dataframe(a, hide_index=True, use_container_width=True)
+        st.dataframe(a, hide_index=True, width="stretch")

@@ -77,7 +77,7 @@ def _baseline_section(engine, base) -> None:
     st.dataframe(
         pd.DataFrame(rows),
         hide_index=True,
-        use_container_width=True,
+        width="stretch",
         column_config={
             "Deaths per year (observed)": st.column_config.NumberColumn(format="%,.0f"),
             "Share of all deaths": st.column_config.NumberColumn(format="percent"),
@@ -341,7 +341,7 @@ def _results(engine, base, scenario) -> None:
         st.warning(n)
     with st.expander("Causal chain and assumptions used"):
         st.markdown("\n".join(f"- {s}" for s in res["chain_description"]))
-        st.dataframe(pd.DataFrame(res["assumptions"]), hide_index=True, use_container_width=True)
+        st.dataframe(pd.DataFrame(res["assumptions"]), hide_index=True, width="stretch")
         st.markdown("\n".join(f"- {s}" for s in res["structural_assumptions"]))
     params = scenario.parameters(base)
     if any(not p.is_fixed for p in params.values()):
@@ -384,7 +384,7 @@ def _tornado_chart(tor: pd.DataFrame) -> None:
             title="One-way sensitivity (other parameters at central values)",
         )
     )
-    st.altair_chart(chart, use_container_width=True)
+    st.altair_chart(chart, width="stretch")
 
 
 def _combination(engine, base, s1, s2) -> None:

@@ -1368,7 +1368,7 @@ requires-dist = [
     { name = "scikit-learn", specifier = ">=1.5" },
     { name = "scipy", specifier = ">=1.13" },
     { name = "statsmodels", specifier = ">=0.14.4" },
-    { name = "streamlit", marker = "extra == 'app'", specifier = ">=1.40" },
+    { name = "streamlit", marker = "extra == 'app'", specifier = ">=1.60" },
 ]
 provides-extras = ["app"]
 
