@@ -1,0 +1,25 @@
+{
+ "table": "vulnerable/pedestrian_light_truck_by_speed.csv",
+ "description": "SUV/pickup vs car pedestrian fatality risk by speed environment (interaction)",
+ "population": "CRSS pedestrians / pedalcyclists 2016-2024 with known injury severity",
+ "unit": "person",
+ "outcome": "killed",
+ "method": "Survey logistic regression; standardised margins; Taylor-linearised CIs (t, 42 df)",
+ "inputs": [
+  "data/interim/CRSS/person",
+  "data/interim/CRSS/vehicle",
+  "data/processed/crss_crash.parquet"
+ ],
+ "rows": 10,
+ "columns": [
+  "victim",
+  "outcome",
+  "quantity",
+  "estimate",
+  "low",
+  "high"
+ ],
+ "module": "nhtsa_stats.analysis.vulnerable",
+ "git_commit": "ef704fd",
+ "generated_utc": "2026-10-23T03:38:21Z"
+}

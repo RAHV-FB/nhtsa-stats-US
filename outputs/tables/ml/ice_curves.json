@@ -1,0 +1,23 @@
+{
+ "table": "ml/ice_curves.csv",
+ "description": "ICE curves of the boosted model for numeric features (30 crashes)",
+ "population": "CRSS police-reported crashes (all severities, national probability sample) with a determinable maximum severity; train 2016-2021, validation 2022, test 2023-2024",
+ "unit": "crash",
+ "outcome": "",
+ "method": "",
+ "inputs": [
+  "data/processed/crss_crash.parquet"
+ ],
+ "rows": 1860,
+ "columns": [
+  "stage",
+  "model",
+  "feature",
+  "value",
+  "row",
+  "probability"
+ ],
+ "module": "nhtsa_stats.models.severity_ml",
+ "git_commit": "ef704fd",
+ "generated_utc": "2026-10-23T03:44:07Z"
+}

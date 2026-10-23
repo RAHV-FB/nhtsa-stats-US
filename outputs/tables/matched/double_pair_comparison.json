@@ -1,0 +1,37 @@
+{
+ "table": "matched/double_pair_comparison.csv",
+ "description": "Evans double-pair comparison risk ratios (x=1 vs x=0) for driver / right-front passenger pairs (belts; age 65+ vs 25-44 and female vs male among both-belted pairs) and motorcycle operator / passenger pairs (helmet); misreport_fraction > 0 = closed-form reclassification of a fraction of 'belted' survivors to unbelted",
+ "population": "FARS 2016-2024 vehicles with exactly one eligible driver (seat 11) and one eligible right-front passenger (seat 13) / motorcycles with one operator and one passenger",
+ "unit": "person within vehicle (matched set = vehicle)",
+ "outcome": "killed (died within 30 days)",
+ "method": "Four component ratios of death ratios and their inverse-variance weighted geometric mean; percentile bootstrap over vehicles (rr_low/rr_high: exact multinomial on 16 cells, 2000 replicates) and over crashes (rr_low_crash_boot/rr_high_crash_boot, combined rows; used in belt_effect.csv); flag: suppressed = a death count < 30, unstable = bootstrap SE(log RR) > 0.30",
+ "inputs": [
+  "data/processed/fars_person.parquet"
+ ],
+ "rows": 40,
+ "columns": [
+  "analysis",
+  "attribute_x1",
+  "misreport_fraction",
+  "component",
+  "rr_x1_vs_x0",
+  "rr_low",
+  "rr_high",
+  "reduction_1_minus_rr",
+  "reduction_low",
+  "reduction_high",
+  "se_log_poisson",
+  "se_log_bootstrap",
+  "boot_degenerate_share",
+  "n_pairs",
+  "n_pairs_with_death",
+  "min_death_count",
+  "flag",
+  "rr_low_crash_boot",
+  "rr_high_crash_boot",
+  "tipping_point_f"
+ ],
+ "module": "nhtsa_stats.analysis.matched",
+ "git_commit": "ef704fd",
+ "generated_utc": "2026-10-23T03:37:29Z"
+}

@@ -1,0 +1,24 @@
+{
+ "table": "ml/partial_dependence.csv",
+ "description": "Weighted partial dependence (fatal) on 2023-2024 crashes",
+ "population": "CRSS police-reported crashes (all severities, national probability sample) with a determinable maximum severity; train 2016-2021, validation 2022, test 2023-2024",
+ "unit": "crash",
+ "outcome": "",
+ "method": "",
+ "inputs": [
+  "data/processed/crss_crash.parquet"
+ ],
+ "rows": 318,
+ "columns": [
+  "stage",
+  "model",
+  "feature",
+  "value",
+  "pd_probability",
+  "pd_logit",
+  "quantity"
+ ],
+ "module": "nhtsa_stats.models.severity_ml",
+ "git_commit": "ef704fd",
+ "generated_utc": "2026-10-23T03:44:07Z"
+}

@@ -1,0 +1,7 @@
+interaction,outcome,population,n,events,n_product_terms,wald_F,df_num,df_den,p,converged,p_holm
+restraint_x_age,killed,"CRSS occupants of light passenger vehicles aged 8+ (known age), belted or none",859707,6200,8,4.26706,8,35,0.00117826,True,0.00471303
+age_x_sex,killed,"CRSS occupants of light passenger vehicles aged 8+ (known age), sex known",909908,6938,8,0.751487,8,35,0.646469,True,0.646469
+restraint_x_crash_type,killed,"CRSS occupants of light passenger vehicles aged 8+ (known age), belted or none, motor-vehicle crash types",825309,6189,7,26.9251,7,36,1.69936e-12,True,1.01961e-11
+restraint_x_age,killed_or_serious,"CRSS occupants of light passenger vehicles aged 8+ (known age), belted or none",859707,45744,8,2.64299,8,35,0.022216,True,0.0451666
+age_x_sex,killed_or_serious,"CRSS occupants of light passenger vehicles aged 8+ (known age), sex known",909908,50303,8,2.84943,8,35,0.0150555,True,0.0451666
+restraint_x_crash_type,killed_or_serious,"CRSS occupants of light passenger vehicles aged 8+ (known age), belted or none, motor-vehicle crash types",825309,45643,7,12.9675,7,36,3.43391e-08,True,1.71695e-07

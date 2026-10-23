@@ -1,0 +1,40 @@
+{
+ "table": "simulation/baseline_annual.csv",
+ "description": "Observed FARS deaths and fatal crashes by year and segment; CRSS estimated crashes and KA crashes by year (with SE)",
+ "population": "FARS fatal crashes and deaths 2022-2024 (census); CRSS police-reported crashes 2022-2024 (sample)",
+ "unit": "per year",
+ "outcome": "",
+ "method": "",
+ "inputs": [
+  "data/processed/fars_crash.parquet",
+  "data/processed/fars_person.parquet",
+  "data/processed/crss_crash.parquet",
+  "data/processed/crss_person.parquet",
+  "outputs/tables/severity/*.csv",
+  "outputs/tables/matched/belt_effect.csv"
+ ],
+ "rows": 3,
+ "columns": [
+  "YEAR",
+  "deaths",
+  "deaths_speeding",
+  "deaths_speeding_exceeded_limit",
+  "deaths_alcohol",
+  "deaths_drugs",
+  "deaths_unrestrained_lpv",
+  "fatal_crashes",
+  "fatal_crashes_speeding",
+  "fatal_crashes_speeding_exceeded_limit",
+  "fatal_crashes_alcohol",
+  "fatal_crashes_drugs",
+  "kind",
+  "source",
+  "crss_crashes",
+  "crss_crashes_se",
+  "crss_ka_crashes",
+  "crss_ka_crashes_se"
+ ],
+ "module": "nhtsa_stats.simulation.engine",
+ "git_commit": "ef704fd",
+ "generated_utc": "2026-10-23T03:46:10Z"
+}

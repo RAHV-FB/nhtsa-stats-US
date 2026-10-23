@@ -1,0 +1,29 @@
+{
+ "table": "ml/implied_interactions.csv",
+ "description": "Interactions implied by each model for the pre-specified RQ2 pairs (fatal, test crashes)",
+ "population": "CRSS police-reported crashes (all severities, national probability sample) with a determinable maximum severity; train 2016-2021, validation 2022, test 2023-2024",
+ "unit": "crash",
+ "outcome": "",
+ "method": "Four-scenario standardisation over 3,000 weight-proportional test crashes",
+ "inputs": [
+  "data/processed/crss_crash.parquet"
+ ],
+ "rows": 120,
+ "columns": [
+  "stage",
+  "pair",
+  "model",
+  "p00",
+  "p10",
+  "p01",
+  "p11",
+  "logit_double_difference",
+  "interaction_contrast",
+  "ratio_of_rr",
+  "quantity",
+  "product_coef"
+ ],
+ "module": "nhtsa_stats.models.severity_ml",
+ "git_commit": "ef704fd",
+ "generated_utc": "2026-10-23T03:44:07Z"
+}

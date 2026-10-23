@@ -1,0 +1,33 @@
+{
+ "table": "severity/fatal_model_coefficients.csv",
+ "description": "Survey-weighted logistic regression coefficients for crash outcome 'fatal'",
+ "population": "CRSS police-reported crashes 2016-2024 with known maximum severity",
+ "unit": "crash",
+ "outcome": "fatal",
+ "method": "Pseudo-ML logistic regression; Taylor-linearised variance (25 strata, 67 PSUs); model A = PRE_CRASH covariates (mutually adjusted), model B = A + crash type + number of vehicles",
+ "inputs": [
+  "data/processed/crss_crash.parquet"
+ ],
+ "rows": 131,
+ "columns": [
+  "term",
+  "coef",
+  "se",
+  "t",
+  "p",
+  "odds_ratio",
+  "or_low",
+  "or_high",
+  "model"
+ ],
+ "module": "nhtsa_stats.analysis.severity",
+ "git_commit": "ef704fd",
+ "generated_utc": "2026-10-23T02:26:35Z",
+ "n": 467008,
+ "events": 9958,
+ "design_df": 42,
+ "converged": [
+  true,
+  true
+ ]
+}

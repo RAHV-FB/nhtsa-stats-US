@@ -1,0 +1,25 @@
+{
+ "table": "measurement/qba_grid.csv",
+ "description": "Quantitative bias analysis: crude fatal RR corrected for outcome-dependent exposure sensitivity",
+ "population": "",
+ "unit": "",
+ "outcome": "",
+ "method": "See module docstring",
+ "inputs": [
+  "data/processed/*.parquet",
+  "data/interim/FARS/drugs"
+ ],
+ "rows": 224,
+ "columns": [
+  "exposure",
+  "se_fatal",
+  "se_nonfatal",
+  "specificity",
+  "rr_observed",
+  "rr_corrected",
+  "bias_factor"
+ ],
+ "module": "nhtsa_stats.analysis.measurement",
+ "git_commit": "ef704fd",
+ "generated_utc": "2026-10-23T02:34:17Z"
+}

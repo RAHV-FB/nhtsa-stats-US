@@ -1,0 +1,32 @@
+{
+ "table": "burden/attributable_fractions_fatal.csv",
+ "description": "Severity-pathway attributable fractions of fatal crashes for modifiable circumstances",
+ "population": "CRSS police-reported crashes 2016-2024 (model); FARS deaths 2022-2024 (scaling)",
+ "unit": "crash",
+ "outcome": "fatal",
+ "method": "g-computation with survey logistic model A; AF = (observed - counterfactual predicted)/observed; linearised CI; for the fatal outcome only, FARS-scaled = AF x mean annual FARS fatal crashes (or deaths) 2022-2024, assuming the averted fatal crashes carry the average number of deaths per fatal crash; fractions of KA crashes are not scaled",
+ "inputs": [
+  "data/processed/crss_crash.parquet",
+  "data/processed/fars_crash.parquet"
+ ],
+ "rows": 7,
+ "columns": [
+  "shift",
+  "description",
+  "outcome",
+  "n_exposed_crss",
+  "af",
+  "af_low",
+  "af_high",
+  "fars_deaths_per_year_window",
+  "fars_fatal_crashes_per_year_window",
+  "fars_scaled_fatal_crashes_per_year",
+  "fars_scaled_deaths_per_year",
+  "fars_scaled_deaths_low",
+  "fars_scaled_deaths_high",
+  "kind"
+ ],
+ "module": "nhtsa_stats.analysis.burden",
+ "git_commit": "ef704fd",
+ "generated_utc": "2026-10-23T03:38:15Z"
+}

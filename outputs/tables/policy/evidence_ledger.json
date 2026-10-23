@@ -1,0 +1,32 @@
+{
+ "table": "policy/evidence_ledger.csv",
+ "description": "Evidence ledger: what the database can and cannot say about each candidate intervention",
+ "population": "FARS 2022-2024 (deaths); CRSS 2016-2024 (associations)",
+ "unit": "intervention",
+ "outcome": "",
+ "method": "Assembled from descriptive, severity, measurement, interactions, burden and matched outputs",
+ "inputs": [
+  "outputs/tables/*"
+ ],
+ "rows": 7,
+ "columns": [
+  "intervention",
+  "target_factor",
+  "prevalence_all_crashes",
+  "prevalence_fatal_crashes",
+  "fars_deaths_per_year_in_segment",
+  "fars_deaths_per_year_note",
+  "adjusted_severity_rr",
+  "measurement_robustness",
+  "interactions",
+  "most_affected",
+  "severity_pathway_af",
+  "evidence_intervention_changes_factor",
+  "assumptions_required",
+  "numeric_estimate_possible",
+  "evidence_grade_target_association"
+ ],
+ "module": "nhtsa_stats.simulation.evidence",
+ "git_commit": "ef704fd",
+ "generated_utc": "2026-10-23T03:46:09Z"
+}

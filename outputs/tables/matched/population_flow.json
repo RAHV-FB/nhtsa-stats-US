@@ -1,0 +1,22 @@
+{
+ "table": "matched/population_flow.csv",
+ "description": "Eligibility flow for the within-vehicle analyses",
+ "population": "FARS 2016-2024 occupants (driver/passenger) of in-transport light passenger vehicles, seat front-left/front-other/second row, age 13+, belted or unbelted, known outcome",
+ "unit": "person within vehicle (matched set = vehicle)",
+ "outcome": "killed (died within 30 days)",
+ "method": "Counts of persons, deaths, vehicles and crashes after each restriction",
+ "inputs": [
+  "data/processed/fars_person.parquet"
+ ],
+ "rows": 10,
+ "columns": [
+  "step",
+  "persons",
+  "deaths",
+  "vehicles",
+  "crashes"
+ ],
+ "module": "nhtsa_stats.analysis.matched",
+ "git_commit": "ef704fd",
+ "generated_utc": "2026-10-23T03:30:34Z"
+}

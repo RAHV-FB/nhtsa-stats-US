@@ -1,0 +1,27 @@
+{
+ "table": "measurement/fars_crss_fatal_composition.csv",
+ "description": "Attribute shares among fatal crashes: CRSS (weighted, 95% CI) vs FARS (census)",
+ "population": "",
+ "unit": "",
+ "outcome": "",
+ "method": "See module docstring",
+ "inputs": [
+  "data/processed/*.parquet",
+  "data/interim/FARS/drugs"
+ ],
+ "rows": 90,
+ "columns": [
+  "YEAR",
+  "attribute",
+  "crss_n_fatal",
+  "crss_share",
+  "crss_low",
+  "crss_high",
+  "fars_share",
+  "fars_within_crss_ci",
+  "ratio_crss_to_fars"
+ ],
+ "module": "nhtsa_stats.analysis.measurement",
+ "git_commit": "ef704fd",
+ "generated_utc": "2026-10-23T02:34:17Z"
+}

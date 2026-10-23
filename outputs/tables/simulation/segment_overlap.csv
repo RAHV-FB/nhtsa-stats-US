@@ -1,0 +1,11 @@
+segment_a,segment_b,deaths_a,deaths_b,deaths_both,deaths_either,share_of_a_also_in_b,share_of_b_also_in_a,nested,kind,note
+speeding,speeding_exceeded_limit,11786,4702.33,4702.33,11786,0.398976,1,True,observed,
+speeding,alcohol,11786,12581.1,4912.17,19455,0.41678,0.390439,False,observed,alcohol membership is an expectation over BAC imputations
+speeding,drugs,11786,4998.33,1865.33,14919,0.158267,0.373191,False,observed,
+speeding,unrestrained_lpv,11786,10155,3862,18079,0.327677,0.380305,False,observed,
+speeding_exceeded_limit,alcohol,4702.33,12581.1,2039.3,15244.2,0.433678,0.162092,False,observed,alcohol membership is an expectation over BAC imputations
+speeding_exceeded_limit,drugs,4702.33,4998.33,899,8801.67,0.191182,0.17986,False,observed,
+speeding_exceeded_limit,unrestrained_lpv,4702.33,10155,1660.33,13197,0.353087,0.163499,False,observed,
+alcohol,drugs,12581.1,4998.33,2117.63,15461.8,0.168318,0.423668,False,observed,alcohol membership is an expectation over BAC imputations
+alcohol,unrestrained_lpv,12581.1,10155,4303.4,18432.7,0.342052,0.423772,False,observed,alcohol membership is an expectation over BAC imputations
+drugs,unrestrained_lpv,4998.33,10155,1815,13338.3,0.363121,0.17873,False,observed,

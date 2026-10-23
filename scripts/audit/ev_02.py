@@ -1,0 +1,17 @@
+import sys; sys.path.insert(0,'.')
+from util import *
+key=['YEAR','CASENUM']
+ve=load_table('CRSS','vevent',columns=key+['VEH_NO','VEVENTNUM','SOE','AOI1','AOI2','VNUMBER1','VNUMBER2'])
+vs=load_table('CRSS','vsoe',columns=key+['VEH_NO','VEVENTNUM','AOI'])
+m=ve.join(vs,on=key+['VEH_NO','VEVENTNUM'])
+m=m.with_columns(pl.when(pl.col('VNUMBER1')==pl.col('VEH_NO')).then(pl.col('AOI1')).otherwise(pl.col('AOI2')).alias('aoi_d'))
+bad=m.filter(pl.col('aoi_d')!=pl.col('AOI'))
+print('mismatch by year:',m.group_by('YEAR').agg((pl.col('aoi_d')!=pl.col('AOI')).mean().round(4)).sort('YEAR').rows())
+print(bad.group_by(['AOI','aoi_d']).len().sort('len',descending=True).head(8).rows())
+print('VNUMBER1==VEH_NO share among bad:',(bad['VNUMBER1']==bad['VEH_NO']).mean())
+b21=bad.filter(pl.col('YEAR')==2021)
+print('2021 bad rows:',b21.height,' AOI==AOI1:',(b21['AOI']==b21['AOI1']).mean(), ' rows where vehicle is VNUMBER2 in 2021:',m.filter((pl.col('YEAR')==2021)&(pl.col('VNUMBER2')==pl.col('VEH_NO'))&(pl.col('VNUMBER1')!=pl.col('VEH_NO'))).height)
+x=m.filter((pl.col('YEAR')==2021)&(pl.col('VNUMBER2')==pl.col('VEH_NO'))&(pl.col('VNUMBER1')!=pl.col('VEH_NO')))
+print('2021 VNUMBER2-side rows: vsoe.AOI==AOI1',(x['AOI']==x['AOI1']).mean(),' ==AOI2',(x['AOI']==x['AOI2']).mean())
+y=m.filter((pl.col('YEAR')==2022)&(pl.col('VNUMBER2')==pl.col('VEH_NO'))&(pl.col('VNUMBER1')!=pl.col('VEH_NO')))
+print('2022 VNUMBER2-side rows: vsoe.AOI==AOI1',(y['AOI']==y['AOI1']).mean(),' ==AOI2',(y['AOI']==y['AOI2']).mean())

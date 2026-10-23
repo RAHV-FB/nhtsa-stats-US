@@ -1,0 +1,27 @@
+{
+ "table": "ml/tuning.csv",
+ "description": "Hyper-parameter tuning on the 2022 validation year (weighted metrics)",
+ "population": "CRSS police-reported crashes (all severities, national probability sample) with a determinable maximum severity; train 2016-2021, validation 2022, test 2023-2024",
+ "unit": "crash",
+ "outcome": "",
+ "method": "Models fitted on 2016-2021 with survey weights; chosen = lowest weighted 2022 log loss",
+ "inputs": [
+  "data/processed/crss_crash.parquet"
+ ],
+ "rows": 52,
+ "columns": [
+  "outcome",
+  "stage",
+  "model",
+  "params",
+  "valid_log_loss_w",
+  "valid_auroc_w",
+  "valid_ap_w",
+  "valid_brier_skill_w",
+  "valid_oe_w",
+  "chosen"
+ ],
+ "module": "nhtsa_stats.models.severity_ml",
+ "git_commit": "ef704fd",
+ "generated_utc": "2026-10-23T03:40:45Z"
+}

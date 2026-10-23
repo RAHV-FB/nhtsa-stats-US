@@ -1,0 +1,45 @@
+{
+ "table": "matched/clogit_coefficients.csv",
+ "description": "Within-vehicle conditional logistic regression of death: odds ratios (models: main = unbelted + 8 age bands + sex + seat; coarse_age = 4 age bands; belt_by_seat_row = main + unbelted x second row; misreport_f = main after seeded random reclassification of a fraction f of belted survivors to unbelted)",
+ "population": "FARS 2016-2024 occupants (driver/passenger) of in-transport light passenger vehicles, seat front-left/front-other/second row, age 13+, belted or unbelted, known outcome; vehicles with >= 2 eligible occupants and discordant outcomes",
+ "unit": "person within vehicle (matched set = vehicle)",
+ "outcome": "killed (died within 30 days)",
+ "method": "statsmodels ConditionalLogit (groups = vehicle), Newton-Raphson; CIs from crash-cluster-robust sandwich (primary) and model-based information; flag: suppressed = fewer than 30 persons with the term, unstable = robust SE(log OR) > 0.30",
+ "inputs": [
+  "data/processed/fars_person.parquet"
+ ],
+ "rows": 81,
+ "columns": [
+  "term",
+  "coef",
+  "se_model",
+  "se_robust",
+  "odds_ratio",
+  "or_low",
+  "or_high",
+  "or_low_model",
+  "or_high_model",
+  "p_robust",
+  "n_with_term",
+  "deaths_with_term",
+  "flag",
+  "model",
+  "info_n_sets",
+  "info_n_persons",
+  "info_n_deaths",
+  "info_n_crash_clusters",
+  "info_converged",
+  "info_max_abs_score",
+  "info_max_newton_step_over_se",
+  "info_loglike"
+ ],
+ "module": "nhtsa_stats.analysis.matched",
+ "git_commit": "ef704fd",
+ "generated_utc": "2026-10-23T03:37:20Z",
+ "belt_discordant_sets": {
+  "sets_discordant_exposure": 14006,
+  "persons_exposed": 43486,
+  "deaths_exposed": 23480,
+  "deaths_unexposed": 25260
+ }
+}

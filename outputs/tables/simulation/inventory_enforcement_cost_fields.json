@@ -1,0 +1,27 @@
+{
+ "table": "simulation/inventory_enforcement_cost_fields.csv",
+ "description": "Search of outputs/audit/column_inventory.csv for enforcement-, testing-, camera- or cost-like fields, with the meaning of every hit",
+ "population": "",
+ "unit": "column",
+ "outcome": "",
+ "method": "regex 'CAMERA|ENFORC|CITAT|CHECKPOINT|COST|PRICE|DOLLAR|TICKET|FINE|PENAL|VIOL|POLIC|TEST|DRUG|ALC_?ST|ALCTES|ALC_RES|ALC_DET|ATST|DSTATUS|SPEC_USE|EMER_USE|PREV_|FIRST_(?:MO|YR)|LAST_(?:MO|YR)|SP_JUR|L_STATUS|L_COMPL|L_RESTRI|L_ENDORS|CDL_STAT|A_LIC|BUDGET|PATROL|RADAR|LIDAR|SOBRI|BREATH|CAMPAIGN|ZONE|EMERGENCYBRAKING' over column names (label *NAME columns excluded)",
+ "inputs": [
+  "outputs/audit/column_inventory.csv"
+ ],
+ "rows": 53,
+ "columns": [
+  "column",
+  "sources",
+  "tables",
+  "first_year",
+  "last_year",
+  "meaning",
+  "measures_intervention_or_cost"
+ ],
+ "module": "nhtsa_stats.simulation.engine",
+ "git_commit": "ef704fd",
+ "generated_utc": "2026-10-23T03:46:10Z",
+ "n_columns_scanned": 1712,
+ "n_tables_scanned": 67,
+ "conclusion": "No field measures camera deployment, enforcement intensity, checkpoints, roadside testing of the driving population, campaigns or costs."
+}

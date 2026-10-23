@@ -1,0 +1,29 @@
+{
+ "table": "person/all_occupants_killed_crude_by_body.csv",
+ "description": "Crude weighted outcome rate by vehicle body group, all occupants (descriptive only; no adjustment -- restraint/helmet are not comparable across body groups)",
+ "population": "CRSS 2016-2024 occupants of in-transport vehicles with known outcome",
+ "unit": "person",
+ "outcome": "killed",
+ "method": "Weighted proportions, Taylor-linearised SEs, logit CIs; flags n<30 / RSE>30%",
+ "inputs": [
+  "data/processed/crss_person.parquet (+ young/older_driver from crss_crash.parquet)"
+ ],
+ "rows": 12,
+ "columns": [
+  "outcome",
+  "body",
+  "n",
+  "n_events",
+  "weighted_n_per_year",
+  "weighted_events_per_year",
+  "rate",
+  "se",
+  "ci_low",
+  "ci_high",
+  "rse",
+  "flag"
+ ],
+ "module": "nhtsa_stats.analysis.person",
+ "git_commit": "ef704fd",
+ "generated_utc": "2026-10-23T03:18:38Z"
+}

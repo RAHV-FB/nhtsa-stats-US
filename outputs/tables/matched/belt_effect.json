@@ -1,0 +1,23 @@
+{
+ "table": "matched/belt_effect.csv",
+ "description": "Machine-readable belt-use estimates (FARS within-vehicle designs) for the policy simulator.  All estimates are conditional on a crash severe enough to kill an occupant of the vehicle (fatal crash); rows with _misreport_fXX are sensitivity analyses, not alternative primary estimates.  DPC rows: n_vehicles = driver / right-front pairs with at least one death; conditional-logit rows: matched sets (vehicles) with discordant outcomes; matched-pair rows: two-occupant vehicles with one death",
+ "population": "FARS 2016-2024 occupants (driver/passenger) of in-transport light passenger vehicles, seat front-left/front-other/second row, age 13+, belted or unbelted, known outcome",
+ "unit": "person within vehicle (matched set = vehicle)",
+ "outcome": "killed (died within 30 days)",
+ "method": "See method column; primary = fatality_risk_reduction_belt_given_fatal_crash (Evans DPC, percentile crash-cluster bootstrap CI)",
+ "inputs": [
+  "data/processed/fars_person.parquet"
+ ],
+ "rows": 19,
+ "columns": [
+  "estimand",
+  "estimate",
+  "low",
+  "high",
+  "method",
+  "n_vehicles"
+ ],
+ "module": "nhtsa_stats.analysis.matched",
+ "git_commit": "ef704fd",
+ "generated_utc": "2026-10-23T03:37:29Z"
+}

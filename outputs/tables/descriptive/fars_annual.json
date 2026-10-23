@@ -1,0 +1,28 @@
+{
+ "table": "descriptive/fars_annual.csv",
+ "description": "Observed fatal crashes and deaths per year, deaths by person type",
+ "population": "FARS census of fatal crashes",
+ "unit": "crash / person",
+ "outcome": "count",
+ "method": "Design-based (CRSS: Taylor linearisation, 25 strata/67 PSUs) or census counts (FARS)",
+ "inputs": [
+  "data/processed/crss_crash.parquet",
+  "data/processed/fars_crash.parquet",
+  "data/processed/fars_person.parquet"
+ ],
+ "rows": 9,
+ "columns": [
+  "YEAR",
+  "fatal_crashes",
+  "deaths",
+  "deaths_cyclist",
+  "deaths_driver",
+  "deaths_other_nonmotorist",
+  "deaths_parked_vehicle_occupant",
+  "deaths_passenger",
+  "deaths_pedestrian"
+ ],
+ "module": "nhtsa_stats.analysis.descriptive",
+ "git_commit": "ef704fd",
+ "generated_utc": "2026-10-23T02:24:40Z"
+}

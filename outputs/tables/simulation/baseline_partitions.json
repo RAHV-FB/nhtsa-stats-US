@@ -1,0 +1,30 @@
+{
+ "table": "simulation/baseline_partitions.csv",
+ "description": "Overlap structure: annual deaths / fatal crashes (FARS, observed) and KA / all crashes (CRSS, estimated) cross-classified by target-segment membership",
+ "population": "FARS fatal crashes and deaths 2022-2024 (census); CRSS police-reported crashes 2022-2024 (sample)",
+ "unit": "deaths or crashes per year",
+ "outcome": "",
+ "method": "Cells = combinations of segments; FARS alcohol membership is the mean over 10 BAC implicates, so cells are expected counts. CRSS cells: design-based SE (Taylor linearisation, 42 df); value blanked and flagged 'suppressed' if n<30 sampled records, 'unstable' if RSE>30%, 'no_sample_records' if empty (the engine uses every cell, see baseline.json)",
+ "inputs": [
+  "data/processed/fars_crash.parquet",
+  "data/processed/fars_person.parquet",
+  "data/processed/crss_crash.parquet",
+  "data/processed/crss_person.parquet",
+  "outputs/tables/severity/*.csv",
+  "outputs/tables/matched/belt_effect.csv"
+ ],
+ "rows": 80,
+ "columns": [
+  "measure",
+  "cell",
+  "per_year",
+  "se",
+  "n_records",
+  "flag",
+  "kind",
+  "source"
+ ],
+ "module": "nhtsa_stats.simulation.engine",
+ "git_commit": "ef704fd",
+ "generated_utc": "2026-10-23T03:46:10Z"
+}

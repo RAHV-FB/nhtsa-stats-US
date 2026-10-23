@@ -1,0 +1,5 @@
+period,alcohol_im_source,n,n_events,weighted_share_of_crashes,p_alcohol_im_yes_fatal,p_alcohol_im_yes_not_fatal,ratio,quantity
+2016-2018,police-reported (known),128260,1909,0.85511,0.282499,0.0442815,6.37961,"estimated (design-weighted, training years); diagnostic only"
+2016-2018,imputed (police-reported unknown),20687,923,0.14489,0.236013,0.0354231,6.66269,"estimated (design-weighted, training years); diagnostic only"
+2019-2021,police-reported (known),102626,1730,0.635864,0.336498,0.0606812,5.54534,"estimated (design-weighted, training years); diagnostic only"
+2019-2021,imputed (police-reported unknown),60127,1860,0.364136,0.180525,0.0426039,4.23729,"estimated (design-weighted, training years); diagnostic only"

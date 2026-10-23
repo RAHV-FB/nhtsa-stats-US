@@ -1,0 +1,228 @@
+{
+ "flow": [
+  {
+   "step": "all FARS person records",
+   "persons": 800688,
+   "deaths": 353706,
+   "vehicles": 572793,
+   "crashes": 325922
+  },
+  {
+   "step": "occupants of in-transport vehicles (driver/passenger)",
+   "persons": 720583,
+   "deaths": 281513,
+   "vehicles": 498835,
+   "crashes": 325626
+  },
+  {
+   "step": "light passenger vehicle",
+   "persons": 581793,
+   "deaths": 215438,
+   "vehicles": 382474,
+   "crashes": 279020
+  },
+  {
+   "step": "seat front-left / front-other / second row",
+   "persons": 565447,
+   "deaths": 211582,
+   "vehicles": 382224,
+   "crashes": 278845
+  },
+  {
+   "step": "age 13+ (known)",
+   "persons": 524353,
+   "deaths": 206362,
+   "vehicles": 378612,
+   "crashes": 276316
+  },
+  {
+   "step": "restraint belted or none (known)",
+   "persons": 477977,
+   "deaths": 186574,
+   "vehicles": 347876,
+   "crashes": 255519
+  },
+  {
+   "step": "known outcome (killed 0/1)",
+   "persons": 474889,
+   "deaths": 186574,
+   "vehicles": 346125,
+   "crashes": 254593
+  },
+  {
+   "step": ">= 2 eligible occupants in the vehicle",
+   "persons": 224529,
+   "deaths": 65722,
+   "vehicles": 95765,
+   "crashes": 85555
+  },
+  {
+   "step": "matched sets with discordant outcomes (analysed)",
+   "persons": 110142,
+   "deaths": 48740,
+   "vehicles": 45248,
+   "crashes": 44990
+  },
+  {
+   "step": "  of which discordant belt use (identify the belt OR)",
+   "persons": 37959,
+   "deaths": 15834,
+   "vehicles": 14006,
+   "crashes": 13975
+  }
+ ],
+ "belt_sets": {
+  "sets_discordant_exposure": 14006,
+  "persons_exposed": 43486,
+  "deaths_exposed": 23480,
+  "deaths_unexposed": 25260
+ },
+ "dpc_belt_counts": {
+  "cells": [
+   [
+    [
+     [
+      2636,
+      4477
+     ],
+     [
+      1398,
+      779
+     ]
+    ],
+    [
+     [
+      4529,
+      2515
+     ],
+     [
+      3498,
+      682
+     ]
+    ]
+   ],
+   [
+    [
+     [
+      1406,
+      3658
+     ],
+     [
+      38995,
+      10392
+     ]
+    ],
+    [
+     [
+      711,
+      764
+     ],
+     [
+      9220,
+      4580
+     ]
+    ]
+   ]
+  ],
+  "driver_deaths[x_d][x_p]": [
+   [
+    7044,
+    4180
+   ],
+   [
+    1475,
+    13800
+   ]
+  ],
+  "other_deaths[x_d][x_p]": [
+   [
+    6992,
+    1461
+   ],
+   [
+    4422,
+    14972
+   ]
+  ]
+ },
+ "clogit_info": {
+  "main": {
+   "n_sets": 45248,
+   "n_persons": 110142,
+   "n_deaths": 48740,
+   "n_crash_clusters": 44990,
+   "converged": true,
+   "max_abs_score": 7.280842595491777e-12,
+   "max_newton_step_over_se": 8.931105643890178e-14,
+   "loglike": -33118.360625897134
+  },
+  "coarse_age": {
+   "n_sets": 45248,
+   "n_persons": 110142,
+   "n_deaths": 48740,
+   "n_crash_clusters": 44990,
+   "converged": true,
+   "max_abs_score": 5.891509502475856e-12,
+   "max_newton_step_over_se": 8.067517447767894e-14,
+   "loglike": -33637.5528394287
+  },
+  "belt_by_seat_row": {
+   "n_sets": 45248,
+   "n_persons": 110142,
+   "n_deaths": 48740,
+   "n_crash_clusters": 44990,
+   "converged": true,
+   "max_abs_score": 4.285793941960492e-12,
+   "max_newton_step_over_se": 6.642310219923363e-14,
+   "loglike": -33088.94390261209
+  },
+  "misreport_0.05": {
+   "n_sets": 45248,
+   "n_persons": 110142,
+   "n_deaths": 48740,
+   "n_crash_clusters": 44990,
+   "converged": true,
+   "max_abs_score": 3.5713654256142036e-12,
+   "max_newton_step_over_se": 6.089234410011383e-14,
+   "loglike": -34361.096111195315
+  },
+  "misreport_0.10": {
+   "n_sets": 45248,
+   "n_persons": 110142,
+   "n_deaths": 48740,
+   "n_crash_clusters": 44990,
+   "converged": true,
+   "max_abs_score": 7.286393710614902e-12,
+   "max_newton_step_over_se": 8.107186114249243e-14,
+   "loglike": -35159.92586872192
+  },
+  "misreport_0.20": {
+   "n_sets": 45248,
+   "n_persons": 110142,
+   "n_deaths": 48740,
+   "n_crash_clusters": 44990,
+   "converged": true,
+   "max_abs_score": 2.394140441452919e-12,
+   "max_newton_step_over_se": 3.841563016754772e-14,
+   "loglike": -36035.929709818185
+  },
+  "complete_restraint_vehicles": {
+   "n_sets": 44097,
+   "n_persons": 107302,
+   "n_deaths": 47490,
+   "n_crash_clusters": 43847,
+   "converged": true,
+   "max_abs_score": 1.0436096431476471e-12,
+   "max_newton_step_over_se": 1.8547101493707713e-14,
+   "loglike": -32248.602135581703
+  }
+ },
+ "n_motorcycle_riders": 55341,
+ "n_motorcycle_pairs": 4735,
+ "helmet_sets": {
+  "sets_discordant_exposure": 336,
+  "persons_exposed": 3586,
+  "deaths_exposed": 1846,
+  "deaths_unexposed": 1586
+ }
+}

@@ -1,0 +1,28 @@
+{
+ "table": "measurement/police_vs_bac.csv",
+ "description": "Police-reported alcohol vs measured BAC>=0.08 among tested FARS drivers",
+ "population": "",
+ "unit": "",
+ "outcome": "",
+ "method": "See module docstring",
+ "inputs": [
+  "data/processed/*.parquet",
+  "data/interim/FARS/drugs"
+ ],
+ "rows": 3,
+ "columns": [
+  "driver_status",
+  "n_tested_with_police_report",
+  "bac08_prevalence",
+  "police_sensitivity_vs_bac08",
+  "police_specificity_vs_bac08",
+  "ppv",
+  "tp",
+  "fn",
+  "fp",
+  "tn"
+ ],
+ "module": "nhtsa_stats.analysis.measurement",
+ "git_commit": "ef704fd",
+ "generated_utc": "2026-10-23T02:34:17Z"
+}

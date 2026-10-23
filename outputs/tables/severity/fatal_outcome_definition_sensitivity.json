@@ -1,0 +1,28 @@
+{
+ "table": "severity/fatal_outcome_definition_sensitivity.csv",
+ "description": "Model-A adjusted risk ratios with the NHTSA-imputed 'fatal' outcome (primary) and the strict complete-case outcome (MAX_SEV; crashes with any person of unknown severity excluded unless the outcome is already met)",
+ "population": "CRSS police-reported crashes 2016-2024",
+ "unit": "crash",
+ "outcome": "fatal vs fatal_cc",
+ "method": "Same model A fitted to each outcome definition; ratio of adjusted RRs",
+ "inputs": [
+  "data/processed/crss_crash.parquet"
+ ],
+ "rows": 77,
+ "columns": [
+  "factor",
+  "level",
+  "crude_rr",
+  "A_adj_rr",
+  "A_adj_rr_low",
+  "A_adj_rr_high",
+  "crude_rr_cc",
+  "A_adj_rr_cc",
+  "A_adj_rr_low_cc",
+  "A_adj_rr_high_cc",
+  "adj_rr_ratio_cc_vs_primary"
+ ],
+ "module": "nhtsa_stats.analysis.severity",
+ "git_commit": "ef704fd",
+ "generated_utc": "2026-10-23T02:33:05Z"
+}

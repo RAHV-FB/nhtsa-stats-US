@@ -1,0 +1,53 @@
+outcome,stage,model,params,valid_log_loss_w,valid_auroc_w,valid_ap_w,valid_brier_skill_w,valid_oe_w,chosen
+fatal,pre_crash,logit_main,{'C': 100.0},0.0345143,0.811769,0.0623384,0.0284568,1.14099,True
+fatal,pre_crash,logit_l2,{'C': 0.0001},0.039433,0.733121,0.0231037,0.000748167,1.18851,False
+fatal,pre_crash,logit_l2,{'C': 0.001},0.0375254,0.776205,0.0340122,0.00548809,1.17617,False
+fatal,pre_crash,logit_l2,{'C': 0.01},0.0349868,0.813351,0.0579655,0.020454,1.15344,False
+fatal,pre_crash,logit_l2,{'C': 0.1},0.0345045,0.813259,0.0627183,0.0282182,1.14237,False
+fatal,pre_crash,logit_l2,{'C': 1.0},0.0345026,0.812038,0.0629628,0.0288086,1.14155,True
+fatal,pre_crash,logit_l2,{'C': 10.0},0.0345118,0.811794,0.0625039,0.0285784,1.14118,False
+fatal,pre_crash,logit_interact,{'C': 100.0},0.0344423,0.813047,0.065101,0.0290536,1.138,True
+fatal,pre_crash,hgb,"{'learning_rate': 0.1, 'max_leaf_nodes': 15, 'min_samples_leaf': 100, 'n_iter': 166}",0.0336282,0.835605,0.0785231,0.0346589,1.15587,False
+fatal,pre_crash,hgb,"{'learning_rate': 0.1, 'max_leaf_nodes': 15, 'min_samples_leaf': 400, 'n_iter': 136}",0.0336265,0.835189,0.079551,0.034925,1.15212,False
+fatal,pre_crash,hgb,"{'learning_rate': 0.1, 'max_leaf_nodes': 31, 'min_samples_leaf': 100, 'n_iter': 98}",0.0336225,0.836366,0.0772937,0.0348051,1.15815,False
+fatal,pre_crash,hgb,"{'learning_rate': 0.1, 'max_leaf_nodes': 31, 'min_samples_leaf': 400, 'n_iter': 89}",0.0335713,0.837047,0.080515,0.0351052,1.14915,True
+fatal,pre_crash,rf,{'min_samples_leaf': 50},0.0343159,0.829649,0.0590683,0.0208176,1.1412,True
+fatal,pre_crash+circumstance,logit_main,{'C': 100.0},0.0302979,0.890351,0.129072,0.0686329,1.11096,True
+fatal,pre_crash+circumstance,logit_l2,{'C': 0.0001},0.0392733,0.783805,0.0251981,0.00103663,1.18898,False
+fatal,pre_crash+circumstance,logit_l2,{'C': 0.001},0.0366196,0.834488,0.0413488,0.00780755,1.17961,False
+fatal,pre_crash+circumstance,logit_l2,{'C': 0.01},0.0320128,0.886412,0.106317,0.0403772,1.15631,False
+fatal,pre_crash+circumstance,logit_l2,{'C': 0.1},0.0304164,0.891231,0.126897,0.0661223,1.12227,False
+fatal,pre_crash+circumstance,logit_l2,{'C': 1.0},0.0302965,0.890673,0.129653,0.0688453,1.11307,False
+fatal,pre_crash+circumstance,logit_l2,{'C': 10.0},0.0302946,0.890388,0.129369,0.0688385,1.1114,True
+fatal,pre_crash+circumstance,logit_interact,{'C': 100.0},0.0301951,0.891912,0.132659,0.0706677,1.11122,True
+fatal,pre_crash+circumstance,hgb,"{'learning_rate': 0.1, 'max_leaf_nodes': 15, 'min_samples_leaf': 100, 'n_iter': 159}",0.0288983,0.911589,0.158336,0.085842,1.11542,False
+fatal,pre_crash+circumstance,hgb,"{'learning_rate': 0.1, 'max_leaf_nodes': 15, 'min_samples_leaf': 400, 'n_iter': 179}",0.0288445,0.913389,0.156094,0.0849975,1.11089,False
+fatal,pre_crash+circumstance,hgb,"{'learning_rate': 0.1, 'max_leaf_nodes': 31, 'min_samples_leaf': 100, 'n_iter': 121}",0.0288304,0.913625,0.158283,0.0848397,1.11441,True
+fatal,pre_crash+circumstance,hgb,"{'learning_rate': 0.1, 'max_leaf_nodes': 31, 'min_samples_leaf': 400, 'n_iter': 116}",0.0289154,0.910289,0.158078,0.0854946,1.11615,False
+fatal,pre_crash+circumstance,rf,{'min_samples_leaf': 50},0.0306223,0.901858,0.1214,0.0488161,1.12654,True
+ka,pre_crash,logit_main,{'C': 100.0},0.12996,0.729925,0.158046,0.0637638,0.995392,True
+ka,pre_crash,logit_l2,{'C': 0.0001},0.142595,0.67051,0.0773645,0.00615391,1.02887,False
+ka,pre_crash,logit_l2,{'C': 0.001},0.135255,0.72207,0.138165,0.0301727,1.01251,False
+ka,pre_crash,logit_l2,{'C': 0.01},0.130427,0.729989,0.157879,0.0605681,0.998526,False
+ka,pre_crash,logit_l2,{'C': 0.1},0.129994,0.730119,0.158364,0.0636554,0.995999,False
+ka,pre_crash,logit_l2,{'C': 1.0},0.129958,0.729956,0.158219,0.0638257,0.995517,True
+ka,pre_crash,logit_l2,{'C': 10.0},0.12996,0.729928,0.158079,0.0637733,0.995406,False
+ka,pre_crash,logit_interact,{'C': 100.0},0.129749,0.731526,0.159084,0.0646144,0.995363,True
+ka,pre_crash,hgb,"{'learning_rate': 0.1, 'max_leaf_nodes': 15, 'min_samples_leaf': 100, 'n_iter': 138}",0.127262,0.755511,0.172829,0.0721662,0.9966,False
+ka,pre_crash,hgb,"{'learning_rate': 0.1, 'max_leaf_nodes': 15, 'min_samples_leaf': 400, 'n_iter': 170}",0.127086,0.756153,0.173602,0.0729758,0.994455,True
+ka,pre_crash,hgb,"{'learning_rate': 0.1, 'max_leaf_nodes': 31, 'min_samples_leaf': 100, 'n_iter': 126}",0.127336,0.755968,0.169488,0.0710385,0.992587,False
+ka,pre_crash,hgb,"{'learning_rate': 0.1, 'max_leaf_nodes': 31, 'min_samples_leaf': 400, 'n_iter': 99}",0.127177,0.756188,0.171994,0.0722234,0.993127,False
+ka,pre_crash,rf,{'min_samples_leaf': 50},0.129242,0.750806,0.157833,0.0576195,1.00416,True
+ka,pre_crash+circumstance,logit_main,{'C': 100.0},0.117041,0.823813,0.233828,0.115942,0.988534,True
+ka,pre_crash+circumstance,logit_l2,{'C': 0.0001},0.140888,0.731071,0.0912586,0.00980591,1.03008,False
+ka,pre_crash+circumstance,logit_l2,{'C': 0.001},0.128624,0.80441,0.182987,0.0499407,1.01683,False
+ka,pre_crash+circumstance,logit_l2,{'C': 0.01},0.118327,0.824728,0.230727,0.10785,0.998104,False
+ka,pre_crash+circumstance,logit_l2,{'C': 0.1},0.117125,0.824262,0.233437,0.11536,0.990171,False
+ka,pre_crash+circumstance,logit_l2,{'C': 1.0},0.117036,0.823893,0.234066,0.116043,0.988823,True
+ka,pre_crash+circumstance,logit_l2,{'C': 10.0},0.11704,0.823822,0.233872,0.115961,0.988564,False
+ka,pre_crash+circumstance,logit_interact,{'C': 100.0},0.116829,0.824806,0.236992,0.117394,0.988248,True
+ka,pre_crash+circumstance,hgb,"{'learning_rate': 0.1, 'max_leaf_nodes': 15, 'min_samples_leaf': 100, 'n_iter': 228}",0.11291,0.844929,0.264838,0.134942,0.979494,False
+ka,pre_crash+circumstance,hgb,"{'learning_rate': 0.1, 'max_leaf_nodes': 15, 'min_samples_leaf': 400, 'n_iter': 215}",0.112846,0.845213,0.265357,0.13568,0.979838,True
+ka,pre_crash+circumstance,hgb,"{'learning_rate': 0.1, 'max_leaf_nodes': 31, 'min_samples_leaf': 100, 'n_iter': 137}",0.113268,0.843238,0.260596,0.13321,0.979982,False
+ka,pre_crash+circumstance,hgb,"{'learning_rate': 0.1, 'max_leaf_nodes': 31, 'min_samples_leaf': 400, 'n_iter': 156}",0.113023,0.844176,0.262893,0.13457,0.97628,False
+ka,pre_crash+circumstance,rf,{'min_samples_leaf': 50},0.11679,0.839478,0.242881,0.105673,0.995601,True

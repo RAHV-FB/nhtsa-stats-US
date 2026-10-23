@@ -1,0 +1,33 @@
+{
+ "table": "simulation/threshold_required_share.csv",
+ "description": "HYPOTHETICAL threshold arithmetic: share of each segment's deaths that would have to be prevented to reduce all deaths by 1/2/5/10% (no effect sizes assumed)",
+ "population": "FARS fatal crashes and deaths 2022-2024 (census); CRSS police-reported crashes 2022-2024 (sample)",
+ "unit": "segment",
+ "outcome": "",
+ "method": "required share = p% x all deaths / segment deaths (window means)",
+ "inputs": [
+  "data/processed/fars_crash.parquet",
+  "data/processed/fars_person.parquet",
+  "data/processed/crss_crash.parquet",
+  "data/processed/crss_person.parquet",
+  "outputs/tables/severity/*.csv",
+  "outputs/tables/matched/belt_effect.csv"
+ ],
+ "rows": 20,
+ "columns": [
+  "segment",
+  "reliability",
+  "segment_deaths_per_year",
+  "all_deaths_per_year",
+  "segment_share_of_all_deaths",
+  "reduction_of_all_deaths_pct",
+  "deaths_to_prevent_per_year",
+  "required_share_of_segment_deaths",
+  "feasible_through_segment_alone",
+  "kind",
+  "assumptions"
+ ],
+ "module": "nhtsa_stats.simulation.engine",
+ "git_commit": "ef704fd",
+ "generated_utc": "2026-10-23T03:46:10Z"
+}

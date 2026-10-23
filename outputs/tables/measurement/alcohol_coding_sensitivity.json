@@ -1,0 +1,26 @@
+{
+ "table": "measurement/alcohol_coding_sensitivity.csv",
+ "description": "Adjusted fatal RR for alcohol under imputed / complete-case / unknown-as-no codings, by period",
+ "population": "",
+ "unit": "",
+ "outcome": "",
+ "method": "See module docstring",
+ "inputs": [
+  "data/processed/*.parquet",
+  "data/interim/FARS/drugs"
+ ],
+ "rows": 9,
+ "columns": [
+  "period",
+  "coding",
+  "n",
+  "events",
+  "share_yes",
+  "adj_rr",
+  "adj_rr_low",
+  "adj_rr_high"
+ ],
+ "module": "nhtsa_stats.analysis.measurement",
+ "git_commit": "ef704fd",
+ "generated_utc": "2026-10-23T02:34:17Z"
+}

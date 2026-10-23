@@ -1,0 +1,27 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      # The raw NHTSA archives are Git LFS objects (~675 MB); CI does not fetch them.
+      # Tests that need the Parquet caches built from them skip themselves.
+      - uses: actions/checkout@v4
+        with:
+          lfs: false
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: "3.12"
+      - name: Install
+        run: uv sync --frozen --all-extras
+      - name: Lint
+        run: |
+          uv run ruff check src tests app
+          uv run ruff format --check src tests app
+      - name: Tests (no data required)
+        run: uv run pytest -q

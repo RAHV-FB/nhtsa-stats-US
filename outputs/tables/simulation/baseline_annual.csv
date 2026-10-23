@@ -1,0 +1,4 @@
+YEAR,deaths,deaths_speeding,deaths_speeding_exceeded_limit,deaths_alcohol,deaths_drugs,deaths_unrestrained_lpv,fatal_crashes,fatal_crashes_speeding,fatal_crashes_speeding_exceeded_limit,fatal_crashes_alcohol,fatal_crashes_drugs,kind,source,crss_crashes,crss_crashes_se,crss_ka_crashes,crss_ka_crashes_se
+2022,42721,12157,4850,13457.8,5509,10928,39422,10934,4301,12217.3,4915,observed,FARS census,5.9305e+06,352877,196116,8953.87
+2023,41025,11913,4723,12381.6,4909,10109,37769,10657,4172,11179.1,4337,observed,FARS census,6.13836e+06,341020,192198,9135.46
+2024,39254,11288,4534,11904,4577,9428,36297,10203,4004,10832,4041,observed,FARS census,6.18024e+06,346795,193136,9706.87

@@ -1,0 +1,26 @@
+{
+ "table": "measurement/fars_testing.csv",
+ "description": "Alcohol and drug test rates among FARS drivers by survival status, year and state",
+ "population": "",
+ "unit": "",
+ "outcome": "",
+ "method": "See module docstring",
+ "inputs": [
+  "data/processed/*.parquet",
+  "data/interim/FARS/drugs"
+ ],
+ "rows": 179,
+ "columns": [
+  "level",
+  "YEAR",
+  "status",
+  "drivers",
+  "pct_alcohol_tested",
+  "pct_alcohol_test_status_unknown",
+  "pct_drug_tested",
+  "STATE"
+ ],
+ "module": "nhtsa_stats.analysis.measurement",
+ "git_commit": "ef704fd",
+ "generated_utc": "2026-10-23T02:34:17Z"
+}

@@ -1,0 +1,35 @@
+{
+ "table": "person/motorcycle_killed_model_coefficients.csv",
+ "description": "Survey logistic regression coefficients for 'killed' (CRSS motorcycle operators and passengers). Coefficients are log-odds ratios conditional on all other terms; only the standardised margins are interpreted.  other_vehicle_body is 'none_or_multi' exactly when the crash did not have two vehicles, so in model B its coefficients and those of n_vehicles are not separately identified (the ridge resolves the split; margins are unaffected).",
+ "population": "CRSS motorcycle operators and passengers",
+ "unit": "person",
+ "outcome": "killed",
+ "method": "Survey-weighted logistic regression (pseudo-ML, ridge 0.01), Taylor-linearised variance (25 strata, 67 PSUs, t with 42 df); standardised predictive margins -> adjusted RR/RD. Model A = person covariates + PRE_CRASH; model B = A + crash type + number of vehicles. Flags: suppressed = n<30 or no events (event-free levels blanked); unstable = crude rate, level margin or reference margin RSE>30%.",
+ "inputs": [
+  "data/processed/crss_person.parquet (+ young/older_driver from crss_crash.parquet)"
+ ],
+ "rows": 189,
+ "columns": [
+  "population",
+  "outcome",
+  "term",
+  "coef",
+  "se",
+  "t",
+  "p",
+  "odds_ratio",
+  "or_low",
+  "or_high",
+  "model"
+ ],
+ "module": "nhtsa_stats.analysis.person",
+ "git_commit": "ef704fd",
+ "generated_utc": "2026-10-23T03:22:07Z",
+ "n": 29423,
+ "events": 1397,
+ "params_A": 89,
+ "converged_A": true,
+ "params_B": 100,
+ "converged_B": true,
+ "design_df": 42
+}

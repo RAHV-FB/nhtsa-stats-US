@@ -1,0 +1,72 @@
+{
+ "speeding": {
+  "deaths_per_year": 11786.0,
+  "fatal_crashes_per_year": 10598.0,
+  "pct_male": 75.11737089201877,
+  "pct_age_15_34": 48.44165393970247,
+  "pct_occupants": 93.56015611742745,
+  "kind": "observed (FARS census)"
+ },
+ "speeding_exceeded_limit": {
+  "deaths_per_year": 4702.333333333333,
+  "fatal_crashes_per_year": 4159.0,
+  "pct_male": 75.15417877649394,
+  "pct_age_15_34": 52.49875948110867,
+  "pct_occupants": 94.59842631317785,
+  "kind": "observed (FARS census)"
+ },
+ "alcohol_bac08": {
+  "deaths_per_year": 12581.133333333333,
+  "kind": "observed census x multiply-imputed BAC (expected value)"
+ },
+ "drugs_police_reported": {
+  "deaths_per_year": 4998.333333333333,
+  "fatal_crashes_per_year": 4431.0,
+  "pct_male": 71.48382794264755,
+  "pct_age_15_34": 41.767255751917304,
+  "pct_occupants": 93.01767255751918,
+  "kind": "observed (FARS census)"
+ },
+ "night_weekend": {
+  "deaths_per_year": 6178.666666666667,
+  "fatal_crashes_per_year": 5591.333333333333,
+  "pct_male": 74.08286577470868,
+  "pct_age_15_34": 51.30556754423824,
+  "pct_occupants": 75.67975830815709,
+  "kind": "observed (FARS census)"
+ },
+ "dark_unlit_pedestrian": {
+  "deaths_per_year": 2570.3333333333335,
+  "fatal_crashes_per_year": 2523.6666666666665,
+  "pct_male": 72.3900920762547,
+  "pct_age_15_34": 30.839061081571778,
+  "pct_occupants": 0.8559201141226819,
+  "kind": "observed (FARS census)"
+ },
+ "high_speed_road": {
+  "deaths_per_year": 20903.333333333332,
+  "fatal_crashes_per_year": 18755.333333333332,
+  "pct_male": 71.01738159783129,
+  "pct_age_15_34": 35.70881837027587,
+  "pct_occupants": 87.09296762876734,
+  "kind": "observed (FARS census)"
+ },
+ "unrestrained_lpv_occupants": {
+  "deaths_per_year": 10155.0,
+  "restraint_unknown_deaths_per_year": 2470.0,
+  "pct_male": 71.92187756441818,
+  "pct_age_15_34": 45.41605120630231,
+  "pct_night": 41.31626456589529,
+  "kind": "observed (FARS census; restraint police-reported)"
+ },
+ "unhelmeted_motorcyclists": {
+  "deaths_per_year": 2095.3333333333335,
+  "helmet_unknown_deaths_per_year": 222.33333333333334,
+  "kind": "observed (FARS census)"
+ },
+ "pedestrians": {
+  "deaths_per_year": 7346.666666666667,
+  "pct_dark": 76.58348457350273,
+  "kind": "observed (FARS census)"
+ }
+}

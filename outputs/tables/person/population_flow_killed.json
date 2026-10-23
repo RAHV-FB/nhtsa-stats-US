@@ -1,0 +1,24 @@
+{
+ "table": "person/population_flow_killed.csv",
+ "description": "Population flow for the CRSS person-level analyses (unweighted and weighted counts)",
+ "population": "CRSS 2016-2024 occupants of in-transport vehicles (PER_TYP 1/2/9) with known outcome",
+ "unit": "person",
+ "outcome": "killed",
+ "method": "Counts; weighted totals by Taylor-linearised design (per year = total / 9)",
+ "inputs": [
+  "data/processed/crss_person.parquet (+ young/older_driver from crss_crash.parquet)"
+ ],
+ "rows": 7,
+ "columns": [
+  "outcome",
+  "step",
+  "n_persons",
+  "n_events",
+  "weighted_persons_per_year",
+  "weighted_events_per_year",
+  "crude_rate"
+ ],
+ "module": "nhtsa_stats.analysis.person",
+ "git_commit": "ef704fd",
+ "generated_utc": "2026-10-23T03:18:38Z"
+}

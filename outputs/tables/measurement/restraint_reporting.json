@@ -1,0 +1,23 @@
+{
+ "table": "measurement/restraint_reporting.csv",
+ "description": "Restraint reporting among CRSS light-vehicle occupants aged 13+ by KABCO",
+ "population": "",
+ "unit": "",
+ "outcome": "",
+ "method": "See module docstring",
+ "inputs": [
+  "data/processed/*.parquet",
+  "data/interim/FARS/drugs"
+ ],
+ "rows": 6,
+ "columns": [
+  "kabco",
+  "n_occupants",
+  "pct_unknown",
+  "pct_belted_among_known",
+  "pct_none_among_known"
+ ],
+ "module": "nhtsa_stats.analysis.measurement",
+ "git_commit": "ef704fd",
+ "generated_utc": "2026-10-23T02:34:17Z"
+}

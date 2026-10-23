@@ -1,0 +1,31 @@
+{
+ "table": "exposure/sample.csv",
+ "description": "QIE sample sizes under both culpability definitions",
+ "population": "CRSS two-vehicle crashes 2016-2024 (no non-motorist, no hit-and-run vehicle, both drivers present) with exactly one culpable and one non-culpable driver",
+ "unit": "driver",
+ "outcome": "culpable (C1 action-based definition unless stated)",
+ "method": "Quasi-induced exposure: RIR = odds of culpability within group (saturated survey logit, linearised CI); adjusted ratios from a multivariable survey logit",
+ "inputs": [
+  "data/interim/CRSS/vehicle",
+  "data/interim/CRSS/driverrf",
+  "data/interim/CRSS/distract",
+  "data/interim/CRSS/violatn",
+  "data/interim/CRSS/person",
+  "data/processed/crss_crash.parquet"
+ ],
+ "rows": 2,
+ "columns": [
+  "definition",
+  "qualifying_crashes",
+  "drivers",
+  "two_vehicle_crashes_no_nonmotorist",
+  "weighted_share_excluded_hit_and_run",
+  "candidate_crashes_excl_hit_and_run",
+  "share_qualifying_unweighted",
+  "share_qualifying_weighted",
+  "weighted_qualifying_crashes_per_year"
+ ],
+ "module": "nhtsa_stats.analysis.exposure",
+ "git_commit": "ef704fd",
+ "generated_utc": "2026-10-23T03:37:50Z"
+}

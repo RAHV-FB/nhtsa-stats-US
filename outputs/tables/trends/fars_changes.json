@@ -1,0 +1,37 @@
+{
+ "table": "trends/fars_changes.csv",
+ "description": "Changes in FARS counts 2019->2021->2024 and each indicator's change as a share of the change in all fatal crashes or deaths (overlapping categories; shares do not add)",
+ "population": "FARS fatal crashes 2016-2024 (census)",
+ "unit": "crash / person",
+ "outcome": "fatal",
+ "method": "Census counts (observed); MI BAC count = Rubin point estimate x crashes with record",
+ "inputs": [
+  "data/processed/fars_crash.parquet",
+  "data/processed/fars_person.parquet",
+  "data/interim/FARS/midrvacc (multiply-imputed driver BAC, 10 implicates)"
+ ],
+ "rows": 11,
+ "columns": [
+  "indicator",
+  "relative_to",
+  "2019",
+  "2021",
+  "2024",
+  "change_2019_2021",
+  "pct_change_2019_2021",
+  "share_of_total_change_2019_2021",
+  "change_2021_2024",
+  "pct_change_2021_2024",
+  "share_of_total_change_2021_2024",
+  "change_2019_2024",
+  "pct_change_2019_2024",
+  "share_of_total_change_2019_2024",
+  "share_of_total_2019",
+  "share_of_total_2021",
+  "share_of_total_2024",
+  "label"
+ ],
+ "module": "nhtsa_stats.analysis.trends",
+ "git_commit": "ef704fd",
+ "generated_utc": "2026-10-23T03:18:34Z"
+}

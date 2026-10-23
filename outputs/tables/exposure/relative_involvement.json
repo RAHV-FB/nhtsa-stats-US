@@ -1,0 +1,34 @@
+{
+ "table": "exposure/relative_involvement.csv",
+ "description": "Relative involvement ratios (QIE, C1): all qualifying crashes (stratum 'all'), by day/night (age), and alcohol by CRSS coding period (imputed V_ALCH_IM and police-reported yes vs not yes)",
+ "population": "CRSS two-vehicle crashes 2016-2024 (no non-motorist, no hit-and-run vehicle, both drivers present) with exactly one culpable and one non-culpable driver",
+ "unit": "driver",
+ "outcome": "culpable (C1 action-based definition unless stated)",
+ "method": "Quasi-induced exposure: RIR = odds of culpability within group (saturated survey logit, linearised CI); adjusted ratios from a multivariable survey logit",
+ "inputs": [
+  "data/interim/CRSS/vehicle",
+  "data/interim/CRSS/driverrf",
+  "data/interim/CRSS/distract",
+  "data/interim/CRSS/violatn",
+  "data/interim/CRSS/person",
+  "data/processed/crss_crash.parquet"
+ ],
+ "rows": 55,
+ "columns": [
+  "factor",
+  "level",
+  "n_drivers",
+  "n_culpable",
+  "rir",
+  "rir_low",
+  "rir_high",
+  "adj_rir_ratio_vs_ref",
+  "adj_low",
+  "adj_high",
+  "flag",
+  "stratum"
+ ],
+ "module": "nhtsa_stats.analysis.exposure",
+ "git_commit": "ef704fd",
+ "generated_utc": "2026-10-23T03:37:50Z"
+}

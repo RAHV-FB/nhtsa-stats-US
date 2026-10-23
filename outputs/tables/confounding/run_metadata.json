@@ -1,0 +1,277 @@
+{
+ "exposures": {
+  "night": "Night (21:00-05:59) vs day (06:00-20:59); time-of-day bands are not adjusted for because they define the exposure",
+  "rural": "Crash in a rural vs urban CRSS PSU (area-level URBANICITY, not crash-site rurality)",
+  "weekend": "Weekend (Saturday/Sunday) vs weekday",
+  "older_driver": "At least one driver aged 65+ vs no such driver (crashes with an unknown-age driver and no known 65+ driver form a separate 'unknown' level)"
+ },
+ "blocks": {
+  "calendar_area": [
+   "YEAR",
+   "region",
+   "urbanicity"
+  ],
+  "calendar_region": [
+   "YEAR",
+   "region"
+  ],
+  "weekend": [
+   "weekend"
+  ],
+  "time_of_day": [
+   "tod"
+  ],
+  "time": [
+   "tod",
+   "weekend"
+  ],
+  "light": [
+   "light"
+  ],
+  "road_environment": [
+   "speed_limit",
+   "interstate",
+   "junction",
+   "work_zone",
+   "weather",
+   "surface"
+  ],
+  "alcohol": [
+   "alcohol_im"
+  ],
+  "speeding": [
+   "speeding"
+  ],
+  "driver_vehicle_mix": [
+   "young_driver",
+   "older_driver",
+   "any_motorcycle",
+   "any_heavy_truck"
+  ],
+  "driver_vehicle_mix_other": [
+   "young_driver",
+   "any_motorcycle",
+   "any_heavy_truck"
+  ],
+  "configuration": [
+   "crash_type",
+   "n_vehicles"
+  ]
+ },
+ "orderings": {
+  "night": {
+   "primary": [
+    "calendar_area",
+    "weekend",
+    "light",
+    "road_environment",
+    "alcohol",
+    "speeding",
+    "driver_vehicle_mix",
+    "configuration"
+   ],
+   "primary_without_light": [
+    "calendar_area",
+    "weekend",
+    "road_environment",
+    "alcohol",
+    "speeding",
+    "driver_vehicle_mix",
+    "configuration"
+   ],
+   "light_last": [
+    "calendar_area",
+    "weekend",
+    "road_environment",
+    "alcohol",
+    "speeding",
+    "driver_vehicle_mix",
+    "configuration",
+    "light"
+   ],
+   "behaviours_first": [
+    "alcohol",
+    "speeding",
+    "calendar_area",
+    "weekend",
+    "light",
+    "road_environment",
+    "driver_vehicle_mix",
+    "configuration"
+   ],
+   "reverse": [
+    "configuration",
+    "driver_vehicle_mix",
+    "speeding",
+    "alcohol",
+    "road_environment",
+    "light",
+    "weekend",
+    "calendar_area"
+   ]
+  },
+  "rural": {
+   "primary": [
+    "calendar_region",
+    "time",
+    "light",
+    "road_environment",
+    "alcohol",
+    "speeding",
+    "driver_vehicle_mix",
+    "configuration"
+   ],
+   "primary_without_light": [
+    "calendar_region",
+    "time",
+    "road_environment",
+    "alcohol",
+    "speeding",
+    "driver_vehicle_mix",
+    "configuration"
+   ],
+   "light_last": [
+    "calendar_region",
+    "time",
+    "road_environment",
+    "alcohol",
+    "speeding",
+    "driver_vehicle_mix",
+    "configuration",
+    "light"
+   ],
+   "behaviours_first": [
+    "alcohol",
+    "speeding",
+    "calendar_region",
+    "time",
+    "light",
+    "road_environment",
+    "driver_vehicle_mix",
+    "configuration"
+   ],
+   "reverse": [
+    "configuration",
+    "driver_vehicle_mix",
+    "speeding",
+    "alcohol",
+    "road_environment",
+    "light",
+    "time",
+    "calendar_region"
+   ]
+  },
+  "weekend": {
+   "primary": [
+    "calendar_area",
+    "time_of_day",
+    "light",
+    "road_environment",
+    "alcohol",
+    "speeding",
+    "driver_vehicle_mix",
+    "configuration"
+   ],
+   "primary_without_light": [
+    "calendar_area",
+    "time_of_day",
+    "road_environment",
+    "alcohol",
+    "speeding",
+    "driver_vehicle_mix",
+    "configuration"
+   ],
+   "light_last": [
+    "calendar_area",
+    "time_of_day",
+    "road_environment",
+    "alcohol",
+    "speeding",
+    "driver_vehicle_mix",
+    "configuration",
+    "light"
+   ],
+   "behaviours_first": [
+    "alcohol",
+    "speeding",
+    "calendar_area",
+    "time_of_day",
+    "light",
+    "road_environment",
+    "driver_vehicle_mix",
+    "configuration"
+   ],
+   "reverse": [
+    "configuration",
+    "driver_vehicle_mix",
+    "speeding",
+    "alcohol",
+    "road_environment",
+    "light",
+    "time_of_day",
+    "calendar_area"
+   ]
+  },
+  "older_driver": {
+   "primary": [
+    "calendar_area",
+    "time",
+    "light",
+    "road_environment",
+    "alcohol",
+    "speeding",
+    "driver_vehicle_mix_other",
+    "configuration"
+   ],
+   "primary_without_light": [
+    "calendar_area",
+    "time",
+    "road_environment",
+    "alcohol",
+    "speeding",
+    "driver_vehicle_mix_other",
+    "configuration"
+   ],
+   "light_last": [
+    "calendar_area",
+    "time",
+    "road_environment",
+    "alcohol",
+    "speeding",
+    "driver_vehicle_mix_other",
+    "configuration",
+    "light"
+   ],
+   "behaviours_first": [
+    "alcohol",
+    "speeding",
+    "calendar_area",
+    "time",
+    "light",
+    "road_environment",
+    "driver_vehicle_mix_other",
+    "configuration"
+   ],
+   "reverse": [
+    "configuration",
+    "driver_vehicle_mix_other",
+    "speeding",
+    "alcohol",
+    "road_environment",
+    "light",
+    "time",
+    "calendar_area"
+   ]
+  }
+ },
+ "n_crashes": 467008,
+ "n_fatal": 9958,
+ "n_ka": 60345,
+ "n_complete_case": 431402,
+ "n_fatal_complete_case": 9810,
+ "design_df": 42,
+ "ridge": 0.01,
+ "stochastic_components": "none (deterministic estimators)",
+ "crss_crash_fingerprint": "10045693-1792722264",
+ "data_unchanged_during_run": true
+}

@@ -1,0 +1,24 @@
+{
+ "table": "ml/feature_sets.csv",
+ "description": "Model inputs per stage with registry timing; excluded variables",
+ "population": "CRSS police-reported crashes (all severities, national probability sample) with a determinable maximum severity; train 2016-2021, validation 2022, test 2023-2024",
+ "unit": "crash",
+ "outcome": "",
+ "method": "",
+ "inputs": [
+  "data/processed/crss_crash.parquet"
+ ],
+ "rows": 68,
+ "columns": [
+  "stage",
+  "feature",
+  "registry_variable",
+  "registry_timing",
+  "registry_note",
+  "type",
+  "declared_levels"
+ ],
+ "module": "nhtsa_stats.models.severity_ml",
+ "git_commit": "ef704fd",
+ "generated_utc": "2026-10-23T03:38:22Z"
+}
