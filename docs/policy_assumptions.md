@@ -310,7 +310,8 @@ compensation or exposure change beyond what the parameters encode.
 > a claim about any real programme. Prices are in abstract currency units (CU).** The
 > baseline is the saved 2022–2024 Layer A (`EmpiricalBaseline.load()`); the outputs quoted
 > change whenever the baseline is rebuilt, and those using an adjusted RR also when the
-> severity module is re-run.
+> severity module is re-run. `uv run python scripts/policy_worked_examples.py` recomputes
+> every number in this section.
 
 ### Example 1 — speed cameras on limit-exceeding crashes
 
@@ -335,16 +336,16 @@ e.evaluate(cams, base); e.tornado(cams, base); e.monte_carlo(cams, base, horizon
 ```
 
 * Target segment: 4,702 deaths/yr (observed). Coverage at 500 units 0.632; share of target
-  speeding removed B = 0.190; severity effect imported from the adjusted RR 5.38 (4.50–6.44)
-  = 0.814 (0.778–0.845) — note how strong this imported assumption is.
-* Central result: 16.1% of target deaths, **759 deaths/yr** (1.85% of all deaths), 671 fatal
+  speeding removed B = 0.190; severity effect imported from the adjusted RR 5.22 (4.34–6.27)
+  = 0.808 (0.769–0.841) — note how strong this imported assumption is.
+* Central result: 16.1% of target deaths, **755 deaths/yr** (1.84% of all deaths), 668 fatal
   crashes/yr — *hypothetical*.
-* Doubling to 1,000 units: coverage 0.865, 1,039 deaths/yr (×1.37, not ×2).
-* Tornado (steady state): behavioural response 253–1,265; coverage rate 473–1,039;
-  occurrence effect 726–792; severity effect 733–781. Corner range 144–1,844.
-* Monte Carlo (10,000 draws): mean 809, 5th–95th percentile 413–1,257 deaths/yr; 5-year
-  cumulative (2-year ramp) 1,796–5,521. Over 5 years the ramp-up assumption matters
-  (ramp 1 vs 3 years: 3,796 vs 3,037 cumulative deaths).
+* Doubling to 1,000 units: coverage 0.865, 1,033 deaths/yr (×1.37, not ×2).
+* Tornado (steady state): behavioural response 252–1,258; coverage rate 470–1,033;
+  occurrence effect 721–789; severity effect 727–778. Corner range 142–1,839.
+* Monte Carlo (10,000 draws): mean 805, 5th–95th percentile 411–1,251 deaths/yr; 5-year
+  cumulative (2-year ramp) 1,785–5,488. Over 5 years the ramp-up assumption matters
+  (ramp 1 vs 3 years: 3,775 vs 3,020 cumulative deaths).
 
 ### Example 2 — adding alcohol checks, without double counting
 
@@ -352,9 +353,9 @@ e.evaluate(cams, base); e.tornado(cams, base); e.monte_carlo(cams, base, horizon
 detection_probability=Param(0.5, 0.3, 0.7), deterrence_elasticity=Param(1.0, 0.5, 2.0),
 occurrence_effect=Param(0.3, 0.1, 0.5), severity_effect=Param(0.3, 0.1, 0.5))`: perceived
 risk 0.316, impaired driving removed 0.271, 1,739 of the 12,581 alcohol deaths/yr.
-`combine([cams, checks])`: **2,452 deaths/yr** vs a naive sum of 2,498 — 45.5 deaths of double
+`combine([cams, checks])`: **2,448 deaths/yr** vs a naive sum of 2,494 — 45.2 deaths of double
 counting avoided on the 2,039 deaths/yr that are both limit-exceeding and alcohol-involved
-(expected value over BAC imputations). Under the `max` rule: 2,216.
+(expected value over BAC imputations). Under the `max` rule: 2,212.
 
 ### Example 3 — costs and break-even (CU)
 
@@ -362,7 +363,7 @@ counting avoided on the 2,039 deaths/yr that are both limit-exceeding and alcoho
 maintenance_per_unit_year=10, operations_per_unit_year=15, service_life_years=8,
 discount_rate=0.03).programme(500)`: investment 60,000 CU, operating 12,500 CU/yr, CRF 0.1425,
 **EAC 21,047 CU/yr**; 10-year total 245,000 CU (renewal at year 8), PV 213,992 CU. Central
-cost per death prevented 27.7 CU (Monte Carlo 5th–95th: 16.7–50.9 CU) — meaningful only
+cost per death prevented 27.9 CU (Monte Carlo 5th–95th: 16.8–51.2 CU) — meaningful only
 relative to a user threshold.
 
 Break-even on the behavioural response (other parameters central), by R = EAC / threshold:
@@ -370,17 +371,17 @@ Break-even on the behavioural response (other parameters central), by R = EAC / 
 | R (deaths/yr required) | Share of target deaths | Minimum behavioural response |
 |---|---|---|
 | 100 | 2.1% | 0.040 |
-| 500 | 10.6% | 0.198 |
-| 1,000 | 21.3% | 0.395 |
-| 2,000 | 42.5% | 0.790 |
-| 3,000 | 63.8% | not achievable (max 2,531 at response = 1) |
+| 500 | 10.6% | 0.199 |
+| 1,000 | 21.3% | 0.397 |
+| 2,000 | 42.5% | 0.795 |
+| 3,000 | 63.8% | not achievable (max 2,517 at response = 1) |
 
 For R = 500 at the central response, the minimum coverage rate is 0.00108 per unit.
 
 Equal budget (21,047 CU/yr) spent on checks priced with `RoadsideCheckCosts` (18 CU per check,
 1,000 CU equipment, 500 CU/yr fixed; illustrative) buys 1,129 checks/yr. Indifference curve:
 cameras with response 0.1 / 0.2 / 0.3 / 0.4 / 0.5 are matched by checks with deterrence
-elasticity 1.47 / 2.99 / 4.59 / 6.25 / 8.00; checks outperform cameras for this budget only
+elasticity 1.46 / 2.98 / 4.56 / 6.22 / 7.95; checks outperform cameras for this budget only
 above those values.
 
 ### Example 4 — seat-belt enforcement

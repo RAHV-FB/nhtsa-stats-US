@@ -39,10 +39,15 @@ policy questions require data that do not exist in this repository.
   design-based standard errors, so year-specific fatal and KA shares are somewhat more
   uncertain than their intervals suggest. Trend statements are therefore also checked
   against a strict complete-case outcome.
-* **Unknown values as proxies for post-crash events.** Unknown driver age and unknown
-  speeding are concentrated in hit-and-run crashes (92% and 64% respectively in CRSS), so an
-  "unknown" level partly encodes a driver leaving the scene. CRSS driver-age flags therefore
-  use NHTSA's imputed age; the speeding "unknown" level remains and is not interpreted.
+* **Unknown values as proxies for post-crash events.** Several "unknown" levels are
+  concentrated in hit-and-run crashes, so they partly encode a driver leaving the scene, which
+  happens after the crash. 92% of CRSS crashes with a driver of unreported age are hit-and-run
+  (`docs/variable_harmonization.md`), so CRSS driver-age flags use NHTSA's imputed age. Among
+  crashes with other unknown levels, the weighted hit-and-run shares in 2016–2021 are
+  (`ml/hit_and_run_proxy`): missing vehicle age 97%, motorcycle involvement 95%, heavy-vehicle
+  involvement 91%, time of day 71%, speeding 68%. The other unknown levels are kept as
+  their own categories (never merged with "no") and are not interpreted; dropping them from the
+  prediction models changes test discrimination by 0.002 AUROC (`docs/model_validation.md`).
 * **Distraction and drug involvement** are unknown or not reported for 42–74% of drivers in
   recent years and their unknown share changed sharply; they are not used as model
   exposures. Drug *presence* in a toxicology result is not impairment.
@@ -72,8 +77,14 @@ policy questions require data that do not exist in this repository.
   died. It is a bound on the definition, not a better estimate. Where the two definitions
   disagree (the 2023–24 excess in RQ5, crude night and weekend RRs in RQ4), both are reported.
 * NHTSA's single imputations (`*_IM`, CRSS) understate variance by roughly the imputed
-  fraction; their imputation models are not documented in the archives (it is unverified
-  whether they condition on severity).
+  fraction; their imputation models are not documented in the archives. For alcohol there is
+  indirect evidence that the imputation uses severity, directly or through correlated
+  circumstances: among crashes whose police-reported alcohol is unknown, the imputed "yes"
+  is 6.7 times (2016–18) and 4.2 times (2019–21) as common in fatal as in non-fatal crashes,
+  about as steep as the gradient among police-reported records (6.4 and 5.5;
+  `ml/alcohol_imputation_check`). Adjusted associations with imputed alcohol may therefore be
+  overstated; the police-reported coding, analysed by coding period, is the check. Imputed
+  driver age may behave the same way; this was not tested.
 * Multiple testing: interaction analyses are pre-specified and adjusted (Holm, BH);
   exploratory results are labelled as such.
 
