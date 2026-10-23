@@ -1,0 +1,53 @@
+exposure,outcome,split,stratum,n_crashes,n_exposed,n_exposed_events,adj_rate_exposed,adj_rate_reference,rr,rr_low,rr_high,rd,blocks,heterogeneity_ratio,heterogeneity_ratio_low,heterogeneity_ratio_high,heterogeneity_p
+exceeded,fatal,alcohol_imputed,no alcohol,437015,4593,555,0.0260465,0.00398433,6.53723,5.45349,7.83634,0.0220622,calendar_area+driver_vehicle_mix+light+road_environment+time,,,,
+exceeded,fatal,alcohol_imputed,alcohol,29993,1291,316,0.0857898,0.0261082,3.28594,2.66597,4.05008,0.0596817,calendar_area+driver_vehicle_mix+light+road_environment+time,0.50265,0.416168,0.607105,4.57526e-09
+exceeded,fatal,alcohol_police,police: no alcohol,302035,3341,308,0.0209212,0.00261956,7.98652,6.14199,10.385,0.0183016,calendar_area+driver_vehicle_mix+light+road_environment+time,,,,
+exceeded,fatal,alcohol_police,police: alcohol,22999,1119,216,0.0702782,0.0218743,3.21283,2.48588,4.15235,0.048404,calendar_area+driver_vehicle_mix+light+road_environment+time,0.402281,0.319344,0.506758,6.37772e-10
+exceeded,fatal,night,day (06-20),387371,3706,461,0.0244508,0.00393152,6.21917,4.93808,7.83261,0.0205193,alcohol+calendar_area+driver_vehicle_mix+road_environment,,,,
+exceeded,fatal,night,night (21-05),77099,2149,403,0.0476394,0.0111516,4.27199,3.5091,5.20074,0.0364878,alcohol+calendar_area+driver_vehicle_mix+road_environment,0.686907,0.54404,0.867291,0.00227357
+exceeded,fatal,vehicles,single vehicle,153239,3310,464,0.0340185,0.00990111,3.43583,2.93531,4.02169,0.0241174,alcohol+calendar_area+driver_vehicle_mix+light+road_environment+time,,,,
+exceeded,fatal,vehicles,multi-vehicle,313769,2574,407,0.0241781,0.0031381,7.7047,5.92199,10.024,0.02104,alcohol+calendar_area+driver_vehicle_mix+light+road_environment+time,2.24246,1.8026,2.78964,3.17374e-09
+exceeded,fatal,speed_environment,limit <= 45 mph,280859,3921,545,0.0228183,0.00365655,6.24039,5.12573,7.59745,0.0191617,alcohol+calendar_area+driver_vehicle_mix+light+road_environment+time,,,,
+exceeded,fatal,speed_environment,limit >= 50 mph,113851,1649,302,0.03973,0.0104755,3.79265,2.98572,4.81766,0.0292544,alcohol+calendar_area+driver_vehicle_mix+light+road_environment+time,0.607758,0.481826,0.766604,9.11158e-05
+exceeded,fatal,period,2016-2019,203103,2432,317,0.0200368,0.00466401,4.29605,3.39878,5.4302,0.0153728,alcohol+calendar_area+driver_vehicle_mix+light+road_environment+time,,,,
+exceeded,fatal,period,2020-2024,263905,3452,554,0.0329357,0.00552503,5.96119,4.93976,7.19383,0.0274107,alcohol+calendar_area+driver_vehicle_mix+light+road_environment+time,1.3876,1.13327,1.699,0.00218174
+exceeded,fatal,hit_and_run,hit-and-run excluded,411633,5245,838,0.0292405,0.00528295,5.53487,4.56795,6.70647,0.0239575,alcohol+calendar_area+driver_vehicle_mix+light+road_environment+time,,,,
+speeding_any,fatal,alcohol_imputed,no alcohol,437015,43804,1445,0.00754631,0.00396163,1.90485,1.5498,2.34124,0.00358468,calendar_area+driver_vehicle_mix+light+road_environment+time,,,,
+speeding_any,fatal,alcohol_imputed,alcohol,29993,5606,713,0.0406963,0.0260501,1.56224,1.24904,1.95397,0.0146463,calendar_area+driver_vehicle_mix+light+road_environment+time,0.820135,0.663039,1.01445,0.0667922
+speeding_any,fatal,alcohol_police,police: no alcohol,302035,27823,628,0.00535828,0.0026012,2.05992,1.69707,2.50036,0.00275707,calendar_area+driver_vehicle_mix+light+road_environment+time,,,,
+speeding_any,fatal,alcohol_police,police: alcohol,22999,4574,504,0.0356271,0.021814,1.63322,1.33929,1.99165,0.0138131,calendar_area+driver_vehicle_mix+light+road_environment+time,0.792856,0.654158,0.960961,0.0191732
+speeding_any,fatal,night,day (06-20),387371,37991,1189,0.00666923,0.00391237,1.70465,1.37579,2.11213,0.00275686,alcohol+calendar_area+driver_vehicle_mix+road_environment,,,,
+speeding_any,fatal,night,night (21-05),77099,11252,947,0.0210539,0.0111053,1.89584,1.56671,2.29411,0.00994856,alcohol+calendar_area+driver_vehicle_mix+road_environment,1.11215,0.932437,1.32651,0.230356
+speeding_any,fatal,vehicles,single vehicle,153239,20718,1212,0.016484,0.00987483,1.6693,1.42524,1.95516,0.00660922,alcohol+calendar_area+driver_vehicle_mix+light+road_environment+time,,,,
+speeding_any,fatal,vehicles,multi-vehicle,313769,28692,946,0.00605212,0.00311861,1.94065,1.51249,2.49001,0.00293351,alcohol+calendar_area+driver_vehicle_mix+light+road_environment+time,1.16255,0.933431,1.44791,0.173445
+speeding_any,fatal,speed_environment,limit <= 45 mph,280859,25715,1132,0.00856225,0.00364886,2.34655,1.83624,2.9987,0.00491339,alcohol+calendar_area+driver_vehicle_mix+light+road_environment+time,,,,
+speeding_any,fatal,speed_environment,limit >= 50 mph,113851,18455,890,0.0129282,0.0104258,1.24001,1.04202,1.47564,0.00250235,alcohol+calendar_area+driver_vehicle_mix+light+road_environment+time,0.528441,0.437771,0.63789,2.47758e-08
+speeding_any,fatal,period,2016-2019,203103,21226,742,0.00722972,0.00465306,1.55376,1.28504,1.87867,0.00257667,alcohol+calendar_area+driver_vehicle_mix+light+road_environment+time,,,,
+speeding_any,fatal,period,2020-2024,263905,28184,1416,0.0110654,0.00549444,2.01392,1.64132,2.47111,0.00557091,alcohol+calendar_area+driver_vehicle_mix+light+road_environment+time,1.29616,1.12098,1.49871,0.000820611
+speeding_any,fatal,hit_and_run,hit-and-run excluded,411633,44254,2043,0.00986794,0.00525805,1.87673,1.52002,2.31716,0.00460989,alcohol+calendar_area+driver_vehicle_mix+light+road_environment+time,,,,
+exceeded,ka,alcohol_imputed,no alcohol,437015,4593,1920,0.0986593,0.0264897,3.72443,3.32574,4.17092,0.0721696,calendar_area+driver_vehicle_mix+light+road_environment+time,,,,
+exceeded,ka,alcohol_imputed,alcohol,29993,1291,810,0.222473,0.0912012,2.43937,2.10858,2.82204,0.131272,calendar_area+driver_vehicle_mix+light+road_environment+time,0.654963,0.569982,0.752613,2.45585e-07
+exceeded,ka,alcohol_police,police: no alcohol,302035,3341,1327,0.0922493,0.0222946,4.13774,3.55464,4.81649,0.0699547,calendar_area+driver_vehicle_mix+light+road_environment+time,,,,
+exceeded,ka,alcohol_police,police: alcohol,22999,1119,669,0.218996,0.0951774,2.30092,1.95496,2.70811,0.123818,calendar_area+driver_vehicle_mix+light+road_environment+time,0.556082,0.458951,0.67377,2.26854e-07
+exceeded,ka,night,day (06-20),387371,3706,1596,0.0989584,0.0265818,3.72278,3.2398,4.27777,0.0723766,alcohol+calendar_area+driver_vehicle_mix+road_environment,,,,
+exceeded,ka,night,night (21-05),77099,2149,1123,0.139022,0.0468787,2.96556,2.67209,3.29127,0.0921431,alcohol+calendar_area+driver_vehicle_mix+road_environment,0.796598,0.708629,0.895488,0.000319183
+exceeded,ka,vehicles,single vehicle,153239,3310,1549,0.114691,0.0494606,2.31883,2.07393,2.59266,0.0652302,alcohol+calendar_area+driver_vehicle_mix+light+road_environment+time,,,,
+exceeded,ka,vehicles,multi-vehicle,313769,2574,1181,0.0973845,0.0218489,4.45718,3.85845,5.14881,0.0755356,alcohol+calendar_area+driver_vehicle_mix+light+road_environment+time,1.92216,1.64981,2.23947,7.50402e-11
+exceeded,ka,speed_environment,limit <= 45 mph,280859,3921,1791,0.0912751,0.0252483,3.6151,3.24133,4.03198,0.0660269,alcohol+calendar_area+driver_vehicle_mix+light+road_environment+time,,,,
+exceeded,ka,speed_environment,limit >= 50 mph,113851,1649,826,0.121327,0.0419946,2.88911,2.47908,3.36697,0.0793325,alcohol+calendar_area+driver_vehicle_mix+light+road_environment+time,0.799178,0.702625,0.909,0.00107319
+exceeded,ka,period,2016-2019,203103,2432,1054,0.0851906,0.0297416,2.86436,2.4555,3.34131,0.0554491,alcohol+calendar_area+driver_vehicle_mix+light+road_environment+time,,,,
+exceeded,ka,period,2020-2024,263905,3452,1676,0.116466,0.0299896,3.88355,3.46298,4.35521,0.0864767,alcohol+calendar_area+driver_vehicle_mix+light+road_environment+time,1.35582,1.16621,1.57625,0.000198136
+exceeded,ka,hit_and_run,hit-and-run excluded,411633,5245,2587,0.111127,0.0304997,3.64355,3.20176,4.14631,0.0806276,alcohol+calendar_area+driver_vehicle_mix+light+road_environment+time,,,,
+speeding_any,ka,alcohol_imputed,no alcohol,437015,43804,7978,0.0413648,0.0264298,1.56508,1.3446,1.82172,0.014935,calendar_area+driver_vehicle_mix+light+road_environment+time,,,,
+speeding_any,ka,alcohol_imputed,alcohol,29993,5606,2445,0.136883,0.091094,1.50266,1.34735,1.67587,0.0457892,calendar_area+driver_vehicle_mix+light+road_environment+time,0.960115,0.853089,1.08057,0.490884
+speeding_any,ka,alcohol_police,police: no alcohol,302035,27823,4790,0.0381066,0.0222313,1.7141,1.49431,1.96622,0.0158753,calendar_area+driver_vehicle_mix+light+road_environment+time,,,,
+speeding_any,ka,alcohol_police,police: alcohol,22999,4574,2065,0.145302,0.095065,1.52845,1.38358,1.68848,0.0502371,calendar_area+driver_vehicle_mix+light+road_environment+time,0.891693,0.781378,1.01758,0.0871156
+speeding_any,ka,night,day (06-20),387371,37991,6671,0.0391279,0.0265241,1.47518,1.25828,1.72946,0.0126037,alcohol+calendar_area+driver_vehicle_mix+road_environment,,,,
+speeding_any,ka,night,night (21-05),77099,11252,3706,0.0811784,0.0467814,1.73527,1.56031,1.92985,0.034397,alcohol+calendar_area+driver_vehicle_mix+road_environment,1.17631,1.06349,1.3011,0.00227486
+speeding_any,ka,vehicles,single vehicle,153239,20718,5769,0.0719682,0.0493789,1.45747,1.32129,1.60769,0.0225893,alcohol+calendar_area+driver_vehicle_mix+light+road_environment+time,,,,
+speeding_any,ka,vehicles,multi-vehicle,313769,28692,4654,0.0334889,0.0217995,1.53622,1.29257,1.82579,0.0116893,alcohol+calendar_area+driver_vehicle_mix+light+road_environment+time,1.05403,0.913767,1.21583,0.461222
+speeding_any,ka,speed_environment,limit <= 45 mph,280859,25715,5411,0.0416873,0.025222,1.65281,1.38269,1.9757,0.0164653,alcohol+calendar_area+driver_vehicle_mix+light+road_environment+time,,,,
+speeding_any,ka,speed_environment,limit >= 50 mph,113851,18455,3868,0.0551642,0.0418553,1.31798,1.14734,1.51399,0.013309,alcohol+calendar_area+driver_vehicle_mix+light+road_environment+time,0.797414,0.694295,0.915848,0.001982
+speeding_any,ka,period,2016-2019,203103,21226,4027,0.0426629,0.0297063,1.43616,1.24824,1.65236,0.0129566,alcohol+calendar_area+driver_vehicle_mix+light+road_environment+time,,,,
+speeding_any,ka,period,2020-2024,263905,28184,6396,0.0498791,0.0299039,1.66798,1.44367,1.92714,0.0199752,alcohol+calendar_area+driver_vehicle_mix+light+road_environment+time,1.16142,1.06671,1.26454,0.000964668
+speeding_any,ka,hit_and_run,hit-and-run excluded,411633,44254,9746,0.0491217,0.0304315,1.61417,1.39078,1.87344,0.0186902,alcohol+calendar_area+driver_vehicle_mix+light+road_environment+time,,,,

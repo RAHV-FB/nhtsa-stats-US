@@ -1,0 +1,37 @@
+{
+ "table": "contributions/predictive.csv",
+ "description": "Predictive information of factor blocks: test R2 alone, drop when removed, exact Shapley allocation of the full-model test R2, permutation importance",
+ "population": "CRSS crashes; train 2016-2021, test 2023-2024",
+ "unit": "crash",
+ "outcome": "fatal",
+ "method": "Survey logistic models fitted on training years; design-weighted McFadden R2 and AUROC on test years; PSU-within-stratum bootstrap of the test set (200 replicates)",
+ "inputs": [
+  "data/processed/crss_crash.parquet",
+  "data/processed/fars_driver.parquet",
+  "data/processed/fars_person.parquet"
+ ],
+ "rows": 6,
+ "columns": [
+  "block",
+  "variables",
+  "r2_alone",
+  "r2_alone_low",
+  "r2_alone_high",
+  "auc_alone",
+  "r2_drop_when_removed",
+  "r2_drop_when_removed_low",
+  "r2_drop_when_removed_high",
+  "auc_drop_when_removed",
+  "shapley_r2",
+  "shapley_r2_low",
+  "shapley_r2_high",
+  "shapley_share",
+  "full_r2",
+  "full_auc",
+  "logloss_increase",
+  "logloss_increase_sd"
+ ],
+ "module": "nhtsa_stats.analysis.contributions",
+ "git_commit": "8fe8986",
+ "generated_utc": "2026-10-23T09:32:09Z"
+}

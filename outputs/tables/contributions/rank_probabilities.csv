@@ -1,0 +1,7 @@
+metric,factor,estimate,se_link,p_rank_1,p_rank_2,p_rank_3,rank_point
+adjusted RR,exceeded,5.1972,0.0913204,0.9688,0.0312,0,1
+adjusted RR,speeding_other,1.31312,0.0903925,0,0,1,3
+adjusted RR,alcohol,4.11223,0.0868643,0.0312,0.9688,0,2
+adjusted RD,exceeded,0.0214186,0.00241898,0.99415,0.00585,0,1
+adjusted RD,speeding_other,0.00159786,0.000534153,0,0,1,3
+adjusted RD,alcohol,0.0144779,0.00151902,0.00585,0.99415,0,2

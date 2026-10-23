@@ -1,0 +1,24 @@
+{
+ "table": "contributions/fars_pairwise_overlap.csv",
+ "description": "Pairwise overlap of factor-specific death counts",
+ "population": "FARS deaths 2016-2024",
+ "unit": "person killed",
+ "outcome": "",
+ "method": "Census counts",
+ "inputs": [
+  "data/processed/crss_crash.parquet",
+  "data/processed/fars_driver.parquet",
+  "data/processed/fars_person.parquet"
+ ],
+ "rows": 6,
+ "columns": [
+  "pair",
+  "deaths_both",
+  "share_of_a_also_b",
+  "share_of_b_also_a",
+  "observed_over_expected"
+ ],
+ "module": "nhtsa_stats.analysis.contributions",
+ "git_commit": "8fe8986",
+ "generated_utc": "2026-10-23T09:32:19Z"
+}

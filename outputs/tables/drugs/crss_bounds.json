@@ -1,0 +1,27 @@
+{
+ "table": "drugs/crss_bounds.csv",
+ "description": "Crude fatal RR of police-reported drug involvement under allocations of unknown status",
+ "population": "CRSS police-reported crashes with known severity",
+ "unit": "crash",
+ "outcome": "fatal",
+ "method": "Weighted 2x2 with unknown crashes allocated by scenario",
+ "inputs": [
+  "data/processed/fars_driver.parquet",
+  "data/processed/crss_crash.parquet"
+ ],
+ "rows": 81,
+ "columns": [
+  "period",
+  "scenario",
+  "k_fatal",
+  "k_nonfatal",
+  "share_unknown",
+  "unknown_share_fatal",
+  "unknown_share_nonfatal",
+  "rr",
+  "rr_complete_case"
+ ],
+ "module": "nhtsa_stats.analysis.drugs",
+ "git_commit": "8fe8986",
+ "generated_utc": "2026-10-23T09:19:39Z"
+}

@@ -1,0 +1,39 @@
+{
+ "table": "speeding/type_composition.csv",
+ "description": "Distribution of police-recorded speeding types within domains (weighted)",
+ "population": "CRSS police-reported crashes 2016-2024 with a determinable NHTSA-imputed maximum severity (MAXSEV_IM 0-4)",
+ "unit": "crash",
+ "outcome": "",
+ "method": "Weighted domain proportions, logit CIs",
+ "inputs": [
+  "data/processed/crss_crash.parquet",
+  "data/processed/fars_crash.parquet"
+ ],
+ "rows": 26,
+ "columns": [
+  "domain",
+  "level",
+  "n",
+  "share_no",
+  "share_no_low",
+  "share_no_high",
+  "share_exceeded_limit_or_racing",
+  "share_exceeded_limit_or_racing_low",
+  "share_exceeded_limit_or_racing_high",
+  "share_too_fast_for_conditions",
+  "share_too_fast_for_conditions_low",
+  "share_too_fast_for_conditions_high",
+  "share_speeding_unspecified",
+  "share_speeding_unspecified_low",
+  "share_speeding_unspecified_high",
+  "share_unknown",
+  "share_unknown_low",
+  "share_unknown_high",
+  "share_any_speeding",
+  "exceeded_share_of_speeding",
+  "flag"
+ ],
+ "module": "nhtsa_stats.analysis.speeding",
+ "git_commit": "8fe8986",
+ "generated_utc": "2026-10-23T09:19:19Z"
+}

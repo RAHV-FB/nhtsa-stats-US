@@ -1,0 +1,24 @@
+{
+ "table": "speeding/e_values.csv",
+ "description": "E-values of adjusted speeding and alcohol RRs",
+ "population": "CRSS police-reported crashes 2016-2024 with a determinable NHTSA-imputed maximum severity (MAXSEV_IM 0-4)",
+ "unit": "crash",
+ "outcome": "fatal; ka",
+ "method": "E = RR + sqrt(RR(RR-1)) (VanderWeele & Ding); CI limit nearest 1",
+ "inputs": [
+  "data/processed/crss_crash.parquet",
+  "data/processed/fars_crash.parquet"
+ ],
+ "rows": 88,
+ "columns": [
+  "exposure",
+  "outcome",
+  "specification",
+  "rr",
+  "e_value_point",
+  "e_value_ci"
+ ],
+ "module": "nhtsa_stats.analysis.speeding",
+ "git_commit": "8fe8986",
+ "generated_utc": "2026-10-23T09:19:20Z"
+}

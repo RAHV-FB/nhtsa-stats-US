@@ -1,0 +1,36 @@
+{
+ "table": "speeding/strata.csv",
+ "description": "Adjusted RR of speeding exposures within strata, with design-based heterogeneity tests (ratio of the two strata RRs)",
+ "population": "CRSS police-reported crashes 2016-2024 with a determinable NHTSA-imputed maximum severity (MAXSEV_IM 0-4)",
+ "unit": "crash",
+ "outcome": "fatal; ka",
+ "method": "Model A blocks minus the blocks that define the stratum, fitted within stratum; standardised over stratum crashes",
+ "inputs": [
+  "data/processed/crss_crash.parquet",
+  "data/processed/fars_crash.parquet"
+ ],
+ "rows": 52,
+ "columns": [
+  "exposure",
+  "outcome",
+  "split",
+  "stratum",
+  "n_crashes",
+  "n_exposed",
+  "n_exposed_events",
+  "adj_rate_exposed",
+  "adj_rate_reference",
+  "rr",
+  "rr_low",
+  "rr_high",
+  "rd",
+  "blocks",
+  "heterogeneity_ratio",
+  "heterogeneity_ratio_low",
+  "heterogeneity_ratio_high",
+  "heterogeneity_p"
+ ],
+ "module": "nhtsa_stats.analysis.speeding",
+ "git_commit": "8fe8986",
+ "generated_utc": "2026-10-23T09:19:14Z"
+}

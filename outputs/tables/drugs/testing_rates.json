@@ -1,0 +1,27 @@
+{
+ "table": "drugs/testing_rates.csv",
+ "description": "Drug- and BAC-test status of FARS drivers by survival, year, police report, measured BAC and survivor injury severity",
+ "population": "FARS drivers (PER_TYP 1) of in-transport vehicles in fatal crashes, 2016-2024",
+ "unit": "driver",
+ "outcome": "",
+ "method": "Unweighted shares (census)",
+ "inputs": [
+  "data/processed/fars_driver.parquet",
+  "data/processed/crss_crash.parquet"
+ ],
+ "rows": 40,
+ "columns": [
+  "dimension",
+  "level",
+  "survival",
+  "n",
+  "share_tested",
+  "share_not_tested",
+  "share_not_reported",
+  "share_unknown_if_tested",
+  "share_bac_tested"
+ ],
+ "module": "nhtsa_stats.analysis.drugs",
+ "git_commit": "8fe8986",
+ "generated_utc": "2026-10-23T09:19:25Z"
+}

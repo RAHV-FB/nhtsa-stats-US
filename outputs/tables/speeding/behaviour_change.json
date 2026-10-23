@@ -1,0 +1,32 @@
+{
+ "table": "speeding/behaviour_change.csv",
+ "description": "Change in the exposure log-RR when the other behaviour is added, for every set of blocks already in the model",
+ "population": "CRSS police-reported crashes 2016-2024 with a determinable NHTSA-imputed maximum severity (MAXSEV_IM 0-4)",
+ "unit": "crash",
+ "outcome": "fatal; ka",
+ "method": "Survey logistic models for every subset of 7 covariate blocks (exact cell compression); standardised RR/RD over all crashes by g-computation; joint Taylor linearisation on the 25-stratum/67-PSU design (t, 42 df); Shapley shares exact over all orderings",
+ "inputs": [
+  "data/processed/crss_crash.parquet",
+  "data/processed/fars_crash.parquet"
+ ],
+ "rows": 384,
+ "columns": [
+  "exposure",
+  "outcome",
+  "other_behaviour",
+  "blocks_already_in",
+  "n_blocks_already_in",
+  "includes_configuration",
+  "rr_before",
+  "rr_after",
+  "log_rr_reduction",
+  "log_rr_reduction_low",
+  "log_rr_reduction_high",
+  "share_of_crude",
+  "share_of_crude_low",
+  "share_of_crude_high"
+ ],
+ "module": "nhtsa_stats.analysis.speeding",
+ "git_commit": "8fe8986",
+ "generated_utc": "2026-10-23T09:17:28Z"
+}

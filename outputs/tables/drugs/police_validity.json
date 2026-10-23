@@ -1,0 +1,27 @@
+{
+ "table": "drugs/police_validity.csv",
+ "description": "Police-reported drug involvement against toxicology",
+ "population": "FARS drivers (PER_TYP 1) of in-transport vehicles in fatal crashes, 2016-2024",
+ "unit": "driver",
+ "outcome": "",
+ "method": "Shares among tested drivers",
+ "inputs": [
+  "data/processed/fars_driver.parquet",
+  "data/processed/crss_crash.parquet"
+ ],
+ "rows": 2,
+ "columns": [
+  "survival",
+  "n_positive",
+  "n_negative",
+  "sensitivity_unknown_as_no",
+  "sensitivity_among_known",
+  "police_unknown_among_positive",
+  "specificity_among_known",
+  "tested_if_police_yes",
+  "tested_if_police_no"
+ ],
+ "module": "nhtsa_stats.analysis.drugs",
+ "git_commit": "8fe8986",
+ "generated_utc": "2026-10-23T09:19:26Z"
+}

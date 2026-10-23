@@ -1,0 +1,33 @@
+{
+ "table": "restraint_behaviour/dpc_by_driver_behaviour.csv",
+ "description": "Within-vehicle belt risk ratio of death (driver / right-front pairs) within strata of the driver's speeding, BAC, crash type and time",
+ "population": "FARS 2016-2024 light passenger vehicles with one eligible driver and one right-front passenger (Phase-1 eligibility)",
+ "unit": "vehicle (pair)",
+ "outcome": "death",
+ "method": "Evans double-pair comparison, inverse-variance combination of four components; crash-cluster percentile bootstrap (1000 replicates); heterogeneity z-test on log RR with bootstrap SEs",
+ "inputs": [
+  "data/processed/fars_person.parquet",
+  "data/processed/fars_driver.parquet"
+ ],
+ "rows": 13,
+ "columns": [
+  "split",
+  "stratum",
+  "n_pairs",
+  "n_pairs_with_death",
+  "min_death_count",
+  "rr_belted_vs_unbelted",
+  "rr_low",
+  "rr_high",
+  "reduction",
+  "reduction_low",
+  "reduction_high",
+  "se_log_bootstrap",
+  "flag",
+  "heterogeneity_ratio",
+  "heterogeneity_p"
+ ],
+ "module": "nhtsa_stats.analysis.restraint_behaviour",
+ "git_commit": "8fe8986",
+ "generated_utc": "2026-10-23T09:25:00Z"
+}
