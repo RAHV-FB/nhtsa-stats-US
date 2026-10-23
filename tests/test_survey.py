@@ -137,6 +137,15 @@ def test_modelspec_rejects_undeclared_levels():
     spec = ModelSpec(categorical={"a": ["x", "y"]})
     with pytest.raises(ValueError, match="outside declared levels"):
         spec.design_matrix(pd.DataFrame({"a": ["x", "z"]}))
+    # Type mismatches are undeclared values, not missing ones.
+    with pytest.raises(ValueError, match="outside declared levels"):
+        ModelSpec(categorical={"b": [0, 1]}).design_matrix(pd.DataFrame({"b": [True, False]}))
+    with pytest.raises(ValueError, match="missing values"):
+        spec.design_matrix(pd.DataFrame({"a": ["x", None]}))
+    # Category and string dtypes match their declared levels.
+    for dtype in ("category", "string"):
+        X, _ = spec.design_matrix(pd.DataFrame({"a": pd.Series(["x", "y"], dtype=dtype)}))
+        assert X.shape[0] == 2
 
 
 def test_proportion_table_flags_small_cells(rng):

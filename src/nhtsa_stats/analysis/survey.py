@@ -264,12 +264,14 @@ class ModelSpec:
         if var in self.categorical:
             levels = self.categorical[var]
             values = df[var]
-            undeclared = values.notna() & ~values.isin(levels)
-            if undeclared.any():
-                bad = pd.unique(values[undeclared].to_numpy())[:5]
+            # One matching rule for both checks (strict: True is not 1, "2016" is not 2016).
+            codes = pd.Index(levels).get_indexer(values)
+            unmatched = codes < 0
+            present = values.notna().to_numpy()
+            if (unmatched & present).any():
+                bad = pd.unique(values[unmatched & present].to_numpy())[:5]
                 raise ValueError(f"{var}: values outside declared levels: {bad}")
-            codes = pd.Categorical(values, categories=levels).codes
-            if (codes < 0).any():  # missing values
+            if unmatched.any():
                 raise ValueError(f"{var}: missing values; declare an explicit level for them")
             block = np.zeros((len(df), len(levels) - 1))
             rows = np.nonzero(codes > 0)[0]

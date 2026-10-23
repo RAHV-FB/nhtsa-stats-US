@@ -44,13 +44,28 @@ def _exposure_picker(df: pd.DataFrame, label: str, key: str, default: str) -> it
     )
 
 
+def _domain(a: it.Exposure, b: it.Exposure) -> str | None:
+    """Standardisation population: a multi-vehicle crash type can only be assigned to
+    multi-vehicle crashes, so such pairs are standardised over those (as registered pairs are)."""
+    for e in (a, b):
+        if e.var == "crash_type" and any(
+            str(lv).startswith("mv_") for lv in (*e.exposed, *e.reference)
+        ):
+            return "multi_vehicle"
+    return None
+
+
 @st.cache_data(show_spinner="Fitting survey-weighted interaction model (20-90 s)…")
-def _fit_pair(a_var, a_exp, a_ref, b_var, b_exp, b_ref, outcome, covset) -> dict:
+def _fit_pair(
+    a_var, a_exp, a_ref, b_var, b_exp, b_ref, outcome, covset, domain=None, extra=()
+) -> dict:
     df, design = severity.load(outcome)
     comb = it.Combination(
         "custom",
         (it.Exposure(a_var, a_exp, a_ref, a_var), it.Exposure(b_var, b_exp, b_ref, b_var)),
         covset,
+        extra_covariates=tuple(extra),
+        domain=domain,
     )
     return it.analyse_pair(df, design, outcome, comb, df["YEAR"].nunique())
 
@@ -136,21 +151,28 @@ def render() -> None:
     st.subheader("Adjusted interaction")
     kind_note("adjusted")
     pre = output_table("interactions", f"pairs_{outcome}")
+
+    def key(e: it.Exposure) -> tuple:  # levels picked in any order are the same exposure
+        return (e.var, frozenset(e.exposed), frozenset(e.reference))
+
     reg = None  # (Combination, pre-computed row) when the selection is a registered pair
+    swapped = None  # registered pair chosen with A and B the other way round
     if pre is not None:
         for comb in it.PAIRS:
             ea, eb = comb.exposures
-            # Order-insensitive: the same levels picked in another order are the same pair.
-            if {
-                (ea.var, frozenset(ea.exposed), frozenset(ea.reference)),
-                (eb.var, frozenset(eb.exposed), frozenset(eb.reference)),
-            } == {
-                (a.var, frozenset(a.exposed), frozenset(a.reference)),
-                (b.var, frozenset(b.exposed), frozenset(b.reference)),
-            }:
-                hit = pre[pre["pair"] == comb.name]
-                if len(hit):
-                    reg = (comb, hit.iloc[0].to_dict())
+            hit = pre[pre["pair"] == comb.name]
+            if not len(hit):
+                continue
+            # Ordered match: the "RR of A given B" rows are not symmetric in A and B.
+            if (key(ea), key(eb)) == (key(a), key(b)):
+                reg = (comb, hit.iloc[0].to_dict())
+            elif (key(ea), key(eb)) == (key(b), key(a)):
+                swapped = comb
+    if swapped is not None:
+        st.caption(
+            f"This pair is registered as '{swapped.name}' with the factors the other way round; "
+            "swap Factor A and Factor B to see its pre-computed estimate."
+        )
     sets = ["A", "B"]
     covset = st.radio(
         "Adjustment set",
@@ -174,7 +196,16 @@ def render() -> None:
             )
         if st.button("Fit adjusted model"):
             match = _fit_pair(
-                a.var, a.exposed, a.reference, b.var, b.exposed, b.reference, outcome, covset
+                a.var,
+                a.exposed,
+                a.reference,
+                b.var,
+                b.exposed,
+                b.reference,
+                outcome,
+                covset,
+                domain=reg[0].domain if reg else _domain(a, b),
+                extra=reg[0].extra_covariates if reg else (),
             )
     elif reg[0].prespecified:
         n_reg = sum(c.prespecified for c in it.PAIRS)
