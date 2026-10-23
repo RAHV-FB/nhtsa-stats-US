@@ -103,6 +103,20 @@
     "table": "matched/belt_effect.csv"
   },
   {
+    "title": "The post-2020 rise in crash severity is only partly explained by the recorded crash mix",
+    "statement": "The fatal share of police-reported crashes was higher in 2020–24 than in 2016–19. Changes in the recorded circumstances of crashes account for a third to a half of the rise; the rest is a higher fatal share within the same circumstances, most clearly in speeding-related crashes.",
+    "effect": "Fatal share {{trends/numerator_denominator|outcome=fatal;comparison=2020-2024 vs 2016-2019;quantity=fatal_share_base|estimate|pct:2}} (2016–19) vs {{trends/numerator_denominator|outcome=fatal;comparison=2020-2024 vs 2016-2019;quantity=fatal_share_comparison|estimate|pct:2}} (2020–24), risk ratio {{trends/numerator_denominator|outcome=fatal;comparison=2020-2024 vs 2016-2019;quantity=ratio_fatal_share|estimate|ci:2}}. Share of the rise accounted for by the recorded crash mix: {{trends/decomposition|analysis=model_B;outcome=fatal;quantity=composition_share_of_change_ref_P0|estimate|cipct:0}}; within-circumstance risk ratio {{trends/decomposition|analysis=model_B;outcome=fatal;quantity=risk_ratio_within_ref_P0|estimate|ci:2}}.",
+    "uncertainty": "Design-based (Taylor linearisation, 42 df); the variance of NHTSA's single imputation of severity is not included.",
+    "population": "CRSS police-reported crashes 2016–2024 with known imputed maximum severity; FARS fatal crashes for corroboration.",
+    "denominator": "Police-reported crashes of all severities (CRSS, weighted).",
+    "adjustment": "Pre-crash circumstances and crash configuration (model B); composition effect from applying the 2016–19 model to 2020–24 crashes.",
+    "robustness": "With the 2020–24 model as reference the composition share is {{trends/decomposition|analysis=model_B;outcome=fatal;quantity=composition_share_of_change_ref_P1|estimate|cipct:0}}; without coding-drift variables, {{trends/decomposition|analysis=sens_B_without_coding_drift_vars;outcome=fatal;quantity=composition_share_of_change_ref_P0|estimate|cipct:0}}; complete-case outcome, {{trends/decomposition|analysis=model_B;outcome=fatal_cc;quantity=composition_share_of_change_ref_P0|estimate|cipct:0}}. About half of the rise in the share reflects fewer reported non-fatal crashes ({{trends/numerator_denominator|outcome=fatal;comparison=2020-2024 vs 2016-2019;quantity=denominator_share_of_log_rise|estimate|cipct:0}}).",
+    "limitations": "The within-circumstance part is a residual (unmeasured speed, recording changes, reporting changes). The two outcome definitions disagree about 2023–24. No exposure data; the rise cannot be attributed to any cause.",
+    "kind": "adjusted",
+    "evidence": "trends/decomposition; trends/numerator_denominator; trends/annual_shares; trends/outcome_definitions_by_year; trends/fars_changes",
+    "table": "trends/decomposition.csv"
+  },
+  {
     "title": "Police-recorded behaviours are measured differently by severity",
     "statement": "Alcohol testing is selective (killed drivers tested far more often than survivors), police reports miss alcohol, CRSS alcohol coding broke in 2019, restraint use is self-reported by survivors, and drug and distraction fields cannot support severity or trend analysis.",
     "effect": "2024: {{measurement/fars_testing|level=national;YEAR=2024;status=killed|pct_alcohol_tested|.0f}}% of killed vs {{measurement/fars_testing|level=national;YEAR=2024;status=survived|pct_alcohol_tested|.0f}}% of surviving drivers alcohol-tested. CRSS alcohol unknown in non-fatal crashes: {{measurement/unknown_by_year|field=alcohol;fatal=0;YEAR=2018|pct_unknown|.0f}}% (2018) → {{measurement/unknown_by_year|field=alcohol;fatal=0;YEAR=2019|pct_unknown|.0f}}% (2019).",

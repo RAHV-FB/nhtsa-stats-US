@@ -79,7 +79,8 @@ def _fmt(value, fmt: str, row: pd.Series | None = None, column: str | None = Non
             raise RenderError(f"CI columns {lo_col}/{hi_col} missing")
         mult, suf = {"cipct": (100.0, "%"), "cix1000": (1000.0, ""), "ci": (1.0, "")}[kind]
         est, lo, hi = (mult * num(row[c]) for c in (column, lo_col, hi_col))
-        return f"{est:.{nd}f}{suf} ({lo:.{nd}f}–{hi:.{nd}f}{suf})"
+        sep = " to " if min(lo, hi) < 0 else "–"  # "-6–-4" is unreadable
+        return f"{est:.{nd}f}{suf} ({lo:.{nd}f}{sep}{hi:.{nd}f}{suf})"
     if fmt.startswith("pct:"):
         return f"{100 * num(value):.{int(fmt[4:])}f}%"
     if fmt.startswith("x1000:"):

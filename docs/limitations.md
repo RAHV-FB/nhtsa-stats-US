@@ -65,9 +65,12 @@ policy questions require data that do not exist in this repository.
   flagged. CRSS 2016 was a transition sample (fewer PSUs).
 * Pooling nine years uses the same PSUs; year effects are included in models, but changes in
   reporting practice across years are only partly captured.
-* Crashes with unknown maximum severity (~1.9% of CRSS) are excluded; they are also the least
-  documented crashes, so excluding them removes poorly recorded crashes twice (once for the
-  outcome, once for covariates). Sensitivity analysis uses NHTSA's imputed severity.
+* The primary CRSS outcome is NHTSA's imputed maximum severity (`MAXSEV_IM`); only crashes
+  it codes as unknown or died-prior (~0.4%) are excluded. The sensitivity analysis is the
+  strict complete case (`fatal_cc`, `ka_cc`), which drops about 8% of crashes, and which ones
+  depends on the outcome: a crash drops out only when someone's severity is unknown and nobody
+  died. It is a bound on the definition, not a better estimate. Where the two definitions
+  disagree (the 2023–24 excess in RQ5, crude night and weekend RRs in RQ4), both are reported.
 * NHTSA's single imputations (`*_IM`, CRSS) understate variance by roughly the imputed
   fraction; their imputation models are not documented in the archives (it is unverified
   whether they condition on severity).

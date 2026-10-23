@@ -112,14 +112,14 @@ Priority reflects scientific value × evidential strength × policy relevance ×
 | Element | Specification |
 |---|---|
 | Question | How much of the excess severity of night-time crashes is accounted for by light condition, speed environment, alcohol, speeding, driver age mix, vehicle mix and crash configuration? |
-| Method | Sequential adjustment (crude → +calendar/area → +light → +road/speed limit → +alcohol → +speeding → +driver/vehicle mix → +configuration) of the standardised night-vs-day risk ratio; share of the crude log-RR retained at each step; order-sensitivity (alternative orderings) |
+| Method | Sequential adjustment (crude → +calendar/area → +weekend → +light → +road/speed limit → +alcohol → +speeding → +driver/vehicle mix → +configuration) of the standardised night-vs-day risk ratio; share of the crude log-RR retained at each step; order-sensitivity (alternative orderings) |
 | Justified | Statistical accounting of an association; not a causal mediation analysis (no ordering assumptions are verifiable) |
 
 ### RQ5 (priority 2) — The post-2020 rise in crash severity
 
 | Element | Specification |
 |---|---|
-| Question | The weighted fatal share of police-reported crashes rose from ~0.48% (2016–2019) to ~0.63% (2020–2024) while FARS deaths peaked at 43,230 in 2021. How much of the rise is explained by changes in the mix of crash circumstances (composition) versus changes in severity within circumstances? |
+| Question | The weighted fatal share of police-reported crashes rose from ~0.51% (2016–2019) to ~0.64% (2020–2024; ~0.67% under the strict complete-case definition) while FARS deaths peaked at 43,230 in 2021. How much of the rise is explained by changes in the mix of crash circumstances (composition) versus changes in severity within circumstances? |
 | Method | Survey-weighted Oaxaca–Blinder-type decomposition with standardised margins: predicted fatal share of 2020–24 crashes under the 2016–19 model vs observed; FARS composition trends for corroboration |
 | Not justified | Attribution to a specific cause (pandemic, enforcement, etc.) — not measured |
 
@@ -236,3 +236,9 @@ Behaviours are recorded by police *after* the crash, and recording depends on se
   limit-exceedance follow-ups are exploratory and outside the Holm family. Three-way
   combinations use a fixed list of three triples (not "pairs that survive"), each estimated
   only when the fully exposed cell has at least 20 fatal crashes.
+  RQ4 and RQ5, recorded from the implementation: the RQ4 block order includes a weekend block
+  after calendar/area (night × weekend share drinking-related crashes, so weekend is adjusted
+  before light), and Shapley shares over all 8! orderings complement the five sequential
+  orderings. RQ5 reports the decomposition under both outcome definitions (imputed and
+  complete case) and under both reference models (2016–19 and 2020–24), because the
+  composition share depends on the reference.

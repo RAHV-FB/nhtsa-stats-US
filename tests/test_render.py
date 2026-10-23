@@ -82,9 +82,13 @@ def test_ci_column_variants(tmp_path, monkeypatch):
             "odds_ratio": [5.07],
             "or_low": [4.84],
             "or_high": [5.31],
+            "share": [-0.05],
+            "share_low": [-0.06],
+            "share_high": [-0.04],
         }
     ).to_csv(tmp_path / "m" / "v.csv", index=False)
     render._table.cache_clear()
     assert render.render_text("{{m/v|term=a|estimate|ci:2}}") == "0.66 (0.65–0.67)"
     assert render.render_text("{{m/v|term=a|odds_ratio|ci:2@or}}") == "5.07 (4.84–5.31)"
+    assert render.render_text("{{m/v|term=a|share|cipct:0}}") == "-5% (-6 to -4%)"
     render._table.cache_clear()

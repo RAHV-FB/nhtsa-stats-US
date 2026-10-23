@@ -34,7 +34,11 @@
 7. **Within the same vehicle, unbelted occupants die far more often than belted ones.**
    The size of that difference is very sensitive to how accurately surviving occupants report
    belt use.
-8. **The post-2020 rise in crash severity is mostly *not* explained by the recorded crash mix.**
+8. **The post-2020 rise in crash severity is only partly explained by the recorded crash mix.**
+   Changes in the recorded circumstances of crashes account for a third to a half of the rise in
+   the fatal share; the rest is a higher fatal share within the same circumstances, most clearly
+   in speeding-related crashes. Separately, about half of the rise in the share reflects fewer
+   non-fatal crashes being reported rather than more fatal ones.
 9. **Police-recorded behaviours are measured differently by severity.** Drug and distraction
    fields cannot support severity or trend analysis at all.
 10. **The database identifies no intervention effect.** It can show where deaths concentrate,
@@ -134,7 +138,42 @@ What changes, and why it matters:
   part of what night means, so the second figure removes part of the night effect itself. The
   night-time hazard is largely the hazard of *what happens at night*: darkness, alcohol,
   higher-speed roads and different crash types. A residual association remains.
-  <!-- SECTION: confounding -->
+  *How much each circumstance accounts for* (`confounding/sequential_fatal`,
+  `confounding/shapley_fatal`; adjusted association). Defining night as 21:00–05:59 against
+  06:00–20:59, the crude risk ratio is {{confounding/sequential_fatal|exposure=night;ordering=primary;step=0|rr|ci:2}}. Adjusting for eight blocks of
+  circumstances at once leaves {{confounding/sequential_fatal|exposure=night;ordering=primary;step=8|rr|ci:2}}, which retains
+  {{confounding/sequential_fatal|exposure=night;ordering=primary;step=8|share_logrr_retained|cipct:0@share_retained}} of the crude log risk ratio.
+  Averaged over every order in which the blocks can be added (Shapley shares), light condition
+  accounts for {{confounding/shapley_fatal|exposure=night;variant=all_blocks;block=light|shapley_share_of_crude|cipct:0@share}} of the crude log risk ratio, alcohol for {{confounding/shapley_fatal|exposure=night;variant=all_blocks;block=alcohol|shapley_share_of_crude|cipct:0@share}}, crash
+  configuration for {{confounding/shapley_fatal|exposure=night;variant=all_blocks;block=configuration|shapley_share_of_crude|cipct:0@share}} and the road environment for {{confounding/shapley_fatal|exposure=night;variant=all_blocks;block=road_environment|shapley_share_of_crude|cipct:0@share}}.
+  The share credited to light depends strongly on the order: from
+  {{confounding/shapley_fatal|exposure=night;variant=all_blocks;block=light|min_share_any_order|pct:0}} to {{confounding/shapley_fatal|exposure=night;variant=all_blocks;block=light|max_share_any_order|pct:0}}
+  across orders, because light and night are nearly the same thing: at night,
+  {{confounding/night_light_overlap|period=night;light=dark_lighted|weighted_share_of_period|pct:0}}
+  of crashes were in lit and
+  {{confounding/night_light_overlap|period=night;light=dark_not_lighted|weighted_share_of_period|pct:0}}
+  in unlit darkness (`confounding/night_light_overlap`). Comparing night with day among crashes
+  in darkness only, the crude ratio of
+  {{confounding/night_within_dark|outcome=fatal;model=crude|rr|ci:2}} falls to
+  {{confounding/night_within_dark|outcome=fatal;model=all_blocks_without_light|rr|ci:2}} after
+  adjustment (`confounding/night_within_dark`). The driver and vehicle mix works the other way:
+  its share is negative,
+  {{confounding/shapley_fatal|exposure=night;variant=all_blocks;block=driver_vehicle_mix|shapley_share_of_crude|cipct:0@share}},
+  so holding it fixed widens the night–day gap.
+  The same accounting for weekend crashes takes the crude ratio of {{confounding/sequential_fatal|exposure=weekend;ordering=primary;step=0|rr|ci:2}} to
+  {{confounding/sequential_fatal|exposure=weekend;ordering=primary;step=8|rr|ci:2}}, mostly through time of day and alcohol; for crashes in rural sampling
+  areas (an area-level measure, not the crash site), {{confounding/sequential_fatal|exposure=rural;ordering=primary;step=0|rr|ci:2}} becomes {{confounding/sequential_fatal|exposure=rural;ordering=primary;step=8|rr|ci:2}}.
+  For crashes involving a driver aged 65+, adjustment *strengthens* the association, from
+  {{confounding/sequential_fatal|exposure=older_driver;ordering=primary;step=0|rr|ci:2}} to {{confounding/sequential_fatal|exposure=older_driver;ordering=primary;step=8|rr|ci:2}}, so shares of it are not meaningful.
+  Under the strict complete-case outcome the fully adjusted night ratio is
+  {{confounding/outcome_definition_sensitivity|exposure=night;model=all_blocks|rr_cc|ci:2}}
+  (`confounding/outcome_definition_sensitivity`), the same as under the imputed outcome; only
+  the crude ratio moves
+  ({{confounding/outcome_definition_sensitivity|exposure=night;model=crude|rr_cc|ci:2}}).
+  These shares are statistical accounting, not causal mediation. The order of the blocks cannot
+  be verified, several blocks are plausible mediators, the behaviours are police-recorded, and
+  there are no exposure data, so they do not support statements such as "a third of the night
+  effect is caused by darkness".
 * **Rain** looks protective in the raw data (crude RR
   {{severity/fatal_crude_vs_adjusted|factor=weather;level=rain|crude_rr|ci:2}}). Adjusted for the
   other circumstances but not for road surface, rain-crashes remain less severe
@@ -386,7 +425,76 @@ by police, partly from survivors' statements.
 
 ## 9. Finding 8 — The post-2020 rise in severity
 
-<!-- SECTION: trends -->
+*Sources: `trends/numerator_denominator`, `trends/decomposition`, `trends/annual_shares`,
+`trends/within_by_subgroup`, `trends/outcome_definitions_by_year`, `trends/fars_changes`.
+Method: survey-weighted Oaxaca–Blinder-type decomposition with standardised margins: the
+2016–19 model applied to 2020–24 crashes gives the fatal share expected from the change in
+recorded circumstances alone. Labels: estimated (shares), adjusted association (composition and
+within-circumstance parts), observed (FARS).*
+
+**How large the rise is.** The fatal share of police-reported crashes rose from
+{{trends/numerator_denominator|outcome=fatal;comparison=2020-2024 vs 2016-2019;quantity=fatal_share_base|estimate|cipct:2}} in 2016–19 to {{trends/numerator_denominator|outcome=fatal;comparison=2020-2024 vs 2016-2019;quantity=fatal_share_comparison|estimate|cipct:2}}
+in 2020–24, a risk ratio of {{trends/numerator_denominator|outcome=fatal;comparison=2020-2024 vs 2016-2019;quantity=ratio_fatal_share|estimate|ci:2}}. Under the strict
+complete-case outcome the rise is larger: {{trends/numerator_denominator|outcome=fatal_cc;comparison=2020-2024 vs 2016-2019;quantity=ratio_fatal_share|estimate|ci:2}}.
+The fatal-or-serious (KA) share shows no clear rise
+({{trends/decomposition|analysis=model_B;outcome=ka;quantity=total_change|estimate|ci:2}} percentage points).
+
+**Numerator and denominator.** Fatal crashes rose
+({{trends/numerator_denominator|outcome=fatal;comparison=2020-2024 vs 2016-2019;quantity=ratio_fatal_crashes_numerator|estimate|ci:3}}, matching the FARS census ratio of
+{{trends/numerator_denominator|outcome=fatal;comparison=2020-2024 vs 2016-2019;quantity=FARS_ratio_fatal_crashes (census)|estimate|.3f}}), but the
+number of police-reported crashes fell ({{trends/numerator_denominator|outcome=fatal;comparison=2020-2024 vs 2016-2019;quantity=ratio_reported_crashes_denominator|estimate|ci:3}}).
+The fall in reported crashes accounts for {{trends/numerator_denominator|outcome=fatal;comparison=2020-2024 vs 2016-2019;quantity=denominator_share_of_log_rise|estimate|cipct:0}}
+of the rise in the fatal share. It is not only a fall in property-damage-only reports: deaths
+also rose as a share of injury crashes ({{trends/numerator_denominator|outcome=fatal;comparison=2020-2024 vs 2016-2019;quantity=ratio_K_share_of_injury_KABC|estimate|ci:2}}).
+
+**Composition accounts for a third to a half.** This is a second, separate accounting of the
+same rise, not an addition to the first. Changes in the recorded circumstances of crashes
+(time, road, light, weather, alcohol, speeding, driver and vehicle mix, crash configuration)
+account for {{trends/decomposition|analysis=model_B;outcome=fatal;quantity=composition_share_of_change_ref_P0|estimate|cipct:0}} of the rise
+when the 2016–19 model is the reference and
+{{trends/decomposition|analysis=model_B;outcome=fatal;quantity=composition_share_of_change_ref_P1|estimate|cipct:0}} with the 2020–24 model.
+Without crash configuration the share is {{trends/decomposition|analysis=model_A;outcome=fatal;quantity=composition_share_of_change_ref_P0|estimate|cipct:0}};
+without the three variables whose "unknown" coding drifted over the period (junction, weather,
+road surface) it is {{trends/decomposition|analysis=sens_B_without_coding_drift_vars;outcome=fatal;quantity=composition_share_of_change_ref_P0|estimate|cipct:0}};
+under the complete-case outcome it is {{trends/decomposition|analysis=model_B;outcome=fatal_cc;quantity=composition_share_of_change_ref_P0|estimate|cipct:0}}.
+Within the same recorded circumstances the fatal share was higher by a factor of
+{{trends/decomposition|analysis=model_B;outcome=fatal;quantity=risk_ratio_within_ref_P0|estimate|ci:2}}. The largest within-circumstance
+increase is in speeding-related crashes ({{trends/within_by_subgroup|analysis=model_B;outcome=fatal;subgroup=speeding-related|within_rr|ci:2}}); there is none in
+alcohol-involved crashes ({{trends/within_by_subgroup|analysis=model_B;outcome=fatal;subgroup=alcohol involved (imputed)|within_rr|ci:2}}).
+
+**Year by year, the two outcome definitions disagree about 2023–24.** Observed fatal share
+against the share expected from the recorded crash mix under the 2016–19 model (model B):
+
+| Year | Fatal share, imputed outcome | Observed ÷ expected, imputed | Fatal share, complete case | Observed ÷ expected, complete case |
+|---|---|---|---|---|
+| 2019 | {{trends/annual_shares|YEAR=2019;outcome=fatal|crude_share|cipct:2@crude}} | {{trends/annual_shares|YEAR=2019;outcome=fatal|obs_over_expectedB|ci:2}} | {{trends/annual_shares|YEAR=2019;outcome=fatal_cc|crude_share|cipct:2@crude}} | {{trends/annual_shares|YEAR=2019;outcome=fatal_cc|obs_over_expectedB|ci:2}} |
+| 2020 | {{trends/annual_shares|YEAR=2020;outcome=fatal|crude_share|cipct:2@crude}} | {{trends/annual_shares|YEAR=2020;outcome=fatal|obs_over_expectedB|ci:2}} | {{trends/annual_shares|YEAR=2020;outcome=fatal_cc|crude_share|cipct:2@crude}} | {{trends/annual_shares|YEAR=2020;outcome=fatal_cc|obs_over_expectedB|ci:2}} |
+| 2021 | {{trends/annual_shares|YEAR=2021;outcome=fatal|crude_share|cipct:2@crude}} | {{trends/annual_shares|YEAR=2021;outcome=fatal|obs_over_expectedB|ci:2}} | {{trends/annual_shares|YEAR=2021;outcome=fatal_cc|crude_share|cipct:2@crude}} | {{trends/annual_shares|YEAR=2021;outcome=fatal_cc|obs_over_expectedB|ci:2}} |
+| 2022 | {{trends/annual_shares|YEAR=2022;outcome=fatal|crude_share|cipct:2@crude}} | {{trends/annual_shares|YEAR=2022;outcome=fatal|obs_over_expectedB|ci:2}} | {{trends/annual_shares|YEAR=2022;outcome=fatal_cc|crude_share|cipct:2@crude}} | {{trends/annual_shares|YEAR=2022;outcome=fatal_cc|obs_over_expectedB|ci:2}} |
+| 2023 | {{trends/annual_shares|YEAR=2023;outcome=fatal|crude_share|cipct:2@crude}} | {{trends/annual_shares|YEAR=2023;outcome=fatal|obs_over_expectedB|ci:2}} | {{trends/annual_shares|YEAR=2023;outcome=fatal_cc|crude_share|cipct:2@crude}} | {{trends/annual_shares|YEAR=2023;outcome=fatal_cc|obs_over_expectedB|ci:2}} |
+| 2024 | {{trends/annual_shares|YEAR=2024;outcome=fatal|crude_share|cipct:2@crude}} | {{trends/annual_shares|YEAR=2024;outcome=fatal|obs_over_expectedB|ci:2}} | {{trends/annual_shares|YEAR=2024;outcome=fatal_cc|crude_share|cipct:2@crude}} | {{trends/annual_shares|YEAR=2024;outcome=fatal_cc|obs_over_expectedB|ci:2}} |
+
+Under NHTSA's imputed outcome the 2023–24 fatal share is close to what the crash mix predicts;
+under the complete case an excess persists. The imputed CRSS fatal total matches FARS every
+year, but by construction (CRSS weights are calibrated to FARS through the imputed severity),
+so this is not independent corroboration (`trends/outcome_definitions_by_year`).
+
+**What FARS shows (observed).** Between 2019 and 2021 fatal crashes rose
+{{trends/fars_changes|indicator=fatal_crashes|pct_change_2019_2021|.1f}}%. Crashes with police-recorded speeding rose
+{{trends/fars_changes|indicator=speeding_crashes|pct_change_2019_2021|.1f}}% and crashes with a driver at BAC ≥ 0.08
+(NHTSA's multiple imputation) {{trends/fars_changes|indicator=bac08_crashes_mi|pct_change_2019_2021|.1f}}%; these
+overlapping groups account for {{trends/fars_changes|indicator=speeding_crashes|share_of_total_change_2019_2021|pct:0}}
+and {{trends/fars_changes|indicator=bac08_crashes_mi|share_of_total_change_2019_2021|pct:0}} of the rise. Motorcyclist
+deaths kept rising to 2024 ({{trends/fars_changes|indicator=motorcyclist_deaths|2019|,.0f}} →
+{{trends/fars_changes|indicator=motorcyclist_deaths|2021|,.0f}} → {{trends/fars_changes|indicator=motorcyclist_deaths|2024|,.0f}}), while total
+deaths fell back from {{trends/fars_changes|indicator=deaths|2021|,.0f}} to {{trends/fars_changes|indicator=deaths|2024|,.0f}}.
+
+*Limitations.* The within-circumstance part is a residual: it contains unmeasured circumstances
+(travel speed above all), changes in recording, and changes in which crashes are reported to
+the police. The split between composition and within-circumstance depends on the reference
+model, and the variance of NHTSA's single imputation of severity is not in the intervals. There
+are no exposure, speed or enforcement data, so the rise cannot be attributed to the pandemic or
+any other cause.
 
 ## 10. Finding 9 — Measurement: what the data can and cannot measure
 
