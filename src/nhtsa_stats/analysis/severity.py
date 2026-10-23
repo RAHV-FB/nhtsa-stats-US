@@ -207,6 +207,7 @@ def crude_vs_adjusted(outcome: str = "fatal", years: Sequence[int] | None = None
     # finite but its contrast and CI would be arbitrary and spuriously precise.
     no_events = res["n_events"].eq(0) | res.groupby("factor")["n_events"].transform("first").eq(0)
     adj_cols = [c for c in res.columns if c.startswith(("A_adj_r", "Ax_adj_r", "B_adj_r"))]
+    adj_cols += ["crude_rr_low", "crude_rr_high"]  # the saturated crude fit degenerates too
     res.loc[no_events, adj_cols] = np.nan
     res.loc[no_events, "adj_flag"] = "no events in level or reference: not estimable"
     # Attenuation: share of the crude log-RR that remains after adjustment.

@@ -563,6 +563,11 @@ REGISTRY: dict[str, VarInfo] = {
     # person-level
     "age": VarInfo("pre_crash", "person"),
     "age_band": VarInfo("pre_crash", "person"),
+    "other_vehicle_body": VarInfo(
+        "crash_circumstance",
+        "person",
+        "body group of the other vehicle in a two-vehicle crash (implies the crash configuration)",
+    ),
     # Non-motorist analyses (analysis/vulnerable.py)
     "str_speed_limit": VarInfo(
         "pre_crash", "person", "posted limit of the striking vehicle's road"
