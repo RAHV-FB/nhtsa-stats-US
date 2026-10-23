@@ -9,7 +9,7 @@ import polars as pl
 
 from nhtsa_stats.ingestion.cache import load_table
 
-OUT = "/tmp/nhtsa-audit/out"
+OUT = "outputs/cache/audit/out"
 
 VARS = {
     "FARS": ["PER_TYP", "SEX", "INJ_SEV", "SEAT_POS", "REST_USE", "REST_MIS", "HELM_USE", "HELM_MIS",

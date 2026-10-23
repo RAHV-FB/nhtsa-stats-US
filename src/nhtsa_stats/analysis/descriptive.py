@@ -97,6 +97,13 @@ def crss_annual() -> pd.DataFrame:
     return pd.DataFrame(rows)
 
 
+# CRSS driver-age flags use NHTSA's imputed age (unknown for ~0.1% of crashes); FARS has only the
+# reported age (unknown for ~4%, mostly hit-and-run, counted as "not young"/"not older" by a
+# yes/no comparison).  For these factors the FARS share is taken among crashes with a known
+# driver age, and the "unknown" level gets no over-representation ratio.
+FARS_KNOWN_ONLY = ("young_driver", "older_driver")
+
+
 def _levels(var: str) -> list:
     return specs.CRASH_LEVELS.get(var, ["no", "yes", "unknown"])
 
@@ -139,8 +146,14 @@ def frequency_vs_severity() -> pd.DataFrame:
                 else ("unstable" if rate.rse > config.MAX_RSE else ""),
             }
             if var in SHARED_FACTORS and var in fars.columns:
-                share_fars = float((fars[var] == lv).mean())
-                rec["n_fars"] = int((fars[var] == lv).sum())
+                fv = fars[var]
+                if var in FARS_KNOWN_ONLY:
+                    if lv == "unknown":  # unknown means different things in the two systems
+                        rows.append(rec)
+                        continue
+                    fv = fv[fv != "unknown"]
+                share_fars = float((fv == lv).mean())
+                rec["n_fars"] = int((fv == lv).sum())
                 rec["share_fatal_fars"] = share_fars
                 # CI of the ratio reflects CRSS sampling error only (FARS is a census).
                 r = share_fars / share_all.estimate
@@ -218,7 +231,8 @@ def run() -> dict[str, pd.DataFrame]:
         ),
         "frequency_vs_severity": (
             "Factor prevalence among all crashes (CRSS) vs among fatal crashes (CRSS and FARS), crude fatal "
-            "rate and over-representation ratio",
+            "rate and over-representation ratio; for driver-age flags the FARS share is among crashes with "
+            "known driver age (CRSS uses NHTSA's imputed age) and the unknown level has no ratio",
             "CRSS 2016-2024 (denominators); FARS 2016-2024 (fatal crashes)",
             "crash",
             "fatal (MAXSEV_IM=4)",

@@ -1,7 +1,7 @@
 """Per source-year code distributions of every column in acc_aux/veh_aux/per_aux."""
 import polars as pl
 from pathlib import Path
-OUT = Path("/tmp/nhtsa-audit/out_aux")
+OUT = Path("outputs/cache/audit/out_aux")
 rows = []
 for src in ["FARS", "CRSS"]:
     for tab in ["acc_aux", "veh_aux", "per_aux"]:

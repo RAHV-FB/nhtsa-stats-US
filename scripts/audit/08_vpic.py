@@ -1,7 +1,7 @@
 """vpicdecode: join structure with vehicle, coverage, safety-tech field values."""
 import polars as pl
 pl.Config.set_tbl_rows(200); pl.Config.set_tbl_cols(30); pl.Config.set_tbl_width_chars(300); pl.Config.set_fmt_str_lengths(60)
-OUT="/tmp/nhtsa-audit/out"
+OUT="outputs/cache/audit/out"
 rows=[]
 for src in ["FARS","CRSS"]:
     key = ["ST_CASE","VEH_NO"] if src=="FARS" else ["CASENUM","VEH_NO"]

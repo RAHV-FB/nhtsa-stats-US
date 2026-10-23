@@ -74,8 +74,11 @@ def segment_deaths() -> dict[str, dict]:
     per = data.fars_person(WINDOW)
     killed = per[per["killed"] == 1].copy()
     k = len(WINDOW)
+    from nhtsa_stats.simulation import engine  # segment definitions shared with the simulator
+
     seg_crash = {
         "speeding": crash["speeding"] == 1,
+        "speeding_exceeded_limit": crash["speeding_type"] == engine.EXCEEDED,
         "alcohol_bac08": None,  # expected value over implicates, handled below
         "drugs_police_reported": crash["drugs"] == 1,
         "night_weekend": (crash["night"] == 1) & (crash["weekend"] == 1),
@@ -102,11 +105,9 @@ def segment_deaths() -> dict[str, dict]:
             "pct_occupants": 100 * kk["ptype"].isin(["driver", "passenger"]).mean(),
             "kind": "observed (FARS census)",
         }
-    lpv = killed[
-        killed["ptype"].isin(["driver", "passenger"])
-        & killed["body"].isin(LPV)
-        & (killed["age"] >= 8)
-    ]
+    # The population of the within-vehicle belt estimate (LPV occupants aged 13+, front or
+    # second row), as in the simulator's unrestrained segment.
+    lpv = killed[engine.belt_eligible_mask(killed)]
     unb = lpv[lpv["restraint"] == "none"]
     out["unrestrained_lpv_occupants"] = {
         "deaths_per_year": len(unb) / k,
@@ -261,7 +262,11 @@ def build_ledger() -> pd.DataFrame:
             "prevalence_fatal_crashes": f"{100 * sp['share_fatal_fars']:.1f}% of fatal crashes (FARS)"
             if sp is not None
             else "",
-            "fars_deaths_per_year_in_segment": round(seg["speeding"]["deaths_per_year"]),
+            "fars_deaths_per_year_in_segment": round(
+                seg["speeding_exceeded_limit"]["deaths_per_year"]
+            ),
+            "fars_deaths_per_year_note": "deaths in crashes with a driver who exceeded the limit or "
+            f"was racing (the camera target); all speeding-related: {seg['speeding']['deaths_per_year']:,.0f}",
             "adjusted_severity_rr": speed_rr,
             "measurement_robustness": "Aggregate association FRAGILE: it mixes a strong association for exceeding "
             "the limit with none for 'too fast for conditions'. "
@@ -383,8 +388,8 @@ def build_ledger() -> pd.DataFrame:
             "evidence_grade_target_association": "strong for protection given a fatal crash (matched design), with misreporting caveat",
         },
         {
-            "intervention": "Targeted enforcement in high-risk periods (night, weekend)",
-            "target_factor": "Night (21:00-05:59) and weekend crashes",
+            "intervention": "Targeted enforcement in high-risk periods (weekend nights)",
+            "target_factor": "Crashes on weekend nights (21:00-05:59, Saturday and Sunday)",
             "prevalence_all_crashes": _fmt_ci(
                 _row(freq, factor="tod", level="00-05"),
                 "share_all_crashes",
@@ -398,7 +403,7 @@ def build_ledger() -> pd.DataFrame:
             if freq is not None
             else "",
             "fars_deaths_per_year_in_segment": round(seg["night_weekend"]["deaths_per_year"]),
-            "adjusted_severity_rr": "00-05 vs 10-15: crude "
+            "adjusted_severity_rr": "time of day, all days (not weekend nights only), 00-05 vs 10-15: crude "
             + _fmt_ci(
                 _row(sev, factor="tod", level="00-05"), "crude_rr", "crude_rr_low", "crude_rr_high"
             )
@@ -478,11 +483,7 @@ def run() -> dict:
     )
     save_json(seg, MODULE, "segment_deaths")
     out = {"evidence_ledger": ledger, "segment_deaths": seg}
-    try:  # the simulation engine's empirical baseline, if the engine is installed
-        from nhtsa_stats.simulation import engine
+    from nhtsa_stats.simulation import engine
 
-        if hasattr(engine, "run"):
-            out["engine"] = engine.run()
-    except ImportError:
-        log.warning("simulation engine not available")
+    out["engine"] = engine.run()
     return out

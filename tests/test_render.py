@@ -92,3 +92,27 @@ def test_ci_column_variants(tmp_path, monkeypatch):
     assert render.render_text("{{m/v|term=a|odds_ratio|ci:2@or}}") == "5.07 (4.84–5.31)"
     assert render.render_text("{{m/v|term=a|share|cipct:0}}") == "-5% (-6 to -4%)"
     render._table.cache_clear()
+
+
+def test_min_max_aggregate(tmp_path, monkeypatch):
+    monkeypatch.setattr(config, "TABLES_DIR", tmp_path)
+    (tmp_path / "m").mkdir()
+    pd.DataFrame({"YEAR": [2016, 2017, 2018], "n": [46511, 54969, 48443]}).to_csv(
+        tmp_path / "m" / "a.csv", index=False
+    )
+    render._table.cache_clear()
+    assert render.render_text("{{m/a||min(n)|,.0f}}–{{m/a||max(n)|,.0f}}") == "46,511–54,969"
+    assert render.render_text("{{m/a|YEAR=2016~2018|max(n)|,.0f}}") == "48,443"
+    render._table.cache_clear()
+
+
+def test_mdtable_missing_text_cell_is_a_dash(tmp_path, monkeypatch):
+    monkeypatch.setattr(config, "TABLES_DIR", tmp_path)
+    (tmp_path / "m").mkdir()
+    pd.DataFrame({"k": ["a", "b"], "txt": ["x", None]}).to_csv(
+        tmp_path / "m" / "t.csv", index=False
+    )
+    render._table.cache_clear()
+    out = render.render_text("{{mdtable:m/t||k:K:;txt:Text:}}")
+    assert "| b | — |" in out and "nan" not in out
+    render._table.cache_clear()

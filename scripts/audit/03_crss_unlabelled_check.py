@@ -6,7 +6,7 @@ share of rows with such codes, and TVD of CRSS y vs CRSS 2019 and vs CRSS 2018->
 """
 import polars as pl
 
-OUT = "/tmp/nhtsa-audit/out"
+OUT = "outputs/cache/audit/out"
 cb = pl.read_csv("/home/user/nhtsa-stats-US/outputs/audit/codebook.csv", infer_schema_length=0)
 cb = cb.filter(pl.col("table") == "person").with_columns(pl.col("year").cast(pl.Int64))
 d = pl.read_csv(f"{OUT}/dist_CRSS.csv").with_columns(pl.col("code").cast(pl.Utf8))

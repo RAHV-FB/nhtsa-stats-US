@@ -239,11 +239,14 @@ def build_drivers() -> pl.DataFrame:
 
 
 def candidate_crashes(crash: pl.DataFrame) -> pl.DataFrame:
-    """Two in-transport vehicles, no non-motorist, no hit-and-run vehicle."""
+    """Two in-transport vehicles, no non-motorist, no hit-and-run vehicle.
+
+    Crashes whose hit-and-run status is unknown are excluded too (unknown is not "no").
+    """
     return crash.filter(
         (pl.col("n_veh_in_transport") == 2)
         & (pl.col("any_nonmotorist") == 0)
-        & (pl.col("hit_and_run").fill_null(0) == 0)
+        & (pl.col("hit_and_run") == 0)
     )
 
 

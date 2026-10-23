@@ -1,6 +1,6 @@
 import polars as pl
 pl.Config.set_tbl_rows(100); pl.Config.set_tbl_cols(30); pl.Config.set_tbl_width_chars(300)
-d = pl.read_csv("/tmp/nhtsa-audit/out/veh_dist.csv", infer_schema_length=0).with_columns(pl.col("n").cast(pl.Int64), pl.col("N").cast(pl.Int64), pl.col("year").cast(pl.Int64), pl.col("code").cast(pl.Int64,strict=False).alias("ci"))
+d = pl.read_csv("outputs/cache/audit/out/veh_dist.csv", infer_schema_length=0).with_columns(pl.col("n").cast(pl.Int64), pl.col("N").cast(pl.Int64), pl.col("year").cast(pl.Int64), pl.col("code").cast(pl.Int64,strict=False).alias("ci"))
 for v in ["MOD_YEAR","MDLYR_IM"]:
     x = d.filter(pl.col("var")==v)
     print(v)

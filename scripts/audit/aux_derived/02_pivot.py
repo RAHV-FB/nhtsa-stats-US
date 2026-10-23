@@ -1,6 +1,6 @@
 """Pivot distribution: per source/table/var, codes x years (pct)."""
 import polars as pl, sys
-d = pl.read_csv("/tmp/nhtsa-audit/out_aux/aux_dist.csv", infer_schema_length=0)
+d = pl.read_csv("outputs/cache/audit/out_aux/aux_dist.csv", infer_schema_length=0)
 d = d.with_columns(pl.col("n").cast(pl.Int64), pl.col("year").cast(pl.Int64)).sort("year")
 tot = d.group_by(["source","table","year","var"]).agg(pl.col("n").sum().alias("tot"))
 d = d.join(tot, on=["source","table","year","var"])

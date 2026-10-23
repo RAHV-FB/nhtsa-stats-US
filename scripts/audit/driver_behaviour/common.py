@@ -10,7 +10,7 @@ import polars as pl  # noqa: E402
 from nhtsa_stats.ingestion.cache import load_table  # noqa: E402
 
 REPO = "/home/user/nhtsa-stats-US"
-OUT = "/tmp/nhtsa-audit/out"
+OUT = "outputs/cache/audit/out"
 YEARS = list(range(2016, 2025))
 
 

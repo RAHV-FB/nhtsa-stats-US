@@ -1,6 +1,6 @@
 """Pivot dist.csv: code x source-year percent (or n), with label variants. usage: ad_show.py VAR [SOURCES] [pct|n] [TABLE]"""
 import polars as pl, sys, re
-OUT = "/tmp/nhtsa-audit/out_ad"
+OUT = "outputs/cache/audit/out_ad"
 d = pl.read_csv(f"{OUT}/dist.csv", infer_schema_length=0).with_columns(pl.col("n").cast(pl.Int64), pl.col("N").cast(pl.Int64), pl.col("year").cast(pl.Int64))
 def norm(s): return re.sub(r"[^a-z0-9]","",s.lower()) if s else None
 var = sys.argv[1]; srcs = sys.argv[2].split(",") if len(sys.argv)>2 else ["FARS","CRSS"]

@@ -1,6 +1,6 @@
 """CRSS 2016-2018 label transfer evidence: code sets vs CRSS 2019 / FARS same year, structural invariants, TVD of distributions."""
 import polars as pl
-OUT = "/tmp/nhtsa-audit/out_ad"
+OUT = "outputs/cache/audit/out_ad"
 pl.Config.set_tbl_rows(200); pl.Config.set_tbl_width_chars(260); pl.Config.set_tbl_cols(30)
 d = pl.read_csv(f"{OUT}/dist.csv", infer_schema_length=0).with_columns(pl.col("n").cast(pl.Int64), pl.col("N").cast(pl.Int64), pl.col("year").cast(pl.Int64))
 for var in ["DRINKING","ALC_STATUS","ATST_TYP","DRUGS","PERALCH_IM","VEH_ALCH","V_ALCH_IM","ALCOHOL","ALCHL_IM","DRIMPAIR","NMIMPAIR"]:

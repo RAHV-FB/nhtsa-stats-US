@@ -1,6 +1,6 @@
 """FARS: killed-vs-survived odds ratios for alcohol under different measures (BAC, police report unk-as-no, complete-case, MI), all states and high-testing states."""
 import polars as pl, math
-OUT = "/tmp/nhtsa-audit/out_ad"
+OUT = "outputs/cache/audit/out_ad"
 df = pl.read_parquet(f"{OUT}/fars_drivers.parquet").filter(pl.col("sev").is_in(["killed","survived"]))
 P = [f"P{i}" for i in range(1,11)]
 def OR(x, ycol):

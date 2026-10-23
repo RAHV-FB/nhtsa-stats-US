@@ -16,6 +16,8 @@ Placeholder grammar::
   columns ``<column>_low`` / ``<column>_high``), ``cipct:N`` (the same, x100 with %),
   ``cix1000:N`` (the same, x1000), ``x1000:N`` (x1000).
 * A filter value ``a~b`` matches either ``a`` or ``b``.
+* ``column`` may be ``min(col)`` or ``max(col)``: the minimum / maximum of ``col`` over all
+  rows the filters select (any number of rows).
 
 Unresolvable placeholders raise ``RenderError`` listing every failure.
 """
@@ -129,7 +131,7 @@ def mdtable(spec: str) -> str:
             v = r[name]
             cells.append(
                 "—"
-                if (fmt and not fmt.startswith(("ci", "cipct")) and pd.isna(v))
+                if (pd.isna(v) and not fmt.startswith(("ci", "cipct")))
                 else _fmt(v, fmt, r, name)
             )
         lines.append("| " + " | ".join(cells) + " |")
@@ -152,6 +154,12 @@ def resolve(spec: str) -> str:
     table, filters, column, fmt = parts
     df = _table(table)
     rows = _filtered(table, filters, spec)
+    agg = re.fullmatch(r"(min|max)\((\w+)\)", column)
+    if agg:
+        how, col = agg.groups()
+        if col not in df.columns or rows.empty:
+            raise RenderError(f"{table}: cannot aggregate {column!r} over {len(rows)} rows: {spec}")
+        return _fmt(getattr(rows[col], how)(), fmt)
     if len(rows) != 1:
         raise RenderError(f"{table}: filters {filters!r} matched {len(rows)} rows (need 1): {spec}")
     if column not in df.columns:

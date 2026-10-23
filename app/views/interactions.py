@@ -136,7 +136,7 @@ def render() -> None:
     st.subheader("Adjusted interaction")
     kind_note("adjusted")
     pre = output_table("interactions", f"pairs_{outcome}")
-    match = None
+    reg = None  # (Combination, pre-computed row) when the selection is a registered pair
     if pre is not None:
         for comb in it.PAIRS:
             ea, eb = comb.exposures
@@ -146,24 +146,42 @@ def render() -> None:
             }:
                 hit = pre[pre["pair"] == comb.name]
                 if len(hit):
-                    match = hit.iloc[0].to_dict()
+                    reg = (comb, hit.iloc[0].to_dict())
+    sets = ["A", "B"]
     covset = st.radio(
         "Adjustment set",
-        ["A", "B"],
+        sets,
+        index=sets.index(reg[0].covariates) if reg else 0,
         horizontal=True,
         format_func=lambda s: "Pre-crash (A)" if s == "A" else "Pre-crash + configuration (B)",
     )
+    # A pre-computed row is shown only for the adjustment set it was estimated with.
+    match = reg[1] if reg and reg[0].covariates == covset else None
     if match is None:
-        st.caption(
-            "Not a pre-specified pair: estimates are exploratory and not multiplicity-adjusted."
-        )
+        if reg:
+            st.caption(
+                f"The pre-computed estimate for '{reg[0].name}' uses adjustment set "
+                f"{reg[0].covariates}. With set {covset} the model is fitted on demand; that "
+                "estimate is exploratory and not multiplicity-adjusted."
+            )
+        else:
+            st.caption(
+                "Not a pre-specified pair: estimates are exploratory and not multiplicity-adjusted."
+            )
         if st.button("Fit adjusted model"):
             match = _fit_pair(
                 a.var, a.exposed, a.reference, b.var, b.exposed, b.reference, outcome, covset
             )
+    elif reg[0].prespecified:
+        n_reg = sum(c.prespecified for c in it.PAIRS)
+        st.caption(
+            f"Pre-specified pair '{reg[0].name}' (pre-computed; Holm adjustment across the "
+            f"{n_reg} registered pairs)."
+        )
     else:
         st.caption(
-            f"Pre-specified pair '{match['pair']}' (pre-computed, Holm-adjusted p-values available)."
+            f"Exploratory pair '{reg[0].name}' (pre-computed; added at implementation, not "
+            "multiplicity-adjusted)."
         )
     if match is not None:
         m = match
@@ -201,12 +219,18 @@ def render() -> None:
                 [
                     "Product-term odds ratio",
                     f"{m['product_or']:.2f}",
-                    f"{m['product_or_low']:.2f}–{m['product_or_high']:.2f} (p={m['product_p']:.3g})",
+                    f"{m['product_or_low']:.2f}–{m['product_or_high']:.2f} "
+                    f"(unadjusted p={m['product_p']:.3g})",
                 ],
             ],
             columns=["Measure", "Estimate", "95% CI"],
         )
         st.table(res)
+        if pd.notna(m.get("ic_p_holm")):
+            st.caption(
+                f"Holm-adjusted p-values: additive interaction {m['ic_p_holm']:.3g}; ratio of risk "
+                f"ratios {m['ratio_of_rr_p_holm']:.3g}."
+            )
         st.caption(
             "Additive interaction > 0: the joint excess risk exceeds the sum of the separate excesses. Ratio of RRs "
             "> 1: super-multiplicative. Both are statistical interactions conditional on a reported crash, not "

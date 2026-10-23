@@ -32,7 +32,7 @@ FARS case key = (YEAR, `ST_CASE`); CRSS case key = `CASENUM` (unique across year
 | `drimpair` | driver impairment code | code | all | condition at time of crash (asleep, ill, alcohol/drugs…) |
 | `factor` | vehicle contributing factor | code | all | `MFACTOR` → `VEHICLECC` (2020) |
 | `maneuver` | driver manoeuvre | code | all | `MDRMANAV` → `DRMAN` (2020) |
-| `violatn` | violation charged | code | all | `MVIOLATN` → `VIOLATION` (2020); basis of the QIE culpability definition |
+| `violatn` | violation charged | code | all | `MVIOLATN` → `VIOLATION` (2020); used only in the charge-based QIE sensitivity analysis (`culp_viol`; impairment and outcome-defined charges excluded); the primary culpability definition is action-based (`culp_c1`) |
 | `vision` | vision obscured | code | all | `MVISOBSC` → `VISION` (2020) |
 | `crashrf`, `driverrf`, `personrf`, `vehiclesf`, `pvehiclesf` | factor rows | code | 2020+ | crash/driver/person/vehicle-related factors (earlier years: `CF1-3` in `accident`, `DR_SF1-4` and `P_SF1-3` columns) |
 | `weather` | weather row | code | 2020+ | multiple atmospheric conditions (crash-level `WEATHER` also in `accident`) |

@@ -1,7 +1,7 @@
 """Missing/unknown rates per source-year and by severity group.
 FARS: vehicle-level DEATHS>0 vs 0.  CRSS: MAX_VSEV (K,A,B,C,O,Unk) and crash MAX_SEV; unweighted and WEIGHT-weighted."""
 import polars as pl
-OUT="/tmp/nhtsa-audit/out"
+OUT="outputs/cache/audit/out"
 MISS = {"BODY_TYP":[98,99], "BODY_TYP_CAT_UNK":None, "MOD_YEAR":[9998,9999], "NUMOCCS":[97,98,99], "HIT_RUN":[9], "TOW_VEH":[9],
  "SPEC_USE":[98,99], "EMER_USE":[8,9], "BUS_USE":[98,99], "VSPD_LIM":[98,99], "VTRAFWAY":[8,9], "VNUM_LAN":[8,9], "VALIGN":[8,9],
  "VPROFILE":[8,9], "VPAVETYP":[8,9], "VSURCOND":[98,99], "VTRAFCON":[97,99], "VTCONT_F":[8,9], "TRAV_SP":[998,999],

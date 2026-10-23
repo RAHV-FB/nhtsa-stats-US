@@ -8,7 +8,7 @@ from nhtsa_stats.ingestion.cache import load_table
 pl.Config.set_tbl_rows(80)
 pl.Config.set_tbl_cols(30)
 pl.Config.set_tbl_width_chars(250)
-OUT = "/tmp/nhtsa-audit/out"
+OUT = "outputs/cache/audit/out"
 
 # ---- race table
 r = load_table("FARS", "race", years=range(2019, 2025), columns=["ST_CASE", "VEH_NO", "PER_NO", "RACE", "ORDER", "MULTRACE"])

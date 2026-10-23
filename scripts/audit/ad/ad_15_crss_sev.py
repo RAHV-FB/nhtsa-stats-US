@@ -1,6 +1,6 @@
 """CRSS weighted alcohol involvement & missingness by severity (crash MAX_SEV; driver INJ_SEV), by year; simple ORs under 3 codings."""
 import polars as pl, math
-OUT = "/tmp/nhtsa-audit/out_ad"
+OUT = "outputs/cache/audit/out_ad"
 pl.Config.set_tbl_rows(200); pl.Config.set_tbl_width_chars(260); pl.Config.set_tbl_cols(30)
 a = pl.read_parquet(f"{OUT}/crss_crash.parquet")
 SEV = {0:"O",1:"C",2:"B",3:"A",4:"K"}

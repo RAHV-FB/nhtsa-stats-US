@@ -1082,7 +1082,7 @@ Their logic is restated briefly:
 
 All scripts are in
 `scripts/audit/aux_derived/`.
-Outputs are written to `/tmp/nhtsa-audit/out_aux/`. Run each script from the repository root with
+Outputs are written to `outputs/cache/audit/out_aux/`. Run each script from the repository root with
 `POLARS_MAX_THREADS=2 uv run python <script>`.
 
 | script | purpose |

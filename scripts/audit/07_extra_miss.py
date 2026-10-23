@@ -1,6 +1,6 @@
 import polars as pl
 pl.Config.set_tbl_rows(100); pl.Config.set_tbl_cols(30); pl.Config.set_tbl_width_chars(300)
-OUT="/tmp/nhtsa-audit/out"
+OUT="outputs/cache/audit/out"
 d = pl.read_csv(f"{OUT}/diffmiss.csv")
 # severity x year for key vars
 for src, groups, col in [("CRSS",["K","A","O"],"pct_w"),("FARS",["veh_death","no_veh_death"],"pct_unw")]:

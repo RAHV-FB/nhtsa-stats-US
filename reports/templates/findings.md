@@ -1,6 +1,7 @@
 # What makes US road crashes deadly? Findings from FARS and CRSS, 2016–2024
 
-*All empirical numbers in this report are read from `outputs/tables/` when it is rendered
+*All empirical numbers in this report (apart from fixed survey-design constants) are read from
+`outputs/tables/` when it is rendered
 (`nhtsa analyze report`). Each finding names its source table. Estimate types: **observed**
 (FARS census counts), **estimated** (CRSS design-based), **adjusted association**
 (model-based, conditional on a police-reported crash, not causal), **model-predicted**, and
@@ -14,19 +15,24 @@
    of fatal crashes. Rain, wet roads, intersections and crashes involving teenage drivers are
    common in crashes but *under*-represented among fatal ones.
 2. **Adjustment changes the picture.** Much of the excess severity of night-time crashes is
-   accounted for by other circumstances. The lower severity of rain-crashes runs through wet
-   road surfaces. Interstates reverse from riskier to safer than comparable roads. The excess
+   accounted for by other circumstances. Rain-crashes are no less severe than clear-weather
+   crashes on the same road surface; their lower crude severity is accounted for by wet
+   surfaces. Interstates reverse from riskier to safer than comparable roads. The excess
    severity of crashes involving older drivers is *unmasked*.
 3. **"Speeding" is two different things.** Crashes in which a driver exceeded the limit have an
    adjusted fatal risk ratio of {{severity/fatal_speeding_type|level=exceeded_limit_or_racing|adj_rr|ci:1}}.
    "Too fast for conditions" — three-quarters of police-reported speeding-related crashes —
-   shows {{severity/fatal_speeding_type|level=too_fast_for_conditions|adj_rr|ci:2}}.
+   shows no detectable excess in the adjusted risk of a fatal outcome
+   ({{severity/fatal_speeding_type|level=too_fast_for_conditions|adj_rr|ci:2}}) and a small one
+   for fatal-or-serious outcomes ({{severity/ka_speeding_type|level=too_fast_for_conditions|adj_rr|ci:2}}).
 4. **The most robust severity associations involve objective circumstances**: motorcycles,
    pedestrians, the speed environment, unlit darkness and heavy trucks. Alcohol is strongly
    associated with severity under every coding, although its size depends on the coding. Pedestrian survival falls steeply with the posted speed limit, and is
    worse when the striking vehicle is an SUV or pickup.
-5. **Some combinations amplify each other**, notably pedestrian crashes in unlit darkness. Others
-   that are often assumed to do so do not.
+5. **Some combinations amplify each other**, notably pedestrian crashes in unlit darkness. For
+   others that are often assumed to (speeding in darkness, young drivers late at night), no
+   interaction is detected for the fatal outcome, although speeding in unlit darkness shows an
+   additive excess for fatal-or-serious crashes.
 6. **Crash involvement and crash severity are different problems.** In two-vehicle crashes,
    teenage drivers are over-represented as the culpable party, but crashes involving them are
    less severe. Drivers aged 75+ are also over-represented as the culpable party, and crashes
@@ -35,8 +41,8 @@
    The size of that difference is very sensitive to how accurately surviving occupants report
    belt use.
 8. **The post-2020 rise in crash severity is only partly explained by the recorded crash mix.**
-   Changes in the recorded circumstances of crashes account for a third to a half of the rise in
-   the fatal share; the rest is a higher fatal share within the same circumstances, most clearly
+   Changes in the recorded circumstances of crashes account for roughly 30–50% of the rise in
+   the fatal share, depending on the model; the rest is a higher fatal share within the same circumstances, most clearly
    in speeding-related crashes. Separately, about half of the rise in the share reflects fewer
    non-fatal crashes being reported rather than more fatal ones.
 9. **Police-recorded behaviours are measured differently by severity.** Drug and distraction
@@ -54,8 +60,11 @@ FARS records every fatal crash on US public roads:
 {{descriptive/fars_annual|YEAR=2019|deaths|,.0f}} in 2019, a peak of
 {{descriptive/fars_annual|YEAR=2021|deaths|,.0f}} in 2021, and
 {{descriptive/fars_annual|YEAR=2024|deaths|,.0f}} in 2024. CRSS is a national probability sample
-of police-reported crashes of every severity (≈46,500–55,000 sampled crashes per year,
-representing 5.3–6.8 million crashes). Severity rates and models use CRSS with design-based
+of police-reported crashes of every severity
+({{descriptive/crss_annual||min(n_sample)|,.0f}}–{{descriptive/crss_annual||max(n_sample)|,.0f}}
+sampled crashes per year, representing
+{{descriptive/crss_annual||min(crashes)|,.0f}}–{{descriptive/crss_annual||max(crashes)|,.0f}}
+crashes). Severity rates and models use CRSS with design-based
 inference: 25 strata, 67 PSUs, 42 degrees of freedom. Counts of deaths use FARS. Rows from the
 two systems are never pooled. Methods: `docs/methodology.md`. Variable definitions and coding
 breaks: `docs/variable_harmonization.md`.
@@ -92,11 +101,20 @@ crashes*.
 | Driver aged 15–20 involved | {{descriptive/frequency_vs_severity|factor=young_driver;level=yes|share_all_crashes|pct:1}} | {{descriptive/frequency_vs_severity|factor=young_driver;level=yes|share_fatal_fars|pct:1}} | ×{{descriptive/frequency_vs_severity|factor=young_driver;level=yes|overrep_ratio|.2f}} | {{descriptive/frequency_vs_severity|factor=young_driver;level=yes|fatal_rate|pct:2}} |
 | Rear-end collision | {{descriptive/frequency_vs_severity|factor=crash_type;level=mv_rear_end|share_all_crashes|pct:1}} | {{descriptive/frequency_vs_severity|factor=crash_type;level=mv_rear_end|share_fatal_fars|pct:1}} | ×{{descriptive/frequency_vs_severity|factor=crash_type;level=mv_rear_end|overrep_ratio|.2f}} | {{descriptive/frequency_vs_severity|factor=crash_type;level=mv_rear_end|fatal_rate|pct:2}} |
 
-*Robustness.* The CRSS-weighted composition of fatal crashes agrees with FARS within CRSS
-confidence intervals for darkness, pedestrian and motorcycle involvement, single-vehicle crashes
-and young drivers (`measurement/fars_crss_fatal_composition`). This supports using CRSS
-denominators with FARS numerators. *Limitation.* Ratios are descriptive; they do not adjust for
-other circumstances (finding 2).
+*Robustness.* Pooled over 2016–2024, the CRSS-weighted composition of fatal crashes agrees
+with the FARS census within the CRSS confidence interval for darkness
+({{measurement/fars_crss_fatal_composition|YEAR=all;attribute=dark|crss_share|cipct:1@crss}} vs {{measurement/fars_crss_fatal_composition|YEAR=all;attribute=dark|fars_share|pct:1}}), pedestrian
+involvement ({{measurement/fars_crss_fatal_composition|YEAR=all;attribute=any_pedestrian|crss_share|cipct:1@crss}} vs {{measurement/fars_crss_fatal_composition|YEAR=all;attribute=any_pedestrian|fars_share|pct:1}})
+and single-vehicle crashes (`measurement/fars_crss_fatal_composition`), which supports
+combining CRSS denominators with FARS numerators for these. It does not agree for motorcycle
+involvement ({{measurement/fars_crss_fatal_composition|YEAR=all;attribute=any_motorcycle|crss_share|cipct:1@crss}} vs {{measurement/fars_crss_fatal_composition|YEAR=all;attribute=any_motorcycle|fars_share|pct:1}}),
+so ratios that mix the two systems are less certain for motorcycle crashes, nor for young drivers
+({{measurement/fars_crss_fatal_composition|YEAR=all;attribute=young_driver|crss_share|cipct:1@crss}} vs {{measurement/fars_crss_fatal_composition|YEAR=all;attribute=young_driver|fars_share|pct:1}}), largely
+because CRSS uses NHTSA's imputed driver age and FARS the reported age, under which drivers of
+unknown age are not counted as young. Police-recorded speeding is much rarer among CRSS fatal
+crashes than in FARS ({{measurement/fars_crss_fatal_composition|YEAR=all;attribute=speeding|crss_share|pct:1}} vs {{measurement/fars_crss_fatal_composition|YEAR=all;attribute=speeding|fars_share|pct:1}}),
+a measurement problem discussed under finding 3. *Limitation.* Ratios are descriptive; they do
+not adjust for other circumstances (finding 2).
 
 ## 3. Finding 2 — Adjustment reshapes which circumstances look dangerous
 
@@ -180,9 +198,10 @@ What changes, and why it matters:
   ({{severity/fatal_crude_vs_adjusted|factor=weather;level=rain|Ax_adj_rr|ci:2}}); holding the
   surface fixed as well, the difference disappears
   ({{severity/fatal_crude_vs_adjusted|factor=weather;level=rain|A_adj_rr|ci:2}}). Rain's lower
-  severity therefore runs through wet and icy surfaces, which remain associated with lower
-  severity (wet {{severity/fatal_crude_vs_adjusted|factor=surface;level=wet|A_adj_rr|ci:2}}),
-  plausibly because drivers slow down (speed is not observed).
+  crude severity is therefore accounted for by wet and icy surfaces (statistical accounting, not
+  causal mediation), which remain associated with lower severity
+  (wet {{severity/fatal_crude_vs_adjusted|factor=surface;level=wet|A_adj_rr|ci:2}}), plausibly
+  because drivers slow down (speed is not observed).
 * **Interstates reverse.** Crude crashes on interstates are more often fatal, but compared with
   other roads *with the same speed limit* they are less severe. This is consistent with divided,
   access-controlled design.
@@ -197,7 +216,7 @@ What changes, and why it matters:
 included in every model. *Limitations.* Residual confounding is likely: travel speed, vehicle
 mass and occupant health are not recorded.
 
-## 4. Finding 3 — "Speeding" mixes a strong and a null association
+## 4. Finding 3 — "Speeding" mixes a strong and a weak association
 
 *Sources: `severity/fatal_speeding_type`, `descriptive/frequency_vs_severity`,
 `burden/attributable_fractions_fatal`, `interactions/pairs_fatal` (follow-up pairs).*
@@ -215,8 +234,10 @@ conclusion:
   of fatal crashes. Their adjusted fatal risk ratio is
   {{severity/fatal_speeding_type|level=exceeded_limit_or_racing|adj_rr|ci:1}}.
 * **"Too fast for conditions"** — most of the police-reported category — has no detectable
-  excess severity ({{severity/fatal_speeding_type|level=too_fast_for_conditions|adj_rr|ci:2}}).
-  It is concentrated on wet and icy roads, where crashes are less severe.
+  excess in the adjusted risk of a fatal outcome
+  ({{severity/fatal_speeding_type|level=too_fast_for_conditions|adj_rr|ci:2}}); for
+  fatal-or-serious (KA) outcomes its adjusted risk ratio is {{severity/ka_speeding_type|level=too_fast_for_conditions|adj_rr|ci:2}}. It is
+  concentrated on wet and icy roads, where crashes are less severe.
 * The severity-pathway attributable fraction is
   {{burden/attributable_fractions_fatal|shift=exceeded_limit_removed|af|cipct:1}} of fatal
   crashes for limit exceedance and
@@ -234,16 +255,24 @@ investigation) records speeding in
 crashes; CRSS records it in
 {{measurement/fars_crss_fatal_composition|YEAR=all;attribute=speeding|crss_share|pct:0}} of the
 same population. Recording is therefore more complete when crashes are investigated more
-thoroughly. If speeding in non-fatal crashes were recorded with sensitivity 0.5 rather than 0.8,
-the crude aggregate risk ratio would fall from
+thoroughly. The crude risk ratio for speeding is
+{{measurement/qba_grid|exposure=speeding;se_fatal=0.8;se_nonfatal=0.8;specificity=1|rr_observed|.2f}}
+as recorded and
 {{measurement/qba_grid|exposure=speeding;se_fatal=0.8;se_nonfatal=0.8;specificity=1|rr_corrected|.2f}}
-to {{measurement/qba_grid|exposure=speeding;se_fatal=0.8;se_nonfatal=0.5;specificity=1|rr_corrected|.2f}}
-(`measurement/qba_grid`). The large association for limit exceedance is less exposed to this:
-it would need an implausibly large recording gap to vanish.
+after correcting for a recording sensitivity of 0.8 in all crashes; if sensitivity in non-fatal
+crashes were 0.5 instead, the corrected ratio would be
+{{measurement/qba_grid|exposure=speeding;se_fatal=0.8;se_nonfatal=0.5;specificity=1|rr_corrected|.2f}}
+(`measurement/qba_grid`). The large association for limit exceedance (crude risk ratio
+{{measurement/qba_grid|exposure=exceeded_limit;se_fatal=0.8;se_nonfatal=0.8;specificity=1|rr_observed|.1f}} against no speeding) is less exposed to this. With
+recording sensitivity 0.8 in fatal crashes, the corrected ratio is still
+{{measurement/qba_grid|exposure=exceeded_limit;se_fatal=0.8;se_nonfatal=0.2;specificity=1|rr_corrected|.1f}} if limit exceedance in non-fatal crashes were recorded
+with sensitivity 0.2, and it vanishes only near 0.1
+({{measurement/qba_grid|exposure=exceeded_limit;se_fatal=0.8;se_nonfatal=0.1;specificity=1|rr_corrected|.2f}}), that is, if exceedance in non-fatal crashes went
+unrecorded about seven times in eight.
 
 *Policy relevance.* Automated speed enforcement acts on exceeding the posted limit — the
 component with the strong association. The much larger "too fast for conditions" category is
-not a camera target and shows no excess severity.
+not a camera target and shows at most a small excess severity.
 
 ## 5. Finding 4 — The most robust severity associations
 
@@ -308,10 +337,16 @@ measured, so these ratios describe severity *given* a pedestrian crash.
 
 See `reports/interactions.md`. In brief: among the 13 registered pairs, pedestrian crashes in
 unlit darkness are the clearest case of amplification on both scales, and motorcycle crashes
-involving alcohol carry a large *additive* excess (deaths) although on the ratio scale they are
-multiplicative or less. Pedestrian crashes on 50+ mph roads show the largest additive excess of
-all, in an exploratory pair. The widely assumed amplifications of speeding by darkness and of
-young drivers by night are not supported. The protective-looking speeding × wet interaction
+involving alcohol carry a large *additive* excess (deaths) although on the ratio scale the
+combination is sub-multiplicative (ratio of risk ratios
+{{interactions/pairs_fatal|pair=motorcycle x alcohol|ratio_of_rr|ci:2}}). Pedestrian crashes on 50+ mph roads show
+the largest additive excess of all, in an exploratory pair. The widely assumed amplifications of
+speeding by darkness and of young drivers by night are not detected for the fatal outcome (ratio
+of risk ratios {{interactions/pairs_fatal|pair=speeding x dark_unlit|ratio_of_rr|ci:2}} and
+{{interactions/pairs_fatal|pair=young_driver x late_night|ratio_of_rr|ci:2}}); a non-significant result is not
+evidence of no interaction. For fatal-or-serious crashes, speeding in unlit darkness does show
+an additive excess of {{interactions/pairs_ka|pair=speeding x dark_unlit|ic|cix1000:1}} per 1,000 crashes (Holm
+p {{interactions/pairs_ka|pair=speeding x dark_unlit|ic_p_holm|.1g}}). The protective-looking speeding × wet interaction
 reflects the mix of speeding types ("too fast for conditions" concentrates on wet roads) and the
 lower wet-road baseline.
 
@@ -377,7 +412,7 @@ unbelted occupants are, on average, in more violent crashes. FARS allows a compa
 the same vehicle**, which holds fixed everything the occupants share — impact speed, vehicle,
 road, weather.
 
-* **Double-pair comparison** (drivers and right-front passengers; 45,805 pairs with at least one
+* **Double-pair comparison** (drivers and right-front passengers; {{matched/belt_effect|estimand=fatality_risk_reduction_belt_given_fatal_crash|n_vehicles|,.0f}} pairs with at least one
   death). Given a crash severe enough to kill someone in the vehicle, a belted occupant's risk of
   dying was
   {{matched/belt_effect|estimand=fatality_risk_reduction_belt_given_fatal_crash|estimate|cipct:1}}
@@ -444,25 +479,33 @@ The fatal-or-serious (KA) share shows no clear rise
 {{trends/numerator_denominator|outcome=fatal;comparison=2020-2024 vs 2016-2019;quantity=FARS_ratio_fatal_crashes (census)|estimate|.3f}}), but the
 number of police-reported crashes fell ({{trends/numerator_denominator|outcome=fatal;comparison=2020-2024 vs 2016-2019;quantity=ratio_reported_crashes_denominator|estimate|ci:3}}).
 The fall in reported crashes accounts for {{trends/numerator_denominator|outcome=fatal;comparison=2020-2024 vs 2016-2019;quantity=denominator_share_of_log_rise|estimate|cipct:0}}
-of the rise in the fatal share. It is not only a fall in property-damage-only reports: deaths
-also rose as a share of injury crashes ({{trends/numerator_denominator|outcome=fatal;comparison=2020-2024 vs 2016-2019;quantity=ratio_K_share_of_injury_KABC|estimate|ci:2}}).
+of the rise in the fatal share. It is not only a fall in property-damage-only reports: fatal
+crashes also rose as a share of injury crashes ({{trends/numerator_denominator|outcome=fatal;comparison=2020-2024 vs 2016-2019;quantity=ratio_K_share_of_injury_KABC|estimate|ci:2}}).
 
-**Composition accounts for a third to a half.** This is a second, separate accounting of the
+**Composition accounts for roughly 30–50%.** This is a second, separate accounting of the
 same rise, not an addition to the first. Changes in the recorded circumstances of crashes
 (time, road, light, weather, alcohol, speeding, driver and vehicle mix, crash configuration)
 account for {{trends/decomposition|analysis=model_B;outcome=fatal;quantity=composition_share_of_change_ref_P0|estimate|cipct:0}} of the rise
 when the 2016–19 model is the reference and
 {{trends/decomposition|analysis=model_B;outcome=fatal;quantity=composition_share_of_change_ref_P1|estimate|cipct:0}} with the 2020–24 model.
-Without crash configuration the share is {{trends/decomposition|analysis=model_A;outcome=fatal;quantity=composition_share_of_change_ref_P0|estimate|cipct:0}};
+Without crash configuration the share is {{trends/decomposition|analysis=model_A;outcome=fatal;quantity=composition_share_of_change_ref_P0|estimate|cipct:0}}
+({{trends/decomposition|analysis=model_A;outcome=fatal;quantity=composition_share_of_change_ref_P1|estimate|cipct:0}}
+with the 2020–24 model);
 without the three variables whose "unknown" coding drifted over the period (junction, weather,
 road surface) it is {{trends/decomposition|analysis=sens_B_without_coding_drift_vars;outcome=fatal;quantity=composition_share_of_change_ref_P0|estimate|cipct:0}};
 under the complete-case outcome it is {{trends/decomposition|analysis=model_B;outcome=fatal_cc;quantity=composition_share_of_change_ref_P0|estimate|cipct:0}}.
+For the 2019→2021 jump alone the split is unstable: composition accounts for
+{{trends/decomposition|analysis=sens_B_2019_vs_2021;outcome=fatal;quantity=composition_share_of_change_ref_P0|estimate|cipct:0}} of it with the 2019
+model as reference but {{trends/decomposition|analysis=sens_B_2019_vs_2021;outcome=fatal;quantity=composition_share_of_change_ref_P1|estimate|cipct:0}}
+with the 2021 model.
 Within the same recorded circumstances the fatal share was higher by a factor of
-{{trends/decomposition|analysis=model_B;outcome=fatal;quantity=risk_ratio_within_ref_P0|estimate|ci:2}}. The largest within-circumstance
-increase is in speeding-related crashes ({{trends/within_by_subgroup|analysis=model_B;outcome=fatal;subgroup=speeding-related|within_rr|ci:2}}); there is none in
-alcohol-involved crashes ({{trends/within_by_subgroup|analysis=model_B;outcome=fatal;subgroup=alcohol involved (imputed)|within_rr|ci:2}}).
+{{trends/decomposition|analysis=model_B;outcome=fatal;quantity=risk_ratio_within_ref_P0|estimate|ci:2}}. The within-circumstance
+increase is clearest in speeding-related crashes ({{trends/within_by_subgroup|analysis=model_B;outcome=fatal;subgroup=speeding-related|within_rr|ci:2}}),
+although its interval overlaps those of motorcycle and interstate crashes; there is no
+detectable increase in alcohol-involved crashes ({{trends/within_by_subgroup|analysis=model_B;outcome=fatal;subgroup=alcohol involved (imputed)|within_rr|ci:2}},
+also compatible with the overall ratio).
 
-**Year by year, the two outcome definitions disagree about 2023–24.** Observed fatal share
+**Year by year, the 2023–24 excess depends on the outcome definition.** Observed fatal share
 against the share expected from the recorded crash mix under the 2016–19 model (model B):
 
 | Year | Fatal share, imputed outcome | Observed ÷ expected, imputed | Fatal share, complete case | Observed ÷ expected, complete case |
@@ -474,19 +517,24 @@ against the share expected from the recorded crash mix under the 2016–19 model
 | 2023 | {{trends/annual_shares|YEAR=2023;outcome=fatal|crude_share|cipct:2@crude}} | {{trends/annual_shares|YEAR=2023;outcome=fatal|obs_over_expectedB|ci:2}} | {{trends/annual_shares|YEAR=2023;outcome=fatal_cc|crude_share|cipct:2@crude}} | {{trends/annual_shares|YEAR=2023;outcome=fatal_cc|obs_over_expectedB|ci:2}} |
 | 2024 | {{trends/annual_shares|YEAR=2024;outcome=fatal|crude_share|cipct:2@crude}} | {{trends/annual_shares|YEAR=2024;outcome=fatal|obs_over_expectedB|ci:2}} | {{trends/annual_shares|YEAR=2024;outcome=fatal_cc|crude_share|cipct:2@crude}} | {{trends/annual_shares|YEAR=2024;outcome=fatal_cc|obs_over_expectedB|ci:2}} |
 
-Under NHTSA's imputed outcome the 2023–24 fatal share is close to what the crash mix predicts;
-under the complete case an excess persists. The imputed CRSS fatal total matches FARS every
+The 2023–24 excess over the composition-only expectation is significant under the
+complete-case outcome but smaller and not significant under NHTSA's imputed outcome; the
+intervals overlap and the difference between the two was not tested. The imputed CRSS fatal total matches FARS every
 year, but by construction (CRSS weights are calibrated to FARS through the imputed severity),
 so this is not independent corroboration (`trends/outcome_definitions_by_year`).
 
-**What FARS shows (observed).** Between 2019 and 2021 fatal crashes rose
+**What FARS shows (observed counts; alcohol estimated by NHTSA's multiple imputation).**
+Between 2019 and 2021 fatal crashes rose
 {{trends/fars_changes|indicator=fatal_crashes|pct_change_2019_2021|.1f}}%. Crashes with police-recorded speeding rose
 {{trends/fars_changes|indicator=speeding_crashes|pct_change_2019_2021|.1f}}% and crashes with a driver at BAC ≥ 0.08
 (NHTSA's multiple imputation) {{trends/fars_changes|indicator=bac08_crashes_mi|pct_change_2019_2021|.1f}}%; these
 overlapping groups account for {{trends/fars_changes|indicator=speeding_crashes|share_of_total_change_2019_2021|pct:0}}
 and {{trends/fars_changes|indicator=bac08_crashes_mi|share_of_total_change_2019_2021|pct:0}} of the rise. Motorcyclist
-deaths kept rising to 2024 ({{trends/fars_changes|indicator=motorcyclist_deaths|2019|,.0f}} →
-{{trends/fars_changes|indicator=motorcyclist_deaths|2021|,.0f}} → {{trends/fars_changes|indicator=motorcyclist_deaths|2024|,.0f}}), while total
+deaths rose from {{trends/fars_composition_by_year|YEAR=2019|motorcyclist_deaths|,.0f}} (2019) to
+{{trends/fars_composition_by_year|YEAR=2021|motorcyclist_deaths|,.0f}} (2021) and peaked at
+{{trends/fars_composition_by_year|YEAR=2023|motorcyclist_deaths|,.0f}} in 2023; in 2024
+({{trends/fars_composition_by_year|YEAR=2024|motorcyclist_deaths|,.0f}}) they were still above
+their 2021 level, while total
 deaths fell back from {{trends/fars_changes|indicator=deaths|2021|,.0f}} to {{trends/fars_changes|indicator=deaths|2024|,.0f}}.
 
 *Limitations.* The within-circumstance part is a residual: it contains unmeasured circumstances
@@ -500,13 +548,15 @@ any other cause.
 
 *Sources: `measurement/*`.*
 
-* **Alcohol testing is selective.** In 2016,
-  {{measurement/fars_testing|level=national;YEAR=2016;status=killed|pct_alcohol_tested|.0f}}% of
-  killed drivers were tested, against
-  {{measurement/fars_testing|level=national;YEAR=2016;status=survived|pct_alcohol_tested|.0f}}%
-  of surviving drivers; in 2024 the figures were
-  {{measurement/fars_testing|level=national;YEAR=2024;status=killed|pct_alcohol_tested|.0f}}% and
-  {{measurement/fars_testing|level=national;YEAR=2024;status=survived|pct_alcohol_tested|.0f}}%.
+* **Alcohol testing is selective.** In 2016, {{measurement/fars_testing|level=national;YEAR=2016;status=killed|pct_alcohol_tested|.0f}}% of
+  killed drivers were tested, against {{measurement/fars_testing|level=national;YEAR=2016;status=survived|pct_alcohol_tested|.0f}}% of surviving
+  drivers; in 2023 the figures were {{measurement/fars_testing|level=national;YEAR=2023;status=killed|pct_alcohol_tested|.0f}}% and
+  {{measurement/fars_testing|level=national;YEAR=2023;status=survived|pct_alcohol_tested|.0f}}% (`measurement/fars_testing`). Part of the apparent
+  decline is missing records: the share of killed drivers whose test status is not reported rose
+  from {{measurement/fars_testing|level=national;YEAR=2016;status=killed|pct_alcohol_test_status_unknown|.0f}}% to
+  {{measurement/fars_testing|level=national;YEAR=2023;status=killed|pct_alcohol_test_status_unknown|.0f}}%, and to
+  {{measurement/fars_testing|level=national;YEAR=2024;status=killed|pct_alcohol_test_status_unknown|.0f}}% in 2024, whose toxicology records are
+  incomplete in these archives.
   Survivors are tested mainly on suspicion.
 * **Police reports miss alcohol in killed drivers.** Among tested FARS drivers with a known
   police report, the report identifies BAC ≥ 0.08 in
@@ -523,7 +573,7 @@ any other cause.
   uninjured but {{measurement/restraint_reporting|kabco=4|pct_belted_among_known|.1f}}% among the
   killed. Some of that gap is real protection, and some is likely over-reporting by survivors.
 * **Drug involvement and distraction cannot be used.** Their "unknown" shares rose sharply in
-  2017–2020 (drugs: {{measurement/unknown_by_year|field=drugs;fatal=0;YEAR=2018|pct_unknown|.0f}}% →
+  2018–2020 (drugs: {{measurement/unknown_by_year|field=drugs;fatal=0;YEAR=2018|pct_unknown|.0f}}% →
   {{measurement/unknown_by_year|field=drugs;fatal=0;YEAR=2020|pct_unknown|.0f}}% of non-fatal
   crashes). Drug testing is selective, and a positive test shows presence, not impairment. No
   severity association or prevalence is reported for drugs or distraction.
@@ -573,17 +623,20 @@ test years was {{ml/metrics_test|outcome=fatal;stage=pre_crash+circumstance;mode
   of crashes with the lowest predicted risk it is {{ml/calibration_by_risk_tier|outcome=fatal;stage=pre_crash+circumstance;model=hgb;weighting=weighted;risk_tier=lowest 50% of predicted risk|oe_ratio|ci:2@oe}}
   (predictions about twice the observed share), and among the riskiest fifth
   {{ml/calibration_by_risk_tier|outcome=fatal;stage=pre_crash+circumstance;model=hgb;weighting=weighted;risk_tier=highest 20%|oe_ratio|ci:2@oe}}. Logistic models show the same pattern.
-* **Drift.** A model trained on 2016–2019 under-predicts fatal crashes after 2020
+* **Drift.** A model trained on 2016–2019 under-predicts fatal crashes in 2020–2022, and by
+  2023–2024 observed and predicted no longer differ clearly
   (observed ÷ predicted {{ml/temporal_stability|outcome=fatal;stage=pre_crash+circumstance;model=hgb;eval_year=2020;metric=oe_ratio|estimate|ci:2@ci}} in 2020, {{ml/temporal_stability|outcome=fatal;stage=pre_crash+circumstance;model=hgb;eval_year=2022;metric=oe_ratio|estimate|ci:2@ci}} in 2022, {{ml/temporal_stability|outcome=fatal;stage=pre_crash+circumstance;model=hgb;eval_year=2024;metric=oe_ratio|estimate|ci:2@ci}} in 2024), in line
   with finding 8.
 * **Interactions.** The 13 pre-specified interaction terms of finding 5 add almost nothing to
   prediction (AUROC {{ml/paired_differences|outcome=fatal;stage=pre_crash+circumstance;model=logit_interact;comparison=vs logit_main;metric=auroc|estimate|+.3f}}). Screening the boosted
-  model on 2016–2022 suggested two further interactions that were then confirmed on 2023–2024
+  model on 2016–2022 suggested three further interactions. Tested on 2023–2024, two were confirmed
   (survey-weighted, Holm-adjusted): intersection × head-on collision (ratio of odds ratios
   {{ml/pattern_confirmation|candidate=junction=intersection x crash_type=mv_head_on (refs non_junction, mv_rear_end)|ratio_of_or|.2f}})
   and speeding × angle collision
-  ({{ml/pattern_confirmation|candidate=speeding=yes x crash_type=mv_angle (refs no, mv_rear_end)|ratio_of_or|.2f}}). Both are
-  exploratory and non-causal.
+  ({{ml/pattern_confirmation|candidate=speeding=yes x crash_type=mv_angle (refs no, mv_rear_end)|ratio_of_or|.2f}});
+  a 40–45 mph × pedestrian term was not confirmed (Holm p
+  {{ml/pattern_confirmation|candidate=speed_limit=40-45 x crash_type=pedestrian (refs 30-35, mv_rear_end)|p_holm|.2f}}).
+  All three are exploratory and non-causal.
 
 *Limitations.* Predictive accuracy is not evidence that any input causes fatal outcomes.
 Several "unknown" inputs mostly mark hit-and-run crashes, and imputed alcohol may carry

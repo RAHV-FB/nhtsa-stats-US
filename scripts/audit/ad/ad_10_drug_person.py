@@ -2,7 +2,7 @@
 Output: out_ad/fars_drug_person.parquet"""
 import polars as pl
 from nhtsa_stats.ingestion.cache import load_table
-OUT = "/tmp/nhtsa-audit/out_ad"
+OUT = "outputs/cache/audit/out_ad"
 pl.Config.set_tbl_rows(200); pl.Config.set_tbl_width_chars(250); pl.Config.set_tbl_cols(30)
 K = ["YEAR","ST_CASE","VEH_NO","PER_NO"]
 def drug_class(c, scheme):

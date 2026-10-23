@@ -53,9 +53,10 @@ def _fmt(x, d: int = 0) -> str:
 def _baseline_section(engine, base) -> None:
     st.subheader("A. What the data show (empirical baseline)")
     st.caption(
-        f"Mean per year over {base.window[0]}-{base.window[1]}. Deaths are observed FARS counts; KA "
-        "crashes are CRSS design-based estimates. Segment counts exclude deaths whose status is "
-        "unknown, so they are lower bounds."
+        f"Mean per year over {base.window[0]}-{base.window[1]}. Deaths are observed FARS counts, "
+        "except alcohol (BAC >= 0.08), which is an expected value over NHTSA's 10 multiply-imputed "
+        "BAC values rather than a census count. KA crashes are CRSS design-based estimates. "
+        "Segment counts exclude deaths whose status is unknown, so they are lower bounds."
     )
     rows = []
     for seg in ("all", *engine.PARTITION_SEGMENTS):
@@ -271,7 +272,7 @@ def _build(engine, base, key: str):
             src = st.selectbox(
                 "Belt effectiveness",
                 [
-                    "Layer A within-vehicle estimate",
+                    "Layer A within-vehicle association (assumes it is causal)",
                     "Same, if 5% of belted survivors were unbelted",
                     "Same, if 10% were",
                     "Same, if 20% were",
@@ -281,7 +282,7 @@ def _build(engine, base, key: str):
                 help="FARS within-vehicle estimate given a fatal crash; the misreporting rows show its sensitivity.",
             )
             variants = {
-                "Layer A within-vehicle estimate": None,
+                "Layer A within-vehicle association (assumes it is causal)": None,
                 "Same, if 5% of belted survivors were unbelted": "misreport_f05",
                 "Same, if 10% were": "misreport_f10",
                 "Same, if 20% were": "misreport_f20",

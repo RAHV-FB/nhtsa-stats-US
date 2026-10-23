@@ -48,7 +48,7 @@ for table, pairs in PAIRS.items():
         details.append(("SEV", orig, im, s.to_dicts()))
     del df
 S = pl.DataFrame(summary)
-S.write_csv("/tmp/nhtsa-audit/svy_06_imputed.csv")
+S.write_csv("outputs/cache/audit/svy_06_imputed.csv")
 print(S.to_pandas().to_string(index=False))
 for x in details:
     print(x)

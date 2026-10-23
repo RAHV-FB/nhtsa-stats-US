@@ -12,7 +12,7 @@ from nhtsa_stats.ingestion.cache import load_table
 pl.Config.set_tbl_rows(40)
 pl.Config.set_tbl_cols(30)
 pl.Config.set_tbl_width_chars(300)
-OUT = "/tmp/nhtsa-audit/out"
+OUT = "outputs/cache/audit/out"
 p = load_table("FARS", "person", columns=["ST_CASE", "VEH_NO", "PER_NO", "PER_TYP", "BODY_TYP", "INJ_SEV", "REST_USE", "SEAT_POS", "AGE"])
 p = p.filter(pl.col("PER_TYP").is_in([1, 2, 9]) & pl.col("BODY_TYP").is_between(1, 49))
 p = p.with_columns(

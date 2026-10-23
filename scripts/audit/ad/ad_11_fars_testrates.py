@@ -1,6 +1,6 @@
 """FARS drivers: alcohol & drug test status by severity (killed vs survived) x year; state variation; MI vs measured share."""
 import polars as pl
-OUT = "/tmp/nhtsa-audit/out_ad"
+OUT = "outputs/cache/audit/out_ad"
 pl.Config.set_tbl_rows(200); pl.Config.set_tbl_width_chars(260); pl.Config.set_tbl_cols(30)
 df = pl.read_parquet(f"{OUT}/fars_person.parquet").filter(pl.col("PER_TYP")==1)
 dp = pl.read_parquet(f"{OUT}/fars_drug_person.parquet")

@@ -1,4 +1,4 @@
-"""Section A: the main supported findings, each with effect size, denominator and caveats."""
+"""Section A: the main supported findings, each with its estimate, denominator and caveats."""
 
 from __future__ import annotations
 
@@ -34,7 +34,7 @@ def render() -> None:
             st.markdown(f"**Finding.** {f['statement']}")
             c1, c2 = st.columns([3, 2])
             with c1:
-                st.markdown(f"**Effect size.** {f.get('effect', '')}")
+                st.markdown(f"**Estimate.** {f.get('effect', '')}")
                 st.markdown(f"**Uncertainty.** {f.get('uncertainty', '')}")
                 st.markdown(f"**Population / period.** {f.get('population', '')}")
                 st.markdown(f"**Denominator.** {f.get('denominator', '')}")
@@ -42,7 +42,8 @@ def render() -> None:
                 st.markdown(f"**Robustness.** {f.get('robustness', '')}")
                 st.markdown(f"**Limitations.** {f.get('limitations', '')}")
                 st.caption(
-                    f"Estimate type: {KIND_BADGE.get(f.get('kind', 'adjusted'), f.get('kind'))} · "
+                    f"Main estimate type: {KIND_BADGE.get(f.get('kind', 'adjusted'), f.get('kind'))} "
+                    "(numbers of other types are labelled in the text) · "
                     f"Evidence: {f.get('evidence', '')}"
                 )
             with c2:

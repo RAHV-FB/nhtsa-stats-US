@@ -1,6 +1,6 @@
 """FARS drivers: police-reported DRINKING vs measured BAC (sensitivity/specificity) by severity; BAC>=.08 prevalence measured vs MI; DRINKING missingness by severity."""
 import polars as pl
-OUT = "/tmp/nhtsa-audit/out_ad"
+OUT = "outputs/cache/audit/out_ad"
 pl.Config.set_tbl_rows(200); pl.Config.set_tbl_width_chars(260); pl.Config.set_tbl_cols(30)
 df = pl.read_parquet(f"{OUT}/fars_drivers.parquet").filter(pl.col("sev").is_in(["killed","survived"]))
 P = [f"P{i}" for i in range(1,11)]

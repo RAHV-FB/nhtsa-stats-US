@@ -1,7 +1,7 @@
 """Restraint-unknown share: killed vs surviving LPV occupants (FARS rows; CRSS weighted), by year.
 Reads out/restraint_by_sev_{FARS,CRSS}.csv written by 09_restraint_detail.py."""
 import polars as pl
-OUT = "/tmp/nhtsa-audit/out"
+OUT = "outputs/cache/audit/out"
 pl.Config.set_tbl_rows(40); pl.Config.set_tbl_width_chars(250); pl.Config.set_tbl_cols(30)
 for src in ("FARS", "CRSS"):
     d = pl.read_csv(f"{OUT}/restraint_by_sev_{src}.csv")

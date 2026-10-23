@@ -19,9 +19,10 @@ policy questions require data that do not exist in this repository.
 
 * **Severity-dependent ascertainment.** Behavioural fields are recorded more completely, and
   often more thoroughly investigated, in severe crashes. Evidence from this project:
-  CRSS records speeding in 21% of *fatal* crashes versus 27% in FARS for the same population
+  CRSS records speeding in 20% of *fatal* crashes versus 27% in FARS for the same population
   (FARS analysts use more sources); alcohol tests are given to 59–74% of killed drivers but
-  21–29% of surviving drivers; the drug-test rate is 53–63% vs 13–20%. A quantitative bias
+  21–28% of surviving drivers; the drug-test rate is 55–63% vs 15–20% (2018–2024; the lowest
+  values are 2024, whose toxicology records are incomplete in these archives). A quantitative bias
   analysis shows the speeding–severity association is fragile to plausible differential
   recording, while the alcohol association is robust (see `reports/findings.md`).
 * **Coding breaks.** CRSS police-reported alcohol (2019), drug involvement (2019–2020),

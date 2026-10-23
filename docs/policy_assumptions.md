@@ -8,8 +8,10 @@ Tests: `tests/test_simulation.py`, `tests/test_costs.py`.
 > **Status of every simulated number: hypothetical.** The simulator does not estimate the
 > effect of any intervention. It applies arithmetic to (a) empirical quantities from FARS and
 > CRSS and (b) assumptions that *you* supply. If the assumptions are wrong, the outputs are
-> wrong. The project ships no default effect sizes, no default prices, no default discount rate
-> and no monetary value of a statistical life.
+> wrong. The project ships no default effect sizes (with one labelled exception: belt
+> effectiveness defaults to the project's own FARS within-vehicle estimate, treated as causal
+> by assumption, §4.4), no default prices, no default discount rate and no monetary value of
+> a statistical life.
 
 ## 1. What the database can and cannot identify
 
@@ -323,7 +325,8 @@ base = e.EmpiricalBaseline.load()
 cams = e.Scenario(
     "cameras",
     e.SpeedEnforcement(
-        units_current=0, units_proposed=500,
+        units_current=0,
+        units_proposed=500,
         coverage=e.SaturatingCoverage(rate=Param(0.002, 0.001, 0.004)),
         behavioural_response=Param(0.3, 0.1, 0.5),
         occurrence_effect=Param(0.2, 0.0, 0.4),
@@ -332,7 +335,9 @@ cams = e.Scenario(
     ),
     e.Timing(ramp_years=Param(2, 1, 3), decay_per_year=Param(0.0, 0.0, 0.05)),
 )
-e.evaluate(cams, base); e.tornado(cams, base); e.monte_carlo(cams, base, horizon_years=5)
+e.evaluate(cams, base)
+e.tornado(cams, base)
+e.monte_carlo(cams, base, horizon_years=5)
 ```
 
 * Target segment: 4,702 deaths/yr (observed). Coverage at 500 units 0.632; share of target

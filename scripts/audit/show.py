@@ -1,6 +1,6 @@
 """Pivot a variable's distribution: code x source-year (percent), with label(s)."""
 import polars as pl, sys, re
-OUT = "/tmp/nhtsa-audit/out"
+OUT = "outputs/cache/audit/out"
 d = pl.read_csv(f"{OUT}/veh_dist.csv", infer_schema_length=0).with_columns(pl.col("n").cast(pl.Int64), pl.col("N").cast(pl.Int64), pl.col("year").cast(pl.Int64))
 def norm(s): return re.sub(r"[^a-z0-9]","",s.lower()) if s else None
 var = sys.argv[1]; srcs = sys.argv[2].split(",") if len(sys.argv)>2 else ["FARS","CRSS"]

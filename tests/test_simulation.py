@@ -189,7 +189,12 @@ def test_baseline_from_frames_fars_counts_and_unknowns():
     assert b.deaths.total() == pytest.approx(b.total_deaths())
     assert b.deaths.overlap("speeding", "alcohol") == pytest.approx(0.6 / 3)
     assert set(b.annual["YEAR"]) == {2022, 2023, 2024}
-    assert all(qq.kind == "observed" for k, qq in q.items() if k.startswith("fars."))
+    # FARS counts are observed; alcohol counts are expectations over NHTSA's BAC imputations.
+    assert all(
+        qq.kind == ("observed_x_imputation" if "alcohol" in k else "observed")
+        for k, qq in q.items()
+        if k.startswith("fars.")
+    )
 
 
 def test_baseline_rejects_window_outside_data():
@@ -212,10 +217,10 @@ def _synthetic_crss(n: int = 3000, seed: int = 3) -> pd.DataFrame:
             "speeding_type": rng.choice(["no", e.EXCEEDED, "unknown"], n),
             "alcohol_im": rng.choice([0.0, 1.0], n, p=[0.9, 0.1]),
             "drugs": rng.choice([0.0, 1.0, np.nan], n),
-            "fatal_im": rng.choice([0.0, 1.0], n, p=[0.95, 0.05]),
-            "ka_im": rng.choice([0.0, 1.0, np.nan], n, p=[0.8, 0.18, 0.02]),
-            "fatal": 0.0,  # older layout: complete-case column, must NOT be used
-            "ka": 0.0,
+            "fatal": rng.choice([0.0, 1.0], n, p=[0.95, 0.05]),
+            "ka": rng.choice([0.0, 1.0, np.nan], n, p=[0.8, 0.18, 0.02]),
+            "fatal_cc": 0.0,  # complete-case columns: sensitivity only, must NOT be used
+            "ka_cc": 0.0,
         }
     )
 
@@ -226,7 +231,7 @@ def test_crss_totals_partition_and_outcome_resolution():
     b = e.baseline_from_frames(crash, person, (2022, 2024), crss_crash=crss)
     win = crss["YEAR"].isin([2022, 2023, 2024])
     w = crss["WEIGHT"].where(win, 0.0)
-    ka = (crss["ka_im"] == 1).astype(float)
+    ka = (crss["ka"] == 1).astype(float)
     q = b.quantities
     assert q["crss.crashes_per_year"].value == pytest.approx(w.sum() / 3)
     assert q["crss.ka_crashes_per_year"].value == pytest.approx((w * ka).sum() / 3)
@@ -250,7 +255,7 @@ def test_crss_partition_cells_have_design_se_and_flags():
     b = e.baseline_from_frames(crash, person, (2022, 2024), crss_crash=crss)
     design = SurveyDesign.from_frame(crss)
     win = crss["YEAR"].isin([2022, 2023, 2024]).to_numpy()
-    ka = (crss["ka_im"] == 1).to_numpy(float)
+    ka = (crss["ka"] == 1).to_numpy(float)
     cm = e.crash_membership(crss, "CRSS")
     only_speeding = (
         cm["speeding"]
@@ -289,10 +294,10 @@ def test_crss_small_cells_are_suppressed():
     assert qd.flag == "suppressed" and qd.value is None and qd.n == 5
 
 
-def test_crss_outcome_column_layouts():
+def test_crss_outcome_column_requires_imputed_outcome():
     assert e.crss_outcome_column(["fatal", "fatal_cc"], "fatal") == "fatal"
-    assert e.crss_outcome_column(["fatal", "fatal_im"], "fatal") == "fatal_im"
-    assert e.crss_outcome_column(["fatal"], "fatal") == "fatal"
+    with pytest.raises(e.MissingInputError):
+        e.crss_outcome_column(["fatal_cc"], "fatal")
 
 
 def test_baseline_roundtrip_dict():
@@ -683,6 +688,7 @@ def test_association_helpers_are_explicitly_assumptions():
         e.severity_effect_from_association(b, "alcohol")
     bp = e.belt_effectiveness_param(b)
     assert (bp.low, bp.central, bp.high) == pytest.approx((0.5, 0.6, 0.7))
+    assert bp.source.startswith("ASSUMES")  # imported association used as a causal effect
 
 
 # --------------------------------------------------------------------------------------

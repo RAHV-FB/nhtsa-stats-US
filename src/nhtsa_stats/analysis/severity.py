@@ -47,9 +47,10 @@ from nhtsa_stats.reporting.io import save_json, save_table
 log = logging.getLogger(__name__)
 MODULE = "severity"
 # Tiny L2 penalty (weights are normalised to mean 1, so the Fisher information of a level with
-# k crashes and fatal rate p is ~k*p*(1-p)).  It keeps coefficients finite for levels with zero
-# events (e.g. 36 crashes with unknown interstate status, none fatal) while shrinking any level
-# with >= 1,000 crashes by well under 1%.
+# k crashes and fatal rate p is ~k*p*(1-p)).  It keeps coefficients finite and stable for sparse
+# levels and cells (e.g. 38 crashes with unknown interstate status, 3 fatal; zero-event cells in
+# period-specific and interaction fits) while shrinking any level with >= 1,000 crashes by well
+# under 1%.
 RIDGE = 0.01
 
 
@@ -336,7 +337,7 @@ def hit_and_run_sensitivity(outcome: str = "fatal") -> pd.DataFrame:
 
 
 def outcome_definition_sensitivity(primary: pd.DataFrame, cc: pd.DataFrame) -> pd.DataFrame:
-    """Model-A associations under the imputed (primary) and complete-case fatal outcomes."""
+    """Model-A associations under the imputed (primary) and complete-case outcome definitions."""
     cols = ["crude_rr", "A_adj_rr", "A_adj_rr_low", "A_adj_rr_high"]
     keys = ["factor", "level"]
     a = primary[primary["A_adj_rr"].notna()][keys + cols]
@@ -346,7 +347,7 @@ def outcome_definition_sensitivity(primary: pd.DataFrame, cc: pd.DataFrame) -> p
     return m
 
 
-def run(outcomes: Sequence[str] = ("fatal", "ka", "fatal_cc")) -> dict[str, pd.DataFrame]:
+def run(outcomes: Sequence[str] = ("fatal", "ka", "fatal_cc", "ka_cc")) -> dict[str, pd.DataFrame]:
     out = {}
     for oc in outcomes:
         res = crude_vs_adjusted(oc)
@@ -376,22 +377,24 @@ def run(outcomes: Sequence[str] = ("fatal", "ka", "fatal_cc")) -> dict[str, pd.D
             inputs=["data/processed/crss_crash.parquet"],
         )
         out[f"{oc}_speeding_type"] = st
-    if "fatal" in out and "fatal_cc" in out:
-        sens = outcome_definition_sensitivity(out["fatal"], out["fatal_cc"])
+    for oc in ("fatal", "ka"):
+        if oc not in out or f"{oc}_cc" not in out:
+            continue
+        sens = outcome_definition_sensitivity(out[oc], out[f"{oc}_cc"])
         save_table(
             sens,
             MODULE,
-            "fatal_outcome_definition_sensitivity",
-            description="Model-A adjusted risk ratios with the NHTSA-imputed fatal outcome (primary) and the "
-            "strict complete-case outcome (MAX_SEV; crashes with any person of unknown severity excluded "
-            "unless fatal)",
+            f"{oc}_outcome_definition_sensitivity",
+            description=f"Model-A adjusted risk ratios with the NHTSA-imputed '{oc}' outcome (primary) and "
+            "the strict complete-case outcome (MAX_SEV; crashes with any person of unknown severity "
+            "excluded unless the outcome is already met)",
             population="CRSS police-reported crashes 2016-2024",
             unit="crash",
-            outcome="fatal vs fatal_cc",
+            outcome=f"{oc} vs {oc}_cc",
             method="Same model A fitted to each outcome definition; ratio of adjusted RRs",
             inputs=["data/processed/crss_crash.parquet"],
         )
-        out["fatal_outcome_definition_sensitivity"] = sens
+        out[f"{oc}_outcome_definition_sensitivity"] = sens
     if "fatal" in out:
         hr = hit_and_run_sensitivity("fatal")
         save_table(

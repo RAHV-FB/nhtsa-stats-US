@@ -1,7 +1,7 @@
 """Misc FARS checks: 2024 provisional toxicology by month; vitreous jump by state; FARS crash-level alcohol comparable to CRSS ALCOHOL; MIDRVACC prevalence."""
 import polars as pl
 from nhtsa_stats.ingestion.cache import load_table
-OUT = "/tmp/nhtsa-audit/out_ad"
+OUT = "outputs/cache/audit/out_ad"
 pl.Config.set_tbl_rows(200); pl.Config.set_tbl_width_chars(260); pl.Config.set_tbl_cols(30)
 df = pl.read_parquet(f"{OUT}/fars_person.parquet")
 acc = load_table("FARS","accident",years=None,columns=["ST_CASE","MONTH"])

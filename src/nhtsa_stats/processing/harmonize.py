@@ -270,10 +270,6 @@ def body_group(col: str = "BODY_TYP") -> pl.Expr:
     return _map(col, BODY_GROUPS)
 
 
-def is_light_passenger_vehicle(col: str = "BODY_TYP") -> pl.Expr:
-    return pl.col(col).is_between(1, 49)
-
-
 def vehicle_age(model_year: str = "MOD_YEAR", year: str = "YEAR") -> pl.Expr:
     """Crash year minus model year (model year 9998/9999 unknown); -1 allowed (next-year
     models sold early); null outside [-1, 60]."""
@@ -346,9 +342,6 @@ def person_type(col: str = "PER_TYP") -> pl.Expr:
 def age_years(col: str = "AGE") -> pl.Expr:
     """AGE in years (0 = under 1); 998 not reported; 999 unknown."""
     return pl.when(pl.col(col).is_between(0, 120)).then(pl.col(col)).otherwise(None)
-
-
-AGE_BANDS = ["0-14", "15-20", "21-24", "25-34", "35-44", "45-54", "55-64", "65-74", "75+"]
 
 
 def age_band(col: str = "age") -> pl.Expr:

@@ -33,4 +33,4 @@ for src in ["FARS", "CRSS"]:
 df = pl.DataFrame(res)
 pl.Config.set_tbl_rows(100); pl.Config.set_tbl_cols(20); pl.Config.set_fmt_str_lengths(80); pl.Config.set_tbl_width_chars(250)
 print(df)
-df.write_csv("/tmp/nhtsa-audit/out_aux/joins.csv")
+df.write_csv("outputs/cache/audit/out_aux/joins.csv")

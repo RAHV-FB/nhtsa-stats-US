@@ -10,7 +10,7 @@ from nhtsa_stats.ingestion.cache import load_table
 pl.Config.set_tbl_rows(80)
 pl.Config.set_tbl_cols(30)
 pl.Config.set_tbl_width_chars(250)
-OUT = "/tmp/nhtsa-audit/out"
+OUT = "outputs/cache/audit/out"
 src = sys.argv[1]
 w = ["WEIGHT"] if src == "CRSS" else []
 p = load_table(src, "person", columns=["VEH_NO", "PER_TYP", "BODY_TYP", "INJ_SEV", "REST_USE", "REST_MIS", "HELM_USE", "HELM_MIS", "AGE"] + w)

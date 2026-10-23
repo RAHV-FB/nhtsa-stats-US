@@ -64,7 +64,8 @@ def test_candidate_crashes_exclude_hit_and_run():
             "hit_and_run": [0, 1, 0, 0, None],
         }
     )
-    assert exposure.candidate_crashes(crash).height == 2
+    # Unknown hit-and-run status is excluded as well (unknown is not "no").
+    assert exposure.candidate_crashes(crash).height == 1
 
 
 def test_rir_equals_within_group_odds_in_one_to_one_pairs():

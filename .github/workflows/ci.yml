@@ -9,7 +9,7 @@ jobs:
   checks:
     runs-on: ubuntu-latest
     steps:
-      # The raw NHTSA archives are Git LFS objects (~1 GB); CI does not fetch them.
+      # The raw NHTSA archives are Git LFS objects (~675 MB); CI does not fetch them.
       # Tests that need the Parquet caches built from them skip themselves.
       - uses: actions/checkout@v4
         with:

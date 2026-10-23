@@ -1,6 +1,6 @@
 """MIPER structure: coverage by PER_TYP, relation of implicates to ALC_RES where measured, units, variability."""
 import polars as pl
-OUT = "/tmp/nhtsa-audit/out_ad"
+OUT = "outputs/cache/audit/out_ad"
 pl.Config.set_tbl_rows(100); pl.Config.set_tbl_width_chars(250); pl.Config.set_tbl_cols(30)
 df = pl.read_parquet(f"{OUT}/fars_person.parquet")
 P = [f"P{i}" for i in range(1,11)]

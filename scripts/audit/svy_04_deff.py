@@ -42,7 +42,7 @@ out = res.with_columns((pl.col("p")*100).round(3).alias("p_%"), (pl.col("A: PSUS
     ((pl.col("E: STRATUM/case")/pl.col("se_srs"))**2).round(2).alias("deff_E"),
     ((pl.col("F: none/case (wt only)")/pl.col("se_srs"))**2).round(2).alias("deff_F"))
 P(out.select(["YEAR","prop","n","p_%","se_A_%","deff_A","deff_B","deff_C","deff_D","deff_E","deff_F"]).sort(["prop","YEAR"]))
-res.write_csv("/tmp/nhtsa-audit/svy_04_deff.csv")
+res.write_csv("outputs/cache/audit/svy_04_deff.csv")
 print("design summaries per year (A and B)")
 for y in range(2016,2025):
     d = a.filter(pl.col("YEAR")==y)

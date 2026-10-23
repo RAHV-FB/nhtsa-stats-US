@@ -52,9 +52,10 @@ corrections (conservative). Implementation: `analysis/survey.py: SurveyDesign.vc
 Pseudo-maximum likelihood: β̂ solves Σ w_k x_k (y_k − μ_k) − λ β = 0 (weights normalised
 to mean 1). Fitting uses damped Newton–Raphson with step-halving on the penalised
 log-likelihood (plain Newton diverges on these rare-event data). A ridge λ = 0.01 is applied
-to non-intercept coefficients: it keeps coefficients finite for levels with zero events (e.g.
-36 crashes with unknown interstate status, none fatal) and shrinks any level with ≥1,000
-crashes by well under 1%.
+to non-intercept coefficients: it keeps coefficients finite and stable for sparse levels and
+cells (e.g. 38 crashes with unknown interstate status, 3 of them fatal; zero-event cells arise
+in period-specific and interaction fits) and shrinks any level with ≥1,000 crashes by well
+under 1%.
 
 Variance: sandwich V(β̂) = A⁻¹ B A⁻¹ with A = Xᵀ diag(w μ(1−μ)) X + λI and
 B = V̂(Σ_k w_k x_k (y_k − μ_k)) from §2.1. Tests of single or grouped coefficients use the
@@ -118,8 +119,14 @@ Two covariate sets (`analysis/specs.py`):
   sideswipe / other) and number of vehicles in transport.
 
 Crash configuration is plausibly a *mediator* of several pre-crash factors (darkness →
-pedestrian crash; speeding → roadway departure), so model A estimates total associations and
-model B associations net of configuration. Post-crash variables (ejection, rollover as an
+pedestrian crash; speeding → roadway departure), so model B estimates associations net of
+configuration. Model A is *mutually adjusted*: each factor's model-A association also holds
+fixed the pre-crash variables downstream of it in the dependency diagram (`specs.DESCENDANTS`:
+time of day → light; weather → road surface; driver age mix and vehicle mix → speeding and
+alcohol), so for those factors it is not a total association. For them a second association
+that leaves the downstream variables out — "A excluding downstream variables", the `Ax_*`
+columns of `severity/*_crude_vs_adjusted` — is reported as the closer analogue of a total
+association; for the other factors the two coincide. Post-crash variables (ejection, rollover as an
 outcome, fire, towing, airbag deployment, hospital transport, time of death) and outcome
 counts are never covariates (`harmonize.REGISTRY` + `assert_no_leakage`). The conceptual
 dependency diagram is in `docs/research_plan.md` §5.
@@ -216,7 +223,8 @@ checks of any machine-learning pattern with the transparent survey models above.
 See `docs/policy_assumptions.md`. The simulator separates (A) empirical baseline quantities
 from this database, (B) intervention mechanisms, (C) user-supplied assumptions and (D)
 outcomes, and labels every output *hypothetical*. No effect sizes or prices are supplied by
-the project.
+the project, except that belt effectiveness defaults to the project's own FARS within-vehicle
+estimate (treated as causal by assumption, and labelled so) when the user gives none.
 
 ## 11. Reproducibility
 

@@ -1,6 +1,6 @@
 """CRSS 2016-2018 (unlabelled): code-set overlap with labelled CRSS 2019+ / same-year FARS; TVD of distributions."""
 import polars as pl
-OUT="/tmp/nhtsa-audit/out"
+OUT="outputs/cache/audit/out"
 d = pl.read_csv(f"{OUT}/veh_dist.csv", infer_schema_length=0).with_columns(pl.col("n").cast(pl.Int64), pl.col("N").cast(pl.Int64), pl.col("year").cast(pl.Int64))
 cb = pl.read_csv("outputs/audit/codebook.csv", infer_schema_length=0).filter(pl.col("table")=="vehicle")
 NUMERIC_LIKE = {"MOD_YEAR","MDLYR_IM","NUMOCCS","TRAV_SP","DEATHS","NUM_INJV","NUMINJ_IM"}

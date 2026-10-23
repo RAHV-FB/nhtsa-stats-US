@@ -1,6 +1,6 @@
 """FARS: selection into testing by police report among killed vs survivors; sensitivity in high-testing states; bias illustration."""
 import polars as pl
-OUT = "/tmp/nhtsa-audit/out_ad"
+OUT = "outputs/cache/audit/out_ad"
 pl.Config.set_tbl_rows(200); pl.Config.set_tbl_width_chars(260); pl.Config.set_tbl_cols(30)
 df = pl.read_parquet(f"{OUT}/fars_drivers.parquet").filter(pl.col("sev").is_in(["killed","survived"]))
 print("P(measured BAC | DRINKING) by sev:")

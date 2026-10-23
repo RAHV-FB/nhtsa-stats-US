@@ -14,7 +14,7 @@ import polars as pl
 
 from nhtsa_stats.ingestion.cache import load_table
 
-OUT = "/tmp/nhtsa-audit/out"
+OUT = "outputs/cache/audit/out"
 src = sys.argv[1]
 K = ["ST_CASE"] if src == "FARS" else ["CASENUM"]
 cols = K + ["VEH_NO", "PER_TYP", "BODY_TYP", "INJ_SEV", "AGE", "SEX", "SEAT_POS", "REST_USE", "REST_MIS",

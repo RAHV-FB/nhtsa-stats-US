@@ -1,5 +1,5 @@
 import polars as pl, sys
-OUT="/tmp/nhtsa-audit/out"
+OUT="outputs/cache/audit/out"
 pl.Config.set_tbl_rows(100); pl.Config.set_tbl_cols(30); pl.Config.set_tbl_width_chars(300)
 d = pl.read_csv(f"{OUT}/diffmiss.csv")
 # 1. By year, ALL (FARS unweighted; CRSS weighted)

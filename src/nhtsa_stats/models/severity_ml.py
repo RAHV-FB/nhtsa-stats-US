@@ -95,7 +95,6 @@ from __future__ import annotations
 import copy
 import logging
 import os
-import resource
 import time
 from collections.abc import Sequence
 from dataclasses import dataclass, field
@@ -2853,10 +2852,9 @@ def run(n_boot: int = N_BOOT, interpret: bool = True) -> dict[str, Any]:
             out["ice"],
             out["top_features"],
         )
-    usage = resource.getrusage(resource.RUSAGE_SELF)
     run_info = {
         "runtime_seconds": round(time.time() - t_start, 1),
-        "cpu_seconds": round(usage.ru_utime + usage.ru_stime, 1),
+        "cpu_seconds": round(time.process_time(), 1),
         "thread_settings": {
             k: os.environ.get(k, "unset")
             for k in ("OMP_NUM_THREADS", "OPENBLAS_NUM_THREADS", "POLARS_MAX_THREADS")

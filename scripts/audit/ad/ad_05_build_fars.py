@@ -2,7 +2,7 @@
 Output: out_ad/fars_person.parquet"""
 import polars as pl
 from nhtsa_stats.ingestion.cache import load_table
-OUT = "/tmp/nhtsa-audit/out_ad"
+OUT = "outputs/cache/audit/out_ad"
 K = ["YEAR","ST_CASE","VEH_NO","PER_NO"]
 p = load_table("FARS","person",years=None,columns=["ST_CASE","VEH_NO","PER_NO","STATE","PER_TYP","INJ_SEV","AGE","SEX","DOA",
      "DRINKING","ALC_STATUS","ATST_TYP","ALC_RES","ALC_DET","DRUGS","DRUG_DET","DRUGTST1","DRUGTST2","DRUGTST3","DRUGRES1","DRUGRES2","DRUGRES3"])

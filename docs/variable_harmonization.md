@@ -58,9 +58,9 @@ behind each decision is in the domain audit appendices under [`docs/audit/`](aud
 | `body` | vehicle | `BODY_TYP` | car / SUV / van / pickup / other light truck / light vehicle of unknown type (49) / bus / medium-heavy truck / motorcycle / truck of unknown type (73, 79) / other / unknown (98, 99) | Pickup codes 30–32 merged into 34 (2017) — absorbed by grouping. Code 49 rises from 0.7% to ~3.7% of CRSS light-vehicle occupants from 2018 and code 79 to ~1.1% of vehicles in 2022–24, so both are kept apart from the known groups (light passenger vehicles = car, SUV, van, pickup, other light truck, unknown light type); aux `A_BODY` breaks in 2020 (not used) | High (known groups) |
 | `veh_age`, `veh_age_band` | vehicle | `YEAR − MOD_YEAR` | 0–3 / 4–7 / 8–12 / 13–17 / 18+ / unknown | −1 → 0; ≤ −2 and 9998/9999 → missing | High |
 | `any_motorcycle`, `any_heavy_truck`, `any_light_truck` | crash | vehicle `body` | tri-state presence flags: unknown when no vehicle confirms the category and some vehicle's body type cannot rule it out (~3–4% of crashes have a vehicle of unknown body type, mostly hit-and-run) | — | High |
-| `restraint` | person | `REST_USE` + `BODY_TYP` + `SEAT_POS` | belted / none / child restraint / not applicable / unknown — **defined only for vehicles with BODY_TYP 1–79 in seat rows 1–4** | 2016 codes 0/7 merged into 20 in 2017; helmet codes left `REST_USE` in 2019 (from 2019 every motorcyclist has 20 = "not applicable"); CRSS code 8 declines (within "belted") | Medium (survivor self-report) |
-| `helmet` | person | `REST_USE` (2016–18) / `HELM_USE` (2019+) | helmet / none / unknown / not applicable | Field move in 2019 handled by year | Medium |
-| `seat`, `role` | person | `SEAT_POS`, `PER_TYP` | front-left / front-other / second row / third+ / cargo-exterior; driver / front passenger / rear passenger / other | `PER_TYP` 8 vs 11–13 split only 2020–21 (non-motorists) | High |
+| `restraint` | person | `REST_USE` + `BODY_TYP` + `SEAT_POS` | belted / none / child restraint / not applicable / unknown — **defined only for occupants of vehicles with BODY_TYP 1–79 in seat rows 1–4 (SEAT_POS 11–49) or an unrecorded seat (SEAT_POS 98/99); everyone else is not applicable** | 2016 codes 0/7 merged into 20 in 2017; helmet codes left `REST_USE` in 2019 (from 2019 every motorcyclist has 20 = "not applicable"); CRSS code 8 declines (within "belted") | Medium (survivor self-report) |
+| `helmet` | person | `REST_USE` (2016–18) / `HELM_USE` (2019+) | helmet / none / unknown / not applicable — defined for motorcycle riders (BODY_TYP 80–89) only; everyone else is not applicable | Field move in 2019 handled by year | Medium |
+| `seat`, `role` | person | `SEAT_POS`, `PER_TYP` | front-left / front-other / second row / third+ / cargo-exterior; driver / front_passenger / rear_passenger / cargo_exterior_passenger / passenger_seat_unknown (SEAT_POS 98/99) / non-occupant person types | `PER_TYP` 8 vs 11–13 split only 2020–21 (non-motorists) | High |
 | `ejected`, `airbag_deployed`, `rollover`, `fire` | person / vehicle | `EJECTION`, `AIR_BAG`, `ROLLOVER`, `FIRE_EXP` | post-crash consequences (never covariates) | `AIR_BAG` 2016 codes 0/28; `ROLLOVER` recoded 2022 (1/2/9 → 3; 8 added) | — |
 | `culp_c1` (QIE, primary) | driver | `SPEEDREL`, `P_CRASH2`, driver factors `DR_SF1-4` (2016–19) / `driverrf` (2020+), `distract` 1 (2016–17) | culpable: speeding, culpable pre-crash event class, or common error code (6, 8, 102, 103, 36, 50, 51, 58; looked-but-did-not-see); non-culpable: none of these, SPEEDREL = 0, non-culpable/neutral pre-crash event, no 'unknown' driver-factor code; else undetermined | driver factor 99/999 unknown codes (999 only 2020–21; folded into 0 'None noted' from 2022); 2023 split of code 8 into 102/103 | Medium |
 | `culp_viol` (QIE, sensitivity) | driver | `violatn.MVIOLATN` (2016–19) / `VIOLATION` (2020+) | any moving violation charged / none / unknown | **outcome-dependent** (dead drivers are rarely charged); column rename 2020 | Low for QIE |
@@ -90,9 +90,11 @@ behind each decision is in the domain audit appendices under [`docs/audit/`](aud
 
 The share of *fatal* crashes with each attribute was compared between CRSS (weighted) and
 FARS (census) — the same population measured by two processes
-(`outputs/tables/measurement/fars_crss_fatal_composition.csv`). Darkness, pedestrian and
-motorcycle involvement, single-vehicle crashes and young-driver involvement agree within CRSS
-confidence intervals. Speeding-related (CRSS 21% vs FARS 27%), unknown speed limit (6.7% vs
-3.3%) and unknown junction (5.4% vs 0.2%) do not: FARS coding draws on fuller investigation.
+(`outputs/tables/measurement/fars_crss_fatal_composition.csv`, pooled 2016–2024). Darkness,
+pedestrian involvement and single-vehicle crashes agree within CRSS confidence intervals.
+Motorcycle involvement (CRSS 13.9% vs FARS 15.5%) and young-driver involvement (14.0% vs 12.4%;
+CRSS uses imputed, FARS reported driver age) do not. Nor do speeding-related (CRSS 20% vs FARS
+27%), unknown speed limit (7.5% vs 3.0%) and unknown junction (5.7% vs 0.2%): FARS coding draws
+on fuller investigation.
 CRSS-based severity associations for these variables are therefore interpreted with the
 measurement analysis in mind.

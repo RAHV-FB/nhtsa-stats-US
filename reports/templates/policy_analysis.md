@@ -38,7 +38,8 @@ most affected, and the assumptions each projection needs, is in
 ## 3. Where deaths concentrate (observed)
 
 Mean deaths per year, 2022–2024, in each target segment (FARS). Deaths whose status is unknown
-are not counted, so segment counts are lower bounds.
+are not counted, so segment counts are lower bounds. The alcohol segment (a driver at BAC ≥ 0.08)
+is an expected value over NHTSA's 10 multiply-imputed BAC values, not a census count.
 
 {{mdtable:simulation/threshold_required_share|reduction_of_all_deaths_pct=1|segment:Segment:;reliability:Reliability:;segment_deaths_per_year:Deaths per year:,.0f;segment_share_of_all_deaths:Share of all road deaths:pct:1}}
 
@@ -96,8 +97,9 @@ with no misreporting.
 **Speed cameras.** The data separate two kinds of police-recorded speeding. Exceeding the limit
 — what automated enforcement detects — has a large adjusted association with a fatal outcome
 ({{severity/fatal_speeding_type|level=exceeded_limit_or_racing|adj_rr|ci:1}}). "Too fast for
-conditions", the larger category, shows none
-({{severity/fatal_speeding_type|level=too_fast_for_conditions|adj_rr|ci:2}}). Any projection
+conditions", the larger category, shows no detectable excess for a fatal outcome
+({{severity/fatal_speeding_type|level=too_fast_for_conditions|adj_rr|ci:2}}) and a small one for
+fatal-or-serious outcomes ({{severity/ka_speeding_type|level=too_fast_for_conditions|adj_rr|ci:2}}). Any projection
 of a camera programme should therefore target limit-exceeding crashes. How many cameras give
 what coverage of speeding exposure, how much speeding falls where they operate, and how far the
 effect spills over are not in the data; the simulator requires them as inputs. Doubling the

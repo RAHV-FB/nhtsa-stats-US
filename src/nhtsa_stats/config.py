@@ -40,8 +40,3 @@ RANDOM_SEED = 20240601
 # relative-standard-error threshold above which it is flagged as unstable.
 MIN_CELL_N = 30
 MAX_RSE = 0.30
-
-
-def ensure_dirs() -> None:
-    for d in (INTERIM_DIR, PROCESSED_DIR, TABLES_DIR, FIGURES_DIR, MODELS_DIR, AUDIT_DIR):
-        d.mkdir(parents=True, exist_ok=True)

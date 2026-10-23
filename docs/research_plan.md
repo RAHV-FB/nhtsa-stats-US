@@ -60,9 +60,11 @@ design argument is given (RQ6), and even there with explicit caveats.
    death timing).
 6. **Two adjustment sets**: PRE_CRASH (time, light, weather, surface, speed limit, road
    class, junction, work zone, region, urbanicity, driver age mix, vehicle mix, speeding,
-   alcohol, year) for *total* associations; + crash configuration (crash type, vehicles)
-   for associations *net of* configuration. Configuration is treated as a potential
-   mediator, not a confounder (§5).
+   alcohol, year), mutually adjusted, with an additional association that leaves out each
+   factor's downstream pre-crash variables (the closer analogue of a *total* association;
+   see `docs/methodology.md` §3); + crash configuration (crash type, vehicles) for
+   associations *net of* configuration. Configuration is treated as a potential mediator,
+   not a confounder (§5).
 7. **Temporal split for prediction**: train 2016–2021, validate 2022, test 2023–2024.
 
 ## 4. Research questions and analyses
@@ -83,7 +85,7 @@ Priority reflects scientific value × evidential strength × policy relevance ×
 | Justified interpretation | "Conditional on a reported crash, crashes with X are fatal Y times as often as comparable crashes without X" |
 | Not justified | Causal effect of X; effect of X on crash occurrence; effect of removing X via policy |
 | Limitations | Police-reported behaviours are ascertained more thoroughly in fatal crashes (RQ3); residual confounding |
-| Validation | Agreement of CRSS weighted fatal-crash composition with FARS census; KA as second outcome; complete-case (`MAX_SEV`) sensitivity; period-specific refits |
+| Validation | Agreement of CRSS weighted fatal-crash composition with FARS census; KA as second outcome; complete-case (`MAX_SEV`) sensitivity for both outcomes; outcome excluding hit-and-run crashes; alcohol by coding period (`measurement/alcohol_coding_sensitivity`) |
 
 ### RQ2 (priority 1) — Interactions and co-occurrence
 
@@ -199,13 +201,13 @@ Behaviours are recorded by police *after* the crash, and recording depends on se
 | 3 | Variable audit and harmonisation | Every analytic variable mapped with evidence; breaks documented | done (docs/audit/*) |
 | 4 | Analytic datasets | One row per unit; row counts reconcile with raw; leakage registry | done |
 | 5 | Descriptive baseline | FARS/CRSS annual series; frequency-vs-severity table with CIs and suppression | done |
-| 6 | RQ1, RQ3, RQ4, RQ5 | Converged models, CIs, sensitivity analyses written to outputs/tables | |
-| 7 | RQ2 | Pre-specified pairs, additive+multiplicative measures, Holm-adjusted | |
-| 8 | RQ6, RQ7 | Within-vehicle and QIE estimates with assumption statements | |
-| 9 | RQ8 | Temporal validation report with calibration; leakage test passes | |
-| 10 | RQ9, RQ10 | Evidence ledger; simulator and cost tools with tests | |
-| 11 | Interface and reports | App runs headless; every reported number traces to an output table | |
-| 12 | Independent audit and rebuild | Clean rebuild from raw; tests pass; audit issues fixed | |
+| 6 | RQ1, RQ3, RQ4, RQ5 | Converged models, CIs, sensitivity analyses written to outputs/tables | done |
+| 7 | RQ2 | Pre-specified pairs, additive+multiplicative measures, Holm-adjusted | done |
+| 8 | RQ6, RQ7 | Within-vehicle and QIE estimates with assumption statements | done |
+| 9 | RQ8 | Temporal validation report with calibration; leakage test passes | done (`docs/model_validation.md`) |
+| 10 | RQ9, RQ10 | Evidence ledger; simulator and cost tools with tests | done |
+| 11 | Interface and reports | App runs headless; every reported number traces to an output table | done |
+| 12 | Independent audit and rebuild | Clean rebuild from raw; tests pass; audit issues fixed | done (two audit rounds; see §7) |
 
 ## 7. Change log
 
@@ -236,9 +238,18 @@ Behaviours are recorded by police *after* the crash, and recording depends on se
   limit-exceedance follow-ups are exploratory and outside the Holm family. Three-way
   combinations use a fixed list of three triples (not "pairs that survive"), each estimated
   only when the fully exposed cell has at least 20 fatal crashes.
-  RQ4 and RQ5, recorded from the implementation: the RQ4 block order includes a weekend block
+  RQ4 and RQ5, recorded from the implementation: the same sequential and Shapley accounting is
+  also applied to crashes in rural CRSS sampling areas, weekend crashes and crashes involving a
+  driver aged 65+ (`confounding/*`). The RQ4 block order includes a weekend block
   after calendar/area (night × weekend share drinking-related crashes, so weekend is adjusted
   before light), and Shapley shares over all 8! orderings complement the five sequential
   orderings. RQ5 reports the decomposition under both outcome definitions (imputed and
   complete case) and under both reference models (2016–19 and 2020–24), because the
   composition share depends on the reference.
+* v1.3 — second independent audit (report claims against tables, wording and estimate labels,
+  reproducibility and interface, independent replication of the headline numbers, repository
+  hygiene). Changes: complete-case sensitivity added for the KA outcome; limit exceedance added
+  to the bias-analysis grid; driver-age over-representation computed among FARS crashes with a
+  known driver age; QIE sample excludes crashes of unknown hit-and-run status; evidence-ledger
+  segments aligned with the simulator's; report wording corrected where a claim went beyond its
+  table.

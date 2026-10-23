@@ -920,7 +920,7 @@ Implementation notes:
 ## 20. Scripts (exploratory checks, not part of the package)
 
 Directory: `scripts/audit/driver_behaviour/`.
-Run them with `POLARS_MAX_THREADS=2 uv run python <script>` from the repository root. Outputs are written to `/tmp/nhtsa-audit/out/`.
+Run them with `POLARS_MAX_THREADS=2 uv run python <script>` from the repository root. Outputs are written to `outputs/cache/audit/out/`.
 
 | script | content |
 |---|---|

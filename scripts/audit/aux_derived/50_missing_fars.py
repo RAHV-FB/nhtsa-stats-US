@@ -58,4 +58,4 @@ for nm, cond in [("A_TOD=3", c("A_TOD") == 3), ("A_DOW=3", c("A_DOW") == 3), ("A
 t = pl.DataFrame(out)
 pl.Config.set_tbl_width_chars(400)
 print(t)
-t.write_csv("/tmp/nhtsa-audit/out_aux/missing_fars.csv")
+t.write_csv("outputs/cache/audit/out_aux/missing_fars.csv")

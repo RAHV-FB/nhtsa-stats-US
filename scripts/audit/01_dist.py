@@ -1,7 +1,7 @@
 """Code distributions per source-year for vehicle-table variables, with embedded labels."""
 import polars as pl, re, sys
 from nhtsa_stats.ingestion.cache import load_table
-OUT = "/tmp/nhtsa-audit/out"
+OUT = "outputs/cache/audit/out"
 VARS = ["BODY_TYP","BDYTYP_IM","ICFINALBODY","VPICBODYCLASS","GVWR","GVWR_FROM","GVWR_TO","MOD_YEAR","MDLYR_IM",
  "NUMOCCS","UNITTYPE","HIT_RUN","HITRUN_IM","TOW_VEH","SPEC_USE","EMER_USE","BUS_USE","VSPD_LIM","VTRAFWAY","VNUM_LAN",
  "VALIGN","VPROFILE","VPAVETYP","VSURCOND","VTRAFCON","VTCONT_F","TRAV_SP","P_CRASH1","P_CRASH2","P_CRASH3","PCRASH1_IM",

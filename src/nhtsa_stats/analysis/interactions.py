@@ -93,7 +93,6 @@ DOMAINS = {"multi_vehicle": lambda d: (d["n_vehicles"] != "1").to_numpy()}
 SPEEDING = Exposure("speeding", ("yes",), ("no",), "speeding-related")
 ALCOHOL = Exposure("alcohol_im", ("yes",), ("no",), "alcohol-involved (imputed)")
 DARK_UNLIT = Exposure("light", ("dark_not_lighted",), ("daylight",), "dark, unlit (vs daylight)")
-DARK_LIT = Exposure("light", ("dark_lighted",), ("daylight",), "dark, lighted (vs daylight)")
 WET = Exposure("surface", ("wet",), ("dry",), "wet surface (vs dry)")
 MOTORCYCLE = Exposure("any_motorcycle", ("yes",), ("no",), "motorcycle involved")
 HEAVY = Exposure("any_heavy_truck", ("yes",), ("no",), "medium/heavy truck or bus involved")

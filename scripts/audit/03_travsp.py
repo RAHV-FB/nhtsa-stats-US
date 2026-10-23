@@ -1,6 +1,6 @@
 import polars as pl
 pl.Config.set_tbl_rows(200); pl.Config.set_tbl_cols(30); pl.Config.set_tbl_width_chars(300); pl.Config.set_fmt_str_lengths(70)
-d = pl.read_csv("/tmp/nhtsa-audit/out/veh_dist.csv", infer_schema_length=0).with_columns(pl.col("n").cast(pl.Int64), pl.col("N").cast(pl.Int64), pl.col("year").cast(pl.Int64), pl.col("code").cast(pl.Int64,strict=False).alias("ci"))
+d = pl.read_csv("outputs/cache/audit/out/veh_dist.csv", infer_schema_length=0).with_columns(pl.col("n").cast(pl.Int64), pl.col("N").cast(pl.Int64), pl.col("year").cast(pl.Int64), pl.col("code").cast(pl.Int64,strict=False).alias("ci"))
 x = d.filter(pl.col("var")=="TRAV_SP")
 # labelled non-numeric-looking labels
 lab = x.filter(pl.col("label").is_not_null() & ~pl.col("label").str.contains(r"^\d+ MPH$"))

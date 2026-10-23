@@ -29,8 +29,10 @@ Method -- four layers
        user-defined coverage functions (``LinearCappedCoverage``, ``SaturatingCoverage``).
     C. Assumptions: every effect, coverage, response, deterrence and timing parameter is a
        user-supplied ``Param`` (point, low/central/high, uniform or triangular distribution).
-       No default effect size is provided; optional parameters default to *neutral* values
-       (no halo, no cap below 100%, converters benefit as much as other unbelted occupants).
+       No default effect size is provided, except that belt effectiveness defaults to the
+       FARS within-vehicle estimate (treated as causal by assumption, and labelled so) when
+       none is supplied; optional parameters default to *neutral* values (no halo, no cap
+       below 100%, converters benefit as much as other unbelted occupants).
     D. Outcomes: point projections, multi-year projections with ramp-up and decay, ranges over
        parameter corners, one-way (tornado) sensitivity, Monte Carlo summaries, and
        combinations of interventions on overlapping segments without double counting
@@ -80,7 +82,9 @@ MODULE = "simulation"
 HYPOTHETICAL = "hypothetical"
 DEFAULT_WINDOW = (2022, 2024)
 
-Provenance = Literal["observed", "estimated", "adjusted_association"]
+# "observed_x_imputation": a FARS census count weighted by NHTSA's multiply-imputed BAC
+# probabilities (expected value over implicates), e.g. deaths in alcohol-involved crashes.
+Provenance = Literal["observed", "observed_x_imputation", "estimated", "adjusted_association"]
 Reliability = Literal["high", "moderate", "low"]
 Overlap = Literal["multiplicative", "max", "naive_sum"]
 ArrayLike = float | np.ndarray
@@ -91,7 +95,8 @@ class MissingInputError(FileNotFoundError):
 
 
 class MissingAssumptionError(ValueError):
-    """A required user assumption was not supplied (the engine has no default effect sizes)."""
+    """A required user assumption was not supplied (the engine has no default effect sizes,
+    except the empirical belt-effectiveness estimate)."""
 
 
 # ======================================================================================
@@ -557,7 +562,8 @@ def _fars_quantities(
     q: dict[str, Quantity] = {}
 
     def add(name: str, value: float, unit: str, source: str, n: int | None, **kw: Any) -> None:
-        q[name] = Quantity(name, float(value), "observed", source, unit, n=n, **kw)
+        kind = "observed_x_imputation" if "alcohol" in name else "observed"
+        q[name] = Quantity(name, float(value), kind, source, unit, n=n, **kw)
 
     add(
         "fars.deaths_per_year",
@@ -677,17 +683,13 @@ def _crss_quantity(
 
 
 def crss_outcome_column(columns: Sequence[str], base: str) -> str:
-    """Name of the NHTSA-imputed outcome in the processed file (robust to both layouts).
+    """Name of the NHTSA-imputed outcome in the processed file.
 
-    Current build: ``fatal``/``ka``/``killed``/``killed_or_serious`` are imputed (MAXSEV_IM /
-    INJSEV_IM) and ``<base>_cc`` the complete-case versions.  Earlier build: ``<base>`` was the
-    complete-case version and ``<base>_im`` the imputed one.
+    ``fatal``/``ka``/``killed``/``killed_or_serious`` are imputed (MAXSEV_IM / INJSEV_IM);
+    ``<base>_cc`` are the complete-case versions, used only in sensitivity analyses.
     """
-    cols = set(columns)
-    if f"{base}_cc" in cols:
-        return base
-    if f"{base}_im" in cols:
-        return f"{base}_im"
+    if base not in set(columns):
+        raise MissingInputError(f"outcome column {base!r} not in the processed file")
     return base
 
 
@@ -1087,10 +1089,8 @@ def build_baseline(
                 "alcohol_im",
                 "drugs",
                 "fatal",
-                "fatal_im",
                 "fatal_cc",
                 "ka",
-                "ka_im",
                 "ka_cc",
             ],
         )
@@ -1105,7 +1105,6 @@ def build_baseline(
                 "age_im",
                 "restraint",
                 "killed_or_serious",
-                "killed_or_serious_im",
                 "killed_or_serious_cc",
             ],
         )
@@ -1880,7 +1879,10 @@ def belt_effectiveness_param(baseline: EmpiricalBaseline, variant: str | None = 
         "triangular",
         unit="relative reduction in P(death | fatal crash)",
         description="belt effectiveness given a fatal crash (FARS within-vehicle design)",
-        source=f"Layer A adjusted association: {q.source}",
+        source=(
+            "ASSUMES the Layer A within-vehicle association is causal and applies to those who "
+            f"would buckle up: {q.source}"
+        ),
     )
 
 
@@ -2980,7 +2982,8 @@ column names matched, none of which measures an intervention or a cost --
 engine combines an **empirical baseline** (Layer A) with **user assumptions** (Layer C)
 through explicit **mechanisms** (Layer B); every simulated output is labelled
 `kind = "hypothetical"` and carries the assumptions used (Layer D). No default effect sizes
-or prices exist anywhere in the code. Assumptions and worked hypothetical examples:
+or prices exist in the code, except that belt effectiveness defaults to the FARS within-vehicle
+estimate (treated as causal by assumption) when the user supplies none. Assumptions and worked hypothetical examples:
 `docs/policy_assumptions.md`.
 
 ## 1. Layer A baseline ({span}, window means) -- `baseline.csv`, `baseline.json`

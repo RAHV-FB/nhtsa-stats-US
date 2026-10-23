@@ -2,7 +2,7 @@
 Output: out_ad/dist.csv (source,year,table,var,code,label,n,N)."""
 import polars as pl
 from nhtsa_stats.ingestion.cache import load_table
-OUT = "/tmp/nhtsa-audit/out_ad"
+OUT = "outputs/cache/audit/out_ad"
 spec = {
  ("FARS","person"): ["DRINKING","ALC_STATUS","ATST_TYP","ALC_DET","DRUGS","DRUG_DET","DRUGTST1","DRUGTST2","DRUGTST3","DRUGRES1","DRUGRES2","DRUGRES3","INJ_SEV","PER_TYP"],
  ("CRSS","person"): ["DRINKING","ALC_STATUS","ATST_TYP","DRUGS","PERALCH_IM","DRUGTST1","DRUGTST2","DRUGTST3","DRUGRES1","DRUGRES2","DRUGRES3","INJ_SEV","PER_TYP"],

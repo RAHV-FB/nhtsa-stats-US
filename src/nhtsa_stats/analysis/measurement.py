@@ -17,9 +17,10 @@ Analyses (outputs/tables/measurement):
 ``police_vs_bac``         accuracy of police-reported alcohol involvement against measured BAC
                           >= 0.08 among tested FARS drivers, killed vs surviving.
 ``restraint_reporting``   reported belt use and unknown restraint among CRSS occupants by KABCO.
-``qba_grid``              quantitative bias analysis: the crude fatal risk ratio for speeding
-                          and alcohol after correcting for differential sensitivity of
-                          recording in fatal vs non-fatal crashes, over a grid of assumptions.
+``qba_grid``              quantitative bias analysis: the crude fatal risk ratio for speeding,
+                          limit exceedance (vs no speeding) and alcohol after correcting for
+                          differential sensitivity of recording in fatal vs non-fatal crashes,
+                          over a grid of assumptions.
 
 Interpretation: these quantify *how* measurement depends on severity; the bias analysis gives
 the range of risk ratios compatible with stated misclassification assumptions, not a single
@@ -303,12 +304,24 @@ def corrected_rr(
     return (a_true / (a_true + b_true)) / (c_true / (c_true + d_true))
 
 
+# Non-fatal recording sensitivities on the grid.  Limit exceedance has a far larger crude RR,
+# so its grid extends to very low sensitivities to show where the association would vanish.
+SE_NONFATAL = (0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0)
+SE_NONFATAL_WIDE = (0.05, 0.1, 0.15, 0.2, *SE_NONFATAL)
+
+
 def qba_grid() -> pd.DataFrame:
     df, design = data.crss_crash(outcome="fatal")
     w = design.weight
+    # Exceeded limit / racing vs no speeding; other speeding types and unknown are left out.
+    st = df["speeding_type"].astype(str)
+    exceeded = np.where(st == "exceeded_limit_or_racing", 1.0, np.where(st == "no", 0.0, np.nan))
     rows = []
-    for var in ("speeding", "alcohol_im"):
-        x = df[var].to_numpy(float)
+    for var, x, grid in (
+        ("speeding", df["speeding"].to_numpy(float), SE_NONFATAL),
+        ("alcohol_im", df["alcohol_im"].to_numpy(float), SE_NONFATAL),
+        ("exceeded_limit", exceeded, SE_NONFATAL_WIDE),
+    ):
         y = df["fatal"].to_numpy(float)
         known = ~np.isnan(x)
         a = w[known & (x == 1) & (y == 1)].sum()
@@ -317,7 +330,7 @@ def qba_grid() -> pd.DataFrame:
         d = w[known & (x == 0) & (y == 0)].sum()
         rr_obs = (a / (a + b)) / (c / (c + d))
         for se_f in (0.7, 0.8, 0.9, 1.0):
-            for se_n in (0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0):
+            for se_n in grid:
                 for sp in (1.0, 0.99):
                     rr = corrected_rr(a, b, c, d, se_f, se_n, sp)
                     rows.append(

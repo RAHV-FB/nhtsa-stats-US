@@ -1,7 +1,7 @@
 """FARS crash-level: A_POSBAC and DRUNK_DR derivations; MIACC/MIDRVACC structure vs persons."""
 import polars as pl
 from nhtsa_stats.ingestion.cache import load_table
-OUT = "/tmp/nhtsa-audit/out_ad"
+OUT = "outputs/cache/audit/out_ad"
 pl.Config.set_tbl_rows(200); pl.Config.set_tbl_width_chars(250); pl.Config.set_tbl_cols(30)
 df = pl.read_parquet(f"{OUT}/fars_person.parquet")
 print("A_ALCTES=1 with ALC_RES 1-79:", df.filter((pl.col("A_ALCTES")==1)&pl.col("ALC_RES").is_between(1,79))["ALC_RES"].value_counts().sort("ALC_RES"))
