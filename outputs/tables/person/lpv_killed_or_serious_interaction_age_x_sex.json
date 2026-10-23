@@ -4,7 +4,7 @@
  "population": "CRSS occupants of light passenger vehicles aged 8+ (known age), sex known",
  "unit": "person",
  "outcome": "killed_or_serious",
- "method": "Model A (B for crash type) with product terms; four standardised margins per cell; IC = p11-p10-p01+p00, RERI = IC/p00, ratio of RR = RR11/(RR10*RR01); linearised CIs (t, 42 df)",
+ "method": "Model A (B for crash type) with product terms; four standardised margins per cell; IC = p11-p10-p01+p00, RERI = IC/p00, ratio of RR = RR11/(RR10*RR01); linearised CIs (t, 42 df). flag = stratum-specific RR (suppressed: a cell with n<30 or no events; unstable: a margin RSE>30%); interaction_flag also covers the reference level of factor b",
  "inputs": [
   "data/processed/crss_person.parquet (+ young/older_driver from crss_crash.parquet)"
  ],
@@ -34,6 +34,7 @@
   "rd_low",
   "rd_high",
   "flag",
+  "interaction_flag",
   "ic",
   "reri",
   "ratio_of_rr",
@@ -47,6 +48,6 @@
   "p_ic"
  ],
  "module": "nhtsa_stats.analysis.person",
- "git_commit": "017579b-dirty",
- "generated_utc": "2026-10-22T17:59:26Z"
+ "git_commit": "283b036-dirty",
+ "generated_utc": "2026-10-23T00:07:14Z"
 }

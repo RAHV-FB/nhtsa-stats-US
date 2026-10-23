@@ -4,7 +4,7 @@
  "population": "FARS 2016-2024 occupants (driver/passenger) of in-transport light passenger vehicles, seat front-left/front-other/second row, age 13+, belted or unbelted, known outcome; vehicles with exactly 2 eligible occupants and exactly one death",
  "unit": "person within vehicle (matched set = vehicle)",
  "outcome": "killed (died within 30 days)",
- "method": "Conditional ML for 1:1 matched pairs: OR = n10/n01; expected counts under misreporting n10*(1-f), n01 + f*n00",
+ "method": "Conditional ML for 1:1 matched pairs: OR = n10/n01; expected counts under misreporting n10*(1-f), n01 + f*n00; Poisson CI treating vehicles as independent",
  "inputs": [
   "data/processed/fars_person.parquet"
  ],
@@ -23,6 +23,6 @@
   "tipping_point_f"
  ],
  "module": "nhtsa_stats.analysis.matched",
- "git_commit": "aab9ff8-dirty",
- "generated_utc": "2026-10-22T17:31:59Z"
+ "git_commit": "283b036-dirty",
+ "generated_utc": "2026-10-23T00:13:41Z"
 }

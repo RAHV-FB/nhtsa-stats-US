@@ -68,9 +68,13 @@ def _fmt(value, fmt: str, row: pd.Series | None = None, column: str | None = Non
         return float(v)
 
     if fmt.startswith(("ci:", "cipct:", "cix1000:")):
+        # "ci:2" reads <column>_low/_high (or plain low/high); "ci:2@or" reads or_low/or_high.
         kind, nd = fmt.split(":")
+        nd, _, prefix = nd.partition("@")
         nd = int(nd)
-        lo_col, hi_col = f"{column}_low", f"{column}_high"
+        lo_col, hi_col = (f"{prefix or column}_low", f"{prefix or column}_high")
+        if not prefix and row is not None and lo_col not in row and "low" in row:
+            lo_col, hi_col = "low", "high"
         if row is None or lo_col not in row or hi_col not in row:
             raise RenderError(f"CI columns {lo_col}/{hi_col} missing")
         mult, suf = {"cipct": (100.0, "%"), "cix1000": (1000.0, ""), "ci": (1.0, "")}[kind]

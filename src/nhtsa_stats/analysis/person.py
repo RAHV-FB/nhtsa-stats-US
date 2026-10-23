@@ -8,11 +8,16 @@ Research question
     of restraint and sex vary with age and crash type?
 
 Populations (CRSS 2016-2024, occupants of in-transport vehicles, PER_TYP 1/2/9, known outcome)
-    * ``lpv`` -- occupants of light passenger vehicles (car, SUV, pickup, van, other light
-      truck) with a recorded age of 8 years or more, where belt codes are meaningful.  Seat
-      belt (restraint) analyses use only this population.  Restraint "not_applicable"
-      (harmonised: seat outside belted rows 1-4 or unknown seat, e.g. cargo areas) is kept
-      as its own level, distinct from "unknown".
+    * ``lpv`` -- occupants of light passenger vehicles (``harmonize.LPV_BODY_GROUPS``: car,
+      SUV, pickup, van, other light truck and light vehicle of unknown type, BODY_TYP 1-49)
+      with a recorded age of 8 years or more, where belt codes are meaningful.  Seat belt
+      (restraint) analyses use only this population.  Restraint "not_applicable" (harmonised:
+      seat outside the belted rows 1-4, i.e. cargo/exterior positions; recorded belt use is
+      kept when the seat is unrecorded) is kept as its own level, distinct from "unknown".
+      It nearly coincides with role ``cargo_exterior_passenger``, so the separate adjusted
+      contrasts of these two levels are extrapolations (and are flagged as unstable).
+      Occupants with unrecorded age are excluded (population_flow tables); most of their
+      deaths have unknown restraint, so the belted-vs-unbelted contrast is barely affected.
     * ``motorcycle`` -- motorcycle operators and passengers (helmet instead of restraint;
       the CRSS ``restraint`` field is not comparable for riders across years: helmet codes
       moved from REST_USE to HELM_USE in 2019).
@@ -22,8 +27,10 @@ Unit
     within crashes within PSUs; the PSU-level ultimate-cluster variance already accounts for
     that dependence.
 Outcomes
-    ``killed`` (INJ_SEV 4 vs 0-3) and ``killed_or_serious`` (3-4 vs 0-2); severity unknown
-    (5, 6, 9) excluded, as in ``data.crss_person``.
+    ``killed`` (NHTSA-imputed severity INJSEV_IM 4 vs 0-3) and ``killed_or_serious`` (3-4 vs
+    0-2); severity still undeterminable after imputation excluded, as in
+    ``data.crss_person``.  The imputation fills only INJ_SEV 9 (unknown); the strict
+    complete-case versions (``*_cc``) are not analysed here.
 Method
     * Crude weighted rates and crude risk ratios (saturated survey logistic model).
     * Survey-weighted logistic models; standardised predictive margins (g-computation over
@@ -41,6 +48,14 @@ Method
       plus a design-adjusted Wald F test of all product terms.
     * Leakage control: every feature is checked against ``harmonize.REGISTRY``; post-crash
       variables (ejection, airbag deployment, rollover) are never used.
+    * Reliability flags (columns ``flag``, ``A_flag``, ``B_flag``): ``suppressed`` when the
+      level has n < 30 persons or no events (an adjusted estimate for an event-free level
+      would be set by the ridge penalty, not by data, so it is blanked); ``unstable`` when
+      the crude rate, the level's adjusted margin or the reference margin has RSE > 30%.
+    * ``other_vehicle_body`` (an adjuster in models A and B) is 'none_or_multi' exactly when
+      the crash did not have two vehicles, so in model B it is collinear with the number of
+      vehicles; the ridge resolves the split, which leaves the margins unaffected but makes
+      those coefficients individually uninterpretable.
 Justified interpretation
     "Among occupants of light passenger vehicles in police-reported crashes, unbelted
     occupants were killed X times as often as belted occupants with the same distribution
@@ -282,7 +297,8 @@ def population_flow(df: pd.DataFrame, design: SurveyDesign, outcome: str) -> pd.
         "occupants (PER_TYP 1/2/9) with known outcome": np.ones(len(df), dtype=bool),
         "  light passenger vehicle occupants": lpv,
         "    age unknown (excluded)": lpv & np.isnan(age),
-        f"    age < {MIN_RESTRAINT_AGE} (excluded)": lpv & (np.nan_to_num(age, nan=99) < 8),
+        f"    age < {MIN_RESTRAINT_AGE} (excluded)": lpv
+        & (np.nan_to_num(age, nan=np.inf) < MIN_RESTRAINT_AGE),
         f"    LPV analysis population (age {MIN_RESTRAINT_AGE}+)": lpv
         & (np.nan_to_num(age, nan=-1) >= MIN_RESTRAINT_AGE),
         "  motorcycle riders (analysis population)": body == "motorcycle",
@@ -406,19 +422,69 @@ def fit_model(
     return model
 
 
-def _flag(n: int, rse: float) -> str:
-    if n < config.MIN_CELL_N:
+FLAG_RANK = {"": 0, "unstable": 1, "suppressed": 2}
+
+
+def _flag(n: int, rse: float, events: int | None = None) -> str:
+    """'suppressed' (n < 30, or no events), 'unstable' (RSE > 30% or undefined) or ''."""
+    if n < config.MIN_CELL_N or events == 0:
         return "suppressed"
     if not np.isfinite(rse) or rse > config.MAX_RSE:
         return "unstable"
     return ""
 
 
+def _worst(*flags: str) -> str:
+    return max(flags, key=lambda f: FLAG_RANK[f])
+
+
+def _rse_from_ci(est: pd.Series, low: pd.Series, high: pd.Series, tcrit: float) -> np.ndarray:
+    """RSE of an estimate from its symmetric (linearised) CI."""
+    with np.errstate(divide="ignore", invalid="ignore"):
+        return ((high - low) / (2 * tcrit) / est.abs()).to_numpy(dtype=float)
+
+
 def _adjusted_flags(res: pd.DataFrame, prefix: str, tcrit: float) -> list[str]:
-    """Suppression / instability flag of each adjusted margin (crude n, margin RSE)."""
-    se = (res[f"{prefix}_adj_rate_high"] - res[f"{prefix}_adj_rate_low"]) / (2 * tcrit)
-    rse = (se / res[f"{prefix}_adj_rate"]).to_numpy(dtype=float)
-    return [_flag(int(n), float(r)) for n, r in zip(res["n"], rse, strict=True)]
+    """Reliability flag of each adjusted contrast (level vs the factor's reference level).
+
+    ``suppressed``: the level has n < 30 persons or no events.  ``unstable``: the crude rate
+    of the level is unstable (RSE > 30%), or the adjusted margin of the level or of the
+    factor's reference level (first row of the factor) has RSE > 30%.
+    """
+    rse = _rse_from_ci(
+        res[f"{prefix}_adj_rate"],
+        res[f"{prefix}_adj_rate_low"],
+        res[f"{prefix}_adj_rate_high"],
+        tcrit,
+    )
+    ref_rse = pd.Series(rse, index=res.index).groupby(res["factor"]).transform("first")
+    crude = res["flag"].fillna("").astype(str)
+    out = []
+    for i in range(len(res)):
+        margin = _flag(int(res["n"].iloc[i]), float(rse[i]), int(res["n_events"].iloc[i]))
+        ref = "unstable" if float(ref_rse.iloc[i]) > config.MAX_RSE else ""
+        cr = "unstable" if crude.iloc[i] == "unstable" else ""
+        out.append(_worst(margin, ref, cr))
+    return out
+
+
+def _blank_event_free(res: pd.DataFrame, models: Sequence[str]) -> pd.DataFrame:
+    """Blank estimates that the data cannot inform: levels with no events.
+
+    The crude RR of such a level is an observed 0 but its CI is undefined; its adjusted
+    margins and contrasts would be determined by the ridge penalty alone.
+    """
+    zero = res["n_events"].to_numpy() == 0
+    if not zero.any():
+        return res
+    res = res.copy()
+    res.loc[zero, ["crude_rr_low", "crude_rr_high"]] = np.nan
+    for name in models:
+        cols = [
+            c for c in res.columns if c.startswith(f"{name}_adj_") or c == f"{name}_logrr_retained"
+        ]
+        res.loc[zero, cols] = np.nan
+    return res
 
 
 def reported_factors(pop: Population) -> list[str]:
@@ -470,6 +536,7 @@ def crude_vs_adjusted(
             res[f"{name}_logrr_retained"] = np.log(res[f"{name}_adj_rr"]) / np.log(res["crude_rr"])
     for name in models:
         res[f"{name}_flag"] = _adjusted_flags(res, name, pop.design.tcrit())
+    res = _blank_event_free(res, list(models))
     coef = pd.concat(coefs, ignore_index=True)
     coef.insert(0, "population", pop.name)
     coef.insert(1, "outcome", outcome)
@@ -550,12 +617,15 @@ def interaction_table(
     av_obs = df[a].to_numpy()
     bv_obs = df[b].to_numpy()
     rows = []
+    ref_flag = ""
     for bv in b_levels:
         p1 = ms.estimate(key(a_exp, bv))
         p0 = ms.estimate(key(a_ref, bv))
         in_b = bv_obs == bv
         n1 = int((in_b & (av_obs == a_exp)).sum())
         n0 = int((in_b & (av_obs == a_ref)).sum())
+        ev1 = int(y[in_b & (av_obs == a_exp)].sum())
+        ev0 = int(y[in_b & (av_obs == a_ref)].sum())
         rec = {
             "outcome": outcome,
             "factor_a": a,
@@ -564,19 +634,24 @@ def interaction_table(
             "factor_b": b,
             "b_level": bv,
             "n_a_exposed": n1,
-            "events_a_exposed": int(y[in_b & (av_obs == a_exp)].sum()),
+            "events_a_exposed": ev1,
             "n_a_reference": n0,
-            "events_a_reference": int(y[in_b & (av_obs == a_ref)].sum()),
+            "events_a_reference": ev0,
             **_ci_row("risk_a_exposed", p1),
             **_ci_row("risk_a_reference", p0),
             **_ci_row("rr", ms.log_ratio(key(a_exp, bv), key(a_ref, bv)), exp=True),
             **_ci_row("rd", ms.difference(key(a_exp, bv), key(a_ref, bv))),
         }
         rse = max(p1.rse, p0.rse)
-        rec["flag"] = _flag(min(n1, n0), rse)
+        # Flag of the stratum-specific contrast (both cells of this level of b) ...
+        rec["flag"] = _flag(min(n1, n0), rse, min(ev1, ev0))
         if bv == b_ref:
+            ref_flag = rec["flag"]
+            rec["interaction_flag"] = ""
             rec.update({k: np.nan for k in ("ic", "reri", "ratio_of_rr")})
         else:
+            # ... and of the interaction measures, which also use the reference level of b.
+            rec["interaction_flag"] = _worst(rec["flag"], ref_flag)
             ic = interaction_contrasts(
                 ms, key(a_exp, bv), key(a_exp, b_ref), key(a_ref, bv), key(a_ref, b_ref)
             )
@@ -726,7 +801,15 @@ def _save(
 ADJ_METHOD = (
     "Survey-weighted logistic regression (pseudo-ML, ridge 0.01), Taylor-linearised variance "
     "(25 strata, 67 PSUs, t with 42 df); standardised predictive margins -> adjusted RR/RD. "
-    "Model A = person covariates + PRE_CRASH; model B = A + crash type + number of vehicles."
+    "Model A = person covariates + PRE_CRASH; model B = A + crash type + number of vehicles. "
+    "Flags: suppressed = n<30 or no events (event-free levels blanked); unstable = crude rate, "
+    "level margin or reference margin RSE>30%."
+)
+COEF_NOTE = (
+    " Coefficients are log-odds ratios conditional on all other terms; only the standardised "
+    "margins are interpreted.  other_vehicle_body is 'none_or_multi' exactly when the crash did "
+    "not have two vehicles, so in model B its coefficients and those of n_vehicles are not "
+    "separately identified (the ridge resolves the split; margins are unaffected)."
 )
 
 
@@ -772,7 +855,7 @@ def analyse_outcome(outcome: str, interactions: bool = True) -> dict[str, pd.Dat
         _save(
             coef,
             f"{key}_{outcome}_model_coefficients",
-            f"Survey logistic regression coefficients for '{outcome}' ({pop.label})",
+            f"Survey logistic regression coefficients for '{outcome}' ({pop.label}).{COEF_NOTE}",
             pop.label,
             outcome,
             ADJ_METHOD,
@@ -806,7 +889,9 @@ def analyse_outcome(outcome: str, interactions: bool = True) -> dict[str, pd.Dat
                 outcome,
                 "Model A (B for crash type) with product terms; four standardised margins per "
                 "cell; IC = p11-p10-p01+p00, RERI = IC/p00, ratio of RR = RR11/(RR10*RR01); "
-                "linearised CIs (t, 42 df)",
+                "linearised CIs (t, 42 df). flag = stratum-specific RR (suppressed: a cell with "
+                "n<30 or no events; unstable: a margin RSE>30%); interaction_flag also covers "
+                "the reference level of factor b",
             )
         tests_df = pd.DataFrame(tests)
         out["interaction_tests"] = tests_df
@@ -899,11 +984,16 @@ def key_numbers(results: dict) -> dict:
                 if r["level"] == levels_first(tab, r["factor"]):
                     continue
                 digest[f"{oc}|{pop}|{r['factor']}={r['level']}"] = {
-                    "crude_rr": r["crude_rr"],
+                    "crude_rr": [r["crude_rr"], r["crude_rr_low"], r["crude_rr_high"]],
                     "A_adj_rr": [r["A_adj_rr"], r["A_adj_rr_low"], r["A_adj_rr_high"]],
                     "B_adj_rr": [r["B_adj_rr"], r["B_adj_rr_low"], r["B_adj_rr_high"]],
                     "n": int(r["n"]),
                     "events": int(r["n_events"]),
+                    "flags": {
+                        "crude": "" if pd.isna(r["flag"]) else str(r["flag"]),
+                        "A": str(r["A_flag"]),
+                        "B": str(r["B_flag"]),
+                    },
                 }
     return digest
 

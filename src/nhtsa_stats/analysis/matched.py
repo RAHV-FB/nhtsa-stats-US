@@ -35,15 +35,22 @@ Methods
        held fixed, compared between belted and unbelted subjects; the belted-belted and
        unbelted-unbelted pairs supply the seat-specific normalisation.  The four component
        estimates are combined as an inverse-variance weighted geometric mean (Poisson
-       variances); the CI is a percentile bootstrap over vehicles (2,000 resamples, exact via
-       multinomial resampling of the 16 vehicle cells), with a crash-cluster bootstrap as a
-       robustness check.  The same estimator is applied to motorcycle helmet use (operator /
-       passenger) and, among both-belted pairs, to age 65+ vs 25-44 and female vs male.
+       variances, used only as weights).  CIs are percentile bootstraps (2,000 resamples)
+       over vehicles (exact via multinomial resampling of the 16 vehicle cells) and over
+       crashes (whole crashes resampled).  About a fifth of the belt pairs share their crash
+       with another pair, so the crash-cluster CI is the one carried into ``belt_effect.csv``;
+       the two differ in the third decimal.  The same estimator is applied to motorcycle
+       helmet use (operator / passenger) and, among both-belted pairs, to age 65+ vs 25-44
+       and female vs male.
     3. Sensitivity to survivor misreporting of belt use: if a fraction f (0, 5, 10, 20%) of
        survivors coded "belted" were in truth unbelted (deaths correctly coded), the expected
        reclassified cell counts are computed in closed form and the DPC estimate and the
        matched-pair odds ratio (two-occupant vehicles, one death) are recomputed; the
        adjusted conditional logit is refitted after a seeded random reclassification.
+Reliability flags
+    ``flag`` columns: ``suppressed`` when fewer than 30 persons carry a conditional-logit term
+    or a DPC ratio rests on a death count below 30; ``unstable`` when the SE of the log
+    estimate (approximately the RSE of the ratio) exceeds 0.30.
 Estimands and labels
     * within-vehicle odds ratio (conditional logit) -- *adjusted association* that controls
       for all vehicle-level confounding by design.  Because deaths are common in these sets
@@ -274,6 +281,15 @@ def occupant_covariates(
     return x.loc[:, x.abs().sum(axis=0) > 0]
 
 
+def _flag(n: float, se_log: float) -> str:
+    """'suppressed' if the supporting count is < 30; 'unstable' if SE(log) > 30% (~RSE)."""
+    if not np.isfinite(n) or n < config.MIN_CELL_N:
+        return "suppressed"
+    if not np.isfinite(se_log) or se_log > config.MAX_RSE:
+        return "unstable"
+    return ""
+
+
 @dataclass
 class CLResult:
     table: pd.DataFrame
@@ -323,6 +339,8 @@ def fit_clogit(
     se_m = np.sqrt(np.diag(cov_model))
     se_r = np.sqrt(np.diag(cov_rob))
     z = stats.norm.ppf(0.5 + level / 2)
+    xv = x.to_numpy(dtype=float)
+    n_term = (xv != 0).sum(axis=0)
     table = pd.DataFrame(
         {
             "term": list(x.columns),
@@ -335,6 +353,9 @@ def fit_clogit(
             "or_low_model": np.exp(params - z * se_m),
             "or_high_model": np.exp(params + z * se_m),
             "p_robust": 2 * stats.norm.sf(np.abs(params / se_r)),
+            "n_with_term": n_term.astype(int),
+            "deaths_with_term": ((xv != 0) * y[:, None]).sum(axis=0).astype(int),
+            "flag": [_flag(int(n), float(s)) for n, s in zip(n_term, se_r, strict=True)],
         }
     )
     grad = scores.sum(axis=0)
@@ -461,6 +482,14 @@ def dpc_components(c: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
     return np.stack(logs, axis=-1), np.stack(variances, axis=-1)
 
 
+def dpc_min_deaths(c: np.ndarray) -> np.ndarray:
+    """Smallest death count entering each component and the combined estimate (length 5)."""
+    dd, dp = death_counts(c)
+    comp = [min(dd[1, b], dp[1, b], dd[0, b], dp[0, b]) for b in (1, 0)]
+    comp += [min(dp[a, 1], dd[a, 1], dp[a, 0], dd[a, 0]) for a in (1, 0)]
+    return np.array([*comp, min(dd.min(), dp.min())], dtype=float)
+
+
 def dpc_combined(c: np.ndarray) -> np.ndarray:
     """Inverse-variance weighted mean of the four component log RRs (NaN if any is undefined)."""
     logs, var = dpc_components(c)
@@ -514,6 +543,14 @@ def bootstrap_counts(
     return out.reshape(n_boot, 2, 2, 2, 2)
 
 
+def _boot_sd(x: np.ndarray) -> float:
+    """Bootstrap SD of the finite replicates (NaN if more than 10% are degenerate)."""
+    ok = np.isfinite(x)
+    if ok.sum() < max(2, 0.9 * len(x)):
+        return float("nan")
+    return float(np.std(x[ok], ddof=1))
+
+
 def _pct_ci(x: np.ndarray, level: float = 0.95) -> tuple[float, float, float]:
     """Percentile CI of finite replicates and the share of degenerate replicates."""
     ok = np.isfinite(x)
@@ -549,10 +586,15 @@ def dpc_analysis(
         bv = dpc_combined(reclassify(boot_v, f))
         bc = dpc_combined(reclassify(boot_c, f))
         bv_comp, _ = dpc_components(reclassify(boot_v, f))
+        min_deaths = dpc_min_deaths(cf)
         entries = [(name, logs[i], var[i], bv_comp[:, i]) for i, name in enumerate(COMPONENTS)]
         entries.append(("combined (inverse-variance weighted)", comb, np.nan, bv))
-        for name, lg, v, boot in entries:
+        for j, (name, lg, v, boot) in enumerate(entries):
             lo, hi, degenerate = _pct_ci(boot)
+            se_boot = _boot_sd(boot)
+            if name.startswith("combined"):
+                finite = [v for v in (se_boot, _boot_sd(bc)) if np.isfinite(v)]
+                se_boot = max(finite) if finite else float("nan")
             rec = {
                 "analysis": label,
                 "attribute_x1": attribute_label,
@@ -565,9 +607,12 @@ def dpc_analysis(
                 "reduction_low": float(1 - np.exp(hi)),
                 "reduction_high": float(1 - np.exp(lo)),
                 "se_log_poisson": float(np.sqrt(v)) if np.isfinite(v) else np.nan,
+                "se_log_bootstrap": se_boot,
                 "boot_degenerate_share": degenerate,
                 "n_pairs": len(pairs),
                 "n_pairs_with_death": n_contrib,
+                "min_death_count": float(min_deaths[j]),
+                "flag": _flag(float(min_deaths[j]), se_boot),
             }
             if name.startswith("combined"):
                 clo, chi, _ = _pct_ci(bc)
@@ -823,14 +868,42 @@ def frailty_dpc(elig: pd.DataFrame, rng: np.random.Generator) -> list[pd.DataFra
     return out
 
 
+def _dpc_belt_rows(r: pd.Series, suffix: str, method: str) -> list[dict]:
+    """RR and 1 - RR rows of a combined DPC estimate, with its crash-cluster bootstrap CI.
+
+    ``n_vehicles`` is the number of driver / right-front pairs with at least one death (the
+    pairs that enter the death counts).
+    """
+    lo, hi = float(r["rr_low_crash_boot"]), float(r["rr_high_crash_boot"])
+    n = int(r["n_pairs_with_death"])
+    return [
+        {
+            "estimand": "fatality_rr_belted_vs_unbelted_given_fatal_crash" + suffix,
+            "estimate": r["rr_x1_vs_x0"],
+            "low": lo,
+            "high": hi,
+            "method": method,
+            "n_vehicles": n,
+        },
+        {
+            "estimand": "fatality_risk_reduction_belt_given_fatal_crash" + suffix,
+            "estimate": r["reduction_1_minus_rr"],
+            "low": 1 - hi,
+            "high": 1 - lo,
+            "method": method,
+            "n_vehicles": n,
+        },
+    ]
+
+
 def belt_effect_table(
     dpc: pd.DataFrame, cl: dict[str, CLResult], mp: pd.DataFrame, dpc_cc: pd.DataFrame
 ) -> pd.DataFrame:
     """Machine-readable belt estimates for the policy simulator.
 
-    The first two rows are the primary estimand (Evans DPC); every other row is either a
-    different estimator (within-vehicle ORs, which are not risk ratios) or a sensitivity
-    analysis, flagged by its estimand suffix.
+    The first two rows are the primary estimand (Evans DPC, crash-cluster bootstrap CI);
+    every other row is either a different estimator (within-vehicle ORs, which are not risk
+    ratios) or a sensitivity analysis, flagged by its estimand suffix.
     """
     rows = []
     for f in MISREPORT_FRACTIONS:
@@ -838,29 +911,10 @@ def belt_effect_table(
             (dpc["misreport_fraction"] == f) & dpc["component"].str.startswith("combined")
         ].iloc[0]
         sfx = "" if f == 0 else f"_misreport_f{round(f * 100):02d}"
-        method = "evans_double_pair_comparison_driver_rf_pairs_vehicle_bootstrap" + (
+        method = "evans_double_pair_comparison_driver_rf_pairs_crash_cluster_bootstrap" + (
             "" if f == 0 else f"_closed_form_reclassification_f={f:.2f}"
         )
-        rows.append(
-            {
-                "estimand": "fatality_rr_belted_vs_unbelted_given_fatal_crash" + sfx,
-                "estimate": r["rr_x1_vs_x0"],
-                "low": r["rr_low"],
-                "high": r["rr_high"],
-                "method": method,
-                "n_vehicles": int(r["n_pairs_with_death"]),
-            }
-        )
-        rows.append(
-            {
-                "estimand": "fatality_risk_reduction_belt_given_fatal_crash" + sfx,
-                "estimate": r["reduction_1_minus_rr"],
-                "low": r["reduction_low"],
-                "high": r["reduction_high"],
-                "method": method,
-                "n_vehicles": int(r["n_pairs_with_death"]),
-            }
-        )
+        rows += _dpc_belt_rows(r, sfx, method)
     for key, res in cl.items():
         if key == "main":
             sfx, method_sfx = "", ""
@@ -884,30 +938,11 @@ def belt_effect_table(
             }
         )
     r = dpc_cc.loc[dpc_cc["component"].str.startswith("combined")].iloc[0]
-    for est, val, lo, hi in (
-        (
-            "fatality_rr_belted_vs_unbelted_given_fatal_crash",
-            r["rr_x1_vs_x0"],
-            r["rr_low"],
-            r["rr_high"],
-        ),
-        (
-            "fatality_risk_reduction_belt_given_fatal_crash",
-            r["reduction_1_minus_rr"],
-            r["reduction_low"],
-            r["reduction_high"],
-        ),
-    ):
-        rows.append(
-            {
-                "estimand": est + "_complete_restraint_vehicles",
-                "estimate": val,
-                "low": lo,
-                "high": hi,
-                "method": "evans_double_pair_comparison_vehicles_without_unknown_restraint",
-                "n_vehicles": int(r["n_pairs_with_death"]),
-            }
-        )
+    rows += _dpc_belt_rows(
+        r,
+        "_complete_restraint_vehicles",
+        "evans_double_pair_comparison_vehicles_without_unknown_restraint_crash_cluster_bootstrap",
+    )
     for _, r in mp.iterrows():
         f = r["misreport_fraction"]
         sfx = "" if f == 0 else f"_misreport_f{round(f * 100):02d}"
@@ -917,7 +952,7 @@ def belt_effect_table(
                 "estimate": r["or_unbelted_vs_belted"],
                 "low": r["or_low"],
                 "high": r["or_high"],
-                "method": "two_occupant_vehicles_one_death_conditional_ml_closed_form",
+                "method": "two_occupant_vehicles_one_death_conditional_ml_closed_form_poisson_ci",
                 "n_vehicles": int(r["n_vehicles"]),
             }
         )
@@ -960,8 +995,9 @@ def run(years: Sequence[int] | None = None, n_boot: int = N_BOOT) -> dict:
         "unbelted + 8 age bands + sex + seat; coarse_age = 4 age bands; belt_by_seat_row = main + "
         "unbelted x second row; misreport_f = main after seeded random reclassification of a "
         "fraction f of belted survivors to unbelted)",
-        "statsmodels ConditionalLogit (groups = vehicle), BFGS; CIs from crash-cluster-robust "
-        "sandwich (primary) and model-based information",
+        "statsmodels ConditionalLogit (groups = vehicle), Newton-Raphson; CIs from "
+        "crash-cluster-robust sandwich (primary) and model-based information; flag: suppressed "
+        "= fewer than 30 persons with the term, unstable = robust SE(log OR) > 0.30",
         LPV_POP + "; vehicles with >= 2 eligible occupants and discordant outcomes",
         extra={"belt_discordant_sets": belt_sets},
     )
@@ -1012,8 +1048,10 @@ def run(years: Sequence[int] | None = None, n_boot: int = N_BOOT) -> dict:
         "and motorcycle operator / passenger pairs (helmet); misreport_fraction > 0 = closed-form "
         "reclassification of a fraction of 'belted' survivors to unbelted",
         "Four component ratios of death ratios and their inverse-variance weighted geometric "
-        "mean; percentile bootstrap over vehicles (exact multinomial on 16 cells, "
-        f"{n_boot} replicates) and over crashes",
+        "mean; percentile bootstrap over vehicles (rr_low/rr_high: exact multinomial on 16 "
+        f"cells, {n_boot} replicates) and over crashes (rr_low_crash_boot/rr_high_crash_boot, "
+        "combined rows; used in belt_effect.csv); flag: suppressed = a death count < 30, "
+        "unstable = bootstrap SE(log RR) > 0.30",
         "FARS 2016-2024 vehicles with exactly one eligible driver (seat 11) and one eligible "
         "right-front passenger (seat 13) / motorcycles with one operator and one passenger",
     )
@@ -1030,7 +1068,7 @@ def run(years: Sequence[int] | None = None, n_boot: int = N_BOOT) -> dict:
         "Closed-form matched-pair OR (unbelted vs belted) in two-occupant vehicles with one "
         "death, under reclassification of a fraction f of belted survivors to unbelted",
         "Conditional ML for 1:1 matched pairs: OR = n10/n01; expected counts under "
-        "misreporting n10*(1-f), n01 + f*n00",
+        "misreporting n10*(1-f), n01 + f*n00; Poisson CI treating vehicles as independent",
         LPV_POP + "; vehicles with exactly 2 eligible occupants and exactly one death",
     )
     moto_tab = moto["clogit"].table.assign(
@@ -1053,8 +1091,12 @@ def run(years: Sequence[int] | None = None, n_boot: int = N_BOOT) -> dict:
         "Machine-readable belt-use estimates (FARS within-vehicle designs) for the policy "
         "simulator.  All estimates are conditional on a crash severe enough to kill an "
         "occupant of the vehicle (fatal crash); rows with _misreport_fXX are sensitivity "
-        "analyses, not alternative primary estimates",
-        "See method column; primary = fatality_risk_reduction_belt_given_fatal_crash (Evans DPC)",
+        "analyses, not alternative primary estimates.  DPC rows: n_vehicles = driver / "
+        "right-front pairs with at least one death; conditional-logit rows: matched sets "
+        "(vehicles) with discordant outcomes; matched-pair rows: two-occupant vehicles with one "
+        "death",
+        "See method column; primary = fatality_risk_reduction_belt_given_fatal_crash (Evans DPC, "
+        "percentile crash-cluster bootstrap CI)",
         LPV_POP,
     )
     digest = {

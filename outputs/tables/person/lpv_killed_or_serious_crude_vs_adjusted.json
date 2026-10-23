@@ -4,11 +4,11 @@
  "population": "CRSS occupants of light passenger vehicles aged 8+ (known age)",
  "unit": "person",
  "outcome": "killed_or_serious",
- "method": "Crude: weighted rate and saturated survey logit; Survey-weighted logistic regression (pseudo-ML, ridge 0.01), Taylor-linearised variance (25 strata, 67 PSUs, t with 42 df); standardised predictive margins -> adjusted RR/RD. Model A = person covariates + PRE_CRASH; model B = A + crash type + number of vehicles.",
+ "method": "Crude: weighted rate and saturated survey logit; Survey-weighted logistic regression (pseudo-ML, ridge 0.01), Taylor-linearised variance (25 strata, 67 PSUs, t with 42 df); standardised predictive margins -> adjusted RR/RD. Model A = person covariates + PRE_CRASH; model B = A + crash type + number of vehicles. Flags: suppressed = n<30 or no events (event-free levels blanked); unstable = crude rate, level margin or reference margin RSE>30%.",
  "inputs": [
   "data/processed/crss_person.parquet (+ young/older_driver from crss_crash.parquet)"
  ],
- "rows": 32,
+ "rows": 34,
  "columns": [
   "population",
   "outcome",
@@ -28,6 +28,7 @@
   "crude_rr_low",
   "crude_rr_high",
   "A_adj_rate",
+  "A_adj_rate_rse",
   "A_adj_rate_low",
   "A_adj_rate_high",
   "A_adj_rr",
@@ -37,6 +38,7 @@
   "A_adj_rd_low",
   "A_adj_rd_high",
   "B_adj_rate",
+  "B_adj_rate_rse",
   "B_adj_rate_low",
   "B_adj_rate_high",
   "B_adj_rr",
@@ -51,13 +53,13 @@
   "B_flag"
  ],
  "module": "nhtsa_stats.analysis.person",
- "git_commit": "13861a2-dirty",
- "generated_utc": "2026-10-22T17:55:59Z",
- "n": 904846,
- "events": 49874,
- "params_A": 94,
+ "git_commit": "34fa793-dirty",
+ "generated_utc": "2026-10-23T00:00:05Z",
+ "n": 912573,
+ "events": 50453,
+ "params_A": 100,
  "converged_A": true,
- "params_B": 105,
+ "params_B": 111,
  "converged_B": true,
  "design_df": 42
 }

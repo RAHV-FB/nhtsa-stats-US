@@ -329,7 +329,60 @@ conditions (light, weather) cannot be assessed with it.
 
 ## 8. Finding 7 — Restraint use
 
-<!-- SECTION: matched + person -->
+*Sources: `matched/belt_effect`, `matched/double_pair_comparison`, `matched/clogit_coefficients`
+(FARS, within the same vehicle); `person/lpv_killed_crude_vs_adjusted`,
+`person/lpv_killed_interaction_restraint_x_age` (CRSS, design-based).*
+
+Comparisons between people in different crashes cannot separate belt use from crash energy:
+unbelted occupants are, on average, in more violent crashes. FARS allows a comparison **within
+the same vehicle**, which holds fixed everything the occupants share — impact speed, vehicle,
+road, weather.
+
+* **Double-pair comparison** (drivers and right-front passengers; 45,805 pairs with at least one
+  death). Given a crash severe enough to kill someone in the vehicle, a belted occupant's risk of
+  dying was
+  {{matched/belt_effect|estimand=fatality_risk_reduction_belt_given_fatal_crash|estimate|cipct:1}}
+  lower than an unbelted occupant's (crash-cluster bootstrap CI). The four component comparisons
+  agree closely.
+* **Conditional logistic regression** with the vehicle as the matched set, adjusted for age, sex
+  and seat: odds ratio of death, unbelted vs belted,
+  {{matched/clogit_coefficients|model=main;term=unbelted|odds_ratio|ci:2@or}}. Deaths are common
+  in these vehicles, so this odds ratio overstates the risk ratio.
+* **The estimate depends on truthful reporting by survivors.** Belt use of surviving occupants
+  is largely what they tell police. If 10% of "belted" survivors were in fact unbelted, the
+  reduction would be
+  {{matched/belt_effect|estimand=fatality_risk_reduction_belt_given_fatal_crash_misreport_f10|estimate|cipct:1}};
+  at 20%, {{matched/belt_effect|estimand=fatality_risk_reduction_belt_given_fatal_crash_misreport_f20|estimate|cipct:1}}.
+  The association would vanish at about
+  {{matched/double_pair_comparison|analysis=belt_driver_rf;misreport_fraction=0;component=combined (inverse-variance weighted)|tipping_point_f|pct:0}}
+  misreporting. The size is therefore uncertain; the direction is not, unless misreporting is
+  very large.
+* **Frailty.** Within the same vehicle, belted occupants aged 65+ died more often than belted
+  occupants aged 25–44 of the same sex
+  ({{matched/double_pair_comparison|analysis=age_65plus_vs_25_44_both_belted_same_sex;component=combined (inverse-variance weighted)|rr_x1_vs_x0|ci:2@rr}}
+  times the risk). Women and men of similar age differed little
+  ({{matched/double_pair_comparison|analysis=female_vs_male_both_belted_age_gap_le5;component=combined (inverse-variance weighted)|rr_x1_vs_x0|ci:2@rr}}).
+* **Motorcycle helmets** (operator and passenger on the same motorcycle): risk ratio of death,
+  helmeted vs unhelmeted,
+  {{matched/double_pair_comparison|analysis=motorcycle_helmet;component=combined (inverse-variance weighted)|rr_x1_vs_x0|ci:2@rr}};
+  few motorcycles have riders who differ in helmet use, so this is imprecise.
+
+Across crashes (CRSS), unbelted light-vehicle occupants were far more likely to die than belted
+ones: crude RR {{person/lpv_killed_crude_vs_adjusted|factor=restraint;level=none|crude_rr|ci:1}},
+{{person/lpv_killed_crude_vs_adjusted|factor=restraint;level=none|A_adj_rr|ci:1}} after
+adjusting for person and pre-crash circumstances. These figures are several times the
+within-vehicle estimate, as expected if unbelted occupants are in more severe crashes and
+survivors over-report belt use. **They must not be read as belt effectiveness.** The *excess*
+risk of being unbelted rises steeply with age on the additive scale: the risk difference is
+{{person/lpv_killed_interaction_restraint_x_age|b_level=25-34|rd|pct:1}} at 25–34 but
+{{person/lpv_killed_interaction_restraint_x_age|b_level=75+|rd|pct:1}} at 75+, although the
+risk ratio is lower at 75+
+({{person/lpv_killed_interaction_restraint_x_age|b_level=75+|ratio_of_rr|ci:2}} times the
+25–34 ratio).
+
+*Limitations.* All within-vehicle estimates are conditional on a fatal crash and assume that
+occupants of the same vehicle differ only in belt use, age, sex and seat; belt use is recorded
+by police, partly from survivors' statements.
 
 ## 9. Finding 8 — The post-2020 rise in severity
 

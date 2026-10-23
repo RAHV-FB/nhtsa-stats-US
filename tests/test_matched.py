@@ -302,3 +302,131 @@ def test_real_data_smoke(rng):
     assert res.info["converged"]
     t = res.table.set_index("term").loc["unbelted"]
     assert np.isfinite([t["odds_ratio"], t["or_low"], t["or_high"]]).all()
+
+
+def _clustered_sets(rng: np.random.Generator, n_crashes: int) -> pd.DataFrame:
+    """Vehicles nested in crashes that share a crash-level severity (between-vehicle dependence)."""
+    rows, vid = [], 0
+    for crash in range(n_crashes):
+        sev = rng.normal(0.0, 1.0)
+        for _veh in range(int(rng.integers(1, 3))):
+            n = int(rng.integers(2, 5))
+            unb = rng.random(n) < 0.3
+            old = rng.random(n) < 0.25
+            eta = -0.5 + sev + 1.2 * unb + 0.8 * old
+            killed = (rng.random(n) < 1 / (1 + np.exp(-eta))).astype(int)
+            rows += [(vid, crash, killed[i], int(unb[i]), float(old[i])) for i in range(n)]
+            vid += 1
+    df = pd.DataFrame(rows, columns=["vehicle_id", "crash_id", "killed", "unbelted", "old"])
+    return matched.matched_sets(df)["discordant"].sample(frac=1.0, random_state=4)
+
+
+def test_clogit_robust_se_matches_crash_jackknife(rng):
+    """The crash-cluster sandwich agrees with a delete-one-crash jackknife (shuffled rows)."""
+    sets = _clustered_sets(rng, 160).reset_index(drop=True)
+    cols = ["unbelted", "old"]
+    res = matched.fit_clogit(
+        sets["killed"].to_numpy(),
+        sets[cols].astype(float),
+        sets["vehicle_id"].to_numpy(),
+        sets["crash_id"].to_numpy(),
+    )
+    crashes = sets["crash_id"].unique()
+    est = []
+    for c in crashes:
+        sub = sets.loc[sets["crash_id"] != c]
+        r = matched.fit_clogit(
+            sub["killed"].to_numpy(),
+            sub[cols].astype(float),
+            sub["vehicle_id"].to_numpy(),
+            sub["crash_id"].to_numpy(),
+            start=res.params,
+        )
+        est.append(r.params)
+    est = np.array(est)
+    g = len(crashes)
+    jk = np.sqrt((g - 1) / g * ((est - est.mean(axis=0)) ** 2).sum(axis=0))
+    np.testing.assert_allclose(res.table["se_robust"].to_numpy(), jk, rtol=0.1)
+
+
+def test_clogit_flags_sparse_terms():
+    sets = _pair_sets(240, 80, 300, 60)
+    sets["rare"] = 0.0
+    rare_rows = [*sets.index[sets["killed"] == 1][:6], *sets.index[sets["killed"] == 0][-6:]]
+    sets.loc[rare_rows, "rare"] = 1.0
+    res = matched.fit_clogit(
+        sets["killed"].to_numpy(),
+        sets[["unbelted", "rare"]].astype(float),
+        sets["vehicle_id"].to_numpy(),
+        sets["crash_id"].to_numpy(),
+    )
+    t = res.table.set_index("term")
+    assert t.loc["rare", "n_with_term"] == 12
+    assert t.loc["rare", "deaths_with_term"] == 6
+    assert t.loc["rare", "flag"] == "suppressed"
+    assert t.loc["unbelted", "flag"] == ""
+
+
+def test_dpc_flags_small_death_counts(rng):
+    c = expected_cells(
+        {(1, 1): 3000, (1, 0): 60, (0, 1): 600, (0, 0): 900},
+        np.array([0.2, 0.6]),
+        1.0,
+        1.2,
+        {1: 0.5, 0: 1.0},
+    )
+    pairs = _pairs_from_cells(np.round(c))
+    tab = matched.dpc_analysis(pairs, "t", "belted", rng, n_boot=200).set_index("component")
+    # pair type (driver belted, other unbelted) has ~60 vehicles -> driver deaths < 30
+    assert tab.loc["driver_subject|other_x=0", "min_death_count"] < 30
+    assert tab.loc["driver_subject|other_x=0", "flag"] == "suppressed"
+    assert tab.loc["combined (inverse-variance weighted)", "flag"] == "suppressed"
+    assert tab.loc["driver_subject|other_x=1", "flag"] == ""
+
+
+def test_belt_effect_table_uses_crash_cluster_ci(rng):
+    c = expected_cells(
+        {(1, 1): 3000, (1, 0): 600, (0, 1): 600, (0, 0): 900},
+        np.array([0.2, 0.6]),
+        1.0,
+        1.2,
+        {1: 0.5, 0: 1.0},
+    )
+    pairs = _pairs_from_cells(np.round(c))
+    dpc = matched.dpc_analysis(
+        pairs, "t", "belted", rng, n_boot=200, fractions=matched.MISREPORT_FRACTIONS
+    )
+    dpc_cc = matched.dpc_analysis(pairs, "t_cc", "belted", rng, n_boot=200)
+    sets = _pair_sets(240, 80, 300, 60)
+    cl = {
+        "main": matched.fit_clogit(
+            sets["killed"].to_numpy(),
+            sets[["unbelted"]].astype(float),
+            sets["vehicle_id"].to_numpy(),
+            sets["crash_id"].to_numpy(),
+        )
+    }
+    mp = pd.DataFrame([matched.matched_pair_or(sets, f) for f in matched.MISREPORT_FRACTIONS])
+    belt = matched.belt_effect_table(dpc, cl, mp, dpc_cc)
+    assert list(belt.columns) == ["estimand", "estimate", "low", "high", "method", "n_vehicles"]
+    assert belt["estimand"].is_unique
+    b = belt.set_index("estimand")
+    comb = dpc.loc[(dpc["misreport_fraction"] == 0) & dpc["component"].str.startswith("comb")]
+    comb = comb.iloc[0]
+    rr = b.loc["fatality_rr_belted_vs_unbelted_given_fatal_crash"]
+    red = b.loc["fatality_risk_reduction_belt_given_fatal_crash"]
+    assert rr["low"] == pytest.approx(comb["rr_low_crash_boot"])
+    assert rr["high"] == pytest.approx(comb["rr_high_crash_boot"])
+    assert red["estimate"] == pytest.approx(1 - rr["estimate"])
+    assert red["low"] == pytest.approx(1 - rr["high"])
+    assert red["high"] == pytest.approx(1 - rr["low"])
+    assert red["low"] < red["estimate"] < red["high"]
+    assert rr["n_vehicles"] == comb["n_pairs_with_death"]
+    for sfx in (
+        "_misreport_f05",
+        "_misreport_f10",
+        "_misreport_f20",
+        "_complete_restraint_vehicles",
+    ):
+        assert "fatality_risk_reduction_belt_given_fatal_crash" + sfx in b.index
+    assert "within_vehicle_or_killed_unbelted_vs_belted" in b.index

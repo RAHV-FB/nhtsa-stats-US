@@ -207,14 +207,14 @@
    "loglike": -36035.929709818185
   },
   "complete_restraint_vehicles": {
-   "n_sets": 44235,
-   "n_persons": 107628,
-   "n_deaths": 47635,
-   "n_crash_clusters": 43984,
+   "n_sets": 44097,
+   "n_persons": 107302,
+   "n_deaths": 47490,
+   "n_crash_clusters": 43847,
    "converged": true,
-   "max_abs_score": 8.165135234605714e-12,
-   "max_newton_step_over_se": 1.0294349678684482e-13,
-   "loglike": -32349.227799616972
+   "max_abs_score": 1.0436096431476471e-12,
+   "max_newton_step_over_se": 1.8547101493707713e-14,
+   "loglike": -32248.602135581703
   }
  },
  "n_motorcycle_riders": 55341,

@@ -4,7 +4,7 @@
  "population": "FARS 2016-2024 occupants (driver/passenger) of in-transport light passenger vehicles, seat front-left/front-other/second row, age 13+, belted or unbelted, known outcome; vehicles with >= 2 eligible occupants and discordant outcomes",
  "unit": "person within vehicle (matched set = vehicle)",
  "outcome": "killed (died within 30 days)",
- "method": "statsmodels ConditionalLogit (groups = vehicle), BFGS; CIs from crash-cluster-robust sandwich (primary) and model-based information",
+ "method": "statsmodels ConditionalLogit (groups = vehicle), Newton-Raphson; CIs from crash-cluster-robust sandwich (primary) and model-based information; flag: suppressed = fewer than 30 persons with the term, unstable = robust SE(log OR) > 0.30",
  "inputs": [
   "data/processed/fars_person.parquet"
  ],
@@ -20,6 +20,9 @@
   "or_low_model",
   "or_high_model",
   "p_robust",
+  "n_with_term",
+  "deaths_with_term",
+  "flag",
   "model",
   "info_n_sets",
   "info_n_persons",
@@ -31,8 +34,8 @@
   "info_loglike"
  ],
  "module": "nhtsa_stats.analysis.matched",
- "git_commit": "aab9ff8-dirty",
- "generated_utc": "2026-10-22T17:31:48Z",
+ "git_commit": "283b036-dirty",
+ "generated_utc": "2026-10-23T00:13:32Z",
  "belt_discordant_sets": {
   "sets_discordant_exposure": 14006,
   "persons_exposed": 43486,

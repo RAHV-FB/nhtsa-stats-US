@@ -89,6 +89,20 @@
     "table": "exposure/relative_involvement.csv"
   },
   {
+    "title": "Within the same vehicle, unbelted occupants die far more often than belted ones",
+    "statement": "Given a crash severe enough to kill someone in the vehicle, belted drivers and front passengers died less often than unbelted ones in the same vehicle. The size of the difference depends on how truthfully surviving occupants report belt use.",
+    "effect": "Fatality-risk reduction associated with belt use (double-pair comparison): {{matched/belt_effect|estimand=fatality_risk_reduction_belt_given_fatal_crash|estimate|cipct:1}}; conditional logit OR of death, unbelted vs belted: {{matched/clogit_coefficients|model=main;term=unbelted|odds_ratio|ci:2@or}}.",
+    "uncertainty": "Crash-cluster bootstrap CI (double-pair); crash-robust CI (conditional logit).",
+    "population": "FARS light-passenger-vehicle occupants aged 13+ in front or second-row seats with known belt use, 2016–2024; vehicles in which at least one occupant died.",
+    "denominator": "Driver/right-front pairs (double-pair comparison); vehicles with discordant outcomes (conditional logit).",
+    "adjustment": "Everything shared within the vehicle (crash forces, speed, vehicle, road); age, sex and seat in the conditional logit.",
+    "robustness": "If 10% of belted survivors were unbelted the reduction would be {{matched/belt_effect|estimand=fatality_risk_reduction_belt_given_fatal_crash_misreport_f10|estimate|cipct:1}}; if 20%, {{matched/belt_effect|estimand=fatality_risk_reduction_belt_given_fatal_crash_misreport_f20|estimate|cipct:1}}. Vehicles with no unknown-restraint occupant give the same result.",
+    "limitations": "Conditional on a fatal crash; assumes occupants differ only in belt use, age, sex and seat; survivor-reported belt use. Cross-crash CRSS ratios (crude {{person/lpv_killed_crude_vs_adjusted|factor=restraint;level=none|crude_rr|ci:1}}) are confounded by crash severity and must not be read as effectiveness.",
+    "kind": "adjusted",
+    "evidence": "matched/belt_effect; matched/double_pair_comparison; person/lpv_killed_crude_vs_adjusted",
+    "table": "matched/belt_effect.csv"
+  },
+  {
     "title": "Police-recorded behaviours are measured differently by severity",
     "statement": "Alcohol testing is selective (killed drivers tested far more often than survivors), police reports miss alcohol, CRSS alcohol coding broke in 2019, restraint use is self-reported by survivors, and drug and distraction fields cannot support severity or trend analysis.",
     "effect": "2024: {{measurement/fars_testing|level=national;YEAR=2024;status=killed|pct_alcohol_tested|.0f}}% of killed vs {{measurement/fars_testing|level=national;YEAR=2024;status=survived|pct_alcohol_tested|.0f}}% of surviving drivers alcohol-tested. CRSS alcohol unknown in non-fatal crashes: {{measurement/unknown_by_year|field=alcohol;fatal=0;YEAR=2018|pct_unknown|.0f}}% (2018) → {{measurement/unknown_by_year|field=alcohol;fatal=0;YEAR=2019|pct_unknown|.0f}}% (2019).",

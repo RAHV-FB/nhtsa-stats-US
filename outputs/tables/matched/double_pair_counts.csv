@@ -3,10 +3,10 @@ belt_driver_rf,belted,1,1,63187,13800,14972,4580
 belt_driver_rf,belted,1,0,6539,1475,4422,764
 belt_driver_rf,belted,0,1,6357,4180,1461,682
 belt_driver_rf,belted,0,0,14157,7044,6992,2515
-belt_driver_rf_complete_restraint_vehicles,belted,1,1,62286,13610,14785,4515
-belt_driver_rf_complete_restraint_vehicles,belted,1,0,6461,1463,4379,758
-belt_driver_rf_complete_restraint_vehicles,belted,0,1,6241,4121,1432,669
-belt_driver_rf_complete_restraint_vehicles,belted,0,0,13950,6975,6904,2486
+belt_driver_rf_complete_restraint_vehicles,belted,1,1,62135,13566,14744,4494
+belt_driver_rf_complete_restraint_vehicles,belted,1,0,6441,1458,4365,755
+belt_driver_rf_complete_restraint_vehicles,belted,0,1,6215,4110,1423,666
+belt_driver_rf_complete_restraint_vehicles,belted,0,0,13904,6948,6881,2474
 age_65plus_vs_25_44_both_belted_same_sex,age 65+,1,1,1659,461,785,157
 age_65plus_vs_25_44_both_belted_same_sex,age 65+,1,0,427,176,74,40
 age_65plus_vs_25_44_both_belted_same_sex,age 65+,0,1,505,63,208,33

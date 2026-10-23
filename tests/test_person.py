@@ -246,3 +246,85 @@ def test_real_data_motorcycle_smoke():
     assert np.isfinite([none["A_adj_rr"], none["A_adj_rr_low"], none["A_adj_rr_high"]]).all()
     assert none["A_adj_rr_low"] < none["A_adj_rr"] < none["A_adj_rr_high"]
     assert coef.attrs["meta"]["converged_A"]
+
+
+def _contrast_table() -> pd.DataFrame:
+    """Hand-made crude/adjusted rows for two factors (reference level first)."""
+    return pd.DataFrame(
+        {
+            "factor": ["body", "body", "body", "body", "sex", "sex"],
+            "level": ["car", "suv", "empty", "tiny", "male", "female"],
+            "n": [5000, 4000, 900, 20, 3000, 3000],
+            "n_events": [100, 80, 0, 3, 60, 40],
+            "flag": [np.nan, np.nan, "unstable", "suppressed", np.nan, "unstable"],
+            "crude_rr": [1.0, 1.0, 0.0, 1.5, 1.0, 0.67],
+            "crude_rr_low": [1.0, 0.8, 0.0, 0.5, 1.0, 0.4],
+            "crude_rr_high": [1.0, 1.2, 0.0, 4.0, 1.0, 1.1],
+            "A_adj_rate": [0.02, 0.02, 1e-4, 0.03, 0.02, 0.013],
+            "A_adj_rate_low": [0.018, 0.017, 0.8e-4, 0.0, 0.018, 0.011],
+            "A_adj_rate_high": [0.022, 0.023, 1.2e-4, 0.06, 0.022, 0.015],
+            "A_adj_rr": [1.0, 1.0, 0.005, 1.5, 1.0, 0.65],
+            "A_adj_rr_low": [1.0, 0.8, 0.004, 0.2, 1.0, 0.5],
+            "A_adj_rr_high": [1.0, 1.2, 0.006, 9.0, 1.0, 0.8],
+            "A_logrr_retained": [np.nan, np.nan, 1.0, 1.0, np.nan, 1.0],
+        }
+    )
+
+
+def test_adjusted_flags_and_event_free_levels():
+    res = _contrast_table()
+    flags = person._adjusted_flags(res, "A", tcrit=2.0)
+    # car/suv fine; event-free level suppressed even though its margin looks precise;
+    # n < 30 suppressed; female inherits the crude 'unstable' flag
+    assert flags == ["", "", "suppressed", "suppressed", "", "unstable"]
+    out = person._blank_event_free(res, ["A"])
+    row = out.loc[out["level"] == "empty"].iloc[0]
+    assert row["crude_rr"] == 0.0  # observed
+    assert np.isnan(row["crude_rr_low"]) and np.isnan(row["crude_rr_high"])
+    assert np.isnan([row["A_adj_rr"], row["A_adj_rr_low"], row["A_adj_rate"]]).all()
+    assert np.isnan(row["A_logrr_retained"])
+    # other rows untouched
+    pd.testing.assert_frame_equal(
+        out.loc[out["level"] != "empty"], res.loc[res["level"] != "empty"]
+    )
+
+
+def test_adjusted_flags_use_reference_margin():
+    res = _contrast_table()
+    # make the reference margin of 'body' (car) imprecise: every body contrast is unstable
+    res.loc[0, ["A_adj_rate_low", "A_adj_rate_high"]] = [0.0, 0.04]
+    flags = person._adjusted_flags(res, "A", tcrit=2.0)
+    assert flags[:4] == ["unstable", "unstable", "suppressed", "suppressed"]
+    assert flags[4:] == ["", "unstable"]
+
+
+def test_interaction_table_flags_event_free_cells(rng):
+    df, design = _synthetic_people(rng)
+    # no events among unbelted persons aged 15-20
+    df.loc[(df["restraint"] == "none") & (df["age_band"] == "15-20"), "y"] = 0.0
+    spec = ModelSpec(categorical=SPEC_LEVELS, interactions=[("restraint", "age_band")])
+    model = person.LeanSurveyLogit(spec, ridge=0.01).fit(df, df["y"].to_numpy(), design)
+    tab = person.interaction_table(
+        model, df, "y", "restraint", "belted", "none", "age_band", SPEC_LEVELS["age_band"]
+    ).set_index("b_level")
+    assert tab.loc["15-20", "events_a_exposed"] == 0
+    assert tab.loc["15-20", "flag"] == "suppressed"
+    assert tab.loc["15-20", "interaction_flag"] == "suppressed"
+    assert tab.loc["25-34", "interaction_flag"] == ""
+
+
+def test_interaction_populations(tmp_path, monkeypatch, rng):
+    _write_synthetic_processed(tmp_path, rng, n=800)
+    monkeypatch.setattr(config, "PROCESSED_DIR", tmp_path)
+    df, design = person.load_occupants("killed")
+    lpv = person.build_populations(df, design)["lpv"]
+    specs_by_name = {s.name: s for s in person.INTERACTIONS}
+    sub = person.interaction_population(lpv, specs_by_name["restraint_x_crash_type"])
+    assert set(sub.df["restraint"]) <= {"belted", "none"}
+    assert not sub.df["crash_type"].isin(person.NON_OCCUPANT_CRASH_TYPES).any()
+    assert set(sub.df["n_vehicles_mv"]) <= {"1-2", "3+"}
+    assert sub.design.n == len(sub.df)
+    assert sub.design.n_clusters == design.n_clusters
+    sub = person.interaction_population(lpv, specs_by_name["age_x_sex"])
+    assert set(sub.df["sex"]) <= {"male", "female"}
+    assert sub.levels["sex"] == ["male", "female"]
