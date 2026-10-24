@@ -178,6 +178,17 @@ assumptions explicit, computes conditional projections and break-even thresholds
 presents them as measured effects. Details: `docs/limitations.md`,
 `docs/policy_assumptions.md`.
 
+## Working on this project with Claude Code
+
+`CLAUDE.md` holds the rules for Claude Code sessions in this repository. Subagents are used
+where they pay off, with the model matched to the task:
+
+- `haiku`: quick writing and simple checks.
+- `sonnet`: simple coding and routine checking.
+- `opus`: complex coding and the final review before a push.
+
+`CLAUDE.md` also lists the data and reporting conventions and the checks to run before a push.
+
 ## Licence
 
 MIT (see `LICENSE`). FARS and CRSS are public NHTSA data products.
