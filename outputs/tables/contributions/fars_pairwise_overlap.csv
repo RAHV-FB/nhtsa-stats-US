@@ -1,0 +1,7 @@
+pair,deaths_both,share_of_a_also_b,share_of_b_also_a,observed_over_expected
+speeding & alcohol,40265.9,0.407991,0.380509,1.36371
+speeding & drugs,30135,0.305341,0.357868,1.28256
+speeding & unbelted victim,35063,0.355273,0.362573,1.29943
+alcohol & drugs,30198.8,0.285376,0.358626,1.1987
+alcohol & unbelted victim,38482.3,0.363654,0.397931,1.33008
+drugs & unbelted victim,31397,0.372855,0.324664,1.36373

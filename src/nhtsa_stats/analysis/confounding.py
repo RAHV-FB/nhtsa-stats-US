@@ -126,6 +126,9 @@ BLOCKS: dict[str, tuple[str, ...]] = {
     ),
     "alcohol": ("alcohol_im",),
     "speeding": ("speeding",),
+    # Phase 2 (analysis/speeding.py): speeding by police-recorded type, used as a block when
+    # alcohol is the exposure.
+    "speeding_type": ("speeding_type",),
     "driver_vehicle_mix": ("young_driver", "older_driver", "any_motorcycle", "any_heavy_truck"),
     "driver_vehicle_mix_other": ("young_driver", "any_motorcycle", "any_heavy_truck"),
     "configuration": ("crash_type", "n_vehicles"),
@@ -504,13 +507,15 @@ def sequential_table(
     ms: MarginSet,
     exposure: Exposure,
     outcome: str,
+    orders: dict[str, list[str]] | None = None,
 ) -> pd.DataFrame:
+    """Sequential adjustment along each ordering (default: ``orderings(exposure)``)."""
     t = ms.design.tcrit()
     crude = "lr|crude"
     crude_lo, crude_hi = _ci(*linear_contrast(ms, {crude: 1.0}), t)
     crude_unstable = crude_lo <= 0 <= crude_hi
     rows = []
-    for name, order in orderings(exposure).items():
+    for name, order in (orders or orderings(exposure)).items():
         prev: frozenset[str] = frozenset()
         for step in range(len(order) + 1):
             cur = frozenset(order[:step])

@@ -1,0 +1,6 @@
+step,covariates,n,n_events,risk_belted,risk_unbelted,rr,rr_low,rr_high,rd,rd_low,rd_high,share_logrr_retained
+crude,,874368,6818,0.000938593,0.0434805,46.3252,41.049,52.2796,0.0425419,0.037976,0.0471079,1
++ crash environment,"YEAR,region,urbanicity,tod,weekend,light,weather,surface,speed_limit,interstate,junction,work_zone",874368,6818,0.000939542,0.0315598,33.5907,29.89,37.7495,0.0306203,0.0266119,0.0346287,0.916198
++ person and vehicle,"YEAR,region,urbanicity,tod,weekend,light,weather,surface,speed_limit,interstate,junction,work_zone,age_band,sex,role,body",874368,6818,0.000935795,0.0336441,35.9524,31.9469,40.4603,0.0327083,0.0282234,0.0371933,0.933913
++ driver's own speeding and alcohol,"YEAR,region,urbanicity,tod,weekend,light,weather,surface,speed_limit,interstate,junction,work_zone,age_band,sex,role,body,lnk_speeding,lnk_alcohol_im",874368,6818,0.000952585,0.0267221,28.0521,24.6978,31.8621,0.0257695,0.0215922,0.0299467,0.869223
++ crash configuration,"YEAR,region,urbanicity,tod,weekend,light,weather,surface,speed_limit,interstate,junction,work_zone,age_band,sex,role,body,lnk_speeding,lnk_alcohol_im,crash_type,n_vehicles",874368,6818,0.000974803,0.0183572,18.8317,17.0288,20.8256,0.0173824,0.014882,0.0198828,0.765324

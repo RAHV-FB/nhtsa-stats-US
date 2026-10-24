@@ -1,0 +1,34 @@
+{
+ "table": "multifactor/analyses.csv",
+ "description": "Specification, population and support of every factorial analysis",
+ "population": "CRSS 2016-2024; unit and population per analysis (see multifactor/analyses)",
+ "unit": "analysis",
+ "outcome": "",
+ "method": "Survey logistic model with all factor main effects, a product for every combination of non-reference factor levels (unknown included), and categorical covariates; standardised margins for all 2^k combinations (g-computation over the analysis population); Taylor linearisation on 25 strata / 67 PSUs (t, 42 df); cells with < 30 units or < 10 events withheld; Holm across the registered family per scale",
+ "inputs": [
+  "data/processed/crss_crash.parquet",
+  "data/processed/crss_driver.parquet",
+  "data/processed/crss_person.parquet",
+  "data/processed/crss_person_link.parquet"
+ ],
+ "rows": 10,
+ "columns": [
+  "analysis",
+  "level",
+  "registered",
+  "population",
+  "outcome",
+  "factors",
+  "covariates",
+  "n",
+  "n_events",
+  "share_of_frame",
+  "n_params",
+  "converged",
+  "n_suppressed_cells",
+  "rationale"
+ ],
+ "module": "nhtsa_stats.analysis.multifactor",
+ "git_commit": "8fe8986",
+ "generated_utc": "2026-10-23T09:23:50Z"
+}

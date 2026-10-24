@@ -1,0 +1,5 @@
+stage,identified,reason,what_is_reported
+A. crash occurrence,no,"No exposure (trips, miles, driver-hours); both systems sample crashes, not travel",Relative involvement (Phase-1 QIE) only
+B. configuration and impact,partly (associations),Travel and impact speed unobserved for most vehicles; posted limit and police speeding judgement are proxies,Associations of recorded speeding and speed environment with severity given a crash
+C. injury given the crash,closest to identified,Within-vehicle designs hold crash forces fixed; survivor belt misreporting remains,"Within-vehicle belt, age and sex risk ratios; occupant-level adjusted risks"
+D. post-crash survival,no,EMS times exist only for fatal crashes (FARS); no survivors with comparable injuries and different response times; CRSS has no EMS times,Descriptive timing of deaths and EMS arrival among fatal crashes

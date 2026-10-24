@@ -129,3 +129,28 @@ policy questions require data that do not exist in this repository.
 4. Consistent toxicology for surviving drivers — would make alcohol/drug severity
    comparisons unbiased.
 5. Programme cost data — would allow cost-effectiveness without user assumptions.
+
+## 7. Phase 2 additions
+
+* **No individual attribution.** No analysis identifies the cause of a particular death or the
+  share of a death "due to" each factor. Shapley allocations in `cases/` and `contributions/` are
+  allocations of model quantities; they change with the scale (risk difference vs log risk
+  ratio), the reference case and the factor set, and are reported precisely to show this.
+* **Drugs.** CRSS has only police-reported drug involvement (50–70% unknown after 2019) and the
+  police co-record drugs with alcohol several times more often than toxicology finds them
+  together. No drug severity association, attributable fraction or ranking is reported; the
+  only drug–alcohol comparison is conditional on a fatal crash and on testing, in four
+  high-testing states.
+* **Mediator adjustment.** Crash configuration lies on plausible pathways from speeding and
+  alcohol to death; estimates with and without it bracket "net of configuration" and "closer to
+  total" associations; neither is a causal direct or total effect.
+* **Selection on fatality.** FARS-only comparisons (factor co-occurrence among fatal crashes,
+  killed-vs-surviving drivers) condition on a common consequence of the factors; Phase 2 shows
+  the speeding–alcohol association changes when fatal crashes alone are examined
+  (`speeding/selection_by_fatality`).
+* **Predictive contribution.** Measured on a temporal split with the model fixed; Shapley values
+  split information shared by correlated blocks evenly and are not causal importance.
+* **Sparse combinations.** Four-factor combinations with drugs and several case-explorer cells
+  are withheld for lack of support; they are reported as unsupported, not as zero.
+* **Stage D.** Post-crash survival effects are not identifiable: EMS times are recorded only for
+  fatal crashes (FARS) and not at all in CRSS.

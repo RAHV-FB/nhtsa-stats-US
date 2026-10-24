@@ -1,0 +1,27 @@
+{
+ "table": "stages/death_timing.csv",
+ "description": "Timing of death after the crash (at scene, within 1 h, 1-24 h, 1-30 days) by group",
+ "population": "FARS deaths 2016-2024",
+ "unit": "person killed",
+ "outcome": "",
+ "method": "Census shares; alcohol groups as expected counts over 10 BAC implicates",
+ "inputs": [
+  "FARS person (raw DOA, LAG_HRS, LAG_MINS)",
+  "data/processed/fars_person.parquet"
+ ],
+ "rows": 10,
+ "columns": [
+  "group",
+  "deaths",
+  "share_died_at_scene",
+  "share_died_en_route",
+  "share_lag_unknown",
+  "share_within_1_hour",
+  "share_1_24_hours",
+  "share_1_30_days",
+  "median_lag_hours_if_not_at_scene"
+ ],
+ "module": "nhtsa_stats.analysis.stages",
+ "git_commit": "8fe8986",
+ "generated_utc": "2026-10-23T09:32:27Z"
+}

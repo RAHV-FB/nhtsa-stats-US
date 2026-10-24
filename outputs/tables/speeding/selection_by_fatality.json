@@ -1,0 +1,25 @@
+{
+ "table": "speeding/selection_by_fatality.csv",
+ "description": "Speeding-alcohol association among all, non-fatal and fatal crashes (CRSS) and FARS",
+ "population": "CRSS police-reported crashes 2016-2024 with a determinable NHTSA-imputed maximum severity (MAXSEV_IM 0-4)",
+ "unit": "crash",
+ "outcome": "",
+ "method": "Crude survey-weighted odds ratios; FARS by implicate",
+ "inputs": [
+  "data/processed/crss_crash.parquet",
+  "data/processed/fars_crash.parquet"
+ ],
+ "rows": 8,
+ "columns": [
+  "measure",
+  "population",
+  "or",
+  "or_low",
+  "or_high",
+  "n",
+  "interval"
+ ],
+ "module": "nhtsa_stats.analysis.speeding",
+ "git_commit": "8fe8986",
+ "generated_utc": "2026-10-23T09:19:22Z"
+}

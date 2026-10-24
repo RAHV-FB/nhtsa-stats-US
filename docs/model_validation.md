@@ -525,3 +525,32 @@ CPUs (`OMP_NUM_THREADS=1`); thread settings, runtime and CPU time are recorded i
 Figures (`outputs/figures/ml/`): `calibration_fatal`, `calibration_ka`, `model_comparison`,
 `temporal_stability_fatal`, `temporal_stability_ka`, `permutation_importance_fatal`,
 `partial_dependence_fatal`.
+
+## Phase 2 models
+
+Phase-2 models are explanatory survey logistic models (no tuning), documented in
+`docs/methodology.md` §12. Validation specific to them:
+
+* **Reproduction of Phase 1.** The speeding lattice's model with the six model-A blocks
+  reproduces the Phase-1 adjusted exceedance RR exactly (`speeding.reproduce_phase1`; 5.22).
+* **Convergence and support.** Every factorial model records convergence and the number of
+  withheld combinations (`multifactor/analyses`); the case explorer withholds unsupported cells.
+* **Calibration of the case model.** For each supported grid case, the mean model prediction for
+  the drivers actually in the cell (`cases/scenarios.predicted_in_cell`) is reported next to the
+  observed weighted rate. A first specification with only pairwise products of the case factors
+  was mis-calibrated in two cells with more than 5,000 drivers (observed/predicted 0.59 and 1.74;
+  `tests/test_phase2_analysis.py::test_case_model_calibrated_in_large_cells`), so the final model
+  is saturated in the case factors, which makes it calibrated within every factor cell by
+  construction. Observed rates, support and standardised risks are always shown together,
+  because standardisation (not misfit) is what separates them.
+* **Collinearity found by the independent audit.** The case model first adjusted for the other
+  drivers' recorded behaviour, whose level "no other vehicle" coincides exactly with a
+  single-vehicle crash (154,323 driver records each way). The single-vehicle effect was then
+  split between collinear terms by the ridge, and the counterfactual "same driver in a
+  multi-vehicle crash" kept an impossible covariate value, halving standardised risks for
+  single-vehicle cases. Those covariates were removed from the case model.
+* **Predictive contribution.** `contributions/predictive` uses the Phase-1 temporal split
+  (train 2016–2021, test 2023–2024) with a design-weighted pseudo-R² and AUROC; the full logistic
+  model's test AUROC is close to the Phase-1 main-effects survey logistic model with configuration.
+  Uncertainty: PSU-within-stratum bootstrap of the test set with the model fixed (training
+  variability not included).

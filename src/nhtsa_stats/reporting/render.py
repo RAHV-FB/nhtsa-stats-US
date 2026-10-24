@@ -129,11 +129,7 @@ def mdtable(spec: str) -> str:
         cells = []
         for name, _, fmt in columns:
             v = r[name]
-            cells.append(
-                "—"
-                if (pd.isna(v) and not fmt.startswith(("ci", "cipct")))
-                else _fmt(v, fmt, r, name)
-            )
+            cells.append("—" if pd.isna(v) else _fmt(v, fmt, r, name))
         lines.append("| " + " | ".join(cells) + " |")
     return "\n".join(lines)
 

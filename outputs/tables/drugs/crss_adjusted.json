@@ -1,0 +1,25 @@
+{
+ "table": "drugs/crss_adjusted.csv",
+ "description": "Model-A adjusted fatal RR of police-reported drug involvement under two codings",
+ "population": "CRSS police-reported crashes with known severity",
+ "unit": "crash",
+ "outcome": "fatal",
+ "method": "Survey logistic model A + drugs; standardised RR",
+ "inputs": [
+  "data/processed/fars_driver.parquet",
+  "data/processed/crss_crash.parquet"
+ ],
+ "rows": 4,
+ "columns": [
+  "period",
+  "coding",
+  "n",
+  "events",
+  "adj_rr",
+  "adj_rr_low",
+  "adj_rr_high"
+ ],
+ "module": "nhtsa_stats.analysis.drugs",
+ "git_commit": "8fe8986",
+ "generated_utc": "2026-10-23T09:19:55Z"
+}

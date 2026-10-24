@@ -1,0 +1,27 @@
+{
+ "table": "contributions/rank_probabilities.csv",
+ "description": "Probability of each rank of crash-level factors on adjusted RR and adjusted RD",
+ "population": "CRSS police-reported crashes 2016-2024 with known imputed severity",
+ "unit": "crash",
+ "outcome": "fatal",
+ "method": "Joint Taylor linearisation of all factor contrasts from one model; 20,000 multivariate-normal draws",
+ "inputs": [
+  "data/processed/crss_crash.parquet",
+  "data/processed/fars_driver.parquet",
+  "data/processed/fars_person.parquet"
+ ],
+ "rows": 6,
+ "columns": [
+  "metric",
+  "factor",
+  "estimate",
+  "se_link",
+  "p_rank_1",
+  "p_rank_2",
+  "p_rank_3",
+  "rank_point"
+ ],
+ "module": "nhtsa_stats.analysis.contributions",
+ "git_commit": "8fe8986",
+ "generated_utc": "2026-10-23T09:32:27Z"
+}

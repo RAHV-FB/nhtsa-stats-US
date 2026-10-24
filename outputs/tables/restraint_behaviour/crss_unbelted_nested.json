@@ -1,0 +1,32 @@
+{
+ "table": "restraint_behaviour/crss_unbelted_nested.csv",
+ "description": "Unbelted vs belted standardised RR of death for light-vehicle occupants as covariate blocks are added (fixed sample)",
+ "population": "CRSS 2016-2024 drivers and passengers of light passenger vehicles aged 15+, belt use belted/none/unknown",
+ "unit": "occupant",
+ "outcome": "killed (imputed severity)",
+ "method": "Survey logistic model, unbelted + covariates; standardised margins; Taylor linearisation (42 df)",
+ "inputs": [
+  "data/processed/crss_person.parquet",
+  "data/processed/crss_driver.parquet",
+  "data/processed/crss_person_link.parquet"
+ ],
+ "rows": 5,
+ "columns": [
+  "step",
+  "covariates",
+  "n",
+  "n_events",
+  "risk_belted",
+  "risk_unbelted",
+  "rr",
+  "rr_low",
+  "rr_high",
+  "rd",
+  "rd_low",
+  "rd_high",
+  "share_logrr_retained"
+ ],
+ "module": "nhtsa_stats.analysis.restraint_behaviour",
+ "git_commit": "8fe8986",
+ "generated_utc": "2026-10-23T09:26:29Z"
+}

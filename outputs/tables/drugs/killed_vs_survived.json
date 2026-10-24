@@ -1,0 +1,30 @@
+{
+ "table": "drugs/killed_vs_survived.csv",
+ "description": "Odds that a tested driver in a fatal crash died: measured BAC >= .08 and drug positivity, mutually adjusted",
+ "population": "FARS drivers (PER_TYP 1) of in-transport vehicles in fatal crashes, 2016-2024",
+ "unit": "driver",
+ "outcome": "driver killed (vs survived) given a fatal crash",
+ "method": "Logistic regression, crash-clustered sandwich SEs; covariates: age, sex, vehicle type, crash configuration, night, period",
+ "inputs": [
+  "data/processed/fars_driver.parquet",
+  "data/processed/crss_crash.parquet"
+ ],
+ "rows": 10,
+ "columns": [
+  "sample",
+  "specification",
+  "term",
+  "odds_ratio",
+  "odds_ratio_low",
+  "odds_ratio_high",
+  "p",
+  "n_drivers",
+  "n_killed",
+  "n_states",
+  "share_alcohol",
+  "share_drug"
+ ],
+ "module": "nhtsa_stats.analysis.drugs",
+ "git_commit": "8fe8986",
+ "generated_utc": "2026-10-23T09:19:37Z"
+}
