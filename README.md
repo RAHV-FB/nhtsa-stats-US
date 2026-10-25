@@ -192,3 +192,14 @@ subagents use the cheapest model that can do the job:
 ## Licence
 
 MIT (see `LICENSE`). FARS and CRSS are public NHTSA data products.
+
+
+## Public research website
+
+The project also includes a polished, responsive **Road Evidence** public website in [website/](website/), built directly from the committed statistical outputs. It complements rather than replaces the nine-page Streamlit research interface.
+
+Features include searchable supported findings, interactive charts with source tables, explanations of overlapping risk factors, a clearly hypothetical policy target calculator, and an in-browser library of eleven full research reports. Public data files are synchronized from canonical outputs; CI rejects stale copies.
+
+Run locally from the repository root: first run `python website/tools/sync_public_data.py --check`, then `python -m http.server 8000 --directory website` and visit http://localhost:8000. Automated smoke tests: `node --test website/tests/site.test.mjs`.
+
+[Website details and deployment instructions](website/README.md). GitHub Pages publishing requires one-time configuration in Repository Settings → Pages → Source: GitHub Actions; do not assume the public URL is live until deployment is confirmed.
