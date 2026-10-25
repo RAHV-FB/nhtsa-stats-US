@@ -1,0 +1,61 @@
+name: Public research website
+
+on:
+  pull_request:
+    paths:
+      - "website/**"
+      - ".github/workflows/public-site.yml"
+  push:
+    branches: [main]
+    paths:
+      - "website/**"
+      - "reports/**"
+      - "docs/**"
+      - "outputs/tables/**"
+      - ".github/workflows/public-site.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: public-site-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  verify:
+    name: Verify site, bundled reports and data lineage
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: JavaScript syntax
+        run: node --check website/assets/site.js
+      - name: Functional static smoke tests
+        run: node --test website/tests/site.test.mjs
+      - name: Website snapshot consistency
+        run: python website/tools/sync_public_data.py --check
+
+  deploy:
+    name: Deploy static site to GitHub Pages
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    needs: verify
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: website
+      - name: Deploy GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
