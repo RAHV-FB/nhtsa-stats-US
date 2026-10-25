@@ -1,0 +1,27 @@
+{
+ "table": "contributions/fars_overlap_combinations.csv",
+ "description": "FARS deaths by combination of crash speeding, any-driver BAC >= .08 (expected over 10 implicates), any-driver drug positivity and the victim's restraint",
+ "population": "FARS deaths 2016-2024",
+ "unit": "person killed",
+ "outcome": "",
+ "method": "Census counts; alcohol as expected counts over multiple-imputation implicates",
+ "inputs": [
+  "data/processed/crss_crash.parquet",
+  "data/processed/fars_driver.parquet",
+  "data/processed/fars_person.parquet"
+ ],
+ "rows": 24,
+ "columns": [
+  "speeding",
+  "alcohol_bac08",
+  "drugs",
+  "unbelted_victim",
+  "deaths",
+  "share_of_deaths",
+  "n_factors",
+  "years"
+ ],
+ "module": "nhtsa_stats.analysis.contributions",
+ "git_commit": "8fe8986",
+ "generated_utc": "2026-10-23T09:32:19Z"
+}

@@ -8,7 +8,7 @@
  "inputs": [
   "outputs/tables/*"
  ],
- "rows": 7,
+ "rows": 8,
  "columns": [
   "intervention",
   "target_factor",
@@ -24,9 +24,10 @@
   "evidence_intervention_changes_factor",
   "assumptions_required",
   "numeric_estimate_possible",
-  "evidence_grade_target_association"
+  "evidence_grade_target_association",
+  "phase2_evidence"
  ],
  "module": "nhtsa_stats.simulation.evidence",
- "git_commit": "ef704fd",
- "generated_utc": "2026-10-23T03:46:09Z"
+ "git_commit": "8fe8986",
+ "generated_utc": "2026-10-23T09:41:58Z"
 }

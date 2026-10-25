@@ -1,0 +1,24 @@
+{
+ "table": "drugs/selection_gradient.csv",
+ "description": "Drug positivity among tested drivers by the state's survivor drug-testing tertile",
+ "population": "FARS drivers (PER_TYP 1) of in-transport vehicles in fatal crashes, 2016-2024",
+ "unit": "driver",
+ "outcome": "",
+ "method": "Unweighted shares",
+ "inputs": [
+  "data/processed/fars_driver.parquet",
+  "data/processed/crss_crash.parquet"
+ ],
+ "rows": 6,
+ "columns": [
+  "survivor_test_tertile",
+  "survival",
+  "n_tested",
+  "share_tested",
+  "drug_positivity",
+  "bac08_among_bac_tested"
+ ],
+ "module": "nhtsa_stats.analysis.drugs",
+ "git_commit": "8fe8986",
+ "generated_utc": "2026-10-23T09:19:25Z"
+}

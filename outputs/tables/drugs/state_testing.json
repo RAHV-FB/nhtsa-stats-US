@@ -1,0 +1,28 @@
+{
+ "table": "drugs/state_testing.csv",
+ "description": "State drug/BAC test rates (pooled 2016-2024) and the high-testing set (>= 50% of killed and surviving drivers tested for both)",
+ "population": "FARS drivers (PER_TYP 1) of in-transport vehicles in fatal crashes, 2016-2024",
+ "unit": "state",
+ "outcome": "",
+ "method": "Unweighted shares",
+ "inputs": [
+  "data/processed/fars_driver.parquet",
+  "data/processed/crss_crash.parquet"
+ ],
+ "rows": 51,
+ "columns": [
+  "STATE",
+  "n_killed",
+  "n_survived",
+  "drug_tested_killed",
+  "drug_tested_survived",
+  "bac_tested_killed",
+  "bac_tested_survived",
+  "drug_positivity_killed_tested",
+  "high_testing",
+  "tertile_survivor_drug_testing"
+ ],
+ "module": "nhtsa_stats.analysis.drugs",
+ "git_commit": "8fe8986",
+ "generated_utc": "2026-10-23T09:19:25Z"
+}

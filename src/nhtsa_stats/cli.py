@@ -35,6 +35,14 @@ ANALYSES: dict[str, str] = {
     "burden": "nhtsa_stats.analysis.burden",
     "vulnerable": "nhtsa_stats.analysis.vulnerable",
     "ml": "nhtsa_stats.models.severity_ml",
+    # Phase 2 (docs/research_plan_phase2.md)
+    "speeding": "nhtsa_stats.analysis.speeding",
+    "drugs": "nhtsa_stats.analysis.drugs",
+    "multifactor": "nhtsa_stats.analysis.multifactor",
+    "restraint_behaviour": "nhtsa_stats.analysis.restraint_behaviour",
+    "contributions": "nhtsa_stats.analysis.contributions",
+    "stages": "nhtsa_stats.analysis.stages",
+    "cases": "nhtsa_stats.analysis.cases",
     "policy": "nhtsa_stats.simulation.evidence",
     "figures": "nhtsa_stats.reporting.figures",
     "report": "nhtsa_stats.reporting.render",
@@ -69,9 +77,12 @@ def cmd_validate(_: argparse.Namespace) -> None:
 
 
 def cmd_features(_: argparse.Namespace) -> None:
+    from nhtsa_stats.processing import drivers
     from nhtsa_stats.processing.features import build_all
 
     build_all()
+    # Driver-level files and person links (Phase 2) read the crash files written above.
+    drivers.build_all()
 
 
 def cmd_build(args: argparse.Namespace) -> None:

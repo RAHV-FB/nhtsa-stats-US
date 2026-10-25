@@ -1,0 +1,26 @@
+{
+ "table": "contributions/fars_overlap_summary.csv",
+ "description": "Deaths counted under each factor, the sum of factor counts and the union",
+ "population": "FARS deaths 2016-2024",
+ "unit": "person killed",
+ "outcome": "",
+ "method": "Census counts",
+ "inputs": [
+  "data/processed/crss_crash.parquet",
+  "data/processed/fars_driver.parquet",
+  "data/processed/fars_person.parquet"
+ ],
+ "rows": 8,
+ "columns": [
+  "factor",
+  "deaths",
+  "share_of_all_deaths",
+  "deaths_with_no_other_listed_factor",
+  "share_also_involving_another_factor",
+  "overcount_ratio_sum_over_union",
+  "deaths_undetermined_drug_status"
+ ],
+ "module": "nhtsa_stats.analysis.contributions",
+ "git_commit": "8fe8986",
+ "generated_utc": "2026-10-23T09:32:19Z"
+}

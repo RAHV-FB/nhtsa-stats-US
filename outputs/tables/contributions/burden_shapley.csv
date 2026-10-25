@@ -1,0 +1,25 @@
+player_set,quantity,kind,estimate,estimate_low,estimate_high,fars_deaths_per_year
+speeding_alcohol,AF[speeding],attributable fraction,0.0887779,0.0668162,0.11074,3639.89
+speeding_alcohol,AF[alcohol],attributable fraction,0.194315,0.163138,0.225493,7966.93
+speeding_alcohol,AF[speeding+alcohol],attributable fraction,0.257394,0.2234,0.291388,10553.1
+speeding_alcohol,sum of single-factor AFs,attributable fraction (sum; double counts),0.283093,0.242854,0.323333,11606.8
+speeding_alcohol,overlap = sum of singles - joint,attributable fraction (overlap),0.0256995,0.0185286,0.0328703,1053.68
+speeding_alcohol,Shapley[speeding],Shapley allocation of the joint AF,0.0759281,0.0569801,0.0948762,3113.05
+speeding_alcohol,Shapley share[speeding],share,0.294988,0.231443,0.358533,
+speeding_alcohol,Shapley[alcohol],Shapley allocation of the joint AF,0.181466,0.15208,0.210852,7440.09
+speeding_alcohol,Shapley share[alcohol],share,0.705012,0.641467,0.768557,
+exceeded_other_alcohol,AF[exceeded],attributable fraction,0.0577671,0.0455943,0.0699398,2368.45
+exceeded_other_alcohol,AF[speeding_other],attributable fraction,0.0310108,0.0137482,0.0482734,1271.44
+exceeded_other_alcohol,AF[alcohol],attributable fraction,0.194315,0.163138,0.225493,7966.93
+exceeded_other_alcohol,AF[exceeded+speeding_other],attributable fraction,0.0887779,0.0668162,0.11074,3639.89
+exceeded_other_alcohol,AF[exceeded+alcohol],attributable fraction,0.2336,0.20213,0.26507,9577.61
+exceeded_other_alcohol,AF[speeding_other+alcohol],attributable fraction,0.218109,0.184536,0.251683,8942.48
+exceeded_other_alcohol,AF[exceeded+speeding_other+alcohol],attributable fraction,0.257394,0.2234,0.291388,10553.1
+exceeded_other_alcohol,sum of single-factor AFs,attributable fraction (sum; double counts),0.283093,0.242854,0.323333,11606.8
+exceeded_other_alcohol,overlap = sum of singles - joint,attributable fraction (overlap),0.0256995,0.0185286,0.0328703,1053.68
+exceeded_other_alcohol,Shapley[exceeded],Shapley allocation of the joint AF,0.0485259,0.0381473,0.0589044,1989.56
+exceeded_other_alcohol,Shapley share[exceeded],share,0.188528,0.148132,0.228924,
+exceeded_other_alcohol,Shapley[speeding_other],Shapley allocation of the joint AF,0.0274023,0.012196,0.0426086,1123.49
+exceeded_other_alcohol,Shapley share[speeding_other],share,0.10646,0.0517947,0.161126,
+exceeded_other_alcohol,Shapley[alcohol],Shapley allocation of the joint AF,0.181466,0.15208,0.210852,7440.09
+exceeded_other_alcohol,Shapley share[alcohol],share,0.705012,0.641467,0.768557,

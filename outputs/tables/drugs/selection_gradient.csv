@@ -1,0 +1,7 @@
+survivor_test_tertile,survival,n_tested,share_tested,drug_positivity,bac08_among_bac_tested
+high,killed,31261,0.630207,0.502895,0.310121
+high,survived,20197,0.393408,0.373917,0.120259
+low,killed,40406,0.539353,0.458348,0.342516
+low,survived,5660,0.0865753,0.415194,0.27303
+middle,killed,55550,0.675869,0.488731,0.321986
+middle,survived,16699,0.16297,0.384035,0.239369

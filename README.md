@@ -22,6 +22,12 @@ are always labelled as such.
 
 > **Start here:** `reports/findings.md` (main results) · `docs/limitations.md` (what the data
 > cannot answer) · `docs/research_plan.md` (questions and design).
+>
+> **Phase 2** — how overlapping factors (speeding, alcohol, drugs, restraint) combine and which
+> associations survive adjustment and bias analysis: `reports/factor_contributions.md`,
+> `reports/speeding_confounding.md`, `reports/alcohol_drugs_restraints.md`,
+> `reports/multifactor_interactions.md`, `reports/case_comparisons.md`; plan in
+> `docs/research_plan_phase2.md`.
 
 ## Quick start
 
@@ -51,6 +57,7 @@ numerical libraries can change the final digits). Individual steps:
 | `nhtsa validate` | 841 relational-integrity checks; exits non-zero on structural failure | `outputs/audit/integrity_checks.csv` |
 | `nhtsa features` | Harmonised analytic datasets | `data/processed/` (git-ignored) |
 | `nhtsa analyze [module …]` | Run analyses (`nhtsa list` shows modules) | `outputs/tables/<module>/`, `outputs/figures/` |
+| `nhtsa analyze speeding drugs multifactor restraint_behaviour contributions stages cases` | Phase-2 modules (about 75 minutes on 4 cores; the speeding lattices take most of it) | `outputs/tables/<module>/` |
 
 Changing one analysis only requires `nhtsa analyze <module>`; the cache and datasets are
 reused.
@@ -77,7 +84,8 @@ data/raw/                 36 original ZIP archives (Git LFS, unchanged)
 src/nhtsa_stats/
   ingestion/              archive discovery, validation, CSV reading, Parquet cache
   validation/             inventory and relational-integrity checks
-  processing/             harmonised code mappings (+ leakage registry) and analytic datasets
+  processing/             harmonised code mappings (+ leakage registry), analytic datasets,
+                          driver-level files and person-to-driver links (Phase 2)
   analysis/               survey inference core and the research modules
   models/                 severity-prediction pipeline (temporal validation)
   simulation/             evidence ledger, intervention simulator, cost model
@@ -124,6 +132,43 @@ the app). In brief — all conditional on a police-reported crash, and associati
     deaths concentrate and what an intervention would have to achieve, under stated
     assumptions (`reports/policy_analysis.md`).
 
+## Phase 2 findings: overlapping factors
+
+All conditional on a police-reported crash; associations, not effects. Details, intervals and
+caveats in the Phase-2 reports (every number there is rendered from `outputs/tables/`).
+
+1. **Official factor counts overlap and cannot be added.** In FARS 2016–2024, deaths in
+   speeding-related crashes, crashes with a driver at BAC ≥ .08, crashes with a drug-positive
+   driver and unbelted-occupant deaths sum to 109% of all deaths, while 65% of deaths involve any
+   of them; about 70% of the deaths counted under each factor also involve another.
+2. **Alcohol does not explain away speeding.** Exceeding the limit has a crude fatal risk ratio
+   of 10.0; alcohol accounts for about 9% of its log (4–16% depending on the adjustment order),
+   and 69% remains after every recorded circumstance. Without alcohol the adjusted risk ratio is
+   6.5, *higher* than with alcohol (3.3). Speeding likewise explains little of alcohol's
+   association (4%).
+3. **The unit matters.** In single-vehicle crashes no departure from multiplicativity is detected
+   for one driver's exceedance and alcohol; at crash level the combination is sub-multiplicative,
+   possibly because different drivers and crash types are pooled. A struck pedestrian's death is
+   much more weakly (and imprecisely) associated with the striking driver's recorded speeding or
+   alcohol than an occupant's death, once road speed limit and light are held fixed.
+4. **Drugs cannot be ranked.** Drug testing follows survival and suspicion (62% of killed vs 19%
+   of surviving drivers), police co-record drugs with alcohol several times more often than
+   toxicology finds them together, and the CRSS drug risk ratio ranges from 1.7 to 73 depending
+   only on how unknowns are allocated.
+5. **Belts act at a different stage.** Within the same vehicle the belt risk ratio (about 0.34)
+   does not change with the driver's speeding and is only slightly lower with a drinking driver
+   (it does differ between single- and multi-vehicle crashes); across crashes the unbelted risk
+   ratio falls from 46 (crude) to 28 (with the driver's own behaviour) and 19 (with crash
+   configuration).
+6. **No defensible single ranking.** Exceeding the limit ranks first on adjusted risk (P ≈ 0.97);
+   alcohol ranks first on deaths involved and attributed burden; predictive importance depends
+   on the measure. The
+   hypothesised ranking drugs > alcohol > belts > speeding is not supported.
+7. **No individual attribution.** The case explorer shows that "shares" of a modelled risk
+   change with scale and order and often require combinations that do not exist in the data.
+
+New interface pages: *Factor contributions*, *Multiple-factor explorer*, *Case comparison*.
+
 ## What this project cannot tell you
 
 The databases contain no exposure (trips, miles), enforcement, camera, testing-programme or
@@ -132,6 +177,17 @@ enforcement programme, or lives saved by an intervention. The simulator makes th
 assumptions explicit, computes conditional projections and break-even thresholds, and never
 presents them as measured effects. Details: `docs/limitations.md`,
 `docs/policy_assumptions.md`.
+
+## Working on this project with Claude Code
+
+`CLAUDE.md` holds the rules for Claude Code sessions in this repository. To save usage,
+subagents use the cheapest model that can do the job:
+
+- `haiku`: quick writing and simple checks (the default).
+- `sonnet`: all coding, simple or complex, and routine checking.
+- `opus`: only the final review before a push.
+
+`CLAUDE.md` also lists the data and reporting conventions and the checks to run before a push.
 
 ## Licence
 

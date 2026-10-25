@@ -175,8 +175,82 @@ def measured_facts() -> dict[str, str]:
     return facts
 
 
+def phase2_evidence() -> dict[str, str]:
+    """Phase-2 findings relevant to each intervention, read from the Phase-2 tables (empty
+    strings when a table is missing).  Associations and statistical attributions only."""
+    out: dict[str, str] = {}
+    strata = _tab("speeding", "strata")
+    dpc = _tab("restraint_behaviour", "dpc_by_driver_behaviour")
+    bounds = _tab("drugs", "crss_bounds")
+    kvs = _tab("drugs", "killed_vs_survived")
+    bur = _tab("contributions", "burden_shapley")
+    ov = _tab("contributions", "fars_overlap_summary")
+    if strata is not None:
+        no = _row(strata, exposure="exceeded", outcome="fatal", stratum="no alcohol")
+        yes = _row(strata, exposure="exceeded", outcome="fatal", stratum="alcohol")
+        out["speeding"] = (
+            "Phase 2: exceeding the limit keeps a large adjusted association in crashes without alcohol "
+            + _fmt_ci(no, "rr", "rr_low", "rr_high")
+            + " and with alcohol "
+            + _fmt_ci(yes, "rr", "rr_low", "rr_high")
+            + " (speeding/strata); alcohol does not explain it away."
+        )
+    if dpc is not None:
+        a = _row(dpc, split="driver speeding (any)", stratum="driver not speeding")
+        b = _row(dpc, split="driver speeding (any)", stratum="driver speeding")
+        c = _row(dpc, split="driver BAC >= .08 (MI)", stratum="driver BAC >= .08")
+        out["belt"] = (
+            "Phase 2: within-vehicle belt RR is unchanged by whether the driver was speeding "
+            + _fmt_ci(b, "rr_belted_vs_unbelted", "rr_low", "rr_high")
+            + " or not "
+            + _fmt_ci(a, "rr_belted_vs_unbelted", "rr_low", "rr_high")
+            + ", and with a BAC >= .08 driver "
+            + _fmt_ci(c, "rr_belted_vs_unbelted", "rr_low", "rr_high")
+            + " (slightly more protective): belt protection is largely independent of the behaviour that led to the crash, so belt "
+            "and impaired-driving measures act on different stages and do not substitute for each other."
+        )
+    if bounds is not None:
+        sub = bounds[bounds["period"] == "2019-2024"]
+        out["drugs"] = (
+            f"Phase 2: crude fatal RR of police-reported drugs ranges {sub['rr'].min():.1f}-{sub['rr'].max():.0f} "
+            "depending only on the allocation of unknown status (drugs/crss_bounds); police co-record drugs with "
+            "alcohol far more than toxicology finds them together (drugs/co_occurrence)."
+        )
+        r = _row(
+            kvs,
+            sample="high-testing states",
+            specification="main effects",
+            term="any psychoactive drug detected",
+        )
+        if r is not None:
+            out["drugs"] += (
+                " In four high-testing states, drug detection is associated with a driver dying given a fatal "
+                f"crash (OR {r['odds_ratio']:.2f}, {r['odds_ratio_low']:.2f}-{r['odds_ratio_high']:.2f}), less than BAC >= .08."
+            )
+    if bur is not None:
+        b = bur[bur["player_set"] == "speeding_alcohol"].set_index("quantity")
+        if {"AF[speeding]", "AF[alcohol]", "AF[speeding+alcohol]"} <= set(b.index):
+            out["combined"] = (
+                f"Severity-pathway AFs: speeding {100 * b.loc['AF[speeding]', 'estimate']:.1f}%, alcohol "
+                f"{100 * b.loc['AF[alcohol]', 'estimate']:.1f}%, both {100 * b.loc['AF[speeding+alcohol]', 'estimate']:.1f}% "
+                f"(overlap {100 * b.loc['overlap = sum of singles - joint', 'estimate']:.1f} points); Shapley shares of the joint "
+                f"AF: speeding {100 * b.loc['Shapley share[speeding]', 'estimate']:.0f}%, alcohol "
+                f"{100 * b.loc['Shapley share[alcohol]', 'estimate']:.0f}% (contributions/burden_shapley)."
+            )
+    if ov is not None:
+        o = ov.set_index("factor")
+        out["overlap"] = (
+            f"FARS 2016-2024: the four factor-specific death counts sum to "
+            f"{o.loc['sum of the four factor counts', 'deaths']:,.0f} for "
+            f"{o.loc['deaths involving at least one factor (union)', 'deaths']:,.0f} deaths involving any of them "
+            f"(over-count x{o['overcount_ratio_sum_over_union'].iloc[0]:.2f})."
+        )
+    return out
+
+
 def build_ledger() -> pd.DataFrame:
     facts = measured_facts()
+    p2 = phase2_evidence()
     freq = _tab("descriptive", "frequency_vs_severity")
     sev = _tab("severity", "fatal_crude_vs_adjusted")
     pairs = _tab("interactions", "pairs_fatal")
@@ -295,6 +369,7 @@ def build_ledger() -> pd.DataFrame:
             "numeric_estimate_possible": "Only conditional/hypothetical (simulator + break-even).",
             "evidence_grade_target_association": "strong for exceeding the limit (large association); none detected for "
             "'too fast for conditions'; aggregate magnitude sensitive to ascertainment",
+            "phase2_evidence": p2.get("speeding", ""),
         },
         {
             "intervention": "Roadside alcohol testing / sobriety checkpoints",
@@ -330,6 +405,7 @@ def build_ledger() -> pd.DataFrame:
             "among the most robust in the data; its size depends on alcohol coding.",
             "evidence_grade_target_association": "strong in direction (large under every coding and robust to plausible "
             "differential ascertainment); magnitude coding-dependent",
+            "phase2_evidence": p2.get("combined", ""),
         },
         {
             "intervention": "Roadside drug testing",
@@ -356,6 +432,7 @@ def build_ledger() -> pd.DataFrame:
             "assumptions_required": "everything: prevalence of impairment, impairment-specific risk, test coverage, deterrence",
             "numeric_estimate_possible": "No defensible estimate from these data; simulator can only show what effect sizes would be required",
             "evidence_grade_target_association": "insufficient",
+            "phase2_evidence": p2.get("drugs", ""),
         },
         {
             "intervention": "Seat-belt (restraint) enforcement",
@@ -386,6 +463,27 @@ def build_ledger() -> pd.DataFrame:
             "numeric_estimate_possible": "Closest to defensible: protection given a crash is estimated within vehicles; "
             "behaviour change remains an assumption",
             "evidence_grade_target_association": "strong for protection given a fatal crash (matched design), with misreporting caveat",
+            "phase2_evidence": p2.get("belt", ""),
+        },
+        {
+            "intervention": "Combined speed and alcohol enforcement",
+            "target_factor": "Crashes with recorded speeding and/or alcohol (overlapping segments)",
+            "prevalence_all_crashes": "see speeding and alcohol rows",
+            "prevalence_fatal_crashes": "see speeding and alcohol rows",
+            "fars_deaths_per_year_in_segment": np.nan,
+            "adjusted_severity_rr": "see multifactor/margins (crash_exceeded_x_alcohol): the combination is super-additive "
+            "and sub-multiplicative at crash level; multiplicative for single-vehicle drivers",
+            "measurement_robustness": "inherits both factors' measurement problems",
+            "interactions": pairs_for("speeding x alcohol"),
+            "most_affected": "single-vehicle and night crashes (speeding/type_composition)",
+            "severity_pathway_af": p2.get("combined", "not available"),
+            "evidence_intervention_changes_factor": NO_INTERVENTION_DATA,
+            "assumptions_required": "separate effects of each programme on each behaviour; whether the same drivers are "
+            "affected by both (overlap); additivity of effects is NOT implied by the data",
+            "numeric_estimate_possible": "Only conditional: segment deaths overlap, so effects of separate programmes cannot "
+            "be added; the joint AF is smaller than the sum of single AFs",
+            "evidence_grade_target_association": "overlap and super-additivity are estimated; programme effects are not",
+            "phase2_evidence": p2.get("overlap", ""),
         },
         {
             "intervention": "Targeted enforcement in high-risk periods (weekend nights)",
@@ -426,6 +524,7 @@ def build_ledger() -> pd.DataFrame:
             "assumptions_required": "which behaviour the enforcement changes (alcohol, speeding) - model through those factors, not 'night'",
             "numeric_estimate_possible": "Only via the behaviour targeted (alcohol/speeding), conditional on assumptions",
             "evidence_grade_target_association": "time is a marker of risk composition rather than an independent target",
+            "phase2_evidence": "",
         },
         {
             "intervention": "Education / awareness campaigns",
@@ -443,6 +542,7 @@ def build_ledger() -> pd.DataFrame:
             "assumptions_required": "campaign reach, behavioural change, persistence",
             "numeric_estimate_possible": "No; data cannot distinguish campaign effects from any other change",
             "evidence_grade_target_association": "n/a",
+            "phase2_evidence": "",
         },
         {
             "intervention": "Pedestrian safety: lighting, speed management, vehicle front-end design",
@@ -463,6 +563,8 @@ def build_ledger() -> pd.DataFrame:
             "without changing exposure",
             "numeric_estimate_possible": "Conditional/hypothetical via the simulator's generic segment intervention",
             "evidence_grade_target_association": "strong (large, objective measures, consistent across adjustment)",
+            "phase2_evidence": "Phase 2: given a pedestrian is struck, the striking driver's recorded speeding and alcohol add "
+            "little once the posted limit and light are held fixed (multifactor/victims).",
         },
     ]
     return pd.DataFrame(rows)

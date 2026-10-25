@@ -1,0 +1,11 @@
+sample,specification,term,odds_ratio,odds_ratio_low,odds_ratio_high,p,n_drivers,n_killed,n_states,share_alcohol,share_drug
+high-testing states,main effects,BAC >= .08 (measured),2.16958,1.82206,2.58338,4.29624e-18,7845,4696,4,0.21963,0.43276
+high-testing states,main effects,any psychoactive drug detected,1.27571,1.13135,1.43848,7.11881e-05,7845,4696,4,0.21963,0.43276
+high-testing states,with alcohol x drug,BAC >= .08 (measured),2.74097,2.14845,3.4969,5.81127e-16,7845,4696,4,0.21963,0.43276
+high-testing states,with alcohol x drug,any psychoactive drug detected,1.37161,1.20386,1.56275,2.09895e-06,7845,4696,4,0.21963,0.43276
+high-testing states,with alcohol x drug,alcohol x drug (product term),0.646494,0.469788,0.889665,0.00742248,7845,4696,4,0.21963,0.43276
+all states,main effects,BAC >= .08 (measured),1.4028,1.35013,1.45753,2.98583e-67,164399,123991,51,0.272562,0.449036
+all states,main effects,any psychoactive drug detected,1.17044,1.13698,1.20488,2.05215e-26,164399,123991,51,0.272562,0.449036
+all states,with alcohol x drug,BAC >= .08 (measured),1.49994,1.42517,1.57863,2.05606e-54,164399,123991,51,0.272562,0.449036
+all states,with alcohol x drug,any psychoactive drug detected,1.20647,1.16739,1.24685,5.58996e-29,164399,123991,51,0.272562,0.449036
+all states,with alcohol x drug,alcohol x drug (product term),0.873273,0.815178,0.935508,0.000114353,164399,123991,51,0.272562,0.449036

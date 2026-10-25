@@ -1,0 +1,19 @@
+{
+ "table": "stages/identifiability.csv",
+ "description": "Which of the four crash stages the data can identify",
+ "population": "",
+ "unit": "stage",
+ "outcome": "",
+ "method": "Design argument",
+ "inputs": [],
+ "rows": 4,
+ "columns": [
+  "stage",
+  "identified",
+  "reason",
+  "what_is_reported"
+ ],
+ "module": "nhtsa_stats.analysis.stages",
+ "git_commit": "8fe8986",
+ "generated_utc": "2026-10-23T09:32:27Z"
+}

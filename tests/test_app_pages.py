@@ -79,3 +79,44 @@ def test_multi_vehicle_crash_types_get_the_multi_vehicle_domain():
     assert (
         page._domain(older, it.Exposure("light", ("dark_not_lighted",), ("daylight",), "")) is None
     )
+
+
+def _table_page(tmp_path, view, module):
+    pytest.importorskip("streamlit")
+    if not (config.TABLES_DIR / module).exists():
+        pytest.skip(f"outputs/tables/{module} not generated")
+    from streamlit.testing.v1 import AppTest
+
+    script = tmp_path / f"{view}.py"
+    script.write_text(
+        f"import sys\nsys.path.insert(0, {str(APP)!r})\n"
+        f"import common  # noqa: F401\nfrom views import {view}\n{view}.render()\n"
+    )
+    return AppTest.from_file(str(script), default_timeout=120)
+
+
+def test_contributions_page_renders(tmp_path):
+    at = _table_page(tmp_path, "contributions", "contributions").run()
+    assert not at.exception
+    assert any("single ranking" in e.label for e in at.expander)
+
+
+def test_multifactor_page_switches_analysis(tmp_path):
+    at = _table_page(tmp_path, "multifactor", "multifactor").run()
+    assert not at.exception
+    at.selectbox(key="mf_analysis").set_value("lpv_driver_drugs_known_4way").run()
+    assert not at.exception
+
+
+def test_case_page_withholds_unsupported_cases(tmp_path):
+    at = _table_page(tmp_path, "cases", "cases").run()
+    assert not at.exception
+    # A combination with too little support shows the refusal instead of a model probability.
+    at.selectbox(key="cs_speeding").set_value("exceeded_limit").run()
+    at.selectbox(key="cs_alcohol").set_value("yes").run()
+    at.selectbox(key="cs_unbelted").set_value("no").run()
+    at.selectbox(key="cs_night").set_value("night").run()
+    at.selectbox(key="cs_single_vehicle").set_value("no").run()
+    assert not at.exception
+    assert any("Insufficient support" in e.value for e in at.error)
+    assert any("What cannot be inferred" in i.value for i in at.info)

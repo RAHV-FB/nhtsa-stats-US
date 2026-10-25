@@ -1,0 +1,9 @@
+measure,population,or,or_low,or_high,n,interval
+any speeding,CRSS all crashes,1.89611,1.61414,2.22734,449187,95% CI (design-based)
+any speeding,CRSS non-fatal crashes,1.87191,1.59424,2.19794,439740,95% CI (design-based)
+any speeding,CRSS fatal crashes,1.40765,1.19784,1.65419,9447,95% CI (design-based)
+exceeded limit / racing,CRSS all crashes,4.2447,3.65139,4.93442,405661,95% CI (design-based)
+exceeded limit / racing,CRSS non-fatal crashes,4.05187,3.46331,4.74044,397501,95% CI (design-based)
+exceeded limit / racing,CRSS fatal crashes,1.70514,1.41963,2.04807,8160,95% CI (design-based)
+any speeding,FARS fatal crashes (census; alcohol by multiple imputation),2.08227,2.07244,2.09165,302394,range over 10 implicates
+exceeded limit / racing,FARS fatal crashes (census; alcohol by multiple imputation),2.31747,2.3057,2.32855,249108,range over 10 implicates

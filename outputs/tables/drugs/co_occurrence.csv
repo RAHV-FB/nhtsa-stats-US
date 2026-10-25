@@ -1,0 +1,5 @@
+measure,survival,n,share_alcohol,share_drug,share_both,share_drug_among_alcohol,share_drug_among_no_alcohol,share_alcohol_among_drug,odds_ratio,odds_ratio_low,odds_ratio_high
+toxicology: BAC >= .08 and any psychoactive drug,killed,123991,0.310458,0.475123,0.158399,0.510209,0.459326,0.333384,1.22617,1.19699,1.25607
+police report: alcohol and drugs both recorded,killed,113883,0.254349,0.205957,0.108945,0.42833,0.130104,0.52897,5.00969,4.85832,5.16578
+toxicology: BAC >= .08 and any psychoactive drug,survived,40408,0.156281,0.368986,0.0770887,0.49327,0.345965,0.20892,1.84025,1.74326,1.94263
+police report: alcohol and drugs both recorded,survived,161488,0.0845945,0.0724326,0.0325845,0.385184,0.0435306,0.449859,13.7657,13.1921,14.3643

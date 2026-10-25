@@ -1,0 +1,30 @@
+{
+ "table": "drugs/co_occurrence.csv",
+ "description": "Alcohol and drug co-occurrence among tested drivers and in police reports",
+ "population": "FARS drivers (PER_TYP 1) of in-transport vehicles in fatal crashes, 2016-2024",
+ "unit": "driver",
+ "outcome": "",
+ "method": "2x2 tables; Woolf CIs ignore clustering",
+ "inputs": [
+  "data/processed/fars_driver.parquet",
+  "data/processed/crss_crash.parquet"
+ ],
+ "rows": 4,
+ "columns": [
+  "measure",
+  "survival",
+  "n",
+  "share_alcohol",
+  "share_drug",
+  "share_both",
+  "share_drug_among_alcohol",
+  "share_drug_among_no_alcohol",
+  "share_alcohol_among_drug",
+  "odds_ratio",
+  "odds_ratio_low",
+  "odds_ratio_high"
+ ],
+ "module": "nhtsa_stats.analysis.drugs",
+ "git_commit": "8fe8986",
+ "generated_utc": "2026-10-23T09:19:26Z"
+}

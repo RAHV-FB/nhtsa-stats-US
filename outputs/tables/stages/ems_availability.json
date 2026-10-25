@@ -1,0 +1,23 @@
+{
+ "table": "stages/ems_availability.csv",
+ "description": "Availability of EMS arrival time and minutes from crash to EMS arrival, fatal crashes",
+ "population": "FARS fatal crashes 2016-2024",
+ "unit": "crash",
+ "outcome": "",
+ "method": "Clock-time differences modulo 24 h; unknown codes excluded",
+ "inputs": [
+  "FARS accident (raw NOT_*, ARR_*, HOSP_*)"
+ ],
+ "rows": 27,
+ "columns": [
+  "YEAR",
+  "road",
+  "fatal_crashes",
+  "share_arrival_time_known",
+  "median_minutes_crash_to_arrival",
+  "p90_minutes_crash_to_arrival"
+ ],
+ "module": "nhtsa_stats.analysis.stages",
+ "git_commit": "8fe8986",
+ "generated_utc": "2026-10-23T09:32:27Z"
+}

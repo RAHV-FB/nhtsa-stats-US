@@ -1,0 +1,36 @@
+{
+ "table": "multifactor/single_factor.csv",
+ "description": "RR and RD of each factor within each combination of the other factors",
+ "population": "CRSS 2016-2024; unit and population per analysis (see multifactor/analyses)",
+ "unit": "contrast",
+ "outcome": "per analysis",
+ "method": "Survey logistic model with all factor main effects, a product for every combination of non-reference factor levels (unknown included), and categorical covariates; standardised margins for all 2^k combinations (g-computation over the analysis population); Taylor linearisation on 25 strata / 67 PSUs (t, 42 df); cells with < 30 units or < 10 events withheld; Holm across the registered family per scale",
+ "inputs": [
+  "data/processed/crss_crash.parquet",
+  "data/processed/crss_driver.parquet",
+  "data/processed/crss_person.parquet",
+  "data/processed/crss_person_link.parquet"
+ ],
+ "rows": 108,
+ "columns": [
+  "analysis",
+  "level",
+  "registered",
+  "factor",
+  "other_factors",
+  "key_reference",
+  "key_exposed",
+  "rr",
+  "rr_low",
+  "rr_high",
+  "rr_p",
+  "rd",
+  "rd_low",
+  "rd_high",
+  "rd_p",
+  "flag"
+ ],
+ "module": "nhtsa_stats.analysis.multifactor",
+ "git_commit": "8fe8986",
+ "generated_utc": "2026-10-23T09:23:50Z"
+}

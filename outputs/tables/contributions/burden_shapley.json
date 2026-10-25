@@ -1,0 +1,27 @@
+{
+ "table": "contributions/burden_shapley.csv",
+ "description": "Severity-pathway attributable fractions: single, joint, overlap and exact Shapley allocation of the joint AF",
+ "population": "CRSS police-reported crashes 2016-2024 with known imputed severity",
+ "unit": "crash",
+ "outcome": "fatal",
+ "method": "g-computation from one survey logistic model (environment + speeding type + alcohol + police drugs + mix); joint Taylor linearisation; FARS-scaled deaths = AF x mean FARS deaths 2022-2024",
+ "inputs": [
+  "data/processed/crss_crash.parquet",
+  "data/processed/fars_driver.parquet",
+  "data/processed/fars_person.parquet"
+ ],
+ "rows": 24,
+ "columns": [
+  "player_set",
+  "quantity",
+  "kind",
+  "estimate",
+  "estimate_low",
+  "estimate_high",
+  "fars_deaths_per_year"
+ ],
+ "module": "nhtsa_stats.analysis.contributions",
+ "git_commit": "8fe8986",
+ "generated_utc": "2026-10-23T09:32:19Z",
+ "fars_deaths_per_year_2022_2024": 41000.0
+}
