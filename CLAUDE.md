@@ -4,19 +4,22 @@ Guidance for Claude Code sessions working in this repository.
 
 ## Subagent and model use (rule)
 
-Delegate to subagents when it saves time or gives an independent read, and pick the model
-by how hard the task is. Pass the tier as the Agent tool's `model` parameter:
+Save usage: prefer the cheapest model that can do the job. Delegate to subagents when it
+saves time or gives an independent read, and pass the tier as the Agent tool's `model`
+parameter:
 
 | Task | Model tier |
 |---|---|
 | Quick writing (short docs, commit/PR text, captions) and simple checks (does a file or column exist, did a command pass, are the numbers in a report the same as in its table) | `haiku` |
-| Simple coding (small, local edits, tests for existing behaviour, lint/format fixes) and routine checking (re-running and reading test or ruff output, comparing tables against reports) | `sonnet` |
-| Complex coding (new analysis modules, statistical or survey-design code, pipeline changes that touch several modules) and the final review before a push or PR | `opus` |
+| All coding, simple or complex (edits, new analysis modules, statistical or survey-design code, multi-module pipeline changes, tests, lint fixes) and routine checking (reading test or ruff output, comparing tables against reports) | `sonnet` |
+| Final review only: one fresh-context review before a push or PR | `opus` |
 
+- Default to `haiku`; move up to `sonnet` only when the task needs code or careful reasoning.
+- Use `opus` for nothing except the final review, and run it once per push, not per change.
 - Do work yourself when it is a few tool calls; delegate only when it pays for itself.
 - Run independent subagents in parallel (one message, several Agent calls).
-- Give each subagent a self-contained brief: the goal, the files, and what has already been ruled out.
-- The final review always gets a fresh-context `opus` agent that sees the code, not your conclusions.
+- Give each subagent a short, self-contained brief: the goal, the files, and what has already been ruled out.
+- The final `opus` reviewer sees the code, not your conclusions.
 
 ## Project conventions
 

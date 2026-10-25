@@ -180,12 +180,12 @@ presents them as measured effects. Details: `docs/limitations.md`,
 
 ## Working on this project with Claude Code
 
-`CLAUDE.md` holds the rules for Claude Code sessions in this repository. Subagents are used
-where they pay off, with the model matched to the task:
+`CLAUDE.md` holds the rules for Claude Code sessions in this repository. To save usage,
+subagents use the cheapest model that can do the job:
 
-- `haiku`: quick writing and simple checks.
-- `sonnet`: simple coding and routine checking.
-- `opus`: complex coding and the final review before a push.
+- `haiku`: quick writing and simple checks (the default).
+- `sonnet`: all coding, simple or complex, and routine checking.
+- `opus`: only the final review before a push.
 
 `CLAUDE.md` also lists the data and reporting conventions and the checks to run before a push.
 
