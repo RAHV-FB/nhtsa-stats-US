@@ -12,7 +12,7 @@ import shutil
 import sys
 from pathlib import Path
 
-REPO = Path(__file__).resolve().parents[3]
+REPO = Path(__file__).resolve().parents[2]
 SITE = REPO / "website"
 SOURCES = {
     "reports/findings.json": "findings.json",
