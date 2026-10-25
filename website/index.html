@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0c2330">
+  <meta name="description" content="What makes US road crashes deadly? Explore a reproducible analysis of NHTSA FARS and CRSS 2016–2024: crash severity, speeding, alcohol, drugs, restraints, interactions and policy limits.">
+  <meta property="og:title" content="Road Evidence — What makes a crash deadly?">
+  <meta property="og:description" content="Explore the evidence behind US road fatalities, with interactive data, uncertainty, and full research reports.">
+  <meta property="og:type" content="website">
+  <title>Road Evidence — US crash severity research, 2016–2024</title>
+  <link rel="stylesheet" href="assets/site.css">
+  <script src="assets/site.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="header" id="top">
+    <div class="nav-shell container">
+      <a class="brand" href="#top" aria-label="Road Evidence home">
+        <span class="brand-icon" aria-hidden="true"><span></span><span></span></span>
+        <span>ROAD<span class="brand-light">/</span>EVIDENCE</span>
+      </a>
+      <nav class="nav-links" aria-label="Main navigation" id="main-nav">
+        <a href="#findings">Findings</a><a href="#explorer">Data explorer</a>
+        <a href="#factors">Factor analysis</a><a href="#policy">Policy</a>
+        <a href="#library">Research library</a>
+      </nav>
+      <div class="nav-actions">
+        <a class="nav-source" href="https://github.com/RAHV-FB/nhtsa-stats-US" target="_blank" rel="noopener noreferrer">Source code <span aria-hidden="true">↗</span></a>
+        <button class="menu-button" id="menu-button" aria-label="Open navigation" aria-controls="main-nav" aria-expanded="false"><span></span><span></span><span></span></button>
+      </div>
+    </div>
+  </header>
+  <main id="main">
+    <section class="hero">
+      <div class="container hero-grid">
+        <div class="hero-content">
+          <div class="eyebrow eyebrow-light"><span class="signal-dot"></span> Independent research <span class="eyebrow-divider">/</span> United States, 2016–2024</div>
+          <h1>What makes a road crash <em>deadly?</em></h1>
+          <p class="hero-intro">A closer look at the evidence behind American road deaths. Not just which factors are recorded in fatal crashes, but which associations survive scrutiny—and where the data cannot give an answer.</p>
+          <div class="hero-actions">
+            <a class="btn btn-mint" href="#findings">Explore the findings <span aria-hidden="true">↗</span></a>
+            <a class="link-on-dark" href="#methodology">How the research works <span aria-hidden="true">→</span></a>
+          </div>
+          <div class="hero-qualifier"><span class="small-rule"></span> FARS census + CRSS survey · Associations are not causal effects</div>
+        </div>
+        <div class="hero-viz" aria-label="Comparison of crude and fully adjusted crash fatality risk ratios for exceeding the speed limit">
+          <div class="hero-viz-top"><span>THE ADJUSTMENT TEST</span><span class="mono">01 / 03</span></div>
+          <h2>Does speeding remain associated with fatal crashes after accounting for other factors?</h2>
+          <div class="risk-plot">
+            <div class="risk-heading"><span>Fatal risk ratio</span><span>vs. no recorded speeding</span></div>
+            <div class="risk-bar-item"><div class="risk-bar-header"><span>Before adjustment</span><b>10.0×</b></div><div class="risk-track"><div class="risk-fill full" style="width:100%"></div></div></div>
+            <div class="risk-bar-item"><div class="risk-bar-header"><span>After full adjustment</span><b>4.9×</b></div><div class="risk-track"><div class="risk-fill adjusted" style="width:48.7%"></div></div></div>
+          </div>
+          <div class="hero-viz-foot"><strong>69% of the original log association remains.</strong><span>Police-reported exceedance / racing. CRSS 2016–2024. Fully adjusted RR 4.88 (95% CI 4.12–5.79). Not a causal estimate.</span></div>
+        </div>
+      </div>
+      <div class="hero-stripe" aria-hidden="true"></div>
+    </section>
+    <section class="metrics-band" aria-label="Study at a glance">
+      <div class="container metrics-grid">
+        <div class="metric"><div class="metric-value">353,706</div><div class="metric-caption">Road deaths recorded</div><div class="metric-detail">FARS, 2016–2024</div></div>
+        <div class="metric"><div class="metric-value">325,922</div><div class="metric-caption">Fatal crashes</div><div class="metric-detail">Complete FARS census</div></div>
+        <div class="metric"><div class="metric-value">468,993</div><div class="metric-caption">Sampled police-reported crashes</div><div class="metric-detail">CRSS, survey-weighted analysis</div></div>
+        <div class="metric"><div class="metric-value">36 <span>archives</span></div><div class="metric-caption">Original data sources</div><div class="metric-detail">Nine years of NHTSA records</div></div>
+      </div>
+    </section>
+    <section class="section intro-section" id="findings">
+      <div class="container">
+        <div class="section-kicker">01 / THE EVIDENCE</div>
+        <div class="section-title-row">
+          <div><h2>The patterns are less simple <span class="serif-accent">than the headlines.</span></h2></div>
+          <p>Counting a behaviour in a fatal crash is not the same as showing that it caused the death. These findings separate raw frequency, conditional severity, confounding, and evidence quality.</p>
+        </div>
+        <div class="feature-grid">
+          <article class="feature-card feature-primary">
+            <div class="feature-number">01 <span>—</span> CRASH SEVERITY</div>
+            <h3>Being common in crashes does not mean being common in <i>fatal</i> crashes.</h3>
+            <p>Pedestrian-involved crashes make up roughly 1.2% of reported crashes but 18.6% of fatal ones. Compare the frequency of a circumstance with its over-representation among fatalities.</p>
+            <div class="feature-stat"><b>15.6×</b><span>Pedestrian over-representation<br>95% CI 13.2–18.5</span></div>
+            <a href="#explorer" class="arrow-link">Examine the data <span aria-hidden="true">↗</span></a>
+          </article>
+          <article class="feature-card">
+            <div class="feature-number">02 <span>—</span> CONFOUNDING</div>
+            <h3>Speeding is not explained away by alcohol.</h3>
+            <p>Alcohol statistically accounts for about 9% of the crude log association of exceeding the limit with fatal crash severity. Most remains after full adjustment.</p>
+            <div class="feature-stat compact"><b>4.88×</b><span>Fully adjusted fatal risk ratio<br>95% CI 4.12–5.79</span></div>
+            <a href="#factors" class="arrow-link">Unpack the finding <span aria-hidden="true">↗</span></a>
+          </article>
+          <article class="feature-card">
+            <div class="feature-number">03 <span>—</span> DATA QUALITY</div>
+            <h3>Drug involvement cannot be reliably ranked.</h3>
+            <p>Testing is far more common among drivers who died. Changing assumptions for unknown drug status produces radically different apparent fatality associations.</p>
+            <div class="feature-stat compact"><b>62% <small>vs</small> 19%</b><span>Drug-tested killed vs surviving drivers<br>FARS fatal crashes</span></div>
+            <a href="#factors" class="arrow-link">See the measurement problem <span aria-hidden="true">↗</span></a>
+          </article>
+        </div>
+        <div class="finding-toolbar">
+          <div><h3>All ten primary findings</h3><p>Directly from the published findings registry. Open any finding for estimates, robustness tests, denominators and limitations.</p></div>
+          <div class="finding-filters">
+            <label class="sr-only" for="finding-search">Search findings</label><input id="finding-search" class="input" type="search" placeholder="Search findings…" autocomplete="off">
+            <label class="sr-only" for="finding-kind">Filter estimate type</label><select id="finding-kind" class="input"><option value="">All estimate types</option></select>
+          </div>
+        </div>
+        <div id="findings-list" class="findings-list"><p class="loading-line">Loading the verified findings…</p></div>
+      </div>
+    </section>
+    <section class="section section-tinted" id="explorer">
+      <div class="container">
+        <div class="section-kicker">02 / INTERACTIVE DATA</div>
+        <div class="section-title-row">
+          <div><h2>Explore the data, <span class="serif-accent">not just the conclusions.</span></h2></div>
+          <p>Compare observed distributions, survey estimates and adjusted associations. The charts and source tables below are generated from the committed research outputs.</p>
+        </div>
+        <div class="explorer-shell">
+          <div class="explorer-controls">
+            <div class="control-label">CHOOSE AN ANALYSIS</div>
+            <div class="dataset-options" id="dataset-options" role="group" aria-label="Analysis dataset">
+              <button type="button" data-dataset="frequency" class="dataset-option active" aria-pressed="true"><span class="option-index">01</span><span>Frequency vs fatal severity</span></button>
+              <button type="button" data-dataset="severity" class="dataset-option" aria-pressed="false"><span class="option-index">02</span><span>Crude vs adjusted risk</span></button>
+              <button type="button" data-dataset="attribution" class="dataset-option" aria-pressed="false"><span class="option-index">03</span><span>Factor contributions</span></button>
+              <button type="button" data-dataset="trends" class="dataset-option" aria-pressed="false"><span class="option-index">04</span><span>Fatal crash trends</span></button>
+            </div>
+            <div class="explorer-side-note"><span class="note-icon">i</span><p>CRSS estimates incorporate the complex survey design. Error intervals and suppressions matter; missing values are not zero.</p></div>
+          </div>
+          <div class="explorer-main">
+            <div class="explorer-heading"><div><div class="eyebrow">DATA EXPLORER / <span id="dataset-tag">01</span></div><h3 id="dataset-title">Frequency versus severity</h3><p id="dataset-subtitle">Loading research table…</p></div><a id="dataset-source" class="text-link" href="https://github.com/RAHV-FB/nhtsa-stats-US/tree/main/outputs/tables" target="_blank" rel="noopener noreferrer">View source table ↗</a></div>
+            <div class="chart-filter-row"><label for="explorer-search">Filter categories</label><input class="input" type="search" id="explorer-search" placeholder="Search rows…"><label for="explorer-sort">Order by</label><select class="input" id="explorer-sort"><option value="desc">Highest first</option><option value="asc">Lowest first</option></select></div>
+            <div id="explorer-chart" class="bar-chart" aria-live="polite"><p class="loading-line">Loading data…</p></div>
+            <div class="chart-caption" id="chart-caption"></div>
+            <details class="table-details"><summary>Show the underlying data table <span aria-hidden="true">↗</span></summary><div class="table-scroller"><table id="explorer-table"><caption class="sr-only">Underlying source data</caption><thead></thead><tbody></tbody></table></div></details>
+          </div>
+        </div>
+      </div>
+    </section>
+    <section class="section" id="factors">
+      <div class="container">
+        <div class="section-kicker">03 / MULTIPLE FACTORS</div>
+        <div class="section-title-row">
+          <div><h2>One death can appear in <span class="serif-accent">several categories.</span></h2></div>
+          <p>Official factor counts overlap. They cannot be added into a breakdown of “causes”, and statistical attribution changes depending on the question being asked.</p>
+        </div>
+        <div class="overlap-layout">
+          <div class="overlap-explainer">
+            <div class="overlap-figures"><div><b>109%</b><span>Sum of four factor-specific death counts</span></div><div><b>65%</b><span>Deaths involving at least one listed factor</span></div></div>
+            <p>Across 2016–2024, the four counts refer to speeding, BAC ≥ 0.08, drug-positive drivers and unbelted occupants. The same death can appear more than once. Drug-positive counts are lower bounds given missing tests.</p>
+            <div class="overlap-bar" role="img" aria-label="The factor-specific counts sum to 109 percent of deaths, but the union is only 65 percent"><span></span><span></span></div>
+            <div class="overlap-legend"><span><i class="legend-box dark"></i>Any of the four: 65%</span><span><i class="legend-box pale"></i>Additional duplicated counts: 44 percentage points</span></div>
+          </div>
+          <div class="overlap-data"><div class="overlap-title"><h3>Deaths counted under each factor</h3><span>FARS, 2016–2024</span></div><div id="overlap-chart" class="factor-chart"></div><p class="small-print">Observed counts except BAC ≥ 0.08, which uses multiple imputation; drug-positive count is a lower bound. A factor being recorded does not establish cause.</p></div>
+        </div>
+        <div class="factor-explain">
+          <div class="factor-header"><h3>Investigate each factor</h3><p>Choose a topic to see what survives adjustment, what cannot be identified, and where the full research is documented.</p></div>
+          <div class="factor-tablist" role="tablist" aria-label="Factor investigations" id="factor-tabs"><button class="factor-tab active" role="tab" aria-selected="true" data-factor="speed">Speeding</button><button class="factor-tab" role="tab" aria-selected="false" data-factor="alcohol">Alcohol</button><button class="factor-tab" role="tab" aria-selected="false" data-factor="drugs">Drugs</button><button class="factor-tab" role="tab" aria-selected="false" data-factor="belts">Seat belts</button></div>
+          <div class="factor-panel" id="factor-panel" role="tabpanel" aria-live="polite"></div>
+        </div>
+      </div>
+    </section>
+    <section class="section section-dark" id="policy">
+      <div class="container">
+        <div class="section-kicker section-kicker-dark">04 / POLICY LIMITS</div>
+        <div class="section-title-row"><div><h2>What would an intervention <span class="serif-accent">have to achieve?</span></h2></div><p>These data do not measure speed-camera programmes, roadside checks or other enforcement interventions. We can still calculate transparent break-even requirements without inventing treatment effects.</p></div>
+        <div class="policy-layout">
+          <div class="policy-calculator">
+            <div class="calc-label">HYPOTHETICAL TARGET CALCULATOR</div>
+            <h3>Choose a national reduction target.</h3>
+            <label class="slider-label" for="policy-target">Reduce total annual road deaths by <output id="policy-target-label">5%</output></label>
+            <input type="range" id="policy-target" min="1" max="10" step="1" value="5">
+            <div class="range-ends"><span>1%</span><span>10%</span></div>
+            <label class="calc-field-label" for="policy-factor">Target population</label>
+            <select id="policy-factor" class="input input-dark"><option value="alcohol">Crashes with a BAC ≥ 0.08 driver</option><option value="speeding">Any recorded speeding-related crash</option><option value="exceeded">Exceeded speed limit / racing</option><option value="unbelted">Unbelted occupant deaths</option><option value="drugs">Crashes with a drug-positive driver*</option></select>
+            <div class="calculation-result"><div class="calculation-value" id="policy-percent">16.3%</div><div class="calculation-description">of deaths in the selected segment would need to be prevented</div></div>
+            <div id="policy-explainer" class="calculation-detail"></div>
+          </div>
+          <div class="policy-interpretation"><div class="policy-stamp">WHAT THIS DOES <span>↘</span></div><h3>Arithmetic, not a prediction.</h3><p>The calculator divides the desired national reduction by the observed deaths in a targeted segment. It does not assume how many drivers change behaviour or how effective enforcement is.</p><ul><li>Target segments overlap; adding them double-counts deaths.</li><li>No exposure, intervention placement or enforcement cost data exist in the archives.</li><li>Risk ratios conditional on crashes cannot be treated as causal effects.</li><li>Drug-positive counts understate involvement where testing is missing.</li></ul><a class="link-on-dark" href="#library" data-report="policy_analysis">Read the complete policy analysis <span aria-hidden="true">↗</span></a></div>
+        </div>
+      </div>
+    </section>
+    <section class="section" id="library">
+      <div class="container">
+        <div class="section-kicker">05 / THE COMPLETE RESEARCH</div>
+        <div class="section-title-row"><div><h2>Every result should be <span class="serif-accent">inspectable.</span></h2></div><p>Read the complete, generated reports—not short promotional summaries. Tables, intervals, methods and important limitations remain visible alongside the interpretations.</p></div>
+        <div class="library-layout">
+          <aside class="library-aside"><div class="library-label">REPORT LIBRARY</div><div id="report-list" class="report-list"><p class="loading-line">Loading reports…</p></div><div class="library-source-note">Reports are produced from committed analysis tables by the repository’s reporting pipeline.</div></aside>
+          <article class="report-article" id="report-article"><div class="report-empty">Select a research report to read the full analysis.</div></article>
+        </div>
+      </div>
+    </section>
+    <section class="section section-tinted" id="methodology">
+      <div class="container">
+        <div class="section-kicker">06 / METHODS & TRANSPARENCY</div>
+        <div class="section-title-row"><div><h2>Built to be <span class="serif-accent">challenged.</span></h2></div><p>The project combines a census of fatal crashes with a probability sample of police-reported crashes. Its key limitations shape what the findings actually mean.</p></div>
+        <div class="method-grid">
+          <div class="method-card"><div class="method-no">01</div><h3>Two different data systems</h3><p>FARS counts fatal crashes; CRSS samples police-reported crashes across severities. Survey-weighted denominators and design-based confidence intervals are essential.</p></div>
+          <div class="method-card"><div class="method-no">02</div><h3>Conditional on a reported crash</h3><p>No trip or distance-exposure data are available. A fatality risk ratio conditional on a crash does not tell us the probability of crashing per trip or kilometre.</p></div>
+          <div class="method-card"><div class="method-no">03</div><h3>Association, not causation</h3><p>Crash configuration, road environment, reporting differences and missingness can alter an association. Adjusted results are not intervention effect estimates.</p></div>
+          <div class="method-card"><div class="method-no">04</div><h3>Reproducible and qualified</h3><p>Source archives, validation checks, generated tables, report templates and tests are held in the public repository. Estimates distinguish observed, estimated, adjusted, predicted and hypothetical results.</p></div>
+        </div>
+        <div class="method-footer"><span>Explore the full documentation, source data lineage, validation reports and code.</span><a class="btn btn-dark" href="https://github.com/RAHV-FB/nhtsa-stats-US/tree/main/docs" target="_blank" rel="noopener noreferrer">Research documentation <span aria-hidden="true">↗</span></a></div>
+      </div>
+    </section>
+  </main>
+  <footer class="footer"><div class="container footer-main"><div><a class="brand footer-brand" href="#top"><span class="brand-icon" aria-hidden="true"><span></span><span></span></span><span>ROAD<span class="brand-light">/</span>EVIDENCE</span></a><p>Independent analysis of US crash records. Data from NHTSA FARS and CRSS, 2016–2024. Not affiliated with or endorsed by NHTSA.</p></div><div class="footer-links"><a href="#findings">Findings</a><a href="#explorer">Explore data</a><a href="#library">Reports</a><a href="#methodology">Methodology</a><a href="https://github.com/RAHV-FB/nhtsa-stats-US" target="_blank" rel="noopener noreferrer">GitHub ↗</a></div></div><div class="container footer-bottom"><span>© 2026 Road Evidence · Research and code available under the repository’s MIT licence.</span><span>Evidence first. Uncertainty visible.</span></div></footer>
+  <noscript><div class="noscript">JavaScript is needed for the interactive charts and full-text research library. The repository contains all source reports and data tables.</div></noscript>
+</body>
+</html>
