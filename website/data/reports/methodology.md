@@ -251,8 +251,8 @@ did not speed". FARS drug-test status and class positivity follow the audit reci
 2018+ `drugs` table; 3-digit codes 2016–2021, 4-digit codes 2022–2024; caffeine, nicotine,
 cotinine, non-psychoactive and unspecified "other" results never count as psychoactive
 positives; a person with only "other" results is indeterminate). Linkage and coding are tested
-in `tests/test_drivers.py` (synthetic and real-data checks, including reproduction of the audit
-test rates).
+in `tests/test_driver_linkage.py` (synthetic frames) and `tests/test_drivers.py` (real data,
+including reproduction of the audit test rates).
 
 ### 12.2 Lattices for speeding and alcohol (`analysis/speeding.py`)
 
