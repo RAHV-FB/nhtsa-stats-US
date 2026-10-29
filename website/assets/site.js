@@ -20,7 +20,7 @@ const pretty=s=>{s=String(s??"").replaceAll("_"," ");return s.charAt(0).toUpperC
 const factorText=(f,label)=>FACTOR_TEXT[f]||label||pretty(f), levelText=l=>LEVEL_TEXT[l]||pretty(l);
 const num=s=>s===""||s==null?NaN:+s;
 const QUERY={
- frequency:{src:"descriptive/frequency_vs_severity.csv",heading:"Frequency versus fatal severity",tag:"01",description:"The share of fatal crashes divided by the share of police-reported crashes. Higher ratios mean over-representation, not causation.",caption:"FARS census numerator and CRSS survey-weighted denominator. Uncertainty is reported in the source table.",ratio:true,value:r=>+r.overrep_ratio,lo:r=>num(r.overrep_low),hi:r=>num(r.overrep_high),name:r=>factorText(r.factor,r.label)+" · "+levelText(r.level),detail:r=>"Fatal crash share: "+percent(+r.share_fatal_fars)+"; all crashes: "+percent(+r.share_all_crashes)+"; 95% CI "+ratio(+r.overrep_low)+"–"+ratio(+r.overrep_high),display:v=>ratio(v)+"×",eligible:r=>r.overrep_ratio!==""},
+ frequency:{src:"descriptive/frequency_vs_severity.csv",heading:"Frequency versus fatal severity",tag:"01",description:"The share of fatal crashes divided by the share of police-reported crashes. Higher ratios mean over-representation, not causation.",caption:"FARS census numerator and CRSS survey-weighted denominator. Uncertainty is reported in the source table. Unknown or other levels are excluded.",ratio:true,value:r=>+r.overrep_ratio,lo:r=>num(r.overrep_low),hi:r=>num(r.overrep_high),name:r=>factorText(r.factor,r.label)+" · "+levelText(r.level),detail:r=>"Fatal crash share: "+percent(+r.share_fatal_fars)+"; all crashes: "+percent(+r.share_all_crashes)+"; 95% CI "+ratio(+r.overrep_low)+"–"+ratio(+r.overrep_high),display:v=>ratio(v)+"×",eligible:r=>r.overrep_ratio!==""&&!["unknown","other"].includes(r.level)},
  severity:{src:"severity/fatal_crude_vs_adjusted.csv",heading:"Crude versus adjusted severity",tag:"02",description:"Model A fatal-crash risk ratios after accounting for recorded pre-crash circumstances. Reference categories have ratio 1 and are excluded from the bar chart.",caption:"CRSS, 2016–2024. The table includes crude, model A and model B estimates, with confidence intervals. Adjusted estimates are not causal effects. Unknown or other levels, years and unstable estimates are excluded.",ratio:true,value:r=>+r.A_adj_rr,lo:r=>num(r.A_adj_rr_low),hi:r=>num(r.A_adj_rr_high),name:r=>factorText(r.factor)+" · "+levelText(r.level),detail:r=>"Crude RR "+ratio(+r.crude_rr)+"; adjusted RR "+ratio(+r.A_adj_rr)+"; 95% CI "+ratio(+r.A_adj_rr_low)+"–"+ratio(+r.A_adj_rr_high),display:v=>ratio(v)+"×",eligible:r=>r.A_adj_rr!==""&&+r.A_adj_rr!==1&&!["unknown","other"].includes(r.level)&&r.factor!=="YEAR"&&!r.flag&&!r.adj_flag},
  attribution:{src:"contributions/ranking.csv",heading:"Ranking depends on the question",tag:"03",description:"Adjusted crash-level associations for the factors that can be ranked. Drug status and occupant-level restraint effects cannot be ranked on the same basis.",caption:"Phase 2 standardised adjusted risk ratios, not causal fractions. The underlying table includes other possible rankings and unrankable factors.",ratio:true,value:r=>+r.adjusted_rr,name:r=>({"exceeded":"Exceeded speed limit / racing","speeding_other":"Other speeding","alcohol":"Alcohol involved"}[r.factor]||pretty(r.factor)),detail:r=>r.note||"Model-based association",display:v=>ratio(v)+"×",eligible:r=>r.rankable==="True"},
  trends:{src:"descriptive/fars_annual.csv",heading:"Annual US road deaths",tag:"04",description:"The fatal-crash census counts deaths each year. They are not rates per trip or per mile.",caption:"FARS observed death counts, 2016–2024. Interpret changes separately from exposure and changes in nonfatal crash reporting.",value:r=>+r.deaths,name:r=>r.YEAR,detail:r=>"Fatal crashes: "+integer(+r.fatal_crashes)+"; deaths: "+integer(+r.deaths),display:v=>integer(v),eligible:r=>true}
@@ -157,7 +157,7 @@ function inline(s){
  const tokens=[];
  let escaped=esc(s.replace(/`([^`\n]+)`/g,(_,value)=>"ZZCOD"+(tokens.push("<code>"+esc(value)+"</code>")-1)+"ZZ"));
  escaped=escaped.replace(/\[([^\]]+)\]\(([^)\s]+)\)/g,(_,name,url)=>{const u=safeLink(url.replace(/&amp;/g,"&"));return u?'<a href="'+esc(u)+'"'+(u.startsWith("http")?' target="_blank" rel="noopener noreferrer"':"")+'>'+name+"</a>":name;});
- escaped=escaped.replace(/\*\*([^*]+)\*\*/g,"<strong>$1</strong>").replace(/(?<!\*)\*([^*\n]+)\*(?!\*)/g,"<em>$1</em>").replace(/(?<!\w)_([^_\n]+)_(?!\w)/g,"<em>$1</em>");
+ escaped=escaped.replace(/\*\*(.+?)\*\*/g,"<strong>$1</strong>").replace(/(?<!\*)\*([^*\n]+)\*(?!\*)/g,"<em>$1</em>").replace(/(?<!\w)_([^_\n]+)_(?!\w)/g,"<em>$1</em>");
  return escaped.replace(/ZZCOD(\d+)ZZ/g,(_,id)=>tokens[+id]);
 }
 function markdown(input){
@@ -170,6 +170,10 @@ function markdown(input){
   if(t.startsWith("<!--")){while(i<lines.length&&!lines[i].includes("-->"))i++;i++;continue;}
   if(t.startsWith("\x60\x60\x60")){
    const code=[];i++;while(i<lines.length&&!lines[i].trim().startsWith("\x60\x60\x60"))code.push(lines[i++]);i++;
+   result.push("<pre><code>"+esc(code.join("\n"))+"</code></pre>");continue;
+  }
+  if(/^ {4}/.test(lines[i])&&(!i||!lines[i-1].trim())){
+   const code=[];while(i<lines.length&&(/^ {4}/.test(lines[i])||(!lines[i].trim()&&i+1<lines.length&&/^ {4}/.test(lines[i+1]))))code.push(lines[i++].slice(4));
    result.push("<pre><code>"+esc(code.join("\n"))+"</code></pre>");continue;
   }
   const heading=/^(#{1,6})\s+(.+)$/.exec(t);

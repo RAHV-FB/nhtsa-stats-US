@@ -96,14 +96,12 @@ const claims = [
   {text: "4.88", file: "index.html", csv: "speeding/key_models.csv", row: "model=all_blocks", col: "rr", value: () => Number(model("all_blocks").rr).toFixed(2)},
   {text: "4.12–5.79", file: "index.html", csv: "speeding/key_models.csv", row: "model=all_blocks", col: "rr_low–rr_high", value: () => Number(model("all_blocks").rr_low).toFixed(2) + "–" + Number(model("all_blocks").rr_high).toFixed(2)},
   {text: "5.2 (4.3–6.3)", file: "index.html", csv: "speeding/key_models.csv", row: "model=environment_and_other_behaviour", col: "rr (rr_low–rr_high)", value: () => {const m = model("environment_and_other_behaviour"); return Number(m.rr).toFixed(1) + " (" + Number(m.rr_low).toFixed(1) + "–" + Number(m.rr_high).toFixed(1) + ")";}},
-  {text: "5.2 (4.3–6.3)", file: "assets/site.js", csv: "speeding/key_models.csv", row: "model=environment_and_other_behaviour", col: "rr (rr_low–rr_high)", value: () => {const m = model("environment_and_other_behaviour"); return Number(m.rr).toFixed(1) + " (" + Number(m.rr_low).toFixed(1) + "–" + Number(m.rr_high).toFixed(1) + ")";}},
   {text: "69%", file: "index.html", csv: "speeding/key_models.csv", row: "model=all_blocks", col: "share_logrr_retained", value: () => pct(Number(model("all_blocks").share_logrr_retained))},
   {text: "68.8%", file: "index.html", csv: "speeding/key_models.csv", row: "all_blocks vs crude", col: "ln(rr)/ln(crude rr)", value: () => pct(Math.log(Number(model("all_blocks").rr)) / Math.log(Number(model("crude").rr)), 1)},
   {text: "7.0", file: "assets/site.js", csv: "speeding/key_models.csv", row: "model=other_behaviour_only", col: "rr", value: () => Number(model("other_behaviour_only").rr).toFixed(1)},
   {text: "about 9%", file: "index.html", csv: "speeding/shapley.csv", row: "exceeded/fatal/all_blocks/alcohol", col: "shapley_share_of_crude", value: () => "about " + pct(Number(shapley("exceeded", "alcohol").shapley_share_of_crude))},
   {text: "around 9%", file: "assets/site.js", csv: "speeding/shapley.csv", row: "exceeded/fatal/all_blocks/alcohol", col: "shapley_share_of_crude", value: () => "around " + pct(Number(shapley("exceeded", "alcohol").shapley_share_of_crude))},
   {text: "4–16%", file: "index.html", csv: "speeding/shapley.csv", row: "exceeded/fatal/all_blocks/alcohol", col: "min_share_any_order–max_share_any_order", value: () => {const r = shapley("exceeded", "alcohol"); return (Number(r.min_share_any_order) * 100).toFixed(0) + "–" + pct(Number(r.max_share_any_order));}},
-  {text: "4–16%", file: "assets/site.js", csv: "speeding/shapley.csv", row: "exceeded/fatal/all_blocks/alcohol", col: "min_share_any_order–max_share_any_order", value: () => {const r = shapley("exceeded", "alcohol"); return (Number(r.min_share_any_order) * 100).toFixed(0) + "–" + pct(Number(r.max_share_any_order));}},
   {text: "around 4%", file: "assets/site.js", csv: "speeding/shapley.csv", row: "alcohol/fatal/all_blocks/speeding_type", col: "shapley_share_of_crude", value: () => "around " + pct(Number(shapley("alcohol", "speeding_type").shapley_share_of_crude))},
   {text: "353,706", file: "index.html", csv: "descriptive/fars_annual.csv", row: "all years", col: "sum(deaths)", value: () => group(sum("descriptive/fars_annual.csv", "deaths"))},
   {text: "325,922", file: "index.html", csv: "descriptive/fars_annual.csv", row: "all years", col: "sum(fatal_crashes)", value: () => group(sum("descriptive/fars_annual.csv", "fatal_crashes"))},
@@ -116,17 +114,33 @@ const claims = [
   {text: "19%", file: "index.html", csv: "drugs/testing_rates.csv", row: "all years/survived", col: "share_tested", value: () => pct(Number(tested("survived").share_tested))},
   {text: "109%", file: "index.html", csv: "contributions/fars_overlap_summary.csv", row: "sum of the four factor counts", col: "deaths/all deaths", value: () => pct(Number(overlap("sum of the four factor counts").deaths) / Number(overlap("all deaths").deaths))},
   {text: "65%", file: "index.html", csv: "contributions/fars_overlap_summary.csv", row: "union", col: "deaths/all deaths", value: () => pct(Number(overlap("deaths involving at least one factor (union)").deaths) / Number(overlap("all deaths").deaths))},
-  {text: "44 percentage points", file: "index.html", csv: "contributions/fars_overlap_summary.csv", row: "sum minus union", col: "deaths/all deaths", value: () => ((Number(overlap("sum of the four factor counts").deaths) - Number(overlap("deaths involving at least one factor (union)").deaths)) / Number(overlap("all deaths").deaths) * 100).toFixed(0) + " percentage points"},
+  {text: "44 percentage points of all deaths", file: "index.html", csv: "contributions/fars_overlap_summary.csv", row: "sum minus union", col: "deaths/all deaths", value: () => ((Number(overlap("sum of the four factor counts").deaths) - Number(overlap("deaths involving at least one factor (union)").deaths)) / Number(overlap("all deaths").deaths) * 100).toFixed(0) + " percentage points of all deaths"},
   {text: "222,767", file: "index.html", csv: "contributions/fars_overlap_summary.csv", row: "all deaths", col: "deaths_undetermined_drug_status", value: () => group(Number(overlap("all deaths").deaths_undetermined_drug_status))},
   {text: "105,821", file: "assets/site.js", csv: "contributions/fars_overlap_summary.csv", row: "driver BAC >= .08 (MI)", col: "deaths", value: () => group(Number(overlap("driver BAC >= .08 (MI)").deaths))},
   {text: "0.34", file: "assets/site.js", csv: "matched/belt_effect.csv", row: "fatality_rr_belted_vs_unbelted_given_fatal_crash", col: "estimate", value: () => Number(belt.estimate).toFixed(2)},
   {text: "0.33–0.35", file: "assets/site.js", csv: "matched/belt_effect.csv", row: "fatality_rr_belted_vs_unbelted_given_fatal_crash", col: "low–high", value: () => Number(belt.low).toFixed(2) + "–" + Number(belt.high).toFixed(2)},
   {text: "16.3%", file: "index.html", csv: "simulation/threshold_required_share.csv", row: "alcohol/5", col: "required_share_of_segment_deaths", value: () => pct(Number(alcohol5.required_share_of_segment_deaths), 1)}
 ];
+// Files each claim must appear in, with the exact expected number of occurrences (digit-bounded match).
+const where = {
+  "10.0": {"index.html": 1, "assets/site.js": 1}, "4.88": {"index.html": 4, "assets/site.js": 2},
+  "4.12–5.79": {"index.html": 2, "assets/site.js": 1}, "5.2 (4.3–6.3)": {"index.html": 2, "assets/site.js": 1},
+  "4–16%": {"index.html": 1, "assets/site.js": 1}, "62%": {"index.html": 1, "assets/site.js": 1}, "19%": {"index.html": 1, "assets/site.js": 1},
+  "65%": {"index.html": 2}, "105,821": {"assets/site.js": 2}, "0.34": {"assets/site.js": 2}
+};
+const occurrences = (text, claim) => (text.match(new RegExp("(?<![\\d.])" + claim.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "(?!\\d)", "g")) || []).length;
 for (const claim of claims) {
-  assert.ok(read(claim.file).includes(claim.text), "Claim not found in " + claim.file + ": " + claim.text);
+  if (where[claim.text] && claim.file !== "index.html") continue;
+  const expected = where[claim.text] || {[claim.file]: 1};
+  for (const [file, count] of Object.entries(expected)) {
+    assert.equal(occurrences(read(file), claim.text), count, "Claim " + claim.text + " expected " + count + "x in " + file);
+  }
   assert.equal(claim.value(), claim.text, "Claim " + claim.text + " differs from " + claim.csv + " [" + claim.row + "] " + claim.col);
 }
+assert.ok(markdown("**Teenage *less* severe** x").includes("<strong>Teenage <em>less</em> severe</strong>"));
+assert.ok(markdown("text\n\n    a = 1 < 2\n\n    b\n\npara").includes("<pre><code>a = 1 &lt; 2\n\nb</code></pre>"));
+assert.ok(!markdown("- item\n\n  more text").includes("<pre>"));
+assert.ok(!QUERY.frequency.eligible({level: "unknown", overrep_ratio: "2"}) && QUERY.frequency.eligible({level: "yes", overrep_ratio: "2"}));
 assert.ok(QUERY.severity.eligible({level: "yes", factor: "light", A_adj_rr: "2", flag: "", adj_flag: ""}));
 for (const bad of [{level: "unknown"}, {level: "other"}, {factor: "YEAR"}, {flag: "unstable"}, {adj_flag: "level RSE>30%"}]) {
   assert.ok(!QUERY.severity.eligible({level: "yes", factor: "light", A_adj_rr: "2", flag: "", adj_flag: "", ...bad}));
