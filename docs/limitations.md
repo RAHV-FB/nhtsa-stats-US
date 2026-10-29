@@ -50,8 +50,10 @@ policy questions require data that do not exist in this repository.
   their own categories (never merged with "no") and are not interpreted; dropping them from the
   prediction models changes test discrimination by 0.002 AUROC (`docs/model_validation.md`).
 * **Distraction and drug involvement** are unknown or not reported for 42–74% of drivers in
-  recent years and their unknown share changed sharply; they are not used as model
-  exposures. Drug *presence* in a toxicology result is not impairment.
+  recent years and their unknown share changed sharply; they are not used as exposures in the
+  Phase-1 severity and prediction models. Phase-2 analyses that include police-reported drugs
+  (`drugs/crss_bounds`, `drugs/crss_adjusted`, the four-factor model in `multifactor/`) report
+  them only to show how far the estimate moves with the coding of unknowns, not as a drug effect. Drug *presence* in a toxicology result is not impairment.
 * **Restraint use** among surviving occupants is largely self-reported to police; reported
   belt use among uninjured CRSS occupants (98.7%) is implausibly high, so person-level belt
   associations in CRSS are likely inflated. The FARS within-vehicle analysis is less affected
@@ -138,7 +140,9 @@ policy questions require data that do not exist in this repository.
   ratio), the reference case and the factor set, and are reported precisely to show this.
 * **Drugs.** CRSS has only police-reported drug involvement (50–70% unknown after 2019) and the
   police co-record drugs with alcohol several times more often than toxicology finds them
-  together. No drug severity association, attributable fraction or ranking is reported; the
+  together. No drug severity association, attributable fraction or ranking is reported as a
+  finding (the drug risk ratios in `drugs/` and `multifactor/` are bounds and coding
+  sensitivities, labelled as not identifying a drug effect); the
   only drug–alcohol comparison is conditional on a fatal crash and on testing, in four
   high-testing states.
 * **Mediator adjustment.** Crash configuration lies on plausible pathways from speeding and

@@ -4,6 +4,9 @@ on:
   pull_request:
     paths:
       - "website/**"
+      - "reports/**"
+      - "docs/**"
+      - "outputs/tables/**"
       - ".github/workflows/public-site.yml"
   push:
     branches: [main]
