@@ -10,6 +10,7 @@ Responsive, static front end for the **FARS & CRSS 2016–2024** US road-safety 
 - Analysis of overlapping counts for speed, BAC, drugs and unbelted occupants.
 - Speeding, alcohol, drugs and seat-belt research explainers.
 - Hypothetical policy break-even calculator computed from the committed threshold baseline (not an assumed intervention effect).
+- Provenance test: every statistic written into index.html or site.js is checked against its bundled table (website/tests/site.test.mjs).
 - Reader for eleven complete generated reports and technical documents.
 - Responsive styles, semantic landmarks, keyboard controls and reduced-motion preferences.
 - No analytics, external JavaScript dependencies or client secrets.
@@ -30,7 +31,7 @@ The published site needs only a static host, not Streamlit, server-side Python, 
 
 .github/workflows/public-site.yml validates the website and source snapshots. On a push to main, it attempts to deploy the website directory with GitHub Pages.
 
-**One-time requirement:** In GitHub Repository Settings → Pages → Build and deployment, select **GitHub Actions** as the source. GitHub Pages is not automatically enabled by adding a workflow. The predicted default address after successful deployment is https://rahv-fb.github.io/nhtsa-stats-US/ but must not be treated as live until a deployment succeeds.
+The site is live at https://rahv-fb.github.io/nhtsa-stats-US/ (Repository Settings → Pages → Source: GitHub Actions). The verify job also runs on pull requests that touch website/, reports/, docs/ or outputs/tables/, so a stale snapshot or a hard-coded statistic that no longer matches its table fails CI before merge.
 
 ## Scientific provenance
 

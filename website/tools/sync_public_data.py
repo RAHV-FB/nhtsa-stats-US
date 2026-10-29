@@ -22,6 +22,11 @@ SOURCES = {
     "outputs/tables/descriptive/fars_annual.csv": "tables/descriptive/fars_annual.csv",
     "outputs/tables/contributions/fars_overlap_summary.csv": "tables/contributions/fars_overlap_summary.csv",
     "outputs/tables/simulation/threshold_required_share.csv": "tables/simulation/threshold_required_share.csv",
+    "outputs/tables/speeding/key_models.csv": "tables/speeding/key_models.csv",
+    "outputs/tables/speeding/shapley.csv": "tables/speeding/shapley.csv",
+    "outputs/tables/drugs/testing_rates.csv": "tables/drugs/testing_rates.csv",
+    "outputs/tables/matched/belt_effect.csv": "tables/matched/belt_effect.csv",
+    "outputs/tables/descriptive/crss_annual.csv": "tables/descriptive/crss_annual.csv",
     **{
         f"{folder}/{name}.md": f"reports/{name}.md"
         for folder, name in (
