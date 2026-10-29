@@ -59,7 +59,7 @@
     "table": "vulnerable/pedestrian_killed_contrasts.csv"
   },
   {
-    "title": "Some combinations amplify each other; others commonly assumed to are not detected",
+    "title": "Some combinations amplify each other; others commonly assumed to do so show no detectable interaction",
     "statement": "Among the 13 registered pairs, pedestrian crashes in unlit darkness show amplification on both the additive and multiplicative scales, and motorcycle crashes involving alcohol carry a large additive excess. Pedestrian crashes on 50+ mph roads show the largest additive excess, in an exploratory pair. Speeding × darkness and young driver × late night show no detectable interaction for the fatal outcome (absence of evidence, not evidence of absence); for fatal-or-serious crashes speeding × unlit darkness shows an additive excess.",
     "effect": "Pedestrian × unlit darkness: ratio of RRs 1.62 (1.39–1.88); additive interaction 94 (70–117) per 1,000 crashes. Pedestrian × 50+ mph road: additive 138 (113–163) per 1,000.",
     "uncertainty": "Design-based 95% CIs; Holm adjustment across the 13 registered pairs on each scale; exploratory pairs unadjusted.",
