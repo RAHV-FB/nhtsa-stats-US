@@ -1,6 +1,6 @@
 # Research plan — Phase 2: factor attribution, confounding, competing explanations
 
-Version 2.0. Written after auditing the Phase-1 system (merged in commit 1236262) and before any
+Version 2.1. Written after auditing the Phase-1 system (merged in commit 1236262) and before any
 Phase-2 code. Phase 1's plan (`docs/research_plan.md`) and its validated results are unchanged;
 this document records what Phase 2 adds, why, and how it will be judged. Change log at the end.
 
@@ -10,7 +10,7 @@ this document records what Phase 2 adds, why, and how it will be judged. Change 
   (`main` = 1236262). Working tree clean.
 * Raw archives (Git LFS) verified; typed cache and the four processed datasets rebuilt with
   `nhtsa ingest` + `nhtsa features` (about 1.5 minutes). The committed Phase-1 output tables are
-  reused as they are; the 84-minute `nhtsa all` was not re-run.
+  reused as they are; the 84-minute `nhtsa all` (Phase-1 timing) was not re-run.
 * Existing test suite run on the rebuilt data before any change (`outputs/logs/`, not committed).
 
 ### 1.1 What Phase 1 already established (numbers from `outputs/tables`)
@@ -96,6 +96,20 @@ person. Crash-level "any driver" flags are used only for crash-level outcomes.
 | Q6 | How much do contributions depend on unit, definition, specification and missingness? | — | The same contrast across units, definitions (any speeding / exceeded; imputed / police alcohol), outcomes (K / KA), complete-case vs imputed outcome, configuration in/out | as above |
 | Q7 | Can a principal cause of an individual death be identified? | H: no — individual attribution is not identified | Demonstration: Shapley allocations of a modelled prediction difference change with the reference scenario, ordering scale (risk vs log-odds) and factor set | Case explorer |
 | Q8 | How should official counts be read? | H: deaths "involving" factors overlap so that factor counts sum to well over the death total | FARS deaths by combination of speeding, driver BAC ≥ .08 (multiple imputation, expected count), drug-positive (tested), unbelted; sum of single-factor counts / union; conditioning-on-fatality distortion of factor co-occurrence (CRSS all vs fatal vs FARS) | FARS deaths and fatal crashes; CRSS crashes |
+
+Mapping to the A–H labels used in `reports/factor_contributions.md` (its "Answers to the
+Phase-2 questions at a glance" table):
+
+| Question | Report label | Topic |
+|---|---|---|
+| Q1 | A | Speeding–fatality association explained by alcohol and other recorded factors |
+| Q2 | B | Exceeding the limit remains associated with fatal severity |
+| Q3 | C | Alcohol and drugs separated reliably? |
+| Q4 | D | Restraint use within comparable occupants |
+| Q5 | E | Interaction between combinations of factors |
+| Q6 | F | Dependence of contributions on units, definitions, specification and missingness |
+| Q7 | G | Identification of a principal cause of an individual death |
+| Q8 | H | Reading official statistics |
 
 ## 4. Factor definitions (Stage 2)
 
@@ -235,19 +249,38 @@ non-identifiability (no non-fatal comparison group; EMS times recorded for fatal
 
 ## 8. Implementation stages and acceptance criteria
 
-| Stage | Deliverable | Acceptance criterion |
-|---|---|---|
-| 1 | This plan | Gap list, estimands, criteria written before code |
-| 2 | `processing/drivers.py`, driver datasets, data dictionary entries | Row counts reconcile with raw; linkage tests pass |
-| 3–4 | Modules `speeding`, `drugs`, `restraint_behaviour`, `multifactor`, `contributions`, `cases`, `stages` | ruff clean; unit tests; deterministic |
-| 5 | Outputs in `outputs/tables/<module>/` with provenance sidecars | All registered estimands produced with CIs and support |
-| 6 | Challenge analyses (recording, selection, mediator, outcome definition, definitions) | Each headline result has at least one alternative-explanation test |
-| 7 | Reports (`reports/factor_contributions.md`, `speeding_confounding.md`, `alcohol_drugs_restraints.md`, `multifactor_interactions.md`, `case_comparisons.md`) rendered from templates | Render succeeds; sync test passes; questions A–H answered |
-| 8 | Streamlit pages | App smoke tests pass headless |
-| 9 | Full test suite; module runs | All tests pass |
-| 10 | Independent audit of claims vs tables | Confirmed errors fixed |
-| 11 | Commit, push, PR | PR open against `main` |
+| Stage | Deliverable | Acceptance criterion | Status |
+|---|---|---|---|
+| 1 | This plan | Gap list, estimands, criteria written before code | Delivered |
+| 2 | `processing/drivers.py`, driver datasets, data dictionary entries | Row counts reconcile with raw; linkage tests pass | Delivered |
+| 3–4 | Modules `speeding`, `drugs`, `restraint_behaviour`, `multifactor`, `contributions`, `cases`, `stages` | ruff clean; unit tests; deterministic | Delivered |
+| 5 | Outputs in `outputs/tables/<module>/` with provenance sidecars | All registered estimands produced with CIs and support | Delivered |
+| 6 | Challenge analyses (recording, selection, mediator, outcome definition, definitions) | Each headline result has at least one alternative-explanation test | Delivered |
+| 7 | Reports (`reports/factor_contributions.md`, `speeding_confounding.md`, `alcohol_drugs_restraints.md`, `multifactor_interactions.md`, `case_comparisons.md`) rendered from templates | Render succeeds; sync test passes; questions A–H answered | Delivered |
+| 8 | Streamlit pages | App smoke tests pass headless | Delivered |
+| 9 | Full test suite; module runs | All tests pass | Delivered |
+| 10 | Independent audit of claims vs tables | Confirmed errors fixed | Delivered |
+| 11 | Commit, push, PR | PR open against `main` | Delivered |
 
 ## 9. Change log
 
 * v2.0 (2026-10-23) — Phase-2 plan written after the audit in §1.
+* v2.1 (2026-10-29) — Delivery record.
+  * Delivered: all stages; reports and pages listed in §8.
+  * Deviations from the plan:
+    * RD with CI is reported for the six key models (`speeding/key_models.csv`), not for all
+      lattice subsets (`speeding/lattice.csv` has RR only).
+    * Speeding-type composition is crash-level only (`speeding/type_composition.csv`).
+    * Predictive block ablation reports R² CIs, but the AUROC drop has no CI
+      (`contributions/predictive.csv`).
+    * The prior speeding and DWI conviction variables are built in `fars_driver` but not used
+      in any analysis.
+    * Selection by fatality is in the speeding module (`speeding/selection_by_fatality.csv`),
+      not `contributions`.
+    * The four-way contrast and the sparse three-way and drug-pair terms are withheld for
+      insufficient support (`multifactor/interactions.csv`; `docs/limitations.md` §7).
+  * Stage-10 audit (2026-10-29): the claims in the reports and on the public website were
+    checked against `outputs/tables`, with no numeric mismatches. The website's wording was
+    clarified: the adjusted speeding RR includes crash configuration, alcohol's Shapley share
+    depends on order, and segment counts are lower bounds. Synthetic linkage and Phase-2 module
+    unit tests were added.

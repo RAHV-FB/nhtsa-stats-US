@@ -41,8 +41,8 @@
    The size of that difference is very sensitive to how accurately surviving occupants report
    belt use.
 8. **The post-2020 rise in crash severity is only partly explained by the recorded crash mix.**
-   Changes in the recorded circumstances of crashes account for roughly 30–50% of the rise in
-   the fatal share, depending on the model; the rest is a higher fatal share within the same circumstances, most clearly
+   Changes in the recorded circumstances of crashes account for between {{trends/decomposition|analysis=model_A;outcome=fatal;quantity=composition_share_of_change_ref_P1|estimate|pct:0}} and
+   {{trends/decomposition|analysis=model_B;outcome=fatal;quantity=composition_share_of_change_ref_P0|estimate|pct:0}} of the rise in the fatal share, depending on the model and reference period; the rest is a higher fatal share within the same circumstances, most clearly
    in speeding-related crashes. Separately, about half of the rise in the share reflects fewer
    non-fatal crashes being reported rather than more fatal ones.
 9. **Police-recorded behaviours are measured differently by severity.** Drug and distraction
@@ -482,7 +482,7 @@ The fall in reported crashes accounts for {{trends/numerator_denominator|outcome
 of the rise in the fatal share. It is not only a fall in property-damage-only reports: fatal
 crashes also rose as a share of injury crashes ({{trends/numerator_denominator|outcome=fatal;comparison=2020-2024 vs 2016-2019;quantity=ratio_K_share_of_injury_KABC|estimate|ci:2}}).
 
-**Composition accounts for roughly 30–50%.** This is a second, separate accounting of the
+**Composition accounts for between {{trends/decomposition|analysis=model_A;outcome=fatal;quantity=composition_share_of_change_ref_P1|estimate|pct:0}} and {{trends/decomposition|analysis=model_B;outcome=fatal;quantity=composition_share_of_change_ref_P0|estimate|pct:0}}.** This is a second, separate accounting of the
 same rise, not an addition to the first. Changes in the recorded circumstances of crashes
 (time, road, light, weather, alcohol, speeding, driver and vehicle mix, crash configuration)
 account for {{trends/decomposition|analysis=model_B;outcome=fatal;quantity=composition_share_of_change_ref_P0|estimate|cipct:0}} of the rise

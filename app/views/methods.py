@@ -10,6 +10,7 @@ DOCS = {
     "Limitations": "docs/limitations.md",
     "Methodology": "docs/methodology.md",
     "Research plan": "docs/research_plan.md",
+    "Research plan (phase 2)": "docs/research_plan_phase2.md",
     "Data audit": "docs/data_audit.md",
     "Variable harmonisation": "docs/variable_harmonization.md",
     "Model validation": "docs/model_validation.md",

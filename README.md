@@ -42,11 +42,11 @@ uv run pytest                     # unit + data-integrity tests
 uv run streamlit run app/streamlit_app.py   # research interface
 ```
 
-A clean `nhtsa all` from the raw archives took 84 minutes on a 4-core machine: about 3
-minutes to build the datasets, then the analyses, dominated by the confounding lattices
-(34 min), person-level models (12 min), severity and interaction models (9 min each), the
-prediction models (8 min) and the within-vehicle bootstraps (7 min). Expect longer when other
-processes compete for the cores. The pipeline is deterministic: a clean rebuild reproduces
+The Phase-1 pipeline (a clean `nhtsa all` from the raw archives) took 84 minutes on a 4-core
+machine, measured before Phase 2: about 3 minutes to build the datasets, then the analyses,
+dominated by the confounding lattices (34 min), person-level models (12 min), severity and
+interaction models (9 min each), the prediction models (8 min) and the within-vehicle bootstraps
+(7 min). Expect longer when other processes compete for the cores. The pipeline is deterministic: a clean rebuild reproduces
 the processed datasets exactly and the output tables to the last digit or so (multi-threaded
 numerical libraries can change the final digits). Individual steps:
 
@@ -57,7 +57,7 @@ numerical libraries can change the final digits). Individual steps:
 | `nhtsa validate` | 841 relational-integrity checks; exits non-zero on structural failure | `outputs/audit/integrity_checks.csv` |
 | `nhtsa features` | Harmonised analytic datasets | `data/processed/` (git-ignored) |
 | `nhtsa analyze [module …]` | Run analyses (`nhtsa list` shows modules) | `outputs/tables/<module>/`, `outputs/figures/` |
-| `nhtsa analyze speeding drugs multifactor restraint_behaviour contributions stages cases` | Phase-2 modules (about 75 minutes on 4 cores; the speeding lattices take most of it) | `outputs/tables/<module>/` |
+| `nhtsa analyze speeding drugs multifactor restraint_behaviour contributions stages cases` | Phase-2 modules (add about 75 minutes on 4 cores; the speeding lattices take most of it) | `outputs/tables/<module>/` |
 
 Changing one analysis only requires `nhtsa analyze <module>`; the cache and datasets are
 reused.
@@ -93,9 +93,13 @@ src/nhtsa_stats/
 app/                      Streamlit research interface
 docs/                     plan, audit, dictionary, harmonisation, methodology, limitations,
                           model validation, policy assumptions (+ docs/audit/, docs/generated/)
-reports/                  findings, interactions, policy analysis
+reports/                  main findings (findings.md, findings.json), seven topic reports,
+                          templates/
 outputs/                  generated tables/figures (small, committed) and audit inventory
 tests/                    unit tests (synthetic fixtures) and data tests (real cache)
+website/                  static public site: index.html, assets/, data/ (snapshots synced
+                          from reports/ and outputs/tables/), tools/sync_public_data.py, tests/
+scripts/                  policy_worked_examples.py; audit/ one-off domain-audit scripts
 ```
 
 ## Findings
@@ -178,6 +182,31 @@ assumptions explicit, computes conditional projections and break-even thresholds
 presents them as measured effects. Details: `docs/limitations.md`,
 `docs/policy_assumptions.md`.
 
+## Public research website
+
+The findings are also published as a static, responsive public site, **Road Evidence**, live at
+https://rahv-fb.github.io/nhtsa-stats-US/. The site source is in [website/](website/). It is built
+directly from the committed statistical outputs and complements rather than replaces the
+nine-page Streamlit research interface. It is deployed by `.github/workflows/public-site.yml`
+on each push to `main`.
+
+Features include searchable supported findings, interactive charts with source tables,
+explanations of overlapping risk factors, a clearly hypothetical policy target calculator, and
+an in-browser library of eleven full research reports. Public data files are synchronised from
+canonical outputs; CI rejects stale copies.
+
+Run locally from the repository root:
+
+```bash
+python website/tools/sync_public_data.py            # refresh the snapshots from reports/ and outputs/tables/
+python website/tools/sync_public_data.py --check    # confirm the snapshots are current
+node --test website/tests/site.test.mjs             # functional smoke tests
+python -m http.server 8000 --directory website      # then visit http://localhost:8000
+```
+
+CI runs the snapshot check and the site tests on pull requests that touch `website/`,
+`reports/`, `docs/` or `outputs/tables/`. [Website details and deployment instructions](website/README.md).
+
 ## Working on this project with Claude Code
 
 `CLAUDE.md` holds the rules for Claude Code sessions in this repository. To save usage,
@@ -192,14 +221,3 @@ subagents use the cheapest model that can do the job:
 ## Licence
 
 MIT (see `LICENSE`). FARS and CRSS are public NHTSA data products.
-
-
-## Public research website
-
-The project also includes a polished, responsive **Road Evidence** public website in [website/](website/), built directly from the committed statistical outputs. It complements rather than replaces the nine-page Streamlit research interface.
-
-Features include searchable supported findings, interactive charts with source tables, explanations of overlapping risk factors, a clearly hypothetical policy target calculator, and an in-browser library of eleven full research reports. Public data files are synchronized from canonical outputs; CI rejects stale copies.
-
-Run locally from the repository root: first run `python website/tools/sync_public_data.py --check`, then `python -m http.server 8000 --directory website` and visit http://localhost:8000. Automated smoke tests: `node --test website/tests/site.test.mjs`.
-
-[Website details and deployment instructions](website/README.md). GitHub Pages publishing requires one-time configuration in Repository Settings → Pages → Source: GitHub Actions; do not assume the public URL is live until deployment is confirmed.

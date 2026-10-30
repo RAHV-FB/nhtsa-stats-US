@@ -43,8 +43,8 @@
    The size of that difference is very sensitive to how accurately surviving occupants report
    belt use.
 8. **The post-2020 rise in crash severity is only partly explained by the recorded crash mix.**
-   Changes in the recorded circumstances of crashes account for roughly 30–50% of the rise in
-   the fatal share, depending on the model; the rest is a higher fatal share within the same circumstances, most clearly
+   Changes in the recorded circumstances of crashes account for between 28% and
+   49% of the rise in the fatal share, depending on the model and reference period; the rest is a higher fatal share within the same circumstances, most clearly
    in speeding-related crashes. Separately, about half of the rise in the share reflects fewer
    non-fatal crashes being reported rather than more fatal ones.
 9. **Police-recorded behaviours are measured differently by severity.** Drug and distraction
@@ -501,7 +501,7 @@ The fall in reported crashes accounts for 54% (29–78%)
 of the rise in the fatal share. It is not only a fall in property-damage-only reports: fatal
 crashes also rose as a share of injury crashes (1.28 (1.19–1.38)).
 
-**Composition accounts for roughly 30–50%.** This is a second, separate accounting of the
+**Composition accounts for between 28% and 49%.** This is a second, separate accounting of the
 same rise, not an addition to the first. Changes in the recorded circumstances of crashes
 (time, road, light, weather, alcohol, speeding, driver and vehicle mix, crash configuration)
 account for 49% (25–73%) of the rise

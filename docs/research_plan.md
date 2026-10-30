@@ -4,7 +4,7 @@
 > comparisons) is planned in [`research_plan_phase2.md`](research_plan_phase2.md). This document
 > remains the Phase-1 plan; its results are unchanged.
 
-Version 1.2 — written after the repository and data audit (see `docs/data_audit.md`) and
+Version 2.0 — written after the repository and data audit (see `docs/data_audit.md`) and
 revised as findings emerged (change log at the end).
 
 ## 1. Central question
