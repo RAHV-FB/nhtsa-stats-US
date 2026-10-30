@@ -15,10 +15,8 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parents[2]
 SITE = REPO / "website"
 SOURCES = {
-    "reports/findings.json": "findings.json",
     "outputs/tables/descriptive/frequency_vs_severity.csv": "tables/descriptive/frequency_vs_severity.csv",
     "outputs/tables/severity/fatal_crude_vs_adjusted.csv": "tables/severity/fatal_crude_vs_adjusted.csv",
-    "outputs/tables/contributions/ranking.csv": "tables/contributions/ranking.csv",
     "outputs/tables/descriptive/fars_annual.csv": "tables/descriptive/fars_annual.csv",
     "outputs/tables/trends/fars_changes.csv": "tables/trends/fars_changes.csv",
     "outputs/tables/vulnerable/fars_pedestrian_deaths_by_striking_vehicle.csv": "tables/vulnerable/fars_pedestrian_deaths_by_striking_vehicle.csv",

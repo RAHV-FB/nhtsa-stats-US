@@ -9,12 +9,12 @@ index.html is one page of plain, sourced data stories, in this order:
 1. Intro and four key figures.
 2. Six stories, each with a short text, a chart drawn at runtime from a bundled CSV, a caveat and a source line: deaths by year, who died, pedestrians (striking vehicle, speed and darkness, vehicle type), time of day, age, rural roads.
 3. Limits of the data, linking to the limitations report.
-4. Explore the tables: the data explorer (four tables, CI whiskers, searchable) with the underlying rows.
+4. Explore the tables: the data explorer (three tables, CI whiskers, searchable) with the underlying rows.
 5. Full reports: the library that renders eleven generated Markdown reports and documents in the browser.
 
 assets/site.js has no dependencies. It holds the SVG line chart, the horizontal bars (with optional CI whiskers), the grouped bars, the data explorer, the CSV parser and the Markdown renderer. Every chart has role="img" with an aria-label that summarises its data, and a "Show the data" table with the rows.
 
-Public data lives in website/data/ and is copied by website/tools/sync_public_data.py. Do not edit it by hand. The page uses these tables: descriptive/fars_annual, descriptive/frequency_vs_severity, trends/fars_changes, vulnerable (striking vehicle, killed contrasts, light truck by speed), person/lpv_killed_crude_vs_adjusted, stages (death timing, EMS availability), severity/fatal_crude_vs_adjusted and contributions/ranking, plus findings.json and the reports.
+Public data lives in website/data/ and is copied by website/tools/sync_public_data.py. Do not edit it by hand. The page uses these tables: descriptive/fars_annual, descriptive/frequency_vs_severity, trends/fars_changes, vulnerable (striking vehicle, killed contrasts, light truck by speed), person/lpv_killed_crude_vs_adjusted, stages (death timing, EMS availability), severity/fatal_crude_vs_adjusted, plus the reports.
 
 Claims test: website/tests/site.test.mjs binds every number written in prose in index.html or site.js to its bundled CSV value through a formatter, counts exact occurrences with digit boundaries, and fails on any other number in the page text. Sums, differences and shares (for example 69% of the increase) are derived from the CSVs in the test.
 

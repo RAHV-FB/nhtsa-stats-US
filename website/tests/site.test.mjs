@@ -49,7 +49,7 @@ assert.equal(ratio(9.996), "10.0");
 assert.equal(ratio(15.599), "15.6");
 assert.equal(safeLink("javascript:alert(1)"), null);
 assert.equal(safeLink("../../../etc/passwd"), null);
-assert.equal(Object.keys(QUERY).length, 4);
+assert.equal(Object.keys(QUERY).length, 3);
 for (const def of Object.values(QUERY)) {
   const file = path.join(root, "data", "tables", def.src);
   assert.ok(fs.existsSync(file), "Missing bundled chart data " + def.src);
@@ -66,9 +66,6 @@ assert.equal(QUERY.severity.name({factor: "YEAR", level: "2021"}), "Year · 2021
 assert.ok(severity.filter(QUERY.severity.eligible).every(row => QUERY.severity.hi(row) >= QUERY.severity.lo(row)));
 assert.equal(Number.isNaN(QUERY.frequency.lo({overrep_low: ""})), true);
 assert.equal(QUERY.trends.display(37806), "37,806");
-const found = JSON.parse(read("data/findings.json"));
-assert.equal(found.length, 10);
-assert.ok(found.every(item => item.title && item.statement && item.evidence));
 for (const [key, label] of REPORTS) {
   const file = path.join(root, "data", "reports", key + ".md");
   assert.ok(fs.existsSync(file), "Missing report " + label);
@@ -104,79 +101,82 @@ const F = "descriptive/fars_annual.csv", C = "trends/fars_changes.csv", S = "vul
 const K = "vulnerable/pedestrian_killed_contrasts.csv", L = "vulnerable/pedestrian_light_truck_by_speed.csv", Q = "descriptive/frequency_vs_severity.csv";
 const P = "person/lpv_killed_crude_vs_adjusted.csv", D = "stages/death_timing.csv", E = "stages/ems_availability.csv";
 const changePct = (name, col) => fmt.pct(num(change(name)[col]) / 100, 0);
-const claims = {
-  "39,254": [use(F, "YEAR=2024", "deaths", () => fmt.int(deaths(2024))), use(F, "YEAR=2024", "deaths", () => fmt.int(deaths(2024)))],
-  "353,706": [use(F, "all years", "sum(deaths)", () => fmt.int(sum(annual, "deaths")))],
-  "43,230": [use(F, "max deaths", "deaths", () => fmt.int(Math.max(...annual.map(r => num(r.deaths))))), use(F, "YEAR=2021", "deaths", () => fmt.int(deaths(2021)))],
-  "+8%": [use(C, "deaths", "pct_change_2019_2024", () => signed(num(change("deaths").pct_change_2019_2024) / 100))],
-  "18%": [use(C, "pedestrian_deaths", "share_of_total_2024", () => pct0(num(change("pedestrian_deaths").share_of_total_2024)))],
-  "36,355": [use(F, "YEAR=2019", "deaths", () => fmt.int(deaths(2019)))],
-  "39,007": [use(F, "YEAR=2020", "deaths", () => fmt.int(deaths(2020)))],
-  "8%": [use(C, "deaths", "pct_change_2019_2024", () => changePct("deaths", "pct_change_2019_2024")), use(Q, "tod/00-05", "share_all_crashes", () => pct0(num(tod("00-05").share_all_crashes)))],
-  "23%": [use(C, "motorcyclist_deaths", "pct_change_2019_2024", () => changePct("motorcyclist_deaths", "pct_change_2019_2024"))],
-  "5,044": [use(C, "motorcyclist_deaths", "2019", () => fmt.int(num(change("motorcyclist_deaths")["2019"])))],
-  "6,227": [use(C, "motorcyclist_deaths", "2024", () => fmt.int(num(change("motorcyclist_deaths")["2024"])))],
-  "13%": [use(C, "pedestrian_deaths", "pct_change_2019_2024", () => changePct("pedestrian_deaths", "pct_change_2019_2024"))],
-  "6,272": [use(C, "pedestrian_deaths", "2019", () => fmt.int(num(change("pedestrian_deaths")["2019"])))],
-  "7,080": [use(C, "pedestrian_deaths", "2024", () => fmt.int(num(change("pedestrian_deaths")["2024"])))],
-  "2%": [use(C, "lpv_occupant_deaths", "pct_change_2019_2024", () => changePct("lpv_occupant_deaths", "pct_change_2019_2024"))],
-  "22,370": [use(C, "lpv_occupant_deaths", "2019", () => fmt.int(num(change("lpv_occupant_deaths")["2019"])))],
-  "22,739": [use(C, "lpv_occupant_deaths", "2024", () => fmt.int(num(change("lpv_occupant_deaths")["2024"])))],
-  "31%": [use(C, "motorcyclist_deaths + pedestrian_deaths", "share_of_total_2019", () => pct0(pairShare("share_of_total_2019")))],
-  "69%": [use(C, "motorcyclist_deaths + pedestrian_deaths", "share_of_total_change_2019_2024", () => pct0(pairShare("share_of_total_change_2019_2024")))],
-  "+16%": [use(F, "2016 to 2024", "deaths_pedestrian", () => signed(growth("deaths_pedestrian")))],
-  "+29%": [use(F, "2016 to 2024", "deaths_cyclist", () => signed(growth("deaths_cyclist")))],
-  "−12%": [use(F, "2016 to 2024", "deaths_passenger", () => signed(growth("deaths_passenger")))],
-  "1,149": [use(S, "YEAR=2016", "deaths_suv", () => fmt.int(num(strikingYear(2016).deaths_suv)))],
-  "1,746": [use(S, "YEAR=2024", "deaths_suv", () => fmt.int(num(strikingYear(2024).deaths_suv)))],
-  "19%": [use(S, "YEAR=2016", "share_suv", () => pct0(num(strikingYear(2016).share_suv)))],
-  "25%": [use(S, "YEAR=2024", "share_suv", () => pct0(num(strikingYear(2024).share_suv)))],
-  "42%": [use(S, "YEAR=2016", "share_car", () => pct0(num(strikingYear(2016).share_car)))],
-  "36%": [use(S, "YEAR=2024", "share_car", () => pct0(num(strikingYear(2024).share_car)))],
-  "2.2%": [use(K, "str_speed_limit/<=25", "crude_rate", () => pct1(num(contrast("str_speed_limit", "<=25").crude_rate)))],
-  "14.8%": [use(K, "str_speed_limit/40-45", "crude_rate", () => pct1(num(contrast("str_speed_limit", "40-45").crude_rate)))],
-  "33.1%": [use(K, "str_speed_limit/50-55", "crude_rate", () => pct1(num(contrast("str_speed_limit", "50-55").crude_rate)))],
-  "25.9%": [use(K, "light/dark_not_lighted", "crude_rate", () => pct1(num(contrast("light", "dark_not_lighted").crude_rate)))],
-  "2.6%": [use(K, "light/daylight", "crude_rate", () => pct1(num(contrast("light", "daylight").crude_rate)))],
-  "7.0%": [use(L, "risk SUV/pickup <=35", "estimate", () => pct1(num(lt("risk SUV/pickup <=35").estimate)))],
-  "4.3%": [use(L, "risk car <=35", "estimate", () => pct1(num(lt("risk car <=35").estimate)))],
-  "1.6": [use(L, "RR SUV/pickup vs car, <=35 mph", "estimate", () => fmt.times(num(lt("RR SUV/pickup vs car, <=35 mph").estimate)))],
-  "11%": [use(S, "all years", "sum(deaths_other_unknown)/sum(all deaths)", () => pct0(sum(striking, "deaths_other_unknown") / sumCols.reduce((t, c) => t + sum(striking, c), 0)))],
-  "1.5%": [use(Q, "tod/00-05", "fatal_rate", () => pct1(num(tod("00-05").fatal_rate)))],
-  "0.38%": [use(Q, "tod/06-09", "fatal_rate", () => pct2(num(tod("06-09").fatal_rate)))],
-  "20%": [use(Q, "tod/00-05", "share_fatal_fars", () => pct0(num(tod("00-05").share_fatal_fars)))],
-  "0.49%": [use(P, "age_band/75+", "rate", () => pct2(num(ageRow("75+").rate)))],
-  "0.18%": [use(P, "age_band/25-34", "rate", () => pct2(num(ageRow("25-34").rate)))],
-  "5.5": [use(P, "age_band/75+", "A_adj_rr", () => fmt.times(num(ageRow("75+").A_adj_rr)))],
-  "4.7–6.5": [use(P, "age_band/75+", "A_adj_rr_low–A_adj_rr_high", () => fmt.times(num(ageRow("75+").A_adj_rr_low)) + "–" + fmt.times(num(ageRow("75+").A_adj_rr_high)))],
-  "151,940": [use(D, "rural road", "deaths", () => fmt.int(num(timing("rural road").deaths)))],
-  "67%": [use(D, "rural road", "share_died_at_scene", () => pct0(num(timing("rural road").share_died_at_scene)))],
-  "49%": [use(D, "urban road", "share_died_at_scene", () => pct0(num(timing("urban road").share_died_at_scene)))],
-  "200,359": [use(D, "urban road", "deaths", () => fmt.int(num(timing("urban road").deaths)))],
-  "14 minutes": [use(E, "YEAR=2024/rural", "median_minutes_crash_to_arrival", () => ems(2024, "rural").median_minutes_crash_to_arrival + " minutes")],
-  "8 minutes": [use(E, "YEAR=2024/urban", "median_minutes_crash_to_arrival", () => ems(2024, "urban").median_minutes_crash_to_arrival + " minutes")],
-  "45%": [use(E, "YEAR=2024/rural", "share_arrival_time_known", () => pct0(num(ems(2024, "rural").share_arrival_time_known)))],
-  "38%": [use(E, "YEAR=2024/urban", "share_arrival_time_known", () => pct0(num(ems(2024, "urban").share_arrival_time_known)))]
-};
-// Exact occurrence counting with digit boundaries (and no sign or decimal point directly before an unsigned number).
-const occurrences = (text, claim) => (text.match(new RegExp("(?<![\\d.,+−])" + claim.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "(?![\\d,]?\\d)", "g")) || []).length;
-const bodyText = html.slice(html.indexOf("<body>")).replace(/<script[\s\S]*?<\/script>/g, "").replace(/<\/?(span|code|a|strong|em|b)\b[^>]*>/g, "").replace(/<[^>]+>/g, "\n");
-let claimCount = 0;
-for (const [text, uses] of Object.entries(claims)) {
-  for (const file of ["index.html", "assets/site.js"]) {
-    const expected = uses.filter(u => u.file === file).length;
-    assert.equal(occurrences(read(file), text), expected, "Claim " + text + " expected " + expected + "x in " + file);
-  }
-  for (const u of uses) {
-    assert.equal(u.value(), text, "Claim " + text + " differs from " + u.csv + " [" + u.row + "] " + u.col);
-    claimCount++;
-  }
+const hr = level => level.split("-").map(Number);
+const [nightStart, nightEnd] = hr("00-05"), [morningStart, morningEnd] = hr("06-09");
+const Y0 = annual[0].YEAR, Yn = annual[annual.length - 1].YEAR, Y = y => year(y).YEAR;
+const maxYear = annual.reduce((a, b) => (num(b.deaths) > num(a.deaths) ? b : a));
+const mdash = (a, b) => a + "–" + b;
+const band = level => level.replace("-", "–");
+const ltSpeed = (quantity, re) => quantity.match(re)[1];
+const ltLow = ltSpeed(lt("risk car <=35").quantity, /<=(\d+)/), ltHigh = ltSpeed(lt("risk car 40+").quantity, /(\d+)\+/);
+const lowSpeed = ltLow;
+const rr = lt("RR SUV/pickup vs car, <=35 mph"), old75 = ageRow("75+"), ageRef = ageRow("25-34");
+const fromTo = (a, b) => fmt.int(num(a)) + " to " + fmt.int(num(b));
+const chg = (name, col) => num(change(name)[col]);
+const sentence = (...parts) => parts.join("");
+// Claims registry: each phrase is bound, with its surrounding words, to the CSV values it states. "line" claims are whole text lines.
+const claims = [];
+const add = (text, csvName, cells, value, opts = {}) => claims.push({text, csv: csvName, row: "", col: cells, value, line: !!opts.line});
+add("US road deaths, " + mdash(2016, 2024), F, "first and last YEAR", () => "US road deaths, " + mdash(Y0, Yn));
+add("39,254 people died on US roads in 2024.", F, "YEAR=2024 deaths", () => fmt.int(deaths(2024)) + " people died on US roads in " + Yn + ".");
+add("crash records for 2016–2024 to show", F, "first and last YEAR", () => "crash records for " + mdash(Y0, Yn) + " to show");
+add("353,706", F, "sum(deaths)", () => fmt.int(sum(annual, "deaths")), {line: true});
+add("deaths, 2016–2024", F, "first and last YEAR", () => "deaths, " + mdash(Y0, Yn), {line: true});
+add("43,230", F, "max(deaths)", () => fmt.int(num(maxYear.deaths)), {line: true});
+add("deaths in 2021, the highest year", F, "YEAR of max(deaths)", () => "deaths in " + maxYear.YEAR + ", the highest year", {line: true});
+add("+8%", C, "deaths pct_change_2019_2024", () => signed(chg("deaths", "pct_change_2019_2024") / 100), {line: true});
+add("deaths in 2024 vs 2019", C, "deaths columns 2024, 2019", () => "deaths in " + Yn + " vs " + Y(2019), {line: true});
+add("18%", C, "pedestrian_deaths share_of_total_2024", () => pct0(chg("pedestrian_deaths", "share_of_total_2024")), {line: true});
+add("of 2024 deaths were pedestrians", C, "pedestrian_deaths column 2024", () => "of " + Yn + " deaths were pedestrians", {line: true});
+add("Deaths rose sharply in 2020–21 and are still above 2019", F, "deaths 2019, 2020, 2021, 2024", () => (deaths(2020) > deaths(2019) && deaths(2021) > deaths(2020) && deaths(2024) > deaths(2019) ? "Deaths rose sharply in " + Y(2020) + "–" + Y(2021).slice(2) + " and are still above " + Y(2019) : "?"), {line: true});
+add("Road deaths were 36,355 in 2019.", F, "YEAR=2019 deaths", () => "Road deaths were " + fmt.int(deaths(2019)) + " in " + Y(2019) + ".");
+add("They rose to 39,007 in 2020 and 43,230 in 2021, then fell for three years to 39,254 in 2024 — still 8% more than in 2019.", F + " + " + C, "YEAR=2020, 2021, 2024 deaths; deaths pct_change_2019_2024", () => "They rose to " + fmt.int(deaths(2020)) + " in " + Y(2020) + " and " + fmt.int(deaths(2021)) + " in " + Y(2021) + ", then fell for " + ({3: "three"}[num(Y(2024)) - num(Y(2021))] || "?") + " years to " + fmt.int(deaths(2024)) + " in " + Y(2024) + " — still " + changePct("deaths", "pct_change_2019_2024") + " more than in " + Y(2019) + ".");
+add("Most of the increase since 2019 was among motorcyclists and pedestrians", C, "share_of_total_change_2019_2024", () => (pairShare("share_of_total_change_2019_2024") > 0.5 ? "Most of the increase since " + Y(2019) + " was among motorcyclists and pedestrians" : "?"), {line: true});
+add("Between 2019 and 2024, motorcyclist deaths rose 23% (5,044 to 6,227)", C, "motorcyclist_deaths 2019, 2024, pct_change", () => "Between " + Y(2019) + " and " + Yn + ", motorcyclist deaths rose " + changePct("motorcyclist_deaths", "pct_change_2019_2024") + " (" + fromTo(chg("motorcyclist_deaths", "2019"), chg("motorcyclist_deaths", "2024")) + ")");
+add("pedestrian deaths 13% (6,272 to 7,080)", C, "pedestrian_deaths 2019, 2024, pct_change", () => "pedestrian deaths " + changePct("pedestrian_deaths", "pct_change_2019_2024") + " (" + fromTo(chg("pedestrian_deaths", "2019"), chg("pedestrian_deaths", "2024")) + ")");
+add("Deaths of people inside cars, SUVs, pickups and vans rose 2% (22,370 to 22,739).", C, "lpv_occupant_deaths 2019, 2024, pct_change", () => "Deaths of people inside cars, SUVs, pickups and vans rose " + changePct("lpv_occupant_deaths", "pct_change_2019_2024") + " (" + fromTo(chg("lpv_occupant_deaths", "2019"), chg("lpv_occupant_deaths", "2024")) + ").");
+add("Motorcyclists and pedestrians were 31% of deaths in 2019 but account for 69% of the increase.", C, "motorcyclist_deaths + pedestrian_deaths: share_of_total_2019, share_of_total_change_2019_2024", () => "Motorcyclists and pedestrians were " + pct0(pairShare("share_of_total_2019")) + " of deaths in " + Y(2019) + " but account for " + pct0(pairShare("share_of_total_change_2019_2024")) + " of the increase.");
+add("Change in deaths, 2019 to 2024", C, "column names 2019, 2024", () => "Change in deaths, " + Y(2019) + " to " + Yn, {line: true});
+add("Deaths by road user, indexed to 2016 = 100", F, "YEAR=2016 index", () => "Deaths by road user, indexed to " + Y0 + " = " + Math.round(num(annual[0].deaths_pedestrian) / num(annual[0].deaths_pedestrian) * 100), {line: true});
+add("2016–2024: pedestrian deaths +16%, cyclist deaths +29%, passenger deaths −12%.", F, "deaths_pedestrian, deaths_cyclist, deaths_passenger first to last year", () => mdash(Y0, Yn) + ": pedestrian deaths " + signed(growth("deaths_pedestrian")) + ", cyclist deaths " + signed(growth("deaths_cyclist")) + ", passenger deaths " + signed(growth("deaths_passenger")) + ".", {line: true});
+add("SUVs struck 1,149 of the pedestrians killed in 2016 and 1,746 in 2024, a rise from 19% to 25% of pedestrian deaths.", S, "deaths_suv, share_suv for 2016 and 2024", () => "SUVs struck " + fmt.int(num(strikingYear(2016).deaths_suv)) + " of the pedestrians killed in " + strikingYear(2016).YEAR + " and " + fmt.int(num(strikingYear(2024).deaths_suv)) + " in " + strikingYear(2024).YEAR + ", a rise from " + pct0(num(strikingYear(2016).share_suv)) + " to " + pct0(num(strikingYear(2024).share_suv)) + " of pedestrian deaths.");
+add("The share killed by passenger cars fell from 42% to 36%.", S, "share_car for 2016 and 2024", () => "The share killed by passenger cars fell from " + pct0(num(strikingYear(2016).share_car)) + " to " + pct0(num(strikingYear(2024).share_car)) + ".");
+add("2.2% where the limit is 25 mph or less", K, "str_speed_limit/<=25 crude_rate", () => pct1(num(contrast("str_speed_limit", "<=25").crude_rate)) + " where the limit is " + "<=25".slice(2) + " mph or less");
+add("14.8% at 40–45 mph", K, "str_speed_limit/40-45 crude_rate", () => pct1(num(contrast("str_speed_limit", "40-45").crude_rate)) + " at " + band("40-45") + " mph");
+add("33.1% at 50–55 mph", K, "str_speed_limit/50-55 crude_rate", () => pct1(num(contrast("str_speed_limit", "50-55").crude_rate)) + " at " + band("50-55") + " mph");
+add("At night on unlit roads 25.9% died, against 2.6% in daylight.", K, "light/dark_not_lighted and light/daylight crude_rate", () => "At night on unlit roads " + pct1(num(contrast("light", "dark_not_lighted").crude_rate)) + " died, against " + pct1(num(contrast("light", "daylight").crude_rate)) + " in daylight.");
+add("On roads limited to 35 mph or less, 7.0% of pedestrians struck by an SUV or pickup died, against 4.3% of those struck by a car — 1.6 times as often (95% CI 1.25–2.10)", L, "risk SUV/pickup <=35, risk car <=35, RR <=35", () => "On roads limited to " + lowSpeed + " mph or less, " + pct1(num(lt("risk SUV/pickup <=35").estimate)) + " of pedestrians struck by an SUV or pickup died, against " + pct1(num(lt("risk car <=35").estimate)) + " of those struck by a car — " + fmt.times(num(rr.estimate)) + " times as often (95% CI " + num(rr.low).toFixed(2) + "–" + num(rr.high).toFixed(2) + ")");
+add("On roads limited to 40 mph or more the difference is smaller: 16.3% against 13.8%.", L, "risk SUV/pickup 40+, risk car 40+", () => (num(lt("risk SUV/pickup 40+").estimate) - num(lt("risk car 40+").estimate) < num(lt("risk SUV/pickup <=35").estimate) - num(lt("risk car <=35").estimate) || num(lt("RR SUV/pickup vs car, 40+ mph").estimate) < num(rr.estimate) ? "On roads limited to " + ltHigh + " mph or more the difference is smaller: " + pct1(num(lt("risk SUV/pickup 40+").estimate)) + " against " + pct1(num(lt("risk car 40+").estimate)) + "." : "?"));
+add("Vehicle type is other or unknown for about 11% of pedestrian deaths.", S, "sum(deaths_other_unknown)/sum(all deaths)", () => "Vehicle type is other or unknown for about " + pct0(sum(striking, "deaths_other_unknown") / sumCols.reduce((t, c) => t + sum(striking, c), 0)) + " of pedestrian deaths.");
+add("Crashes between midnight and 6 a.m. are four times as likely to be fatal as crashes from 6 to 10 a.m.", Q, "tod/00-05 and 06-09 fatal_rate", () => "Crashes between midnight and " + (nightEnd + 1) + " a.m. are " + (Math.round(num(tod("00-05").fatal_rate) / num(tod("06-09").fatal_rate)) === 4 ? "four" : "?") + " times as likely to be fatal as crashes from " + morningStart + " to " + (morningEnd + 1) + " a.m.", {line: true});
+add("Of police-reported crashes between midnight and 5:59 a.m., 1.5% were fatal, against 0.38% between 6:00 and 9:59 a.m.", Q, "tod/00-05 and 06-09 fatal_rate", () => "Of police-reported crashes between midnight and " + nightEnd + ":59 a.m., " + pct1(num(tod("00-05").fatal_rate)) + " were fatal, against " + pct2(num(tod("06-09").fatal_rate)) + " between " + morningStart + ":00 and " + morningEnd + ":59 a.m.");
+add("These hours have 8% of police-reported crashes but 20% of fatal ones.", Q, "tod/00-05 share_all_crashes, share_fatal_fars", () => "These hours have " + pct0(num(tod("00-05").share_all_crashes)) + " of police-reported crashes but " + pct0(num(tod("00-05").share_fatal_fars)) + " of fatal ones.");
+add("Occupants aged 75 and over are the most likely to die in a crash", P, "age_band/75+ rate is the maximum", () => (num(old75.rate) === Math.max(...table(P).filter(r => r.factor === "age_band").map(r => num(r.rate))) ? "Occupants aged " + old75.level.replace("+", "") + " and over are the most likely to die in a crash" : "?"), {line: true});
+add("0.49% of car, SUV, pickup and van occupants aged 75 or older were killed, against 0.18% of those aged 25–34.", P, "age_band/75+ and 25-34 rate", () => pct2(num(old75.rate)) + " of car, SUV, pickup and van occupants aged " + old75.level.replace("+", "") + " or older were killed, against " + pct2(num(ageRef.rate)) + " of those aged " + band(ageRef.level) + ".");
+add("the gap widens to 5.5 times (95% CI 4.7–6.5)", P, "age_band/75+ A_adj_rr, A_adj_rr_low, A_adj_rr_high", () => "the gap widens to " + fmt.times(num(old75.A_adj_rr)) + " times (95% CI " + fmt.times(num(old75.A_adj_rr_low)) + "–" + fmt.times(num(old75.A_adj_rr_high)) + ")");
+add("Of the 151,940 people killed on rural roads in 2016–2024, 67% died at the scene, against 49% of the 200,359 killed on urban roads.", D, "rural road and urban road deaths, share_died_at_scene", () => "Of the " + fmt.int(num(timing("rural road").deaths)) + " people killed on rural roads in " + mdash(Y0, Yn) + ", " + pct0(num(timing("rural road").share_died_at_scene)) + " died at the scene, against " + pct0(num(timing("urban road").share_died_at_scene)) + " of the " + fmt.int(num(timing("urban road").deaths)) + " killed on urban roads.");
+add("In 2024 the median time from the crash to the arrival of emergency medical services, where recorded, was 14 minutes on rural roads and 8 minutes on urban ones.", E, "YEAR=2024 rural and urban median_minutes_crash_to_arrival", () => "In " + ems(2024, "rural").YEAR + " the median time from the crash to the arrival of emergency medical services, where recorded, was " + ems(2024, "rural").median_minutes_crash_to_arrival + " minutes on rural roads and " + ems(2024, "urban").median_minutes_crash_to_arrival + " minutes on urban ones.");
+add("In 2024 arrival time is recorded for 45% of fatal crashes on rural roads and 38% on urban roads", E, "YEAR=2024 rural and urban share_arrival_time_known", () => "In " + ems(2024, "rural").YEAR + " arrival time is recorded for " + pct0(num(ems(2024, "rural").share_arrival_time_known)) + " of fatal crashes on rural roads and " + pct0(num(ems(2024, "urban").share_arrival_time_known)) + " on urban roads");
+// Numbers that are structure, not statistics: story numbers, the explorer's table indices and the fixed 95% confidence level.
+const structural = ["1 · DEATHS BY YEAR", "2 · WHO DIED", "3 · PEDESTRIANS", "4 · TIME OF DAY", "5 · AGE", "6 · RURAL ROADS", "01Frequency vs fatal severity", "02Crude vs adjusted risk", "03Fatal crash trends", "TABLE 01", "with 95% confidence interval", "design-based 95% CIs"];
+const esc = x => x.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+const phrase = (text, line) => new RegExp((line ? "^" : "(?<![\\d.,+−])") + esc(text) + (line ? "$" : "(?![\\d,]?\\d)"), line ? "gm" : "g");
+const flat = html.slice(html.indexOf("<body>")).replace(/<script[\s\S]*?<\/script>/g, "").replace(/<\/?(span|code|a|strong|em|b)\b[^>]*>/g, "").replace(/<[^>]+>/g, "\n").split("\n").map(line => line.trim()).filter(Boolean).join("\n");
+let claimCount = 0, rest = flat;
+const seen = new Set();
+for (const claim of claims) {
+  assert.ok(!seen.has(claim.text), "Duplicate claim " + claim.text);
+  seen.add(claim.text);
+  assert.equal(claim.value(), claim.text, "Claim differs from " + claim.csv + " [" + claim.row + "] " + claim.col + ": " + claim.text);
+  assert.equal((flat.match(phrase(claim.text, claim.line)) || []).length, 1, "Claim expected once in index.html: " + claim.text);
+  rest = rest.replace(phrase(claim.text, claim.line), "§");
+  claimCount++;
 }
-// Every other number in the page body must be a year, clock time, speed-limit band, age, kicker index or confidence level.
-let rest = bodyText;
-for (const text of Object.keys(claims)) rest = rest.replace(new RegExp("(?<![\\d.,+−])" + text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "(?![\\d,]?\\d)", "g"), "§");
-for (const allowed of [/2020–21/g, /\b20(1[6-9]|2[0-4])\b/g, /\b0[1-4](?=[A-Z])/g, /^\s*\d ·/gm, /\b\d{1,2}:\d{2}/g, /\b\d{1,2}( to \d{1,2})? a\.m\./g, /\b\d{2}(–\d{2})? mph/g, /\b25–34\b/g, /\baged 75\b/g, /\b75 or older/g, /\b95% (CIs?|confidence interval)/g, /= 100\b/g, /^\s*0\d\s*$/gm, /TABLE 0\d/g]) rest = rest.replace(allowed, "§");
-assert.deepEqual(rest.match(/\d[\d,.]*/g) || [], [], "Unregistered number in page text");
+for (const text of structural) {
+  assert.ok(flat.includes(text), "Structural phrase missing: " + text);
+  rest = rest.replaceAll(text, "§");
+}
+assert.deepEqual(rest.match(/\d[\d,.]*/g) || [], [], "Unregistered number in page text: " + (rest.match(/.{0,30}\d[\d,.]*.{0,15}/g) || []).join(" | "));
 // Wording claims for numbers written as words.
 const ratioTod = num(tod("00-05").fatal_rate) / num(tod("06-09").fatal_rate);
 assert.ok(html.includes("four times as likely") && Math.round(ratioTod) === 4 && Math.abs(ratioTod - 4) < 0.1, "'four times' differs from the fatal-rate ratio");
@@ -197,7 +197,7 @@ for (const key of Object.keys(STORIES)) {
   assert.ok(spec.table.head.length > 1 && spec.table.rows.length > 0, "Chart " + key + " has no data table");
   assert.ok(spec.table.rows.every(row => row.length === spec.table.head.length), "Chart " + key + " table is ragged");
 }
-console.log("Claims registry: " + Object.keys(claims).length + " distinct claims, " + claimCount + " bound occurrences.");
+console.log("Claims registry: " + claimCount + " claims bound to CSV values.");
 
 assert.ok(markdown("**Teenage *less* severe** x").includes("<strong>Teenage <em>less</em> severe</strong>"));
 assert.ok(markdown("text\n\n    a = 1 < 2\n\n    b\n\npara").includes("<pre><code>a = 1 &lt; 2\n\nb</code></pre>"));
