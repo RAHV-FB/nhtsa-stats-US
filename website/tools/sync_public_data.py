@@ -15,18 +15,16 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parents[2]
 SITE = REPO / "website"
 SOURCES = {
-    "reports/findings.json": "findings.json",
     "outputs/tables/descriptive/frequency_vs_severity.csv": "tables/descriptive/frequency_vs_severity.csv",
     "outputs/tables/severity/fatal_crude_vs_adjusted.csv": "tables/severity/fatal_crude_vs_adjusted.csv",
-    "outputs/tables/contributions/ranking.csv": "tables/contributions/ranking.csv",
     "outputs/tables/descriptive/fars_annual.csv": "tables/descriptive/fars_annual.csv",
-    "outputs/tables/contributions/fars_overlap_summary.csv": "tables/contributions/fars_overlap_summary.csv",
-    "outputs/tables/simulation/threshold_required_share.csv": "tables/simulation/threshold_required_share.csv",
-    "outputs/tables/speeding/key_models.csv": "tables/speeding/key_models.csv",
-    "outputs/tables/speeding/shapley.csv": "tables/speeding/shapley.csv",
-    "outputs/tables/drugs/testing_rates.csv": "tables/drugs/testing_rates.csv",
-    "outputs/tables/matched/belt_effect.csv": "tables/matched/belt_effect.csv",
-    "outputs/tables/descriptive/crss_annual.csv": "tables/descriptive/crss_annual.csv",
+    "outputs/tables/trends/fars_changes.csv": "tables/trends/fars_changes.csv",
+    "outputs/tables/vulnerable/fars_pedestrian_deaths_by_striking_vehicle.csv": "tables/vulnerable/fars_pedestrian_deaths_by_striking_vehicle.csv",
+    "outputs/tables/vulnerable/pedestrian_killed_contrasts.csv": "tables/vulnerable/pedestrian_killed_contrasts.csv",
+    "outputs/tables/vulnerable/pedestrian_light_truck_by_speed.csv": "tables/vulnerable/pedestrian_light_truck_by_speed.csv",
+    "outputs/tables/person/lpv_killed_crude_vs_adjusted.csv": "tables/person/lpv_killed_crude_vs_adjusted.csv",
+    "outputs/tables/stages/death_timing.csv": "tables/stages/death_timing.csv",
+    "outputs/tables/stages/ems_availability.csv": "tables/stages/ems_availability.csv",
     **{
         f"{folder}/{name}.md": f"reports/{name}.md"
         for folder, name in (

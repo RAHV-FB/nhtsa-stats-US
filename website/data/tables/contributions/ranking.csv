@@ -1,6 +1,0 @@
-factor,unit,rankable,note,prevalence_all_crashes,prevalence_fatal_crashes,crude_rr,adjusted_rr,adjusted_rd,shapley_test_r2_of_block,shapley_share_joint_af,fars_deaths_in_crashes_with_factor,rank_prevalence_fatal_crashes,rank_crude_rr,rank_adjusted_rr,rank_adjusted_rd,rank_shapley_test_r2_of_block,rank_shapley_share_joint_af,rank_fars_deaths_in_crashes_with_factor
-exceeded,crash,True,predictive value is that of the whole speeding-type block,0.00851769,0.0732252,10.0301,5.1972,0.0214186,0.0161525,0.0485259,40036,3,1,1,1,2,2,3
-speeding_other,crash,True,shares the speeding-type predictive block with 'exceeded',0.0923097,0.131037,1.65637,1.31312,0.00159786,,0.0274023,58657,2,3,3,3,,3,2
-alcohol,crash,True,,0.0518457,0.259419,6.4059,4.11223,0.0144779,0.0201378,0.181466,105821,1,2,2,2,1,1,1
-drugs_police,crash,False,NOT RANKED: severity association not identified (drugs/crss_bounds); FARS count is a lower bound (63% of deaths in crashes with undetermined drug status),0.010091,0.0768485,11.729,4.04785,0.012012,0.0116522,,84207,,,,,,,
-unbelted (occupant),occupant,False,occupant-level quantity; not comparable with crash-level factors,,,46.3252,28.0521,0.0257695,,,96706,,,,,,,
