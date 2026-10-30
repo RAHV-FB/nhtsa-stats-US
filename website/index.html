@@ -112,16 +112,16 @@
           <details class="chart-data"><summary>Show the data</summary><div class="table-scroller"><table></table></div></details>
         </figure>
 
-        <h3 class="sub-head">Vehicle type at the same speed limit</h3>
+        <h3 class="sub-head">Vehicle type on slower roads</h3>
         <div class="story-head">
-          <p>On roads limited to 35 mph or less, 7.0% of pedestrians struck by an SUV or pickup died, against 4.3% of those struck by a car — 1.6 times as often, after adjusting for pedestrian age and sex, crash location, light, time of day, area, year, and recorded alcohol and speeding.</p>
+          <p>On roads limited to 35 mph or less, 7.0% of pedestrians struck by an SUV or pickup died, against 4.3% of those struck by a car — 1.6 times as often (95% CI 1.25–2.10), after adjusting for pedestrian age and sex, crash location, light, time of day, NHTSA-imputed alcohol, police-reported speeding, and other recorded crash circumstances (full list in the <a href="#reports" data-report="methodology">methodology report</a>). On roads limited to 40 mph or more the difference is smaller: 16.3% against 13.8%.</p>
         </div>
         <figure class="chart" data-chart="lighttruck">
           <figcaption class="chart-title">Adjusted share of struck pedestrians who died, with 95% confidence interval</figcaption>
           <div class="chart-body"><p class="loading-line">Loading chart…</p></div>
           <details class="chart-data"><summary>Show the data</summary><div class="table-scroller"><table></table></div></details>
         </figure>
-        <p class="chart-note">Vehicle type is unknown for about 11% of pedestrian deaths. The data have no count of vehicles on the road by type, so a rising SUV share partly reflects more SUVs. Impact speed is not recorded; the posted limit stands in for it.</p>
+        <p class="chart-note">Vehicle type is other or unknown for about 11% of pedestrian deaths. The data have no count of vehicles on the road by type, so a rising SUV share partly reflects more SUVs. Impact speed is not recorded; the posted limit stands in for it.</p>
         <p class="source">FARS observed counts; CRSS survey estimates (design-based 95% CIs) · <code>vulnerable/fars_pedestrian_deaths_by_striking_vehicle.csv</code>; <code>vulnerable/pedestrian_killed_contrasts.csv</code>; <code>vulnerable/pedestrian_light_truck_by_speed.csv</code></p>
       </div>
     </section>
@@ -131,7 +131,7 @@
         <div class="section-kicker">4 · TIME OF DAY</div>
         <div class="story-head">
           <h2>Crashes between midnight and 6 a.m. are four times as likely to be fatal as crashes from 6 to 10 a.m.</h2>
-          <p>Of police-reported crashes between midnight and 5:59 a.m., 1.5% were fatal, against 0.38% between 6:00 and 9:59 a.m. These hours have 8% of crashes but 20% of fatal ones.</p>
+          <p>Of police-reported crashes between midnight and 5:59 a.m., 1.5% were fatal, against 0.38% between 6:00 and 9:59 a.m. These hours have 8% of police-reported crashes but 20% of fatal ones.</p>
         </div>
         <figure class="chart" data-chart="tod">
           <figcaption class="chart-title">Share of police-reported crashes that were fatal, by time of day, with 95% confidence interval</figcaption>
@@ -148,14 +148,14 @@
         <div class="section-kicker">5 · AGE</div>
         <div class="story-head">
           <h2>Occupants aged 75 and over are the most likely to die in a crash</h2>
-          <p>In police-reported crashes, 0.49% of car, SUV, pickup and van occupants aged 75 or older were killed, against 0.18% of those aged 25–34. After adjusting for sex, seat position, belt use, vehicle type and vehicle age, speeding, alcohol, and the recorded road, weather, light and time-of-day conditions, the gap widens to 5.5 times (95% CI 4.7–6.5). Crash type is not adjusted for.</p>
+          <p>In police-reported crashes, 0.49% of car, SUV, pickup and van occupants aged 75 or older were killed, against 0.18% of those aged 25–34. After adjusting for sex, seat position, belt use, vehicle type, whether an older driver was involved, NHTSA-imputed alcohol, police-reported speeding, and other recorded crash circumstances (full list in the <a href="#reports" data-report="methodology">methodology report</a>), the gap widens to 5.5 times (95% CI 4.7–6.5). Crash type is not adjusted for.</p>
         </div>
         <figure class="chart" data-chart="age">
           <figcaption class="chart-title">Share of car, SUV, pickup and van occupants killed, by age, with 95% confidence interval</figcaption>
           <div class="chart-body"><p class="loading-line">Loading chart…</p></div>
           <details class="chart-data"><summary>Show the data</summary><div class="table-scroller"><table></table></div></details>
         </figure>
-        <p class="chart-note">Older bodies tolerate impact forces less well; the data cannot separate frailty from driving and travel patterns.</p>
+        <p class="chart-note">Frailty may contribute; the data cannot separate it from driving and travel patterns.</p>
         <p class="source">CRSS survey estimates · <code>person/lpv_killed_crude_vs_adjusted.csv</code></p>
       </div>
     </section>
@@ -204,8 +204,7 @@
             <div class="dataset-options" id="dataset-options" role="group" aria-label="Analysis dataset">
               <button type="button" data-dataset="frequency" class="dataset-option active" aria-pressed="true"><span class="option-index">01</span><span>Frequency vs fatal severity</span></button>
               <button type="button" data-dataset="severity" class="dataset-option" aria-pressed="false"><span class="option-index">02</span><span>Crude vs adjusted risk</span></button>
-              <button type="button" data-dataset="attribution" class="dataset-option" aria-pressed="false"><span class="option-index">03</span><span>Factor contributions</span></button>
-              <button type="button" data-dataset="trends" class="dataset-option" aria-pressed="false"><span class="option-index">04</span><span>Fatal crash trends</span></button>
+              <button type="button" data-dataset="trends" class="dataset-option" aria-pressed="false"><span class="option-index">03</span><span>Fatal crash trends</span></button>
             </div>
             <div class="explorer-side-note"><span class="note-icon">i</span><p>CRSS estimates incorporate the complex survey design. Error intervals and suppressions matter; missing values are not zero.</p></div>
           </div>
