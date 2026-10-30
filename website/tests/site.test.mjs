@@ -11,13 +11,14 @@ const script = read("assets/site.js");
 assert.ok(html.includes('<html lang="en">'));
 assert.ok(html.includes('name="description"'));
 assert.ok(css.includes("@media(max-width:550px)"));
-for (const id of ["main", "findings-list", "explorer-chart", "factor-panel", "policy-percent", "report-list", "report-article"]) {
+for (const id of ["main", "deaths-by-year", "who-died", "pedestrians", "night", "age", "rural", "limits", "data", "reports", "explorer-chart", "report-list", "report-article"]) {
   assert.ok(html.includes('id="' + id + '"'), "Missing accessible page element " + id);
 }
-assert.ok(html.includes('href="#methodology"'));
+for (const chart of ["deaths", "changes", "indexed", "striking", "speed", "lighttruck", "tod", "age", "rural"]) assert.ok(html.includes('data-chart="' + chart + '"'), "Missing chart " + chart);
+assert.ok(!/FACTORS|policy\(|findings\(|overlap\(/.test(script), "Removed feature code is still present");
 const sandbox = {document: {readyState: "loading", addEventListener() {}}, console};
-const {csv, markdown, safeLink, ratio, QUERY, REPORTS} = vm.runInNewContext(
-  script + "\n;({csv,markdown,safeLink,ratio,QUERY,REPORTS})", sandbox
+const {csv, markdown, safeLink, ratio, QUERY, REPORTS, fmt, STORIES} = vm.runInNewContext(
+  script + "\n;({csv,markdown,safeLink,ratio,QUERY,REPORTS,fmt,STORIES})", sandbox
 );
 assert.equal(csv('a,b\n"one,two",3\n"line\nbreak",4\n').length, 2);
 assert.equal(csv('a,b\n"one,two",3\n')[0].a, "one,two");
@@ -73,70 +74,131 @@ for (const [key, label] of REPORTS) {
   assert.ok(fs.existsSync(file), "Missing report " + label);
   assert.ok(fs.statSync(file).size > 500, "Suspiciously empty report " + label);
 }
-const originalCounts = csv(read("data/tables/contributions/fars_overlap_summary.csv"));
-assert.ok(originalCounts.some(row => row.factor === "sum of the four factor counts"));
-const policy = csv(read("data/tables/simulation/threshold_required_share.csv"));
-const alcohol5 = policy.find(row => row.segment === "alcohol" && row.reduction_of_all_deaths_pct === "5");
-assert.ok(alcohol5 && Math.abs(Number(alcohol5.required_share_of_segment_deaths)-0.163)<0.005);
-
-// Provenance registry: every hard-coded statistic must appear in the page and equal its bundled source table value.
+// Claims registry: every statistic written in prose in index.html or site.js is bound to its bundled CSV value.
 const table = name => csv(read("data/tables/" + name));
-const models = table("speeding/key_models.csv").filter(r => r.exposure === "exceeded" && r.outcome === "fatal");
-const model = name => models.find(r => r.model === name);
-const shapley = (exposure, block) => table("speeding/shapley.csv").find(r => r.exposure === exposure && r.outcome === "fatal" && r.variant === "all_blocks" && r.block === block);
-const pedestrian = table("descriptive/frequency_vs_severity.csv").find(r => r.factor === "crash_type" && r.level === "pedestrian");
-const overlap = name => table("contributions/fars_overlap_summary.csv").find(r => r.factor === name);
-const tested = survival => table("drugs/testing_rates.csv").find(r => r.dimension === "all years" && r.survival === survival);
-const belt = table("matched/belt_effect.csv").find(r => r.estimand === "fatality_rr_belted_vs_unbelted_given_fatal_crash");
-const sum = (name, col) => table(name).reduce((total, r) => total + Number(r[col]), 0);
-const pct = (x, d = 0) => (x * 100).toFixed(d) + "%";
-const group = n => Math.round(n).toLocaleString("en-US");
-const claims = [
-  {text: "10.0", file: "index.html", csv: "speeding/key_models.csv", row: "model=crude", col: "rr", value: () => Number(model("crude").rr).toFixed(1)},
-  {text: "4.88", file: "index.html", csv: "speeding/key_models.csv", row: "model=all_blocks", col: "rr", value: () => Number(model("all_blocks").rr).toFixed(2)},
-  {text: "4.12–5.79", file: "index.html", csv: "speeding/key_models.csv", row: "model=all_blocks", col: "rr_low–rr_high", value: () => Number(model("all_blocks").rr_low).toFixed(2) + "–" + Number(model("all_blocks").rr_high).toFixed(2)},
-  {text: "5.2 (4.3–6.3)", file: "index.html", csv: "speeding/key_models.csv", row: "model=environment_and_other_behaviour", col: "rr (rr_low–rr_high)", value: () => {const m = model("environment_and_other_behaviour"); return Number(m.rr).toFixed(1) + " (" + Number(m.rr_low).toFixed(1) + "–" + Number(m.rr_high).toFixed(1) + ")";}},
-  {text: "69%", file: "index.html", csv: "speeding/key_models.csv", row: "model=all_blocks", col: "share_logrr_retained", value: () => pct(Number(model("all_blocks").share_logrr_retained))},
-  {text: "68.8%", file: "index.html", csv: "speeding/key_models.csv", row: "all_blocks vs crude", col: "ln(rr)/ln(crude rr)", value: () => pct(Math.log(Number(model("all_blocks").rr)) / Math.log(Number(model("crude").rr)), 1)},
-  {text: "7.0", file: "assets/site.js", csv: "speeding/key_models.csv", row: "model=other_behaviour_only", col: "rr", value: () => Number(model("other_behaviour_only").rr).toFixed(1)},
-  {text: "about 9%", file: "index.html", csv: "speeding/shapley.csv", row: "exceeded/fatal/all_blocks/alcohol", col: "shapley_share_of_crude", value: () => "about " + pct(Number(shapley("exceeded", "alcohol").shapley_share_of_crude))},
-  {text: "around 9%", file: "assets/site.js", csv: "speeding/shapley.csv", row: "exceeded/fatal/all_blocks/alcohol", col: "shapley_share_of_crude", value: () => "around " + pct(Number(shapley("exceeded", "alcohol").shapley_share_of_crude))},
-  {text: "4–16%", file: "index.html", csv: "speeding/shapley.csv", row: "exceeded/fatal/all_blocks/alcohol", col: "min_share_any_order–max_share_any_order", value: () => {const r = shapley("exceeded", "alcohol"); return (Number(r.min_share_any_order) * 100).toFixed(0) + "–" + pct(Number(r.max_share_any_order));}},
-  {text: "around 4%", file: "assets/site.js", csv: "speeding/shapley.csv", row: "alcohol/fatal/all_blocks/speeding_type", col: "shapley_share_of_crude", value: () => "around " + pct(Number(shapley("alcohol", "speeding_type").shapley_share_of_crude))},
-  {text: "353,706", file: "index.html", csv: "descriptive/fars_annual.csv", row: "all years", col: "sum(deaths)", value: () => group(sum("descriptive/fars_annual.csv", "deaths"))},
-  {text: "325,922", file: "index.html", csv: "descriptive/fars_annual.csv", row: "all years", col: "sum(fatal_crashes)", value: () => group(sum("descriptive/fars_annual.csv", "fatal_crashes"))},
-  {text: "468,993", file: "index.html", csv: "descriptive/crss_annual.csv", row: "all years", col: "sum(n_sample)", value: () => group(sum("descriptive/crss_annual.csv", "n_sample"))},
-  {text: "1.2%", file: "index.html", csv: "descriptive/frequency_vs_severity.csv", row: "crash_type/pedestrian", col: "share_all_crashes", value: () => pct(Number(pedestrian.share_all_crashes), 1)},
-  {text: "18.6%", file: "index.html", csv: "descriptive/frequency_vs_severity.csv", row: "crash_type/pedestrian", col: "share_fatal_fars", value: () => pct(Number(pedestrian.share_fatal_fars), 1)},
-  {text: "15.6×", file: "index.html", csv: "descriptive/frequency_vs_severity.csv", row: "crash_type/pedestrian", col: "overrep_ratio", value: () => Number(pedestrian.overrep_ratio).toFixed(1) + "×"},
-  {text: "13.2–18.5", file: "index.html", csv: "descriptive/frequency_vs_severity.csv", row: "crash_type/pedestrian", col: "overrep_low–overrep_high", value: () => Number(pedestrian.overrep_low).toFixed(1) + "–" + Number(pedestrian.overrep_high).toFixed(1)},
-  {text: "62%", file: "index.html", csv: "drugs/testing_rates.csv", row: "all years/killed", col: "share_tested", value: () => pct(Number(tested("killed").share_tested))},
-  {text: "19%", file: "index.html", csv: "drugs/testing_rates.csv", row: "all years/survived", col: "share_tested", value: () => pct(Number(tested("survived").share_tested))},
-  {text: "109%", file: "index.html", csv: "contributions/fars_overlap_summary.csv", row: "sum of the four factor counts", col: "deaths/all deaths", value: () => pct(Number(overlap("sum of the four factor counts").deaths) / Number(overlap("all deaths").deaths))},
-  {text: "65%", file: "index.html", csv: "contributions/fars_overlap_summary.csv", row: "union", col: "deaths/all deaths", value: () => pct(Number(overlap("deaths involving at least one factor (union)").deaths) / Number(overlap("all deaths").deaths))},
-  {text: "44 percentage points of all deaths", file: "index.html", csv: "contributions/fars_overlap_summary.csv", row: "sum minus union", col: "deaths/all deaths", value: () => ((Number(overlap("sum of the four factor counts").deaths) - Number(overlap("deaths involving at least one factor (union)").deaths)) / Number(overlap("all deaths").deaths) * 100).toFixed(0) + " percentage points of all deaths"},
-  {text: "222,767", file: "index.html", csv: "contributions/fars_overlap_summary.csv", row: "all deaths", col: "deaths_undetermined_drug_status", value: () => group(Number(overlap("all deaths").deaths_undetermined_drug_status))},
-  {text: "105,821", file: "assets/site.js", csv: "contributions/fars_overlap_summary.csv", row: "driver BAC >= .08 (MI)", col: "deaths", value: () => group(Number(overlap("driver BAC >= .08 (MI)").deaths))},
-  {text: "0.34", file: "assets/site.js", csv: "matched/belt_effect.csv", row: "fatality_rr_belted_vs_unbelted_given_fatal_crash", col: "estimate", value: () => Number(belt.estimate).toFixed(2)},
-  {text: "0.33–0.35", file: "assets/site.js", csv: "matched/belt_effect.csv", row: "fatality_rr_belted_vs_unbelted_given_fatal_crash", col: "low–high", value: () => Number(belt.low).toFixed(2) + "–" + Number(belt.high).toFixed(2)},
-  {text: "16.3%", file: "index.html", csv: "simulation/threshold_required_share.csv", row: "alcohol/5", col: "required_share_of_segment_deaths", value: () => pct(Number(alcohol5.required_share_of_segment_deaths), 1)}
-];
-// Files each claim must appear in, with the exact expected number of occurrences (digit-bounded match).
-const where = {
-  "10.0": {"index.html": 1, "assets/site.js": 1}, "4.88": {"index.html": 4, "assets/site.js": 2},
-  "4.12–5.79": {"index.html": 2, "assets/site.js": 1}, "5.2 (4.3–6.3)": {"index.html": 2, "assets/site.js": 1},
-  "4–16%": {"index.html": 1, "assets/site.js": 1}, "62%": {"index.html": 1, "assets/site.js": 1}, "19%": {"index.html": 1, "assets/site.js": 1},
-  "65%": {"index.html": 2}, "105,821": {"assets/site.js": 2}, "0.34": {"assets/site.js": 2}
+const num = Number;
+const annual = table("descriptive/fars_annual.csv");
+const year = y => annual.find(r => r.YEAR === String(y));
+const deaths = y => num(year(y).deaths);
+const changes = table("trends/fars_changes.csv");
+const change = name => changes.find(r => r.indicator === name);
+const striking = table("vulnerable/fars_pedestrian_deaths_by_striking_vehicle.csv");
+const strikingYear = y => striking.find(r => r.YEAR === String(y));
+const contrasts = table("vulnerable/pedestrian_killed_contrasts.csv");
+const contrast = (factor, level) => contrasts.find(r => r.factor === factor && r.level === level);
+const lightTruck = table("vulnerable/pedestrian_light_truck_by_speed.csv");
+const lt = quantity => lightTruck.find(r => r.quantity === quantity);
+const freq = table("descriptive/frequency_vs_severity.csv");
+const tod = level => freq.find(r => r.factor === "tod" && r.level === level);
+const ageRow = level => table("person/lpv_killed_crude_vs_adjusted.csv").find(r => r.factor === "age_band" && r.level === level);
+const timing = group => table("stages/death_timing.csv").find(r => r.group === group);
+const ems = (y, road) => table("stages/ems_availability.csv").find(r => r.YEAR === String(y) && r.road === road);
+const sum = (rows, col) => rows.reduce((total, r) => total + num(r[col]), 0);
+const pct0 = x => fmt.pct(x, 0), pct1 = x => fmt.pct(x, 1), pct2 = x => fmt.pct(x, 2);
+const signed = x => (x < 0 ? "−" : "+") + Math.abs(x * 100).toFixed(0) + "%";
+const sumCols = ["deaths_car", "deaths_large", "deaths_motorcycle", "deaths_other_unknown", "deaths_pickup", "deaths_suv", "deaths_van"];
+const pairShare = col => num(change("motorcyclist_deaths")[col]) + num(change("pedestrian_deaths")[col]);
+const growth = col => annual[annual.length - 1][col] / annual[0][col] - 1;
+const use = (csvName, row, colName, value, file = "index.html") => ({csv: csvName, row, col: colName, value, file});
+const F = "descriptive/fars_annual.csv", C = "trends/fars_changes.csv", S = "vulnerable/fars_pedestrian_deaths_by_striking_vehicle.csv";
+const K = "vulnerable/pedestrian_killed_contrasts.csv", L = "vulnerable/pedestrian_light_truck_by_speed.csv", Q = "descriptive/frequency_vs_severity.csv";
+const P = "person/lpv_killed_crude_vs_adjusted.csv", D = "stages/death_timing.csv", E = "stages/ems_availability.csv";
+const changePct = (name, col) => fmt.pct(num(change(name)[col]) / 100, 0);
+const claims = {
+  "39,254": [use(F, "YEAR=2024", "deaths", () => fmt.int(deaths(2024))), use(F, "YEAR=2024", "deaths", () => fmt.int(deaths(2024)))],
+  "353,706": [use(F, "all years", "sum(deaths)", () => fmt.int(sum(annual, "deaths")))],
+  "43,230": [use(F, "max deaths", "deaths", () => fmt.int(Math.max(...annual.map(r => num(r.deaths))))), use(F, "YEAR=2021", "deaths", () => fmt.int(deaths(2021)))],
+  "+8%": [use(C, "deaths", "pct_change_2019_2024", () => signed(num(change("deaths").pct_change_2019_2024) / 100))],
+  "18%": [use(C, "pedestrian_deaths", "share_of_total_2024", () => pct0(num(change("pedestrian_deaths").share_of_total_2024)))],
+  "36,355": [use(F, "YEAR=2019", "deaths", () => fmt.int(deaths(2019)))],
+  "39,007": [use(F, "YEAR=2020", "deaths", () => fmt.int(deaths(2020)))],
+  "8%": [use(C, "deaths", "pct_change_2019_2024", () => changePct("deaths", "pct_change_2019_2024")), use(Q, "tod/00-05", "share_all_crashes", () => pct0(num(tod("00-05").share_all_crashes)))],
+  "23%": [use(C, "motorcyclist_deaths", "pct_change_2019_2024", () => changePct("motorcyclist_deaths", "pct_change_2019_2024"))],
+  "5,044": [use(C, "motorcyclist_deaths", "2019", () => fmt.int(num(change("motorcyclist_deaths")["2019"])))],
+  "6,227": [use(C, "motorcyclist_deaths", "2024", () => fmt.int(num(change("motorcyclist_deaths")["2024"])))],
+  "13%": [use(C, "pedestrian_deaths", "pct_change_2019_2024", () => changePct("pedestrian_deaths", "pct_change_2019_2024"))],
+  "6,272": [use(C, "pedestrian_deaths", "2019", () => fmt.int(num(change("pedestrian_deaths")["2019"])))],
+  "7,080": [use(C, "pedestrian_deaths", "2024", () => fmt.int(num(change("pedestrian_deaths")["2024"])))],
+  "2%": [use(C, "lpv_occupant_deaths", "pct_change_2019_2024", () => changePct("lpv_occupant_deaths", "pct_change_2019_2024"))],
+  "22,370": [use(C, "lpv_occupant_deaths", "2019", () => fmt.int(num(change("lpv_occupant_deaths")["2019"])))],
+  "22,739": [use(C, "lpv_occupant_deaths", "2024", () => fmt.int(num(change("lpv_occupant_deaths")["2024"])))],
+  "31%": [use(C, "motorcyclist_deaths + pedestrian_deaths", "share_of_total_2019", () => pct0(pairShare("share_of_total_2019")))],
+  "69%": [use(C, "motorcyclist_deaths + pedestrian_deaths", "share_of_total_change_2019_2024", () => pct0(pairShare("share_of_total_change_2019_2024")))],
+  "+16%": [use(F, "2016 to 2024", "deaths_pedestrian", () => signed(growth("deaths_pedestrian")))],
+  "+29%": [use(F, "2016 to 2024", "deaths_cyclist", () => signed(growth("deaths_cyclist")))],
+  "−12%": [use(F, "2016 to 2024", "deaths_passenger", () => signed(growth("deaths_passenger")))],
+  "1,149": [use(S, "YEAR=2016", "deaths_suv", () => fmt.int(num(strikingYear(2016).deaths_suv)))],
+  "1,746": [use(S, "YEAR=2024", "deaths_suv", () => fmt.int(num(strikingYear(2024).deaths_suv)))],
+  "19%": [use(S, "YEAR=2016", "share_suv", () => pct0(num(strikingYear(2016).share_suv)))],
+  "25%": [use(S, "YEAR=2024", "share_suv", () => pct0(num(strikingYear(2024).share_suv)))],
+  "42%": [use(S, "YEAR=2016", "share_car", () => pct0(num(strikingYear(2016).share_car)))],
+  "36%": [use(S, "YEAR=2024", "share_car", () => pct0(num(strikingYear(2024).share_car)))],
+  "2.2%": [use(K, "str_speed_limit/<=25", "crude_rate", () => pct1(num(contrast("str_speed_limit", "<=25").crude_rate)))],
+  "14.8%": [use(K, "str_speed_limit/40-45", "crude_rate", () => pct1(num(contrast("str_speed_limit", "40-45").crude_rate)))],
+  "33.1%": [use(K, "str_speed_limit/50-55", "crude_rate", () => pct1(num(contrast("str_speed_limit", "50-55").crude_rate)))],
+  "25.9%": [use(K, "light/dark_not_lighted", "crude_rate", () => pct1(num(contrast("light", "dark_not_lighted").crude_rate)))],
+  "2.6%": [use(K, "light/daylight", "crude_rate", () => pct1(num(contrast("light", "daylight").crude_rate)))],
+  "7.0%": [use(L, "risk SUV/pickup <=35", "estimate", () => pct1(num(lt("risk SUV/pickup <=35").estimate)))],
+  "4.3%": [use(L, "risk car <=35", "estimate", () => pct1(num(lt("risk car <=35").estimate)))],
+  "1.6": [use(L, "RR SUV/pickup vs car, <=35 mph", "estimate", () => fmt.times(num(lt("RR SUV/pickup vs car, <=35 mph").estimate)))],
+  "11%": [use(S, "all years", "sum(deaths_other_unknown)/sum(all deaths)", () => pct0(sum(striking, "deaths_other_unknown") / sumCols.reduce((t, c) => t + sum(striking, c), 0)))],
+  "1.5%": [use(Q, "tod/00-05", "fatal_rate", () => pct1(num(tod("00-05").fatal_rate)))],
+  "0.38%": [use(Q, "tod/06-09", "fatal_rate", () => pct2(num(tod("06-09").fatal_rate)))],
+  "20%": [use(Q, "tod/00-05", "share_fatal_fars", () => pct0(num(tod("00-05").share_fatal_fars)))],
+  "0.49%": [use(P, "age_band/75+", "rate", () => pct2(num(ageRow("75+").rate)))],
+  "0.18%": [use(P, "age_band/25-34", "rate", () => pct2(num(ageRow("25-34").rate)))],
+  "5.5": [use(P, "age_band/75+", "A_adj_rr", () => fmt.times(num(ageRow("75+").A_adj_rr)))],
+  "4.7–6.5": [use(P, "age_band/75+", "A_adj_rr_low–A_adj_rr_high", () => fmt.times(num(ageRow("75+").A_adj_rr_low)) + "–" + fmt.times(num(ageRow("75+").A_adj_rr_high)))],
+  "151,940": [use(D, "rural road", "deaths", () => fmt.int(num(timing("rural road").deaths)))],
+  "67%": [use(D, "rural road", "share_died_at_scene", () => pct0(num(timing("rural road").share_died_at_scene)))],
+  "49%": [use(D, "urban road", "share_died_at_scene", () => pct0(num(timing("urban road").share_died_at_scene)))],
+  "200,359": [use(D, "urban road", "deaths", () => fmt.int(num(timing("urban road").deaths)))],
+  "14 minutes": [use(E, "YEAR=2024/rural", "median_minutes_crash_to_arrival", () => ems(2024, "rural").median_minutes_crash_to_arrival + " minutes")],
+  "8 minutes": [use(E, "YEAR=2024/urban", "median_minutes_crash_to_arrival", () => ems(2024, "urban").median_minutes_crash_to_arrival + " minutes")],
+  "45%": [use(E, "YEAR=2024/rural", "share_arrival_time_known", () => pct0(num(ems(2024, "rural").share_arrival_time_known)))],
+  "38%": [use(E, "YEAR=2024/urban", "share_arrival_time_known", () => pct0(num(ems(2024, "urban").share_arrival_time_known)))]
 };
-const occurrences = (text, claim) => (text.match(new RegExp("(?<![\\d.])" + claim.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "(?!\\d)", "g")) || []).length;
-for (const claim of claims) {
-  if (where[claim.text] && claim.file !== "index.html") continue;
-  const expected = where[claim.text] || {[claim.file]: 1};
-  for (const [file, count] of Object.entries(expected)) {
-    assert.equal(occurrences(read(file), claim.text), count, "Claim " + claim.text + " expected " + count + "x in " + file);
+// Exact occurrence counting with digit boundaries (and no sign or decimal point directly before an unsigned number).
+const occurrences = (text, claim) => (text.match(new RegExp("(?<![\\d.,+−])" + claim.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "(?![\\d,]?\\d)", "g")) || []).length;
+const bodyText = html.slice(html.indexOf("<body>")).replace(/<script[\s\S]*?<\/script>/g, "").replace(/<\/?(span|code|a|strong|em|b)\b[^>]*>/g, "").replace(/<[^>]+>/g, "\n");
+let claimCount = 0;
+for (const [text, uses] of Object.entries(claims)) {
+  for (const file of ["index.html", "assets/site.js"]) {
+    const expected = uses.filter(u => u.file === file).length;
+    assert.equal(occurrences(read(file), text), expected, "Claim " + text + " expected " + expected + "x in " + file);
   }
-  assert.equal(claim.value(), claim.text, "Claim " + claim.text + " differs from " + claim.csv + " [" + claim.row + "] " + claim.col);
+  for (const u of uses) {
+    assert.equal(u.value(), text, "Claim " + text + " differs from " + u.csv + " [" + u.row + "] " + u.col);
+    claimCount++;
+  }
 }
+// Every other number in the page body must be a year, clock time, speed-limit band, age, kicker index or confidence level.
+let rest = bodyText;
+for (const text of Object.keys(claims)) rest = rest.replace(new RegExp("(?<![\\d.,+−])" + text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "(?![\\d,]?\\d)", "g"), "§");
+for (const allowed of [/2020–21/g, /\b20(1[6-9]|2[0-4])\b/g, /\b0[1-4](?=[A-Z])/g, /^\s*\d ·/gm, /\b\d{1,2}:\d{2}/g, /\b\d{1,2}( to \d{1,2})? a\.m\./g, /\b\d{2}(–\d{2})? mph/g, /\b25–34\b/g, /\baged 75\b/g, /\b75 or older/g, /\b95% (CIs?|confidence interval)/g, /= 100\b/g, /^\s*0\d\s*$/gm, /TABLE 0\d/g]) rest = rest.replace(allowed, "§");
+assert.deepEqual(rest.match(/\d[\d,.]*/g) || [], [], "Unregistered number in page text");
+// Wording claims for numbers written as words.
+const ratioTod = num(tod("00-05").fatal_rate) / num(tod("06-09").fatal_rate);
+assert.ok(html.includes("four times as likely") && Math.round(ratioTod) === 4 && Math.abs(ratioTod - 4) < 0.1, "'four times' differs from the fatal-rate ratio");
+assert.ok(html.includes("Two in three") && Math.abs(num(timing("rural road").share_died_at_scene) - 2 / 3) < 0.01, "'Two in three' differs from share_died_at_scene");
+assert.ok(html.includes("for three years") && deaths(2021) > deaths(2022) && deaths(2022) > deaths(2023) && deaths(2023) > deaths(2024) && 2024 - 2021 === 3, "'three years of decline' differs from fars_annual.csv");
+assert.ok(html.includes("Most of the increase") && pairShare("share_of_total_change_2019_2024") > 0.5, "'Most of the increase' differs from fars_changes.csv");
+assert.ok(html.includes("most likely to die") && num(ageRow("75+").rate) === Math.max(...table(P).filter(r => r.factor === "age_band").map(r => num(r.rate))), "Highest age band differs from the table");
+assert.equal(annual.length, 9, "'Nine years' differs from fars_annual.csv");
+assert.ok(num(strikingYear(2024).share_suv) > num(strikingYear(2016).share_suv) && num(strikingYear(2024).share_car) < num(strikingYear(2016).share_car), "SUV/car share direction differs from the table");
+// site.js prose carries no data statistics; chart numbers are formatted from the CSVs at runtime.
+assert.ok(!/\d+(\.\d+)?%/.test(script.replace(/95%/g, "")), "site.js contains a hard-coded statistic");
+// Every story chart builds from its bundled CSV and exposes a data table.
+const siteCsv = name => csv(fs.readFileSync(path.join(root, "data/tables", name), "utf8"));
+const fetched = {};
+sandbox.fetch = async url => ({ok: true, status: 200, text: async () => fs.readFileSync(path.join(root, url), "utf8")});
+for (const key of Object.keys(STORIES)) {
+  const spec = await STORIES[key]();
+  assert.ok(spec.table.head.length > 1 && spec.table.rows.length > 0, "Chart " + key + " has no data table");
+  assert.ok(spec.table.rows.every(row => row.length === spec.table.head.length), "Chart " + key + " table is ragged");
+}
+console.log("Claims registry: " + Object.keys(claims).length + " distinct claims, " + claimCount + " bound occurrences.");
+
 assert.ok(markdown("**Teenage *less* severe** x").includes("<strong>Teenage <em>less</em> severe</strong>"));
 assert.ok(markdown("text\n\n    a = 1 < 2\n\n    b\n\npara").includes("<pre><code>a = 1 &lt; 2\n\nb</code></pre>"));
 assert.ok(!markdown("- item\n\n  more text").includes("<pre>"));
@@ -145,4 +207,4 @@ assert.ok(QUERY.severity.eligible({level: "yes", factor: "light", A_adj_rr: "2",
 for (const bad of [{level: "unknown"}, {level: "other"}, {factor: "YEAR"}, {flag: "unstable"}, {adj_flag: "level RSE>30%"}]) {
   assert.ok(!QUERY.severity.eligible({level: "yes", factor: "light", A_adj_rr: "2", flag: "", adj_flag: "", ...bad}));
 }
-console.log("Road Evidence: static structure, chart tables, reports, CSV/Markdown parser and policy baseline passed.");
+console.log("Road Evidence: static structure, story charts, claims registry, reports and CSV/Markdown parser passed.");

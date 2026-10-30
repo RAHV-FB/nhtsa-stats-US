@@ -184,16 +184,12 @@ presents them as measured effects. Details: `docs/limitations.md`,
 
 ## Public research website
 
-The findings are also published as a static, responsive public site, **Road Evidence**, live at
-https://rahv-fb.github.io/nhtsa-stats-US/. The site source is in [website/](website/). It is built
-directly from the committed statistical outputs and complements rather than replaces the
-nine-page Streamlit research interface. It is deployed by `.github/workflows/public-site.yml`
-on each push to `main`.
-
-Features include searchable supported findings, interactive charts with source tables,
-explanations of overlapping risk factors, a clearly hypothetical policy target calculator, and
-an in-browser library of eleven full research reports. Public data files are synchronised from
-canonical outputs; CI rejects stale copies.
+The results are also published as a static public site, **Road Evidence**, live at
+https://rahv-fb.github.io/nhtsa-stats-US/. It presents six plain data stories (deaths by year, who
+died, pedestrians, time of day, age, rural roads) with charts drawn at runtime from the committed
+output tables, the limits of the data, a table explorer and an in-browser library of the full
+reports. The source is in [website/](website/); `.github/workflows/public-site.yml` deploys it on
+each push to `main`, and CI rejects stale data copies or page numbers that no longer match their tables.
 
 Run locally from the repository root:
 

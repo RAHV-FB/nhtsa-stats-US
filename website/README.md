@@ -2,18 +2,21 @@
 
 Responsive, static front end for the **FARS & CRSS 2016–2024** US road-safety study. It complements, and does not replace, the nine-page Streamlit research app.
 
-## Included
+## Structure
 
-- Editorial landing page with provenance and uncertainty.
-- Searchable and filterable set of all ten Phase 1 findings (confidence intervals, denominators, robustness and limitations).
-- Interactive charts for over-representation, adjusted severity, factor rankings and annual fatalities, with underlying table access.
-- Analysis of overlapping counts for speed, BAC, drugs and unbelted occupants.
-- Speeding, alcohol, drugs and seat-belt research explainers.
-- Hypothetical policy break-even calculator computed from the committed threshold baseline (not an assumed intervention effect).
-- Provenance test: every statistic written into index.html or site.js is checked against its bundled table (website/tests/site.test.mjs).
-- Reader for eleven complete generated reports and technical documents.
-- Responsive styles, semantic landmarks, keyboard controls and reduced-motion preferences.
-- No analytics, external JavaScript dependencies or client secrets.
+index.html is one page of plain, sourced data stories, in this order:
+
+1. Intro and four key figures.
+2. Six stories, each with a short text, a chart drawn at runtime from a bundled CSV, a caveat and a source line: deaths by year, who died, pedestrians (striking vehicle, speed and darkness, vehicle type), time of day, age, rural roads.
+3. Limits of the data, linking to the limitations report.
+4. Explore the tables: the data explorer (four tables, CI whiskers, searchable) with the underlying rows.
+5. Full reports: the library that renders eleven generated Markdown reports and documents in the browser.
+
+assets/site.js has no dependencies. It holds the SVG line chart, the horizontal bars (with optional CI whiskers), the grouped bars, the data explorer, the CSV parser and the Markdown renderer. Every chart has role="img" with an aria-label that summarises its data, and a "Show the data" table with the rows.
+
+Public data lives in website/data/ and is copied by website/tools/sync_public_data.py. Do not edit it by hand. The page uses these tables: descriptive/fars_annual, descriptive/frequency_vs_severity, trends/fars_changes, vulnerable (striking vehicle, killed contrasts, light truck by speed), person/lpv_killed_crude_vs_adjusted, stages (death timing, EMS availability), severity/fatal_crude_vs_adjusted and contributions/ranking, plus findings.json and the reports.
+
+Claims test: website/tests/site.test.mjs binds every number written in prose in index.html or site.js to its bundled CSV value through a formatter, counts exact occurrences with digit boundaries, and fails on any other number in the page text. Sums, differences and shares (for example 69% of the increase) are derived from the CSVs in the test.
 
 ## Run locally
 
@@ -31,13 +34,13 @@ The published site needs only a static host, not Streamlit, server-side Python, 
 
 .github/workflows/public-site.yml validates the website and source snapshots. On a push to main, it attempts to deploy the website directory with GitHub Pages.
 
-The site is live at https://rahv-fb.github.io/nhtsa-stats-US/ (Repository Settings → Pages → Source: GitHub Actions). The verify job also runs on pull requests that touch website/, reports/, docs/ or outputs/tables/, so a stale snapshot or a hard-coded statistic that no longer matches its table fails CI before merge.
+The site is live at https://rahv-fb.github.io/nhtsa-stats-US/ (Repository Settings → Pages → Source: GitHub Actions). The verify job also runs on pull requests that touch website/, reports/, docs/ or outputs/tables/, so a stale snapshot or a number in the page text that no longer matches its table fails CI before merge.
 
 ## Scientific provenance
 
 The canonical source of every displayed data value is the project's generated source reports and output tables. The public data copies are mapped by website/tools/sync_public_data.py and checked by CI. Do not manually change website/data.
 
-When analysis results change, regenerate reports using the established research pipeline, synchronize the public snapshots and review the explanatory text for alignment. Never turn adjusted associations, selected drug observations or hypothetical policy scenarios into causal claims.
+When analysis results change, regenerate reports using the established research pipeline, synchronize the public snapshots and review the explanatory text for alignment. Never turn adjusted associations into causal claims.
 
 The nine-page technical interface remains runnable through: uv run streamlit run app/streamlit_app.py
 

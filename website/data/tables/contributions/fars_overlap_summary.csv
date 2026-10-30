@@ -1,9 +1,0 @@
-factor,deaths,share_of_all_deaths,deaths_with_no_other_listed_factor,share_also_involving_another_factor,overcount_ratio_sum_over_union,deaths_undetermined_drug_status
-speeding-related crash,98693,0.279026,29461.4,0.701484,1.68278,222767
-driver BAC >= .08 (MI),105821,0.299178,33889.3,0.679749,1.68278,222767
-driver drug-positive (determinate crashes only),84207,0.238071,24823.2,0.705212,1.68278,222767
-victim an unbelted vehicle occupant,96706,0.273408,27597.1,0.714629,1.68278,222767
-sum of the four factor counts,385427,1.08968,,,1.68278,222767
-deaths involving at least one factor (union),229041,0.647547,,,1.68278,222767
-deaths involving none of the four,124665,0.352453,,,1.68278,222767
-all deaths,353706,1,,,1.68278,222767
