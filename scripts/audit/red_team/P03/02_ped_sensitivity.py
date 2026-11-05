@@ -9,6 +9,8 @@ from nhtsa_stats.analysis.factorial import Factor
 per_df, per_design = mf.person_frame()
 raw = pl.read_parquet(config.PROCESSED_DIR/"crss_person.parquet", columns=["YEAR","case_id","VEH_NO","PER_NO","PERALCH_IM","pr_alcohol"]).to_pandas()
 print(raw.PERALCH_IM.value_counts(dropna=False).head(8).to_dict())
+raw["YEAR"] = raw["YEAR"].astype(int).astype(str)
+n0=len(per_df)
 per_df = per_df.merge(raw, on=["YEAR","case_id","VEH_NO","PER_NO"], how="left", validate="1:1")
 assert len(per_df)==len(per_design.__dict__.get('weight', per_df)) or True
 per_df["ped_alc_own"] = per_df.PERALCH_IM.map(lambda x: "unknown" if pd.isna(x) else ("yes" if x==1 else ("no" if x==0 else "unknown")))
