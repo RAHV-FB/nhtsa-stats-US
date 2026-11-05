@@ -1,0 +1,35 @@
+{
+ "table": "deaths/potential_lives.csv",
+ "description": "Lives the same people would have been expected to survive had they been belted/helmeted, using the within-vehicle (double pair comparison) effectiveness from the matched module applied to all seat positions; the belt estimate is sensitive to survivors' belt use being misrecorded (misreport scenarios)",
+ "population": "FARS fatal crashes 2016-2024 (census)",
+ "unit": "person killed",
+ "outcome": "death (INJ_SEV 4)",
+ "method": "Census counts; alcohol quantities are means over NHTSA's 10 BAC implicates with MI SE sqrt(1.1 * between-implicate variance)",
+ "inputs": [
+  "FARS person (INJ_SEV)",
+  "FARS per_aux",
+  "FARS veh_aux",
+  "FARS acc_aux",
+  "FARS midrvacc",
+  "FARS miper"
+ ],
+ "rows": 5,
+ "columns": [
+  "measure",
+  "scenario",
+  "effectiveness",
+  "effectiveness_low",
+  "effectiveness_high",
+  "deaths_without",
+  "lives",
+  "lives_low",
+  "lives_high",
+  "lives_per_year",
+  "lives_per_year_low",
+  "lives_per_year_high",
+  "estimate_type"
+ ],
+ "module": "nhtsa_stats.analysis.deaths",
+ "git_commit": "9e8ab40",
+ "generated_utc": "2026-11-05T14:18:27Z"
+}

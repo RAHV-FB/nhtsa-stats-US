@@ -1,0 +1,6 @@
+measure,scenario,effectiveness,effectiveness_low,effectiveness_high,deaths_without,lives,lives_low,lives_high,lives_per_year,lives_per_year_low,lives_per_year_high,estimate_type
+seat_belts,as_recorded,0.658495,0.645338,0.66995,94400,62161.9,60919.9,63243.3,6906.88,6768.88,7027.03,hypothetical (model-based: observed deaths x within-vehicle effectiveness estimate)
+seat_belts,misreport_5pct,0.524764,0.509819,0.537786,94400,49537.7,48126.9,50767,5504.19,5347.43,5640.78,hypothetical (model-based: observed deaths x within-vehicle effectiveness estimate)
+seat_belts,misreport_10pct,0.378908,0.36153,0.393718,94400,35768.9,34128.4,37167,3974.32,3792.05,4129.66,hypothetical (model-based: observed deaths x within-vehicle effectiveness estimate)
+seat_belts,misreport_20pct,0.0436194,0.0196537,0.0639725,94400,4117.67,1855.31,6039,457.519,206.145,671,hypothetical (model-based: observed deaths x within-vehicle effectiveness estimate)
+helmets,as_recorded,0.307081,0.199805,0.399942,18789,5769.74,3754.14,7514.51,641.083,417.126,834.946,hypothetical (model-based: observed deaths x within-vehicle effectiveness estimate)

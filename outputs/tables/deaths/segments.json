@@ -1,0 +1,34 @@
+{
+ "table": "deaths/segments.csv",
+ "description": "Pooled 2016-2024 deaths per segment with 2019/2021/2024 comparisons",
+ "population": "FARS fatal crashes 2016-2024 (census)",
+ "unit": "person killed",
+ "outcome": "death (INJ_SEV 4)",
+ "method": "Census counts; alcohol quantities are means over NHTSA's 10 BAC implicates with MI SE sqrt(1.1 * between-implicate variance)",
+ "inputs": [
+  "FARS person (INJ_SEV)",
+  "FARS per_aux",
+  "FARS veh_aux",
+  "FARS acc_aux",
+  "FARS midrvacc",
+  "FARS miper"
+ ],
+ "rows": 31,
+ "columns": [
+  "segment",
+  "deaths",
+  "share_of_all",
+  "per_year",
+  "deaths_2019",
+  "deaths_2021",
+  "deaths_2024",
+  "pct_change_2019_2021",
+  "pct_change_2021_2024",
+  "pct_change_2019_2024",
+  "mi_se",
+  "estimate_type"
+ ],
+ "module": "nhtsa_stats.analysis.deaths",
+ "git_commit": "9e8ab40",
+ "generated_utc": "2026-11-05T14:18:27Z"
+}

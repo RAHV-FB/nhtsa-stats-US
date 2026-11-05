@@ -1,0 +1,19 @@
+group,role,deaths,share_of_group,mi_se,estimate_type
+alcohol_impaired,risk_driver,64111.8,0.605853,0.00135735,estimated (MI)
+alcohol_impaired,risk_passenger,13668.8,0.129169,0.000498535,estimated (MI)
+alcohol_impaired,other_vehicle_occupant,16224.8,0.153324,0.00120989,estimated (MI)
+alcohol_impaired,pedestrian_or_cyclist,11317.5,0.106945,0.00183703,estimated (MI)
+alcohol_impaired,other_nonoccupant,498.2,0.00470768,0.000187908,estimated (MI)
+alcohol_impaired,not_risk_driver,41709.3,0.394147,0.00135735,estimated (MI)
+speeding,risk_driver,61811,0.626296,0,observed
+speeding,risk_passenger,15853,0.160629,0,observed
+speeding,other_vehicle_occupant,15134,0.153344,0,observed
+speeding,pedestrian_or_cyclist,5515,0.0558804,0,observed
+speeding,other_nonoccupant,380,0.00385032,0,observed
+speeding,not_risk_driver,36882,0.373704,0,observed
+large_truck,risk_driver,7064,0.14974,0,observed
+large_truck,risk_passenger,1225,0.0259671,0,observed
+large_truck,other_vehicle_occupant,33478,0.709656,0,observed
+large_truck,pedestrian_or_cyclist,5151,0.109189,0,observed
+large_truck,other_nonoccupant,257,0.0054478,0,observed
+large_truck,not_risk_driver,40111,0.85026,0,observed

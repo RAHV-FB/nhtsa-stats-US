@@ -1,0 +1,27 @@
+{
+ "table": "deaths/annual.csv",
+ "description": "Deaths per year in each (overlapping) segment of fatal crashes",
+ "population": "FARS fatal crashes 2016-2024 (census)",
+ "unit": "person killed",
+ "outcome": "death (INJ_SEV 4)",
+ "method": "Census counts; alcohol quantities are means over NHTSA's 10 BAC implicates with MI SE sqrt(1.1 * between-implicate variance)",
+ "inputs": [
+  "FARS person (INJ_SEV)",
+  "FARS per_aux",
+  "FARS veh_aux",
+  "FARS acc_aux",
+  "FARS midrvacc",
+  "FARS miper"
+ ],
+ "rows": 279,
+ "columns": [
+  "YEAR",
+  "segment",
+  "deaths",
+  "mi_se",
+  "estimate_type"
+ ],
+ "module": "nhtsa_stats.analysis.deaths",
+ "git_commit": "9e8ab40",
+ "generated_utc": "2026-11-05T14:18:27Z"
+}

@@ -1,0 +1,55 @@
+YEAR,group,indicator,share,n_known,mi_se,estimate_type
+2016,all,licence_invalid,0.130888,50929,0,observed
+2017,all,licence_invalid,0.131116,51298,0,observed
+2018,all,licence_invalid,0.128855,50328,0,observed
+2019,all,licence_invalid,0.130438,49786,0,observed
+2020,all,licence_invalid,0.166686,52110,0,observed
+2021,all,licence_invalid,0.161866,58956,0,observed
+2022,all,licence_invalid,0.149394,57867,0,observed
+2023,all,licence_invalid,0.145216,55848,0,observed
+2024,all,licence_invalid,0.139434,53416,0,observed
+2016,all,prior_dwi,0.0365834,50624,0,observed
+2017,all,prior_dwi,0.0350192,50972,0,observed
+2018,all,prior_dwi,0.0319819,49997,0,observed
+2019,all,prior_dwi,0.0308386,49451,0,observed
+2020,all,prior_dwi,0.0339393,51710,0,observed
+2021,all,prior_dwi,0.0299122,58538,0,observed
+2022,all,prior_dwi,0.027623,57416,0,observed
+2023,all,prior_dwi,0.0245967,55414,0,observed
+2024,all,prior_dwi,0.026084,52906,0,observed
+2016,bac_08_plus,licence_invalid,0.236339,9964.8,0.00348302,estimated (MI)
+2017,bac_08_plus,licence_invalid,0.23178,9917.4,0.00179535,estimated (MI)
+2018,bac_08_plus,licence_invalid,0.225537,9755.9,0.00165218,estimated (MI)
+2019,bac_08_plus,licence_invalid,0.232542,9379.6,0.00250204,estimated (MI)
+2020,bac_08_plus,licence_invalid,0.26096,10454.9,0.00136543,estimated (MI)
+2021,bac_08_plus,licence_invalid,0.251964,12232,0.00165415,estimated (MI)
+2022,bac_08_plus,licence_invalid,0.232918,12308.9,0.00168668,estimated (MI)
+2023,bac_08_plus,licence_invalid,0.232743,11277.4,0.00183364,estimated (MI)
+2024,bac_08_plus,licence_invalid,0.222292,10957.1,0.00225028,estimated (MI)
+2016,bac_08_plus,prior_dwi,0.0919149,9904.7,0.00103798,estimated (MI)
+2017,bac_08_plus,prior_dwi,0.0878625,9841.5,0.000485811,estimated (MI)
+2018,bac_08_plus,prior_dwi,0.0794138,9675.8,0.00095756,estimated (MI)
+2019,bac_08_plus,prior_dwi,0.0832881,9311.3,0.000951288,estimated (MI)
+2020,bac_08_plus,prior_dwi,0.0811379,10360.6,0.000828391,estimated (MI)
+2021,bac_08_plus,prior_dwi,0.068437,12133.1,0.000994908,estimated (MI)
+2022,bac_08_plus,prior_dwi,0.0614901,12182.5,0.000680952,estimated (MI)
+2023,bac_08_plus,prior_dwi,0.061243,11175.4,0.000759582,estimated (MI)
+2024,bac_08_plus,prior_dwi,0.0626447,10826.3,0.000496042,estimated (MI)
+2016,speeding,licence_invalid,0.223522,9234,0,observed
+2017,speeding,licence_invalid,0.226474,8937,0,observed
+2018,speeding,licence_invalid,0.224847,8637,0,observed
+2019,speeding,licence_invalid,0.23046,8700,0,observed
+2020,speeding,licence_invalid,0.274491,10208,0,observed
+2021,speeding,licence_invalid,0.268069,11124,0,observed
+2022,speeding,licence_invalid,0.243555,10823,0,observed
+2023,speeding,licence_invalid,0.240436,10560,0,observed
+2024,speeding,licence_invalid,0.217619,10137,0,observed
+2016,speeding,prior_dwi,0.0629638,9164,0,observed
+2017,speeding,prior_dwi,0.0621686,8863,0,observed
+2018,speeding,prior_dwi,0.0606909,8568,0,observed
+2019,speeding,prior_dwi,0.0573019,8621,0,observed
+2020,speeding,prior_dwi,0.055572,10113,0,observed
+2021,speeding,prior_dwi,0.0546379,11018,0,observed
+2022,speeding,prior_dwi,0.0448568,10723,0,observed
+2023,speeding,prior_dwi,0.0458198,10454,0,observed
+2024,speeding,prior_dwi,0.0440383,10014,0,observed
