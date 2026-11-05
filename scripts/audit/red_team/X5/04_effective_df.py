@@ -14,7 +14,7 @@ doms = {
  "fatal events (all)": y == 1,
  "fatal & too-fast": (y == 1) & (df.speeding_type == "too_fast_for_conditions") if "speeding_type" in df else None,
  "fatal & speeding": (y == 1) & (df.speeding == "yes"),
- "fatal & speeding & unlit": (y == 1) & (df.speeding == "yes") & (df.light == "dark_unlit"),
+ "fatal & speeding & unlit": (y == 1) & (df.speeding == "yes") & (df.light == "dark_not_lighted"),
  "fatal & young & night(tod)": (y == 1) & (df.young_driver == "yes"),
  "fatal & motorcycle & alcohol": (y == 1) & (df.any_motorcycle == "yes") & (df.alcohol_im == "yes"),
  "fatal & ped-config?": None,
@@ -25,9 +25,8 @@ for k, m in doms.items():
     m = np.asarray(m, bool)
     z = design.cluster_totals(m.astype(float))[:, 0]
     st = design.cluster_stratum
-    eff = 0; psus = int((z > 0).sum())
-    for h in range(design.n_strata):
-        zh = z[st == h]
-        if len(zh) >= 2 and np.ptp(zh) > 0: eff += 1
+    psus = int((z > 0).sum())
+    strata_with = len({int(st[i]) for i in np.nonzero(z > 0)[0]})
+    eff = max(psus - strata_with, 1)   # effective df = PSUs with events - strata with events (Korn-Graubard style)
     t42, te = stats.t.ppf(.975, design.df), stats.t.ppf(.975, max(eff, 1))
-    print(f"{k:32s} events={int(m.sum()):6d} PSUs with >=1 event={psus:3d} strata contributing variance={eff:3d}  t42={t42:.3f} t_eff={te:.3f} z=1.960  CI half-width x{te/t42:.3f} vs t42")
+    print(f"{k:32s} events={int(m.sum()):6d} PSUs with >=1 event={psus:3d} strata with events={strata_with:3d} eff df={eff:3d}  t42={t42:.3f} t_eff={te:.3f} z=1.960  CI half-width x{te/t42:.3f} vs t42")
