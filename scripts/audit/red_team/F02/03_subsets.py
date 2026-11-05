@@ -22,9 +22,11 @@ w = df.weather.isin(["clear","rain"])
 sub(df.surface=="wet", ["surface"], "weather", "rain", "rain vs clear, wet surface only")
 sub(df.surface=="dry", ["surface"], "weather", "rain", "rain vs clear, dry surface only")
 sub(w, ["surface"], "weather", "rain", "rain vs clear, all surfaces, no surface adj")
-for lab, mask in [("speed 30-45", df.speed_limit.isin(["30-35","40-45","<=25"])), ("speed 50-65", df.speed_limit.isin(["50-55","60-65"])), ("speed 70+", df.speed_limit=="70+")]:
-    sub(mask, [], "interstate", "yes", "interstate, "+lab)
-for lab, mask in [("speed <=45", df.speed_limit.isin(["30-35","40-45","<=25"])), ("speed >=50", df.speed_limit.isin(["50-55","60-65","70+"]))]:
-    sub(mask, [], "older_driver", "yes", "older driver, "+lab)
+sub(df.speed_limit.isin(["30-35","40-45","<=25"]), [], "interstate", "yes", "interstate, speed <=45")
+sub(df.speed_limit.isin(["30-35","40-45","<=25"]), [], "older_driver", "yes", "older driver, speed <=45")
+for lab, mask in [("speed 50-65", df.speed_limit.isin(["50-55","60-65"])), ("speed 70+", df.speed_limit=="70+")]:
+    sub(mask, ["speed_limit"], "interstate", "yes", "interstate, "+lab+" (speed_limit not adj)")
+sub(df.speed_limit.isin(["50-55","60-65","70+"]), ["speed_limit"], "interstate", "yes", "interstate, speed >=50 (not adj)")
+sub(df.speed_limit.isin(["50-55","60-65","70+"]), ["speed_limit"], "older_driver", "yes", "older driver, speed >=50 (not adj)")
 for lab, mask in [("urban", df.urbanicity=="urban"), ("rural", df.urbanicity=="rural")]:
     sub(mask, ["urbanicity"], "tod", "00-05", "night 00-05, "+lab)

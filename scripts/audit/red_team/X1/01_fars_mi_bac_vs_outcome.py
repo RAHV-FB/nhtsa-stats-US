@@ -34,7 +34,7 @@ print("n untested & police alcohol missing",len(un2))
 # counterfactual: untested killed drivers get survivors' conditional rate (model fitted on untested survivors)
 ms=smf.glm("drv_p_p08"+f.replace("drv_killed +",""),data=un[un.drv_killed==0],family=sm.families.Binomial()).fit()
 k=un.drv_killed==1
-cf=un.copy(); cf.loc[k,"drv_p_p08"]=ms.predict(un[k])
+cf=un.copy(); pr=np.asarray(ms.predict(un.loc[k])); print("pred NaN",int(np.isnan(pr).sum()),"of",len(pr)); cf.loc[k,"drv_p_p08"]=pr
 print("untested killed: actual mean p08 %.4f vs survivor-model counterfactual %.4f"%(un.loc[k,"drv_p_p08"].mean(),cf.loc[k,"drv_p_p08"].mean()))
 # effect on share of ALL drivers/ killed drivers at BAC>=.08 (measured where tested else p_p08)
 d=d.copy(); d["p"]=np.where(d.drv_bac08_measured.notna(),d.drv_bac08_measured,d.drv_p_p08)

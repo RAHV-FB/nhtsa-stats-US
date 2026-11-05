@@ -68,7 +68,7 @@ print("\n(d) crash-level severity in QIE sample, crude (weighted):")
 for lab, m in [("teen involved",cq.teen),("no teen",~cq.teen),("75+ involved",cq.old),("65-74 involved",cq.s65)]:
     s=cq[m]; print(f"  {lab}: crashes={len(s)} P(K)={wp(s,'K'):.5f} P(KA)={wp(s,'KA'):.4f}")
 # direct standardisation on night x urb x speedlimit-band x collision
-cq["slb"]=pd.cut(pd.to_numeric(cq.sl,errors="coerce"),[-1,30,45,60,200]).astype(str)
+cq["slb"]=cq.sl.astype(str)
 cq["cell"]=cq.night.astype(str)+cq.urb.astype(str)+cq.slb+cq.coll.astype(str)
 def std_ratio(flag, out):
     ref = cq[~cq[flag]]; w_ref = ref.groupby("cell").w.sum()

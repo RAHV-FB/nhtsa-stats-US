@@ -74,7 +74,7 @@ for gname, g in groups.items():
     mdl = SurveyLogit(sp2, ridge=T.RIDGE).fit(df, y, design)
     names = list(mdl.names_); b = mdl.coef_; V = mdl.vcov_
     ix = {n: i for i, n in enumerate(names)}
-    k = {l: next(i for n, i in ix.items() if n.endswith(l) and n.startswith("gp")) for l in lev[1:]}
+    k = {l: next(i for n, i in ix.items() if "gp" in n and l in n) for l in lev[1:]}
     c = np.zeros(len(b)); c[k["g1_P1"]] = 1; c[k["g1_P0"]] = -1; c[k["g0_P1"]] = -1
     est = c @ b; se = np.sqrt(c @ V @ c); t = est / se; p = 2 * stats.t.sf(abs(t), 42)
     print(f"interaction {gname}: log-OR diff {est:.3f} (se {se:.3f}) ratio-of-OR {np.exp(est):.2f} p={p:.3f}", flush=True)
