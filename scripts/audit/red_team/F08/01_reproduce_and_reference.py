@@ -35,8 +35,8 @@ for oc in ("fatal", "fatal_cc"):
     q = n[(n.outcome == oc) & (n.comparison == "2020-2024 vs 2016-2019")].set_index("quantity").estimate
     K = q.ratio_fatal_crashes_numerator; N = q.ratio_reported_crashes_denominator
     s0 = q.fatal_share_base; s1 = q.fatal_share_comparison; tot = s1 - s0
-    # linear scale, three orderings of the exact two-factor split s1/s0 = K / N
-    den_a = (s1 - s1 * N) / tot            # numerator first (k0 -> k1 at n0), then denominator at k1
-    den_b = (s0 / N - s0) / tot            # denominator first, then numerator
-    print(oc, dict(log_den=-np.log(N)/np.log(K/N), lin_den_numfirst=(s1 - s1*N)/tot if False else 1 - (s1*N - s0)/tot,
-                   lin_den_denfirst=(s0/N - s0)/tot, lin_den_shapley=0.5*((s1 - s1*N)/tot*0 + 1 - (s1*N - s0)/tot + (s0/N - s0)/tot)))
+    # linear (pp) scale: the exact two-factor split s1/s0 = K/N, ordered two ways
+    den_num_first = (s1 - s0 * K) / tot    # numerator moves first (s0 -> s0*K), denominator second
+    den_den_first = (s0 / N - s0) / tot    # denominator moves first (s0 -> s0/N), numerator second
+    print(oc, dict(log_den=-np.log(N) / np.log(K / N), lin_den_numfirst=den_num_first,
+                   lin_den_denfirst=den_den_first, lin_den_mean=0.5 * (den_num_first + den_den_first)))

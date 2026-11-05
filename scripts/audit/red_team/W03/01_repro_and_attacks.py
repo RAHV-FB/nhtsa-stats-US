@@ -6,8 +6,8 @@ import polars as pl
 from nhtsa_stats.analysis import deaths as D
 
 d = D.build_driver_frame()
-per = D.load_table("FARS","person",None,["ST_CASE","VEH_NO","PER_NO","PER_TYP","AGE","SEX","ALC_RES","ALC_STATUS","ALC_DET"]).filter(pl.col("PER_TYP")==1)
-d = d.join(per.select("ST_CASE","VEH_NO","PER_NO","AGE","SEX","ALC_RES","ALC_STATUS"), on=["ST_CASE","VEH_NO","PER_NO"], how="left")
+per = D.load_table("FARS","person",None,["YEAR","ST_CASE","VEH_NO","PER_NO","PER_TYP","AGE","SEX","ALC_RES","ALC_STATUS","ALC_DET"]).filter(pl.col("PER_TYP")==1)
+d = d.join(per.select("YEAR","ST_CASE","VEH_NO","PER_NO","AGE","SEX","ALC_RES","ALC_STATUS"), on=["YEAR","ST_CASE","VEH_NO","PER_NO"], how="left")
 if "YEAR" not in d.columns: print("no YEAR")
 P=[f"P{m}" for m in range(1,11)]
 print("drivers",d.height)

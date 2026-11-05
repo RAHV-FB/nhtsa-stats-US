@@ -23,10 +23,30 @@ def run(name, pop, covs, outcome="killed"):
     for lvl in ["4-7","8-12","13-17","18+"]:
         if lvl in r.index:
             rows.append(dict(variant=name,outcome=outcome,level=lvl,n=len(pop.df),events=int(pop.df[outcome].sum()),
-              rr=r.loc[lvl,"adj_rr"] if "adj_rr" in r else r.loc[lvl].iloc[0],
-              lo=r.loc[lvl,"adj_rr_low"] if "adj_rr_low" in r else np.nan, hi=r.loc[lvl,"adj_rr_high"] if "adj_rr_high" in r else np.nan))
+              rr=r.loc[lvl,'adj_rr'],
+              lo=r.loc[lvl,'adj_rr_low'], hi=r.loc[lvl,'adj_rr_high']))
     print(rows[-1], flush=True)
-import inspect
-# probe columns of contrasts once
-m = P.fit_model(lpv,"killed",base); lean=lpv.df[[*dict.fromkeys(base),"killed"]]
-con = P.factor_contrasts(m, lean,"veh_age_band",P.levels_for(lpv,"veh_age_band")); print(con.columns.tolist())
+
+D=lpv.df
+CIRC=list(specs.CIRCUMSTANCE)
+drop=lambda *x:[c for c in base if c not in x]
+run("A_published", lpv, base)
+run("B_published", lpv, base+CIRC)
+# fewer / different adjustment
+run("A_minus_speeding_alcohol", lpv, drop("speeding","alcohol_im"))
+run("person_only+YEAR", lpv, ["age_band","sex","role","restraint","body","veh_age_band","YEAR"])
+run("A_minus_other_vehicle_body", lpv, drop("other_vehicle_body"))
+# sub-populations
+def sub(mask,n): return lpv.subset(np.asarray(mask),n,n)
+run("drivers_only", sub(D.role=="driver","drv"), drop("role"))
+run("belted_only", sub(D.restraint=="belted","belted"), drop("restraint"))
+run("belted_drivers_age25-64", sub((D.restraint=="belted")&(D.role=="driver")&D.age_band.isin(["25-34","35-44","45-54","55-64"]),"bd"), drop("restraint","role"))
+for nm,msk in [("2016-2019",D.YEAR<=2019),("2020-2024",D.YEAR>=2020),("2016-2019_B",D.YEAR<=2019),("2020-2024_B",D.YEAR>=2020)]:
+    run("period_"+nm, sub(msk,nm), drop("YEAR")+(CIRC if nm.endswith("_B") else []))
+run("single_vehicle_only", sub(D.n_vehicles.astype(str).isin(["1"]) ,"sv"), drop("other_vehicle_body","any_motorcycle","any_heavy_truck")+[])
+run("urban_only", sub(D.urbanicity.astype(str)=="urban","urb"), drop("urbanicity"))
+run("rural_only", sub(D.urbanicity.astype(str)=="rural","rur"), drop("urbanicity"))
+run("A_K_or_A_outcome(not run here)", lpv, base) if False else None
+pd.DataFrame(rows).to_csv(OUT+"01_variants.csv",index=False)
+print(pd.DataFrame(rows).query("level=='18+'").round(3).to_string())
+print(D.n_vehicles.astype(str).value_counts().head(), D.urbanicity.astype(str).value_counts())

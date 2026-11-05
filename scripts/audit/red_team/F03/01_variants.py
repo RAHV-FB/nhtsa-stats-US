@@ -26,7 +26,7 @@ def run(label, outcome="fatal", drop=(), add=(), keep=None, years=None):
 
 rows = []
 rows.append(run("limit_le45", keep=lambda d: d["speed_limit"].astype(str).isin(["<=25","30-35","40-45"])))
-rows.append(run("limit_ge50", keep=lambda d: d["speed_limit"].astype(str).isin(["50-55","60-65","70+"])))
+rows.append(run("limit_ge50", keep=lambda d: d["speed_limit"].astype(str).isin(["50-55","60-65","70+"]), drop=("speed_limit",)))
 rows.append(run("years_2016_19", years=list(range(2016, 2020))))
 rows.append(run("years_2020_24", years=list(range(2020, 2025))))
 rows.append(run("KA_base", outcome="ka"))

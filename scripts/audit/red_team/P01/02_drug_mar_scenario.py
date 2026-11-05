@@ -14,8 +14,8 @@ S=(per.speeding==1).to_numpy(); U=((per.restraint=="none")&per.PER_TYP.isin([1,2
 det=(per.drug!="undetermined").to_numpy(); Dy=(per.drug=="yes").to_numpy()
 N=len(per)
 def run(keys,label):
-    df=pd.DataFrame({"S":S,"U":U,"ab":(abar>0.5),"Y":per.YEAR.values if "Y" in keys else 0,"det":det,"D":Dy})
-    kk=[k for k in ["S","U","ab","Y"] if k in keys]
+    df=pd.DataFrame({"S":S,"U":U,"ab":(abar>0.5),"Y":per.YEAR.values,"c":0,"det":det,"D":Dy})
+    kk=[k for k in ["S","U","ab","Y"] if k in keys] or ["c"]
     rate=df[df.det].groupby(kk).D.mean().rename("r")
     df=df.join(rate,on=kk); p=np.where(det,Dy.astype(float),df.r.fillna(df[df.det].D.mean()).to_numpy())
     res=[]
