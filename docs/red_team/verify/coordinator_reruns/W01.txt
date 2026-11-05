@@ -1,0 +1,80 @@
+[rt_py] slot 4 acquired after 30s; limit 420s
+rows 353706 years [2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024]
+A. union per implicate [np.float64(0.5959), np.float64(0.596), np.float64(0.596), np.float64(0.5973), np.float64(0.5967), np.float64(0.5971), np.float64(0.5971), np.float64(0.5958), np.float64(0.5961), np.float64(0.596)] mean 0.5963882433433416
+alc share 0.29917813099014434 spd 0.2790255183683624 unb 0.2668883196779246 unh 0.053120388118946246
+sum 0.8982123571553776 ratio 1.5060866259200811
+A. unknown pv 20998 rate unbelted among known 0.4858991450439831 unk mc 1665 rate 0.3788945128960052
+A. extra deaths in union if unknowns behave like knowns 4410.676764323251 -> union 0.6088581385792813
+A. upper bound union (all unknown unbelted) 0.6225096549111409
+B. unbelted/pv 0.4385048100818945 unbelted/known pv 0.4858991450439831 unhelm/mc 0.3665860225543372 unhelm/known mc 0.3788945128960052
+B. union share by victim type (share of that type's deaths | share of all deaths)
+  pv_occ         n= 215277 (0.609) union=0.706 alc=0.343 spd=0.326
+  mc             n=  51254 (0.145) union=0.719 alc=0.323 spd=0.369
+  ped            n=  60876 (0.172) union=0.222 alc=0.165 spd=0.078
+  cyc            n=   8706 (0.025) union=0.211 alc=0.144 spd=0.091
+  other_nonocc   n=   2611 (0.007) union=0.283 alc=0.191 spd=0.146
+  lt_occ         n=   8289 (0.023) union=0.291 alc=0.114 spd=0.213
+  bus/other_occ  n=   6693 (0.019) union=0.539 alc=0.387 spd=0.290
+C. share of union deaths via victim's own protective-device failure only(any): 0.5365778272269551
+C. union deaths with no victim-level factor (crash-level only): 97757.1 0.46342217277304487
+  crash-level-only union among pv_occ: 57601
+  crash-level-only union among mc: 18078
+  crash-level-only union among ped: 13484
+  crash-level-only union among cyc: 1839
+  crash-level-only union among other_nonocc: 740
+  crash-level-only union among lt_occ: 2410
+  crash-level-only union among bus/other_occ: 3606
+C. strict (risk vehicle driver BAC>=.08 / risk veh speeding / own belt/helmet) union 0.49958751053134526 alc 0.21990183938072863 spd 0.21957218707061796
+D. deaths in crashes with no midrvacc record 733 0.0020723425669906645 union among them (excluding alc) 0.3519781718963165
+D. A1 value counts [{'A1': nan, 'count': 733}, {'A1': 0.0, 'count': 229243}, {'A1': 1.0, 'count': 2044}, {'A1': 2.0, 'count': 2256}, {'A1': 3.0, 'count': 2313}, {'A1': 4.0, 'count': 2479}, {'A1': 5.0, 'count': 2845}, {'A1': 6.0, 'count': 3072}, {'A1': 7.0, 'count': 3399}, {'A1': 8.0, 'count': 3936}, {'A1': 9.0, 'count': 4061}, {'A1': 10.0, 'count': 4607}, {'A1': 11.0, 'count': 4988}, {'A1': 12.0, 'count': 5184}, {'A1': 13.0, 'count': 5318}, {'A1': 14.0, 'count': 5557}, {'A1': 15.0, 'count': 5911}, {'A1': 16.0, 'count': 5943}, {'A1': 17.0, 'count': 5860}, {'A1': 18.0, 'count': 5717}, {'A1': 19.0, 'count': 5594}, {'A1': 20.0, 'count': 5353}, {'A1': 21.0, 'count': 5103}, {'A1': 22.0, 'count': 4689}, {'A1': 23.0, 'count': 3973}, {'A1': 24.0, 'count': 3697}, {'A1': 25.0, 'count': 3232}, {'A1': 26.0, 'count': 2822}, {'A1': 27.0, 'count': 2398}, {'A1': 28.0, 'count': 1918}, {'A1': 29.0, 'count': 1644}, {'A1': 30.0, 'count': 1331}, {'A1': 31.0, 'count': 1107}, {'A1': 32.0, 'count': 935}, {'A1': 33.0, 'count': 835}, {'A1': 34.0, 'count': 604}, {'A1': 35.0, 'count': 554}, {'A1': 36.0, 'count': 489}, {'A1': 37.0, 'count': 378}, {'A1': 38.0, 'count': 281}, {'A1': 39.0, 'count': 229}, {'A1': 40.0, 'count': 249}, {'A1': 41.0, 'count': 120}, {'A1': 42.0, 'count': 130}, {'A1': 43.0, 'count': 96}, {'A1': 44.0, 'count': 82}, {'A1': 45.0, 'count': 54}, {'A1': 46.0, 'count': 48}, {'A1': 47.0, 'count': 45}, {'A1': 48.0, 'count': 39}, {'A1': 49.0, 'count': 33}, {'A1': 50.0, 'count': 25}, {'A1': 51.0, 'count': 20}, {'A1': 52.0, 'count': 15}, {'A1': 53.0, 'count': 20}, {'A1': 54.0, 'count': 3}, {'A1': 55.0, 'count': 3}, {'A1': 56.0, 'count': 4}, {'A1': 57.0, 'count': 10}, {'A1': 58.0, 'count': 8}, {'A1': 59.0, 'count': 6}, {'A1': 60.0, 'count': 5}, {'A1': 61.0, 'count': 6}, {'A1': 62.0, 'count': 1}, {'A1': 63.0, 'count': 2}, {'A1': 64.0, 'count': 3}, {'A1': 65.0, 'count': 2}, {'A1': 66.0, 'count': 4}, {'A1': 68.0, 'count': 8}, {'A1': 69.0, 'count': 3}, {'A1': 70.0, 'count': 2}, {'A1': 71.0, 'count': 2}, {'A1': 72.0, 'count': 1}, {'A1': 73.0, 'count': 1}, {'A1': 74.0, 'count': 2}, {'A1': 75.0, 'count': 1}, {'A1': 77.0, 'count': 3}, {'A1': 78.0, 'count': 1}, {'A1': 79.0, 'count': 2}, {'A1': 80.0, 'count': 2}, {'A1': 81.0, 'count': 1}, {'A1': 82.0, 'count': 1}, {'A1': 84.0, 'count': 1}, {'A1': 85.0, 'count': 1}, {'A1': 86.0, 'count': 1}, {'A1': 90.0, 'count': 2}, {'A1': 93.0, 'count': 1}, {'A1': 94.0, 'count': 5}]
+E. year: union, alc, spd, unb, unh, restraint_unknown
+2016 0.59 0.29 0.272 0.277 0.055 0.052
+2017 0.589 0.29 0.265 0.27 0.052 0.055
+2018 0.584 0.291 0.26 0.267 0.05 0.053
+2019 0.574 0.28 0.264 0.262 0.051 0.054
+2020 0.613 0.301 0.293 0.28 0.055 0.063
+2021 0.618 0.315 0.289 0.275 0.055 0.062
+2022 0.606 0.315 0.285 0.266 0.053 0.063
+2023 0.596 0.302 0.29 0.257 0.053 0.065
+2024 0.592 0.303 0.288 0.249 0.052 0.065
+shape: (3, 2)
+┌───────────┬───────┐
+│ A_RESTUSE ┆ len   │
+│ ---       ┆ ---   │
+│ i64       ┆ u32   │
+╞═══════════╪═══════╡
+│ 1         ┆ 99879 │
+│ 2         ┆ 94400 │
+│ 3         ┆ 20998 │
+└───────────┴───────┘
+shape: (4, 2)
+┌───────────┬───────┐
+│ A_HELMUSE ┆ len   │
+│ ---       ┆ ---   │
+│ i64       ┆ u32   │
+╞═══════════╪═══════╡
+│ 1         ┆ 30800 │
+│ 2         ┆ 18789 │
+│ 3         ┆ 1662  │
+│ 4         ┆ 3     │
+└───────────┴───────┘
+F. A_BODY==9/other & A_PTYPE occupants: shape: (9, 2)
+┌──────┬────────┐
+│ body ┆ len    │
+│ ---  ┆ ---    │
+│ i64  ┆ u32    │
+╞══════╪════════╡
+│ 1    ┆ 113715 │
+│ 2    ┆ 39394  │
+│ 3    ┆ 52393  │
+│ 4    ┆ 9467   │
+│ 5    ┆ 308    │
+│ 6    ┆ 8289   │
+│ 7    ┆ 51254  │
+│ 8    ┆ 318    │
+│ 9    ┆ 6375   │
+└──────┴────────┘
+
+real	0m33.791s
+user	0m2.681s
+sys	0m0.696s

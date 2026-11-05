@@ -1,0 +1,28 @@
+[rt_py] slot 1 acquired after 0s; limit 600s
+share of speeding pairs that are single-vehicle: 0.621 ; of not-speeding: 0.298
+share BAC>=.08 single-vehicle: 0.638 ; BAC<.08: 0.312
+share speeding rollover 0.373 vs not 0.139
+speeding vs not, by single/multi | single: ref 0.233 (n=18283) exp 0.315 (n=10569) ratio 1.354 CI 1.200-1.527
+speeding vs not, by single/multi | multi: ref 0.434 (n=53093) exp 0.427 (n=5888) ratio 0.985 CI 0.871-1.115
+speeding vs not, by single/multi | pooled within layers: ratio 1.160 CI 1.064-1.264 p=0.000755
+
+speeding vs not, by rollover | rollover: ref 0.221 (n=10769) exp 0.242 (n=6603) ratio 1.093 CI 0.948-1.260
+speeding vs not, by rollover | no rollover: ref 0.419 (n=60607) exp 0.463 (n=9854) ratio 1.105 CI 1.002-1.219
+speeding vs not, by rollover | pooled within layers: ratio 1.101 CI 1.016-1.194 p=0.0191
+
+speeding vs not, by single/multi x rollover | s&r: ref 0.176 (n=6286) exp 0.237 (n=5676) ratio 1.349 CI 1.147-1.588
+speeding vs not, by single/multi x rollover | s&nr: ref 0.330 (n=11997) exp 0.449 (n=4893) ratio 1.359 CI 1.156-1.597
+speeding vs not, by single/multi x rollover | m&r: ref 0.346 (n=4483) exp 0.271 (n=927) ratio 0.785 CI 0.571-1.081
+speeding vs not, by single/multi x rollover | m&nr: ref 0.456 (n=48610) exp 0.490 (n=4961) ratio 1.074 CI 0.942-1.225
+speeding vs not, by single/multi x rollover | pooled within layers: ratio 1.188 CI 1.093-1.292 p=5.1e-05
+
+BAC>=.08 vs <.08, by single/multi | single: ref 0.270 (n=21851) exp 0.275 (n=8101) ratio 1.020 CI 0.910-1.143
+BAC>=.08 vs <.08, by single/multi | multi: ref 0.436 (n=56069) exp 0.459 (n=4219) ratio 1.052 CI 0.919-1.205
+BAC>=.08 vs <.08, by single/multi | pooled within layers: ratio 1.033 CI 0.947-1.127 p=0.464
+
+BAC>=.08 vs <.08, by single/multi x rollover | s&r: ref 0.199 (n=8181) exp 0.220 (n=4277) ratio 1.103 CI 0.931-1.307
+BAC>=.08 vs <.08, by single/multi x rollover | s&nr: ref 0.392 (n=13670) exp 0.362 (n=3824) ratio 0.925 CI 0.792-1.080
+BAC>=.08 vs <.08, by single/multi x rollover | m&r: ref 0.323 (n=4911) exp 0.388 (n=634) ratio 1.202 CI 0.874-1.654
+BAC>=.08 vs <.08, by single/multi x rollover | m&nr: ref 0.467 (n=51158) exp 0.484 (n=3585) ratio 1.036 CI 0.890-1.207
+BAC>=.08 vs <.08, by single/multi x rollover | pooled within layers: ratio 1.027 CI 0.941-1.122 p=0.549
+
