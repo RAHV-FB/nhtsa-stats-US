@@ -1,0 +1,64 @@
+group,indicator,share,mi_se,n_known,n_group,estimate_type
+all,licence_invalid,0.143179,0,480538,497955,observed
+all,unlicensed,0.057779,0,480538,497955,observed
+all,suspended_or_revoked,0.0682922,0,480538,497955,observed
+all,expired_or_cancelled,0.0171079,0,480538,497955,observed
+all,prior_dwi,0.0305978,0,477028,497955,observed
+all,prior_speeding,0.183424,0,477026,497955,observed
+all,prior_suspension,0.125789,0,375431,497955,observed
+all,prior_crash,0.179007,0,446899,497955,observed
+all,bac_15_plus,0.134078,0.000501366,497955,497955,estimated (MI)
+bac_08_plus,licence_invalid,0.236601,0.000396564,96248,100692,estimated (MI)
+bac_08_plus,unlicensed,0.0898646,0.000348017,96248,100692,estimated (MI)
+bac_08_plus,suspended_or_revoked,0.122119,0.000375444,96248,100692,estimated (MI)
+bac_08_plus,expired_or_cancelled,0.0246176,0.000305305,96248,100692,estimated (MI)
+bac_08_plus,prior_dwi,0.0744307,0.00029833,95411.2,100692,estimated (MI)
+bac_08_plus,prior_speeding,0.214296,0.000416729,95411.2,100692,estimated (MI)
+bac_08_plus,prior_suspension,0.201082,0.000630466,75665,100692,estimated (MI)
+bac_08_plus,prior_crash,0.189974,0.000346212,89788.2,100692,estimated (MI)
+bac_08_plus,bac_15_plus,0.663057,0.00174662,100692,100692,estimated (MI)
+bac_01_07,licence_invalid,0.205387,0.00196118,18245.2,19242.8,estimated (MI)
+bac_01_07,unlicensed,0.0801574,0.000842594,18245.2,19242.8,estimated (MI)
+bac_01_07,suspended_or_revoked,0.102845,0.00133673,18245.2,19242.8,estimated (MI)
+bac_01_07,expired_or_cancelled,0.0223854,0.00055634,18245.2,19242.8,estimated (MI)
+bac_01_07,prior_dwi,0.0447407,0.000997843,18111.5,19242.8,estimated (MI)
+bac_01_07,prior_speeding,0.222244,0.00177079,18111.5,19242.8,estimated (MI)
+bac_01_07,prior_suspension,0.171424,0.00176686,14347.3,19242.8,estimated (MI)
+bac_01_07,prior_crash,0.195056,0.00149194,17087.2,19242.8,estimated (MI)
+bac_01_07,bac_15_plus,0,0,19242.8,19242.8,estimated (MI)
+bac_zero,licence_invalid,0.115514,0.000139162,366045,378020,estimated (MI)
+bac_zero,unlicensed,0.0482269,0.00011592,366045,378020,estimated (MI)
+bac_zero,suspended_or_revoked,0.0524168,9.45167e-05,366045,378020,estimated (MI)
+bac_zero,expired_or_cancelled,0.0148703,6.81483e-05,366045,378020,estimated (MI)
+bac_zero,prior_dwi,0.0183882,6.59768e-05,363505,378020,estimated (MI)
+bac_zero,prior_speeding,0.173387,0.000104007,363503,378020,estimated (MI)
+bac_zero,prior_suspension,0.103535,9.97951e-05,285419,378020,estimated (MI)
+bac_zero,prior_crash,0.175305,0.00013487,340024,378020,estimated (MI)
+bac_zero,bac_15_plus,0,0,378020,378020,estimated (MI)
+speeding,licence_invalid,0.239928,0,88360,90376,observed
+speeding,unlicensed,0.0956768,0,88360,90376,observed
+speeding,suspended_or_revoked,0.119522,0,88360,90376,observed
+speeding,expired_or_cancelled,0.0247284,0,88360,90376,observed
+speeding,prior_dwi,0.0537709,0,87538,90376,observed
+speeding,prior_speeding,0.237203,0,87537,90376,observed
+speeding,prior_suspension,0.193785,0,69510,90376,observed
+speeding,prior_crash,0.207687,0,82576,90376,observed
+speeding,bac_15_plus,0.256182,0.000790502,90376,90376,estimated (MI)
+not_speeding,licence_invalid,0.121381,0,392178,407579,observed
+not_speeding,unlicensed,0.0492404,0,392178,407579,observed
+not_speeding,suspended_or_revoked,0.0567497,0,392178,407579,observed
+not_speeding,expired_or_cancelled,0.015391,0,392178,407579,observed
+not_speeding,prior_dwi,0.0253896,0,389490,407579,observed
+not_speeding,prior_speeding,0.171337,0,389489,407579,observed
+not_speeding,prior_suspension,0.110339,0,305921,407579,observed
+not_speeding,prior_crash,0.172506,0,364323,407579,observed
+not_speeding,bac_15_plus,0.107003,0.000544308,407579,407579,estimated (MI)
+neither,licence_invalid,0.0996099,0.000130539,315831,326557,estimated (MI)
+neither,unlicensed,0.0413848,0.000103557,315831,326557,estimated (MI)
+neither,suspended_or_revoked,0.0447223,7.80021e-05,315831,326557,estimated (MI)
+neither,expired_or_cancelled,0.0135028,6.1047e-05,315831,326557,estimated (MI)
+neither,prior_dwi,0.0164047,4.94673e-05,313759,326557,estimated (MI)
+neither,prior_speeding,0.164349,9.42497e-05,313758,326557,estimated (MI)
+neither,prior_suspension,0.0935999,7.58204e-05,245902,326557,estimated (MI)
+neither,prior_crash,0.170044,0.000185406,293078,326557,estimated (MI)
+neither,bac_15_plus,0,0,326557,326557,estimated (MI)

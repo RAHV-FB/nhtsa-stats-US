@@ -1,44 +1,22 @@
-# Road Evidence — public research website
+# Road Deaths in America: public website
 
-Responsive, static front end for the **FARS & CRSS 2016–2024** US road-safety study. It complements, and does not replace, the nine-page Streamlit research app.
+A single static page. Every number and chart is rendered at build time from the committed tables in `outputs/tables/`, so nothing on the page is typed by hand.
 
-## Included
+## Pipeline
 
-- Editorial landing page with provenance and uncertainty.
-- Searchable and filterable set of all ten Phase 1 findings (confidence intervals, denominators, robustness and limitations).
-- Interactive charts for over-representation, adjusted severity, factor rankings and annual fatalities, with underlying table access.
-- Analysis of overlapping counts for speed, BAC, drugs and unbelted occupants.
-- Speeding, alcohol, drugs and seat-belt research explainers.
-- Hypothetical policy break-even calculator computed from the committed threshold baseline (not an assumed intervention effect).
-- Provenance test: every statistic written into index.html or site.js is checked against its bundled table (website/tests/site.test.mjs).
-- Reader for eleven complete generated reports and technical documents.
-- Responsive styles, semantic landmarks, keyboard controls and reduced-motion preferences.
-- No analytics, external JavaScript dependencies or client secrets.
+1. `website/templates/index.html` holds the prose. Numbers are placeholders of the report grammar (`{{deaths/segments|segment=all|deaths|,.0f}}`, see `src/nhtsa_stats/reporting/render.py`). Directives: `{{chart:<id>}}`, `{{statestable}}`, `{{asset:css}}`, `{{asset:js}}`.
+2. `uv run nhtsa analyze site` (`src/nhtsa_stats/reporting/site.py`) renders the template into `website/index.html`, one self-contained file with CSS and JS inlined. It fails on an unresolved placeholder or a NaN-like value. Edit the template, `assets/site.css` or `assets/site.js`, never `index.html`.
+3. `python3 website/tools/sync_public_data.py` copies exactly 19 CSV files into `website/data/tables/`, keeping their `outputs/tables/` paths: every `outputs/tables/deaths/*.csv` (13 files) and six cited tables listed in the tool's `CITED` (`severity/fatal_speeding_type`, `vulnerable/pedestrian_killed_contrasts`, `vulnerable/fars_pedestrian_deaths_by_striking_vehicle`, `person/lpv_killed_crude_vs_adjusted`, `matched/belt_effect`, `matched/double_pair_comparison`). Nothing else is copied (no JSON sidecars). Every one of these files is linked from the page and every link on the page points to one (`tests/test_site.py` checks both directions). It deletes snapshots no longer listed; `--check` fails on a missing, stale or orphan file.
 
-## Run locally
+Charts are HTML and CSS bars, plus SVG for line charts, each with a "Show the data" table. `assets/site.js` is optional enhancement: tooltips, line-chart crosshair, states table sorting and filtering, nav highlight.
 
-From the repository root:
+## Checks
 
-1. Run: python website/tools/sync_public_data.py
-2. Run: node --test website/tests/site.test.mjs
-3. Run: python website/tools/sync_public_data.py --check
-4. Run: python -m http.server 8000 --directory website
-5. Visit: http://localhost:8000
+```bash
+uv run pytest -q tests/test_site.py   # page equals a fresh render; no hand-typed numbers; chart builders and fixed-scale guards; CSV links match the sync tool
+node --check website/assets/site.js
+node --test website/tests/site.test.mjs
+python3 website/tools/sync_public_data.py --check
+```
 
-The published site needs only a static host, not Streamlit, server-side Python, raw archives or Git LFS.
-
-## Deployment
-
-.github/workflows/public-site.yml validates the website and source snapshots. On a push to main, it attempts to deploy the website directory with GitHub Pages.
-
-The site is live at https://rahv-fb.github.io/nhtsa-stats-US/ (Repository Settings → Pages → Source: GitHub Actions). The verify job also runs on pull requests that touch website/, reports/, docs/ or outputs/tables/, so a stale snapshot or a hard-coded statistic that no longer matches its table fails CI before merge.
-
-## Scientific provenance
-
-The canonical source of every displayed data value is the project's generated source reports and output tables. The public data copies are mapped by website/tools/sync_public_data.py and checked by CI. Do not manually change website/data.
-
-When analysis results change, regenerate reports using the established research pipeline, synchronize the public snapshots and review the explanatory text for alignment. Never turn adjusted associations, selected drug observations or hypothetical policy scenarios into causal claims.
-
-The nine-page technical interface remains runnable through: uv run streamlit run app/streamlit_app.py
-
-The research cannot measure risk per journey or kilometre, intervention effects, selective drug-testing biases away, or individual causal shares of deaths.
+Preview: `python3 -m http.server 8000 --directory website`.

@@ -1,0 +1,280 @@
+YEAR,segment,deaths,mi_se,estimate_type
+2016,alcohol_and_speeding,4213.7,26.6481,estimated (MI)
+2016,alcohol_impaired,10966.9,119.984,estimated (MI)
+2016,all,37806,0,observed
+2016,any_of_four,22306.1,95.0154,estimated (MI)
+2016,belted,11343,0,observed
+2016,cyclists,853,0,observed
+2016,day,18043,0,observed
+2016,distracted,3490,0,observed
+2016,drowsy,832,0,observed
+2016,helmet_unknown,144,0,observed
+2016,helmeted,3095,0,observed
+2016,hit_and_run,2082,0,observed
+2016,intersection,9204,0,observed
+2016,invalid_licence_crash,7157,0,observed
+2016,large_truck_crash,4678,0,observed
+2016,large_truck_occupants,815,0,observed
+2016,motorcyclists,5337,0,observed
+2016,night,19496,0,observed
+2016,other_nonoccupants,260,0,observed
+2016,other_vehicle_occupants,674,0,observed
+2016,pedestrians,6080,0,observed
+2016,police_pursuit,405,0,observed
+2016,pv_occupants,23787,0,observed
+2016,restraint_unknown,1981,0,observed
+2016,roadway_departure,19793,0,observed
+2016,rural,18321,0,observed
+2016,speeding,10291,0,observed
+2016,two_or_more,9390.7,42.3035,estimated (MI)
+2016,unbelted,10463,0,observed
+2016,unhelmeted,2098,0,observed
+2016,urban,19357,0,observed
+2017,alcohol_and_speeding,3955.1,35.75,estimated (MI)
+2017,alcohol_impaired,10879.5,109.647,estimated (MI)
+2017,all,37473,0,observed
+2017,any_of_four,22063.2,78.023,estimated (MI)
+2017,belted,11488,0,observed
+2017,cyclists,806,0,observed
+2017,day,18089,0,observed
+2017,distracted,3242,0,observed
+2017,drowsy,810,0,observed
+2017,helmet_unknown,145,0,observed
+2017,helmeted,3120,0,observed
+2017,hit_and_run,2010,0,observed
+2017,intersection,9207,0,observed
+2017,invalid_licence_crash,7126,0,observed
+2017,large_truck_crash,4906,0,observed
+2017,large_truck_occupants,878,0,observed
+2017,motorcyclists,5226,0,observed
+2017,night,19108,0,observed
+2017,other_nonoccupants,236,0,observed
+2017,other_vehicle_occupants,589,0,observed
+2017,pedestrians,6075,0,observed
+2017,police_pursuit,422,0,observed
+2017,pv_occupants,23663,0,observed
+2017,restraint_unknown,2059,0,observed
+2017,roadway_departure,19159,0,observed
+2017,rural,17405,0,observed
+2017,speeding,9947,0,observed
+2017,two_or_more,8891.6,35.9367,estimated (MI)
+2017,unbelted,10116,0,observed
+2017,unhelmeted,1961,0,observed
+2017,urban,19976,0,observed
+2018,alcohol_and_speeding,3812.6,37.5923,estimated (MI)
+2018,alcohol_impaired,10710.1,86.805,estimated (MI)
+2018,all,36835,0,observed
+2018,any_of_four,21503.3,58.4372,estimated (MI)
+2018,belted,11055,0,observed
+2018,cyclists,871,0,observed
+2018,day,17694,0,observed
+2018,distracted,2858,0,observed
+2018,drowsy,785,0,observed
+2018,helmet_unknown,155,0,observed
+2018,helmeted,3024,0,observed
+2018,hit_and_run,2060,0,observed
+2018,intersection,8975,0,observed
+2018,invalid_licence_crash,6946,0,observed
+2018,large_truck_crash,5006,0,observed
+2018,large_truck_occupants,890,0,observed
+2018,motorcyclists,5038,0,observed
+2018,night,18910,0,observed
+2018,other_nonoccupants,220,0,observed
+2018,other_vehicle_occupants,597,0,observed
+2018,pedestrians,6374,0,observed
+2018,police_pursuit,435,0,observed
+2018,pv_occupants,22845,0,observed
+2018,restraint_unknown,1945,0,observed
+2018,roadway_departure,18632,0,observed
+2018,rural,16070,0,observed
+2018,speeding,9579,0,observed
+2018,two_or_more,8598.3,41.41,estimated (MI)
+2018,unbelted,9845,0,observed
+2018,unhelmeted,1859,0,observed
+2018,urban,20661,0,observed
+2019,alcohol_and_speeding,3848.1,25.9718,estimated (MI)
+2019,alcohol_impaired,10195.5,48.7975,estimated (MI)
+2019,all,36355,0,observed
+2019,any_of_four,20864,33.122,estimated (MI)
+2019,belted,10891,0,observed
+2019,cyclists,859,0,observed
+2019,day,17518,0,observed
+2019,distracted,3119,0,observed
+2019,drowsy,697,0,observed
+2019,helmet_unknown,177,0,observed
+2019,helmeted,2997,0,observed
+2019,hit_and_run,2037,0,observed
+2019,intersection,9051,0,observed
+2019,invalid_licence_crash,6964,0,observed
+2019,large_truck_crash,5032,0,observed
+2019,large_truck_occupants,893,0,observed
+2019,motorcyclists,5044,0,observed
+2019,night,18573,0,observed
+2019,other_nonoccupants,289,0,observed
+2019,other_vehicle_occupants,626,0,observed
+2019,pedestrians,6272,0,observed
+2019,police_pursuit,415,0,observed
+2019,pv_occupants,22372,0,observed
+2019,restraint_unknown,1958,0,observed
+2019,roadway_departure,18045,0,observed
+2019,rural,16288,0,observed
+2019,speeding,9592,0,observed
+2019,two_or_more,8437.6,29.2549,estimated (MI)
+2019,unbelted,9523,0,observed
+2019,unhelmeted,1870,0,observed
+2019,urban,19946,0,observed
+2020,alcohol_and_speeding,4569.3,26.5747,estimated (MI)
+2020,alcohol_impaired,11727.1,92.9779,estimated (MI)
+2020,all,39007,0,observed
+2020,any_of_four,23913.4,67.8774,estimated (MI)
+2020,belted,10532,0,observed
+2020,cyclists,948,0,observed
+2020,day,17834,0,observed
+2020,distracted,3154,0,observed
+2020,drowsy,632,0,observed
+2020,helmet_unknown,174,0,observed
+2020,helmeted,3291,0,observed
+2020,hit_and_run,2596,0,observed
+2020,intersection,9525,0,observed
+2020,invalid_licence_crash,9212,0,observed
+2020,large_truck_crash,4945,0,observed
+2020,large_truck_occupants,822,0,observed
+2020,motorcyclists,5620,0,observed
+2020,night,20850,0,observed
+2020,other_nonoccupants,257,0,observed
+2020,other_vehicle_occupants,881,0,observed
+2020,pedestrians,6565,0,observed
+2020,police_pursuit,545,0,observed
+2020,pv_occupants,23914,0,observed
+2020,restraint_unknown,2457,0,observed
+2020,roadway_departure,19831,0,observed
+2020,rural,16340,0,observed
+2020,speeding,11428,0,observed
+2020,two_or_more,10066.7,26.4502,estimated (MI)
+2020,unbelted,10925,0,observed
+2020,unhelmeted,2155,0,observed
+2020,urban,22513,0,observed
+2021,alcohol_and_speeding,5130.6,41.8917,estimated (MI)
+2021,alcohol_impaired,13598.6,129.701,estimated (MI)
+2021,all,43230,0,observed
+2021,any_of_four,26724.8,90.38,estimated (MI)
+2021,belted,11899,0,observed
+2021,cyclists,976,0,observed
+2021,day,19660,0,observed
+2021,distracted,3521,0,observed
+2021,drowsy,701,0,observed
+2021,helmet_unknown,200,0,observed
+2021,helmeted,3569,0,observed
+2021,hit_and_run,2917,0,observed
+2021,intersection,10507,0,observed
+2021,invalid_licence_crash,10025,0,observed
+2021,large_truck_crash,5821,0,observed
+2021,large_truck_occupants,1011,0,observed
+2021,motorcyclists,6144,0,observed
+2021,night,23242,0,observed
+2021,other_nonoccupants,302,0,observed
+2021,other_vehicle_occupants,861,0,observed
+2021,pedestrians,7470,0,observed
+2021,police_pursuit,532,0,observed
+2021,pv_occupants,26466,0,observed
+2021,restraint_unknown,2689,0,observed
+2021,roadway_departure,21418,0,observed
+2021,rural,17339,0,observed
+2021,speeding,12498,0,observed
+2021,two_or_more,11198.5,40.2613,estimated (MI)
+2021,unbelted,11878,0,observed
+2021,unhelmeted,2375,0,observed
+2021,urban,25749,0,observed
+2022,alcohol_and_speeding,5122.2,56.4082,estimated (MI)
+2022,alcohol_impaired,13457.8,134.957,estimated (MI)
+2022,all,42721,0,observed
+2022,any_of_four,25905.9,109.314,estimated (MI)
+2022,belted,11436,0,observed
+2022,cyclists,1117,0,observed
+2022,day,19365,0,observed
+2022,distracted,3316,0,observed
+2022,drowsy,700,0,observed
+2022,helmet_unknown,227,0,observed
+2022,helmeted,3767,0,observed
+2022,hit_and_run,2972,0,observed
+2022,intersection,10731,0,observed
+2022,invalid_licence_crash,9092,0,observed
+2022,large_truck_crash,5969,0,observed
+2022,large_truck_occupants,1098,0,observed
+2022,motorcyclists,6251,0,observed
+2022,night,23038,0,observed
+2022,other_nonoccupants,332,0,observed
+2022,other_vehicle_occupants,830,0,observed
+2022,pedestrians,7593,0,observed
+2022,police_pursuit,586,0,observed
+2022,pv_occupants,25500,0,observed
+2022,restraint_unknown,2705,0,observed
+2022,roadway_departure,20572,0,observed
+2022,rural,17375,0,observed
+2022,speeding,12157,0,observed
+2022,two_or_more,10846.1,57.0023,estimated (MI)
+2022,unbelted,11359,0,observed
+2022,unhelmeted,2257,0,observed
+2022,urban,25216,0,observed
+2023,alcohol_and_speeding,4958.2,49.6037,estimated (MI)
+2023,alcohol_impaired,12381.6,140.442,estimated (MI)
+2023,all,41025,0,observed
+2023,any_of_four,24431.3,107.577,estimated (MI)
+2023,belted,10833,0,observed
+2023,cyclists,1173,0,observed
+2023,day,18525,0,observed
+2023,distracted,3283,0,observed
+2023,drowsy,637,0,observed
+2023,helmet_unknown,219,0,observed
+2023,helmeted,3976,0,observed
+2023,hit_and_run,2911,0,observed
+2023,intersection,10504,0,observed
+2023,invalid_licence_crash,8582,0,observed
+2023,large_truck_crash,5478,0,observed
+2023,large_truck_occupants,962,0,observed
+2023,motorcyclists,6366,0,observed
+2023,night,22219,0,observed
+2023,other_nonoccupants,345,0,observed
+2023,other_vehicle_occupants,795,0,observed
+2023,pedestrians,7367,0,observed
+2023,police_pursuit,541,0,observed
+2023,pv_occupants,24017,0,observed
+2023,restraint_unknown,2651,0,observed
+2023,roadway_departure,19362,0,observed
+2023,rural,16796,0,observed
+2023,speeding,11913,0,observed
+2023,two_or_more,10240.9,52.4601,estimated (MI)
+2023,unbelted,10533,0,observed
+2023,unhelmeted,2171,0,observed
+2023,urban,24036,0,observed
+2024,alcohol_and_speeding,4656.1,29.0421,estimated (MI)
+2024,alcohol_impaired,11904,133.342,estimated (MI)
+2024,all,39254,0,observed
+2024,any_of_four,23234.1,128.172,estimated (MI)
+2024,belted,10402,0,observed
+2024,cyclists,1103,0,observed
+2024,day,18017,0,observed
+2024,distracted,3208,0,observed
+2024,drowsy,644,0,observed
+2024,helmet_unknown,224,0,observed
+2024,helmeted,3961,0,observed
+2024,hit_and_run,2758,0,observed
+2024,intersection,10432,0,observed
+2024,invalid_licence_crash,7875,0,observed
+2024,large_truck_crash,5340,0,observed
+2024,large_truck_occupants,920,0,observed
+2024,motorcyclists,6228,0,observed
+2024,night,20971,0,observed
+2024,other_nonoccupants,370,0,observed
+2024,other_vehicle_occupants,840,0,observed
+2024,pedestrians,7080,0,observed
+2024,police_pursuit,599,0,observed
+2024,pv_occupants,22713,0,observed
+2024,restraint_unknown,2553,0,observed
+2024,roadway_departure,18348,0,observed
+2024,rural,16006,0,observed
+2024,speeding,11288,0,observed
+2024,two_or_more,9617.6,32.3348,estimated (MI)
+2024,unbelted,9758,0,observed
+2024,unhelmeted,2043,0,observed
+2024,urban,22905,0,observed

@@ -1,0 +1,27 @@
+{
+ "table": "deaths/driver_records.csv",
+ "description": "Licence status and driving record of drivers in fatal crashes by BAC / speeding group",
+ "population": "FARS fatal crashes 2016-2024 (census)",
+ "unit": "driver in a fatal crash",
+ "outcome": "death (INJ_SEV 4)",
+ "method": "Census counts; alcohol quantities are means over NHTSA's 10 BAC implicates with MI SE sqrt(1.1 * between-implicate variance)",
+ "inputs": [
+  "FARS person (PER_TYP)",
+  "FARS vehicle (L_STATUS, PREV_*)",
+  "FARS veh_aux (A_SPVEH)",
+  "FARS miper"
+ ],
+ "rows": 63,
+ "columns": [
+  "group",
+  "indicator",
+  "share",
+  "mi_se",
+  "n_known",
+  "n_group",
+  "estimate_type"
+ ],
+ "module": "nhtsa_stats.analysis.deaths",
+ "git_commit": "c353485",
+ "generated_utc": "2026-11-05T15:13:28Z"
+}

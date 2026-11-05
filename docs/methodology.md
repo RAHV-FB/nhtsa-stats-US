@@ -326,3 +326,49 @@ The Phase-1 double-pair comparison (driver / right-front passenger, light vehicl
 disjoint strata of the driver's behaviour, crash type and time; crash-cluster bootstrap
 (1,000 replicates); heterogeneity z-test on the log RR. CRSS nested sequence for the unbelted
 RR on a fixed occupant sample.
+
+## 13. Where deaths concentrate (`analysis/deaths.py`, November 2026)
+
+The re-analysis behind `reports/road_deaths.md` and the public website starts from the people
+killed (FARS person files, `INJ_SEV` = 4) rather than from crash severity.
+
+* **Definitions.** NHTSA's analytical variables from the FARS auxiliary files: person type
+  (`A_PTYPE`), body type of the person's vehicle (`A_BODY`; passenger vehicles = codes 1–5),
+  belt use (`A_RESTUSE`), helmet use (`A_HELMUSE`), speeding-related crash (`A_SPCRA`), speeding
+  vehicle (`A_SPVEH`), large truck (`A_LT`), rural/urban (`A_RU`), time of day (`A_TOD`), road
+  function class (`A_ROADFC`), hit-and-run (`A_HR`), distraction and drowsiness (`A_DIST`,
+  `A_DROWSY`). The codes were verified by cross-tabulation against the labelled main-file
+  variables (`PER_TYP`, `BODY_TYP`, `REST_USE`/`HELM_USE`, `FUNC_SYS`, `L_STATUS`) before use.
+* **Alcohol.** A drunk-driving crash has a driver at a blood alcohol concentration of .08 or more
+  in NHTSA's multiple imputation (`MIDRVACC`; driver and pedestrian level `MIPER`; values in
+  hundredths). Each quantity is computed in each of the 10 implicates and averaged. FARS is a
+  census, so the within-imputation variance of a count is zero and the standard error reported is
+  sqrt((1 + 1/10) B), B the between-implicate variance (Rubin's rules). Shares for imputation-defined
+  groups are computed per implicate and averaged.
+* **Overlap.** Four per-death flags (drunk-driving crash, speeding-related crash, unbelted
+  passenger-vehicle occupant, unhelmeted motorcyclist) give 16 exclusive combinations per
+  implicate; the union and the counts with exactly one, two and three flags follow from them.
+* **Victim roles.** Within the deaths of a crash group, each death is classed relative to a "risk
+  vehicle" (driver at .08 or more in the same implicate; vehicle coded speeding; large truck): its
+  driver, its passenger, an occupant of another vehicle, a pedestrian or cyclist, or another
+  non-occupant.
+* **Driver records.** Drivers (`PER_TYP` 1) of every vehicle in a fatal crash, with licence
+  status (`L_STATUS`: invalid = not licensed, suspended, revoked, expired, cancelled/denied) and
+  five-year record counts (`PREV_DWI`, `PREV_SPD`, `PREV_ACC`; `PREV_SUS1–3` from 2018). Unknown
+  codes (7/9 for licence; 99/998 for conviction counts; 98/99/998 for prior crashes) leave the
+  base of each share.
+* **Belt and helmet use** shares are among the killed with known use, with bounds that count every
+  unknown as protected or unprotected.
+* **Lives belts and helmets would have saved (model-based).** For the unbelted (unhelmeted) people
+  killed, U, the expected number who would have survived had they been protected is U × E, where E
+  is the within-vehicle fatality reduction from the double pair comparison (`matched/belt_effect`,
+  `matched/double_pair_comparison`; driver–right-front-passenger pairs aged 13 and over for belts,
+  rider–passenger pairs for helmets). Belt estimates are reported under the matched module's misrecording
+  scenarios (0, 5, 10 and 20% of belted survivors assumed unbelted). E is estimated in fatal
+  crashes for front-seat occupants and applied to every seat and age.
+* **Vehicle age** is the crash year minus the model year, in the bands of the CRSS person model.
+* **States** are FARS state codes; shares are composition of each state's deaths, not rates.
+
+The public website (`website/index.html`) is rendered from `website/templates/index.html` by
+`nhtsa analyze site`, with the same placeholder grammar as the reports, so every number on the page
+is looked up in `outputs/tables` at build time.

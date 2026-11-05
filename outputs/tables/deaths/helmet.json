@@ -1,0 +1,34 @@
+{
+ "table": "deaths/helmet.csv",
+ "description": "Helmet use of killed motorcyclists with bounds for unknown use",
+ "population": "FARS fatal crashes 2016-2024 (census)",
+ "unit": "motorcyclist killed",
+ "outcome": "death (INJ_SEV 4)",
+ "method": "Census counts; alcohol quantities are means over NHTSA's 10 BAC implicates with MI SE sqrt(1.1 * between-implicate variance)",
+ "inputs": [
+  "FARS person (INJ_SEV, PER_TYP, AGE, SEX, LOCATION, STR_VEH)",
+  "FARS per_aux",
+  "FARS vehicle (L_STATUS, PREV_*, MOD_YEAR, VSPD_LIM)",
+  "FARS veh_aux",
+  "FARS accident (LGT_COND)",
+  "FARS acc_aux",
+  "FARS midrvacc",
+  "FARS miper"
+ ],
+ "rows": 70,
+ "columns": [
+  "dimension",
+  "level",
+  "killed",
+  "known",
+  "unhelmeted",
+  "unhelmeted_share",
+  "unknown_share",
+  "share_if_unknown_protected",
+  "share_if_unknown_unprotected",
+  "flag"
+ ],
+ "module": "nhtsa_stats.analysis.deaths",
+ "git_commit": "c353485",
+ "generated_utc": "2026-11-05T15:13:28Z"
+}

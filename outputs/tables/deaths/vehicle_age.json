@@ -1,0 +1,28 @@
+{
+ "table": "deaths/vehicle_age.csv",
+ "description": "Vehicle-age bands of killed PV occupants",
+ "population": "FARS fatal crashes 2016-2024 (census)",
+ "unit": "PV occupant killed",
+ "outcome": "death (INJ_SEV 4)",
+ "method": "Census counts; alcohol quantities are means over NHTSA's 10 BAC implicates with MI SE sqrt(1.1 * between-implicate variance)",
+ "inputs": [
+  "FARS person (INJ_SEV, PER_TYP, AGE, SEX, LOCATION, STR_VEH)",
+  "FARS per_aux",
+  "FARS vehicle (L_STATUS, PREV_*, MOD_YEAR, VSPD_LIM)",
+  "FARS veh_aux",
+  "FARS accident (LGT_COND)",
+  "FARS acc_aux",
+  "FARS midrvacc",
+  "FARS miper"
+ ],
+ "rows": 70,
+ "columns": [
+  "YEAR",
+  "band",
+  "deaths",
+  "share"
+ ],
+ "module": "nhtsa_stats.analysis.deaths",
+ "git_commit": "c353485",
+ "generated_utc": "2026-11-05T15:13:28Z"
+}
