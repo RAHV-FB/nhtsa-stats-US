@@ -31,14 +31,12 @@ mt,o2,l2,h2=fit(te,"drv_bac08_measured"); print("TESTED adj OR(killed) for measu
 # restricted to police-alcohol-unknown ('nan' string) untested to remove police-report path
 un2=un[un.drv_pr_alcohol.isin(["nan","None"])]
 print("n untested & police alcohol missing",len(un2))
-# counterfactual: untested killed drivers get survivors' conditional rate (model fitted on untested survivors)
+# counterfactual (rows with a defined survivor-model prediction only): untested killed drivers get the
+# survivors' covariate-conditional imputed rate
 ms=smf.glm("drv_p_p08"+f.replace("drv_killed +",""),data=un[un.drv_killed==0],family=sm.families.Binomial()).fit()
-k=un.drv_killed==1
-cf=un.copy(); pr=np.asarray(ms.predict(un.loc[k])); print("pred NaN",int(np.isnan(pr).sum()),"of",len(pr)); cf.loc[k,"drv_p_p08"]=pr
-print("untested killed: actual mean p08 %.4f vs survivor-model counterfactual %.4f"%(un.loc[k,"drv_p_p08"].mean(),cf.loc[k,"drv_p_p08"].mean()))
-# effect on share of ALL drivers/ killed drivers at BAC>=.08 (measured where tested else p_p08)
-d=d.copy(); d["p"]=np.where(d.drv_bac08_measured.notna(),d.drv_bac08_measured,d.drv_p_p08)
-d["pcf"]=d["p"]; idx=un.index[k.values]; print("n replaced",len(idx),"NaN cf",int(cf.loc[idx,"drv_p_p08"].isna().sum()),"NaN p killed",int(d.loc[d.drv_killed==1,"p"].isna().sum())); d.loc[idx,"pcf"]=cf.loc[idx,"drv_p_p08"].to_numpy()
-kk=d[d.drv_killed==1]
-print("killed drivers: share BAC>=.08  published-style %.4f ; counterfactual %.4f ; n=%d ; untested share %.3f"%(kk.p.mean(),kk.pcf.mean(),len(kk),kk.drv_bac08_measured.isna().mean()))
-print("all drivers: %.4f vs %.4f"%(d.p.mean(),d.pcf.mean()))
+uk=un[un.drv_killed==1].copy(); uk["cf"]=np.asarray(ms.predict(uk)); ok=uk.cf.notna()
+print("untested killed with defined prediction: %d of %d; actual mean p08 %.4f vs survivor-model counterfactual %.4f"%(ok.sum(),len(uk),uk.loc[ok,"drv_p_p08"].mean(),uk.loc[ok,"cf"].mean()))
+# bound on W01-style statistic: share of killed drivers at BAC>=.08 (tested measured, untested imputed)
+kt=d[d.drv_killed==1]; n=len(kt); meas=kt.drv_bac08_measured.sum(); imp=kt.loc[kt.drv_bac08_measured.isna(),"drv_p_p08"].sum()
+shift=(uk.loc[ok,"drv_p_p08"]-uk.loc[ok,"cf"]).sum()
+print("killed drivers: share BAC>=.08 = %.4f; if imputed rate had followed survivors' model (defined rows) = %.4f; untested share %.3f"%((meas+imp)/n,(meas+imp-shift)/n,kt.drv_bac08_measured.isna().mean()))
