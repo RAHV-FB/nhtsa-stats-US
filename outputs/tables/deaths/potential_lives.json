@@ -4,11 +4,15 @@
  "population": "FARS fatal crashes 2016-2024 (census)",
  "unit": "person killed",
  "outcome": "death (INJ_SEV 4)",
- "method": "Census counts; alcohol quantities are means over NHTSA's 10 BAC implicates with MI SE sqrt(1.1 * between-implicate variance)",
+ "method": "lives = deaths without the device (unbelted passenger-vehicle occupants or unhelmeted motorcyclists killed, FARS 2016-2024) x within-vehicle effectiveness (1 - RR) from the matched module; lives per year divide by the number of years. Seat belts are shown as recorded and under three scenarios in which 5%, 10% or 20% of belted survivors were misrecorded; helmets as recorded. Bounds apply the effectiveness interval to the same death count (the death count itself is observed). Hypothetical, not a causal estimate",
  "inputs": [
-  "FARS person (INJ_SEV)",
+  "outputs/tables/matched/belt_effect.csv",
+  "outputs/tables/matched/double_pair_comparison.csv",
+  "FARS person (INJ_SEV, PER_TYP, AGE, SEX, LOCATION, STR_VEH)",
   "FARS per_aux",
+  "FARS vehicle (L_STATUS, PREV_*, MOD_YEAR, VSPD_LIM)",
   "FARS veh_aux",
+  "FARS accident (LGT_COND)",
   "FARS acc_aux",
   "FARS midrvacc",
   "FARS miper"
@@ -30,6 +34,10 @@
   "estimate_type"
  ],
  "module": "nhtsa_stats.analysis.deaths",
- "git_commit": "9e8ab40",
- "generated_utc": "2026-11-05T14:18:27Z"
+ "git_commit": "c353485",
+ "generated_utc": "2026-11-05T15:13:28Z",
+ "input_git_commits": {
+  "matched/belt_effect.csv": "ef704fd",
+  "matched/double_pair_comparison.csv": "ef704fd"
+ }
 }

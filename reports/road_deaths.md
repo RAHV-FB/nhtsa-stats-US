@@ -32,12 +32,14 @@ here where they add the size of an association.
    recent conviction**: 66.3%
    were at .15 or more and 23.7%
    had no valid licence, but only 7.4%
-   had a drink-driving conviction in the previous five years.
+   had a DWI conviction on record from the previous five years.
 4. **48.6% of passenger-vehicle
    occupants killed with known belt use were unbelted.** On the project's within-vehicle
-   effectiveness estimates, between 4,000
-   and 6,900
-   of them a year would have been expected to survive had they been belted (model-based).
+   effectiveness estimates, up to about 6,900
+   of them a year would have been expected to survive had they been belted (model-based). The
+   figure depends heavily on how accurately belt use is recorded: about
+   4,000 if one in ten belted survivors was
+   misrecorded and 500 if one in five.
 5. **Pedestrian deaths are concentrated** on the roadway away from intersections
    (72.6%), in darkness
    (only 19.9% in daylight) and on
@@ -45,7 +47,8 @@ here where they add the size of an association.
    hit-and-runs.
 6. **Vehicle age**: occupants of vehicles 18 or more years old had an adjusted risk of death in a
    police-reported crash 2.22 (1.99–2.48)
-   times that of occupants of vehicles 0–3 years old, and their share of occupant deaths rose
+   times that of occupants of vehicles 0–3 years old (1.76 (1.59–1.94) when the
+   crash type and number of vehicles are also held fixed), and their share of occupant deaths rose
    from 18.0% (2016) to
    30.5% (2024).
 7. **The 2019–2021 rise was steepest for risky driving** (deaths in crashes with a driver
@@ -164,9 +167,10 @@ Drivers in fatal crashes, by blood alcohol (share of drivers with a known record
 Only 7.4% of drunk
 drivers had a DWI conviction in the five years before the crash
 (1.8% of drivers with no
-alcohol). Programmes restricted to convicted drivers could not have reached the remainder. Driver
-records count convictions, not arrests, and can miss out-of-state offences, so this share is a
-lower bound on prior drink-driving.
+alcohol). Driver records count convictions, not arrests, and can miss out-of-state offences and
+offences reduced by plea, so this share is a lower bound on prior impaired driving. Even so, most
+drunk drivers in fatal crashes had no recent conviction for programmes aimed at convicted drivers
+to act on.
 
 ## 4. Seat belts
 
@@ -215,8 +219,8 @@ misrecorded):
 | misreport_10pct | 37.9% | 35,769 | 3,974 | 3,792 | 4,130 |
 | misreport_20pct | 4.4% | 4,118 | 458 | 206 | 671 |
 
-The effectiveness was estimated for drivers and right-front passengers and is applied to every
-seat. These are expectations for the people who died, not the effect of any policy.
+The effectiveness was estimated for drivers and right-front passengers aged 13 and over and is
+applied to every seat and age. These are expectations for the people who died, not the effect of any policy.
 
 ## 5. Speed
 
@@ -318,16 +322,17 @@ would have been expected to survive with a helmet (model-based).
 
 Occupants of light passenger vehicles in police-reported crashes (CRSS), adjusted risk of death by
 vehicle age (model A: occupant age, sex, seat role, belt use, vehicle body, the other vehicle's
-body, and the pre-crash crash set):
+body, and the pre-crash crash set; model B adds crash type and number of vehicles, which may
+partly reflect the vehicle itself):
 
-| Vehicle age | Crude rate | Crude RR | Adjusted RR |
-|---|---|---|---|
-| 0-3 | 0.097% | 1.00 | 1.00 (1.00–1.00) |
-| 4-7 | 0.134% | 1.38 | 1.25 (1.13–1.40) |
-| 8-12 | 0.161% | 1.66 | 1.35 (1.22–1.49) |
-| 13-17 | 0.269% | 2.77 | 1.81 (1.62–2.01) |
-| 18+ | 0.419% | 4.32 | 2.22 (1.99–2.48) |
-| unknown | 0.407% | 4.20 | 2.09 (1.03–4.22) |
+| Vehicle age | Crude rate | Crude RR | Adjusted RR, model A | Adjusted RR, model B |
+|---|---|---|---|---|
+| 0-3 | 0.097% | 1.00 | 1.00 (1.00–1.00) | 1.00 (1.00–1.00) |
+| 4-7 | 0.134% | 1.38 | 1.25 (1.13–1.40) | 1.18 (1.06–1.32) |
+| 8-12 | 0.161% | 1.66 | 1.35 (1.22–1.49) | 1.21 (1.09–1.34) |
+| 13-17 | 0.269% | 2.77 | 1.81 (1.62–2.01) | 1.52 (1.37–1.67) |
+| 18+ | 0.419% | 4.32 | 2.22 (1.99–2.48) | 1.76 (1.59–1.94) |
+| unknown | 0.407% | 4.20 | 2.09 (1.03–4.22) | 2.19 (1.18–4.04) |
 
 Share of passenger-vehicle occupants killed (known model year) by vehicle age, FARS:
 

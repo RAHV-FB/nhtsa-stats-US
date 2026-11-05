@@ -6,9 +6,11 @@
  "outcome": "death (INJ_SEV 4)",
  "method": "Census counts; alcohol quantities are means over NHTSA's 10 BAC implicates with MI SE sqrt(1.1 * between-implicate variance)",
  "inputs": [
-  "FARS person (INJ_SEV)",
+  "FARS person (INJ_SEV, PER_TYP, AGE, SEX, LOCATION, STR_VEH)",
   "FARS per_aux",
+  "FARS vehicle (L_STATUS, PREV_*, MOD_YEAR, VSPD_LIM)",
   "FARS veh_aux",
+  "FARS accident (LGT_COND)",
   "FARS acc_aux",
   "FARS midrvacc",
   "FARS miper"
@@ -24,6 +26,6 @@
   "mi_se"
  ],
  "module": "nhtsa_stats.analysis.deaths",
- "git_commit": "9e8ab40",
- "generated_utc": "2026-11-05T14:18:27Z"
+ "git_commit": "c353485",
+ "generated_utc": "2026-11-05T15:13:28Z"
 }
