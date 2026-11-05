@@ -33,7 +33,7 @@ rows = []
 for name, (f, lv, adj) in SETS.items():
     crude = severity.crude_table(df, design, "fatal", f, severity.observed_levels(df, f), df.YEAR.nunique()).set_index("level").loc[lv, "crude_rr"]
     a = get(mA, f, lv)
-    m = severity.fit(df, design, "fatal", adj)
+    m = severity.fit(df, design, "fatal", adj + [f])
     s = get(m, f, lv)
     # ATT: model A, standardised to exposed crashes
     dom = (df[f] == lv).to_numpy()
