@@ -38,7 +38,7 @@ for sf in (0.5,0.6,0.7):
 # (c) type shift
 ex = cells("exceeded_limit_or_racing"); tf = cells("too_fast_for_conditions"); no = cells("no")
 rate = lambda c_: c_[0]/(c_[0]+c_[1])
-r_tf, r_ex, r_no = rate(tf), rate(ex), c / (c+d) if False else no[2]/(no[2]+no[3])
+r_tf, r_ex, r_no = rate(tf), rate(ex), 0.00494814  # r_no: published fatal_speeding_type rate (no)
 print("\n(c) rates (weighted, per crash) no/TF/EX:", r_no, r_tf, r_ex)
 print("   share g of TF group that would be hidden exceeders to explain whole crude excess:", (r_tf-r_no)/(r_ex-r_no))
 # (d) FARS recalibration: published FARS share of fatal crashes vs CRSS (descriptive/frequency_vs_severity)
