@@ -14,7 +14,7 @@ def run(df, design, covs, outcome, tag):
     res=[]
     if "striking" in covs:
         t = severity.factor_contrasts(m, df, "striking", severity.observed_levels(df,"striking",V.LEVELS["striking"])).set_index("level")
-        for l in ("suv","pickup","large"): res.append("%s %.2f (%.2f-%.2f)"%(l,t.loc[l,"adj_rr"],t.loc[l,"adj_rr_low"],t.loc[l,"adj_rr_high"]))
+        for l in [x for x in ("suv","pickup","large") if x in t.index]: res.append("%s %.2f (%.2f-%.2f)"%(l,t.loc[l,"adj_rr"],t.loc[l,"adj_rr_low"],t.loc[l,"adj_rr_high"]))
     if "str_speed_limit" in covs:
         t = severity.factor_contrasts(m, df, "str_speed_limit", severity.observed_levels(df,"str_speed_limit",V.LEVELS["str_speed_limit"])).set_index("level")
         for l in ("30-35","50-55"): res.append("%s %.2f (%.2f-%.2f)"%(l,t.loc[l,"adj_rr"],t.loc[l,"adj_rr_low"],t.loc[l,"adj_rr_high"]))
