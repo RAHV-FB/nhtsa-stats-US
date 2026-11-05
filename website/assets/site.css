@@ -177,7 +177,7 @@ h3 { font-weight: 800; font-size: 1.25rem; margin: 40px 0 12px; }
 .hero { padding: 48px 0 48px; }
 .hero h1 { margin-bottom: 20px; }
 .standfirst { font-size: 1.25rem; line-height: 1.55; max-width: 680px; }
-.meta { font: 400 0.8125rem/1.6 var(--font-mono); color: var(--muted); max-width: 680px; margin-bottom: 36px; }
+.meta { font: 400 0.8125rem/1.6 var(--font-mono); font-variant-ligatures: none; color: var(--muted); max-width: 680px; margin-bottom: 36px; }
 .hero-figure { display: flex; align-items: flex-end; gap: 28px; margin-bottom: 36px; }
 .hero-num {
   flex: none; margin: 0; font: 800 clamp(4rem, 15vw, 5.5rem)/1 var(--font-ui);
@@ -217,7 +217,7 @@ h3 { font-weight: 800; font-size: 1.25rem; margin: 40px 0 12px; }
   margin: 28px 0 14px; padding-left: 14px; border-left: 3px solid var(--rule);
   font: 400 0.9375rem/1.55 var(--font-ui); color: var(--ink-2);
 }
-.source { font: 400 0.8125rem/1.6 var(--font-mono); color: var(--muted); }
+.source { font: 400 0.8125rem/1.6 var(--font-mono); font-variant-ligatures: none; color: var(--muted); }
 .lede { font-size: 1.0625rem; color: var(--ink-2); }
 .limits { margin: 0 0 24px; }
 .limits dt { font: 800 1.0625rem/1.3 var(--font-ui); margin-top: 20px; }
@@ -285,7 +285,7 @@ h3 { font-weight: 800; font-size: 1.25rem; margin: 40px 0 12px; }
 }
 .hb-tick {
   position: absolute; top: 6px; transform: translateX(-50%); white-space: nowrap;
-  font: 400 0.75rem/1 var(--font-mono); color: var(--muted);
+  font: 400 0.75rem/1 var(--font-mono); font-variant-ligatures: none; color: var(--muted);
 }
 
 /* segmented bars */
@@ -307,7 +307,7 @@ h3 { font-weight: 800; font-size: 1.25rem; margin: 40px 0 12px; }
 .vg:first-child { border-top-color: var(--axis); }
 .vg b {
   position: absolute; right: 100%; top: 0; margin-right: 8px; transform: translateY(-50%);
-  font: 400 0.75rem/1 var(--font-mono); color: var(--muted);
+  font: 400 0.75rem/1 var(--font-mono); font-variant-ligatures: none; color: var(--muted);
 }
 .vref { position: absolute; left: 0; right: 0; height: 0; border-top: 1px solid var(--ink-2); z-index: 2; }
 .ref-key { margin: 0 0 -14px 44px; font: 400 0.8125rem/1.3 var(--font-ui); color: var(--ink-2); }
@@ -360,7 +360,7 @@ h3 { font-weight: 800; font-size: 1.25rem; margin: 40px 0 12px; }
 .ln-narrow { display: none; }
 .ln-grid { stroke: var(--rule); stroke-width: 1; }
 .ln-base { stroke: var(--axis); }
-.ln-tick { font: 400 12px var(--font-mono); fill: var(--muted); }
+.ln-tick { font: 400 12px var(--font-mono); font-variant-ligatures: none; fill: var(--muted); }
 .ln-line { fill: none; stroke-linejoin: round; stroke-linecap: round; }
 .ln-area { fill: var(--accent-wash); stroke: none; }
 .ln-dot { stroke: var(--surface); stroke-width: 2px; }
@@ -380,7 +380,7 @@ h3 { font-weight: 800; font-size: 1.25rem; margin: 40px 0 12px; }
   cursor: pointer; display: inline-block; font: 600 0.875rem/1.3 var(--font-ui); color: var(--accent-ink);
 }
 .table-wrap { overflow-x: auto; max-width: 100%; margin-top: 10px; -webkit-overflow-scrolling: touch; }
-.dataview table { border-collapse: collapse; width: 100%; font: 400 0.8125rem/1.4 var(--font-mono); }
+.dataview table { border-collapse: collapse; width: 100%; font: 400 0.8125rem/1.4 var(--font-mono); font-variant-ligatures: none; }
 .dataview th, .dataview td { padding: 6px 12px 6px 0; border-bottom: 1px solid var(--rule); text-align: left; vertical-align: top; }
 .dataview thead th { font-weight: 600; color: var(--muted); white-space: normal; }
 .dataview tbody th { font-weight: 400; color: var(--ink); font-family: var(--font-ui); min-width: 140px; }
@@ -412,7 +412,7 @@ h3 { font-weight: 800; font-size: 1.25rem; margin: 40px 0 12px; }
 .states tbody tr:hover th, .states tbody tr:hover td { background-image: linear-gradient(var(--accent-wash), var(--accent-wash)); }
 .states tr.us-row th, .states tr.us-row td { font-weight: 800; }
 .states tr:last-child th, .states tr:last-child td { border-bottom: 0; }
-.st-code { font: 400 0.8125rem var(--font-mono); color: var(--muted); }
+.st-code { font: 400 0.8125rem var(--font-mono); font-variant-ligatures: none; color: var(--muted); }
 .st-val { display: block; font-variant-numeric: tabular-nums; }
 .st-bar { display: block; height: 4px; margin-top: 3px; }
 .st-bar i { display: block; height: 4px; background: var(--accent); border-radius: 0 2px 2px 0; }
