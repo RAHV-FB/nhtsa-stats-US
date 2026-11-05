@@ -1,0 +1,391 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Road Deaths in America</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="What federal crash records show about the people killed on US roads from 2016 to 2024: which behaviours were involved, who the victims were, and where the risk concentrates.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Overpass:wght@400;600;800&amp;family=Overpass+Mono:wght@400;600&amp;family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&amp;display=swap">
+<style>
+{{asset:css}}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="bar">
+  <div class="bar-in">
+    <a class="brand" href="#top">Road Deaths in America</a>
+    <nav aria-label="Sections">
+      <a href="#behaviours">Overview</a>
+      <a href="#alcohol">Drunk driving</a>
+      <a href="#belts">Seat belts</a>
+      <a href="#speed">Speed</a>
+      <a href="#pedestrians">Pedestrians</a>
+      <a href="#motorcycles">Motorcycles</a>
+      <a href="#vehicles">Vehicles</a>
+      <a href="#trend">Since 2019</a>
+      <a href="#states">States</a>
+      <a href="#method">Method</a>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+
+<section class="hero band" id="top">
+  <div class="band-in">
+    <p class="kicker">Federal crash records, 2016–2024</p>
+    <h1>What is killing people on America’s roads</h1>
+    <p class="standfirst">Every death on a US public road is recorded in the Fatality Analysis Reporting System. We analysed all {{deaths/segments|segment=all|deaths|,.0f}} deaths recorded from 2016 to 2024 to find out who died, what was involved, and which risks account for the most lives.</p>
+    <p class="meta">Data: NHTSA FARS and CRSS · Independent analysis, not affiliated with NHTSA · <a href="#method">Method and sources</a></p>
+
+    <div class="hero-figure">
+      <p class="hero-num">{{deaths/segments|segment=any_of_four|share_of_all|pct:0}}</p>
+      <p class="hero-text">of deaths involved at least one of four behaviours that road-safety policy already targets: a drunk driver, a speeding driver, a victim without a seat belt, or a motorcyclist without a helmet. That is about {{deaths/segments|segment=any_of_four|per_year|rnd:-2}} deaths a year.</p>
+    </div>
+
+    <ul class="tiles" aria-label="The four behaviours, share of all deaths 2016–2024">
+      <li class="tile">
+        <span class="tile-label">Drunk driver involved</span>
+        <span class="tile-value">{{deaths/segments|segment=alcohol_impaired|share_of_all|pct:0}}</span>
+        <span class="tile-sub">about {{deaths/segments|segment=alcohol_impaired|per_year|rnd:-2}} deaths a year</span>
+      </li>
+      <li class="tile">
+        <span class="tile-label">Speeding-related</span>
+        <span class="tile-value">{{deaths/segments|segment=speeding|share_of_all|pct:0}}</span>
+        <span class="tile-sub">about {{deaths/segments|segment=speeding|per_year|rnd:-2}} deaths a year</span>
+      </li>
+      <li class="tile">
+        <span class="tile-label">Victim not wearing a seat belt</span>
+        <span class="tile-value">{{deaths/segments|segment=unbelted|share_of_all|pct:0}}</span>
+        <span class="tile-sub">about {{deaths/segments|segment=unbelted|per_year|rnd:-2}} deaths a year</span>
+      </li>
+      <li class="tile">
+        <span class="tile-label">Motorcyclist without a helmet</span>
+        <span class="tile-value">{{deaths/segments|segment=unhelmeted|share_of_all|pct:0}}</span>
+        <span class="tile-sub">about {{deaths/segments|segment=unhelmeted|per_year|rnd:-2}} deaths a year</span>
+      </li>
+    </ul>
+    <p class="tile-note">Shares of all deaths, 2016–2024. A death can involve more than one behaviour, so the four shares add up to more than the combined figure.</p>
+  </div>
+</section>
+
+<section class="findings" id="findings" aria-labelledby="findings-h">
+  <div class="wrap">
+    <h2 id="findings-h">Key findings</h2>
+    <ul class="finding-list">
+      <li><strong>About {{deaths/segments|segment=alcohol_impaired|per_year|rnd:-2}} people a year died in drunk-driving crashes, and {{deaths/victim_roles|group=alcohol_impaired;role=not_risk_driver|share_of_group|pct:0}} of them were not the drunk driver.</strong> {{deaths/driver_records|group=bac_08_plus;indicator=bac_15_plus|share|pct:0}} of the drunk drivers were at .15 or more, yet only {{deaths/driver_records|group=bac_08_plus;indicator=prior_dwi|share|pct:0}} had a drink-driving conviction in the previous five years. <a href="#alcohol">Drunk driving</a></li>
+      <li><strong>{{deaths/restraint|dimension=overall;level=all|unbelted_share|pct:0}} of people killed in cars, SUVs, pickups and vans whose belt use was recorded were not wearing a seat belt</strong>, rising to {{deaths/restraint|dimension=time_of_day;level=night|unbelted_share|pct:0}} at night and {{deaths/restraint|dimension=vehicle;level=pickup|unbelted_share|pct:0}} in pickups. A model-based estimate puts the number who would have survived had they been belted at about {{deaths/potential_lives|measure=seat_belts;scenario=misreport_10pct|lives_per_year|rnd:-2}} to {{deaths/potential_lives|measure=seat_belts;scenario=as_recorded|lives_per_year|rnd:-2}} a year, depending on how accurately belt use is recorded. <a href="#belts">Seat belts</a></li>
+      <li><strong>{{deaths/victim_roles|group=speeding;role=not_risk_driver|share_of_group|pct:0}} of people killed in speeding crashes were not the speeding driver.</strong> Crashes in which a driver exceeded the posted limit were by far the most likely to be fatal; crashes coded “too fast for conditions” showed no detectable increase. <a href="#speed">Speed</a></li>
+      <li><strong>Pedestrians were {{deaths/segments|segment=pedestrians|share_of_all|pct:0}} of deaths.</strong> {{deaths/pedestrians|dimension=location;level=midblock_roadway|share|pct:0}} were struck on the roadway away from an intersection, most in the dark, and {{deaths/pedestrians|dimension=hit_and_run;level=yes|share|pct:0}} were hit-and-runs. <a href="#pedestrians">Pedestrians</a></li>
+      <li><strong>Motorcyclist deaths rose {{deaths/segments|segment=motorcyclists|pct_change_2019_2024|pct:0}} from 2019 to 2024.</strong> {{deaths/helmet|dimension=overall;level=all|unhelmeted_share|pct:0}} of motorcyclists killed wore no helmet, where helmet use was recorded; in some states almost all wore one, in others most did not. <a href="#motorcycles">Motorcycles</a></li>
+      <li><strong>Occupants of vehicles 18 or more years old were {{person/lpv_killed_crude_vs_adjusted|population=lpv;outcome=killed;factor=veh_age_band;level=18+|A_adj_rr|x:1}} as likely to die in a crash</strong> as occupants of vehicles under 4 years old, after adjustment, and such vehicles carried a growing share of the dead. <a href="#vehicles">Vehicles</a></li>
+      <li><strong>The 2020–21 surge was steepest in risky driving and on urban roads.</strong> From 2019 to 2021 deaths in crashes involving a driver without a valid licence rose {{deaths/segments|segment=invalid_licence_crash|pct_change_2019_2021|pct:0}}, hit-and-run deaths {{deaths/segments|segment=hit_and_run|pct_change_2019_2021|pct:0}} and drunk-driving deaths {{deaths/segments|segment=alcohol_impaired|pct_change_2019_2021|pct:0}}, against {{deaths/segments|segment=all|pct_change_2019_2021|pct:0}} for all deaths. <a href="#trend">Since 2019</a></li>
+      <li><strong>States differ sharply.</strong> The unbelted share of occupants killed ranges from {{deaths/states||min(unbelted_share_known)|pct:0}} to {{deaths/states||max(unbelted_share_known)|pct:0}} by state, and the share of motorcyclists killed without a helmet from {{deaths/states||min(unhelmeted_share_known)|pct:0}} to {{deaths/states||max(unhelmeted_share_known)|pct:0}}. <a href="#states">States</a></li>
+    </ul>
+  </div>
+</section>
+
+<section class="sec" id="behaviours" aria-labelledby="behaviours-h">
+  <div class="wrap">
+    <p class="kicker">Overview</p>
+    <h2 id="behaviours-h">Most deaths involved drink-driving, speeding, or a victim without a belt or helmet</h2>
+    <p>Police and NHTSA code each fatal crash for speeding, and NHTSA estimates every driver’s blood alcohol concentration, imputing it statistically where no test result exists. For each person killed, the record shows whether they wore a seat belt or helmet. These four behaviours are the best-measured in the records, and all four are long-standing targets of road-safety law and enforcement.</p>
+    <p>Together they were involved in {{deaths/segments|segment=any_of_four|share_of_all|pct:0}} of deaths: {{deaths/segments|segment=any_of_four|deaths|,.0f}} people from 2016 to 2024. They often came together. In {{deaths/segments|segment=two_or_more|share_of_all|pct:0}} of deaths two or more were present. Crashes with both a drunk driver and speeding, for example, accounted for {{deaths/segments|segment=alcohol_and_speeding|share_of_all|pct:0}} of all deaths.</p>
+
+    <figure class="fig">
+      <p class="fig-title">Share of all deaths involving each behaviour, 2016–2024</p>
+      <p class="fig-sub">FARS, all {{deaths/segments|segment=all|deaths|,.0f}} deaths. Alcohol uses NHTSA’s multiply imputed blood alcohol concentration.</p>
+      {{chart:behaviours}}
+      <figcaption>A death is counted under each behaviour that was present, so the bars overlap. The last bar counts each death once.</figcaption>
+    </figure>
+
+    <figure class="fig">
+      <p class="fig-title">How many of the four behaviours were present</p>
+      <p class="fig-sub">Share of all deaths, 2016–2024</p>
+      {{chart:overlap}}
+      <figcaption>Seat-belt and helmet use apply to different victims, so a single death can involve at most three of the four.</figcaption>
+    </figure>
+
+    <p class="note">Distraction ({{deaths/segments|segment=distracted|share_of_all|pct:0}} of deaths) and drowsy driving ({{deaths/segments|segment=drowsy|share_of_all|pct:0}}) are also coded, but police can seldom establish them after a crash, so they are left out of this count. Drug tests are given mainly to drivers who died, and testing practice differs by state, so drug involvement is not counted either.</p>
+    <p class="source">Sources: <a href="data/tables/deaths/segments.csv">deaths/segments</a>, <a href="data/tables/deaths/behaviour_summary.csv">deaths/behaviour_summary</a>, <a href="data/tables/deaths/behaviour_overlap.csv">deaths/behaviour_overlap</a>. Observed counts; alcohol estimated from ten imputations.</p>
+  </div>
+</section>
+
+<section class="sec" id="alcohol" aria-labelledby="alcohol-h">
+  <div class="wrap">
+    <p class="kicker">Drunk driving</p>
+    <h2 id="alcohol-h">About {{deaths/segments|segment=alcohol_impaired|per_year|rnd:-2}} people a year died in drunk-driving crashes. {{deaths/victim_roles|group=alcohol_impaired;role=not_risk_driver|share_of_group|pct:0}} of them were not the drunk driver</h2>
+    <p>Of the {{deaths/segments|segment=alcohol_impaired|deaths|,.0f}} people killed from 2016 to 2024 in crashes in which a driver had a blood alcohol concentration of .08 or more, {{deaths/victim_roles|group=alcohol_impaired;role=risk_driver|share_of_group|pct:0}} were the drunk drivers themselves. The rest were their passengers ({{deaths/victim_roles|group=alcohol_impaired;role=risk_passenger|share_of_group|pct:0}}), people in other vehicles ({{deaths/victim_roles|group=alcohol_impaired;role=other_vehicle_occupant|share_of_group|pct:0}}) and pedestrians or cyclists ({{deaths/victim_roles|group=alcohol_impaired;role=pedestrian_or_cyclist|share_of_group|pct:0}}): about {{deaths/victim_roles|group=alcohol_impaired;role=not_risk_driver|deaths|rnd:-2}} people over the nine years.</p>
+
+    <figure class="fig">
+      <p class="fig-title">Who died in drunk-driving crashes</p>
+      <p class="fig-sub">Deaths in crashes with a driver at .08 or more, 2016–2024</p>
+      {{chart:alcohol_victims}}
+      <figcaption>“The drunk driver” means the driver of a vehicle whose driver was at .08 or more; “their passengers” rode in that vehicle.</figcaption>
+    </figure>
+
+    <h3>Who the drunk drivers were</h3>
+    <p>Most drunk drivers in fatal crashes were far over the limit. {{deaths/driver_records|group=bac_08_plus;indicator=bac_15_plus|share|pct:0}} had a blood alcohol concentration of .15 or more, nearly twice the legal limit. {{deaths/driver_records|group=bac_08_plus;indicator=licence_invalid|share|pct:0}} were driving without a valid licence, twice the share among drivers with no alcohol ({{deaths/driver_records|group=bac_zero;indicator=licence_invalid|share|pct:0}}).</p>
+    <p>Yet only {{deaths/driver_records|group=bac_08_plus;indicator=prior_dwi|share|pct:1}} had a drink-driving conviction on their record from the previous five years. Measures aimed at drivers with a recent drink-driving conviction, such as court-ordered ignition interlocks, would not have covered the other {{deaths/driver_records|group=bac_08_plus;indicator=prior_dwi|share|pctc:0}}.</p>
+
+    <figure class="fig">
+      <p class="fig-title">Driver records: drunk drivers compared with drivers with no alcohol</p>
+      <p class="fig-sub">Drivers in fatal crashes, 2016–2024, share of those with a known record</p>
+      {{chart:alcohol_records}}
+      <figcaption>Previous convictions, suspensions and crashes come from state driver records for the five years before the crash; suspensions are recorded from 2018.</figcaption>
+    </figure>
+
+    <p class="note">NHTSA imputes blood alcohol for drivers who were not tested, from the circumstances of the crash; the figures here average its ten imputations. Driver records show convictions, not arrests, and can miss offences in other states.</p>
+    <p class="source">Sources: <a href="data/tables/deaths/victim_roles.csv">deaths/victim_roles</a>, <a href="data/tables/deaths/driver_records.csv">deaths/driver_records</a>. Estimated from ten imputations.</p>
+  </div>
+</section>
+
+<section class="sec" id="belts" aria-labelledby="belts-h">
+  <div class="wrap">
+    <p class="kicker">Seat belts</p>
+    <h2 id="belts-h">{{deaths/restraint|dimension=overall;level=all|unbelted_share|pct:0}} of people killed in passenger vehicles were unbelted, where belt use was recorded</h2>
+    <p>Among people killed in cars, SUVs, pickups and vans whose belt use was recorded, {{deaths/restraint|dimension=overall;level=all|unbelted_share|pct:1}} were unbelted: {{deaths/restraint|dimension=overall;level=all|unbelted|,.0f}} deaths from 2016 to 2024. Belt use was not recorded for another {{deaths/restraint|dimension=overall;level=all|unknown_share|pct:0}}; counting all of them as belted, or all as unbelted, gives a range of {{deaths/restraint|dimension=overall;level=all|share_if_unknown_protected|pct:0}} to {{deaths/restraint|dimension=overall;level=all|share_if_unknown_unprotected|pct:0}}.</p>
+    <p>Not wearing a belt was most common at night ({{deaths/restraint|dimension=time_of_day;level=night|unbelted_share|pct:0}}, against {{deaths/restraint|dimension=time_of_day;level=day|unbelted_share|pct:0}} by day), in pickups ({{deaths/restraint|dimension=vehicle;level=pickup|unbelted_share|pct:0}}), among men ({{deaths/restraint|dimension=sex;level=male|unbelted_share|pct:0}}) and among adults aged 25–34 ({{deaths/restraint|dimension=age_band;level=25-34|unbelted_share|pct:0}}).</p>
+
+    <figure class="fig">
+      <p class="fig-title">Share of occupants killed who were not wearing a seat belt</p>
+      <p class="fig-sub">Cars, SUVs, pickups and vans, 2016–2024, where belt use was recorded</p>
+      {{chart:unbelted_by}}
+      <figcaption>The vertical line marks the overall share.</figcaption>
+    </figure>
+
+    <h3>How many lives belts would have saved</h3>
+    <p>Comparing people in the same vehicle in the same crash holds the crash itself constant. In fatal crashes, and as belt use is recorded, belted drivers and front passengers were {{matched/belt_effect|estimand=fatality_risk_reduction_belt_given_fatal_crash|estimate|pct:0}} less likely to die than their unbelted companion. Survivors who were in fact unbelted are sometimes recorded as belted, which inflates that figure. If one in twenty belted survivors was misrecorded, the reduction would be {{matched/belt_effect|estimand=fatality_risk_reduction_belt_given_fatal_crash_misreport_f05|estimate|pct:0}}; if one in ten, {{matched/belt_effect|estimand=fatality_risk_reduction_belt_given_fatal_crash_misreport_f10|estimate|pct:0}}.</p>
+    <p>Applied to the {{deaths/potential_lives|measure=seat_belts;scenario=as_recorded|deaths_without|,.0f}} unbelted occupants who died, these estimates mean that between about {{deaths/potential_lives|measure=seat_belts;scenario=misreport_10pct|lives_per_year|rnd:-2}} and {{deaths/potential_lives|measure=seat_belts;scenario=as_recorded|lives_per_year|rnd:-2}} of them a year would have been expected to survive had they been belted.</p>
+
+    <figure class="fig">
+      <p class="fig-title">Unbelted occupants a year who would have been expected to survive with a belt</p>
+      <p class="fig-sub">Model-based estimate, average for 2016–2024, under three assumptions about how accurately belt use is recorded</p>
+      {{chart:belt_lives}}
+      <figcaption>Whiskers show 95% confidence intervals of the effectiveness estimate. If one in five belted survivors had been misrecorded, the estimate would fall to about {{deaths/potential_lives|measure=seat_belts;scenario=misreport_20pct|lives_per_year|rnd:-2}}.</figcaption>
+    </figure>
+
+    <p class="note">These figures estimate what belts would have meant for the people who died. They are not a forecast of what any law or campaign would achieve. The effectiveness was measured on drivers and front passengers and is applied here to every seat.</p>
+    <p class="source">Sources: <a href="data/tables/deaths/restraint.csv">deaths/restraint</a>, <a href="data/tables/deaths/potential_lives.csv">deaths/potential_lives</a>, <a href="data/tables/matched/belt_effect.csv">matched/belt_effect</a>. Observed counts; effectiveness from a within-vehicle comparison (double pair comparison).</p>
+  </div>
+</section>
+
+<section class="sec" id="speed" aria-labelledby="speed-h">
+  <div class="wrap">
+    <p class="kicker">Speed</p>
+    <h2 id="speed-h">Speeding was involved in {{deaths/segments|segment=speeding|share_of_all|pct:0}} of deaths, and {{deaths/victim_roles|group=speeding;role=not_risk_driver|share_of_group|pct:0}} of those killed were not the speeding driver</h2>
+    <p>From 2016 to 2024, {{deaths/segments|segment=speeding|deaths|,.0f}} people died in crashes in which police recorded a driver as speeding. {{deaths/victim_roles|group=speeding;role=risk_driver|share_of_group|pct:0}} were the speeding drivers. The others were their passengers ({{deaths/victim_roles|group=speeding;role=risk_passenger|share_of_group|pct:0}}), people in other vehicles ({{deaths/victim_roles|group=speeding;role=other_vehicle_occupant|share_of_group|pct:0}}) and pedestrians or cyclists ({{deaths/victim_roles|group=speeding;role=pedestrian_or_cyclist|share_of_group|pct:0}}).</p>
+
+    <figure class="fig">
+      <p class="fig-title">Who died in speeding crashes</p>
+      <p class="fig-sub">Deaths in speeding-related crashes, 2016–2024</p>
+      {{chart:speeding_victims}}
+      <figcaption>“The speeding driver” means the driver of a vehicle that police recorded as speeding; “their passengers” rode in that vehicle.</figcaption>
+    </figure>
+
+    <h3>Crashes in which a driver exceeded the limit were the most likely to be fatal</h3>
+    <p>Police record two kinds of speeding: exceeding the posted limit (or racing), and driving too fast for conditions. In the national sample of police-reported crashes, a crash in which a driver exceeded the limit was {{severity/fatal_speeding_type|outcome=fatal;factor=speeding_type;level=exceeded_limit_or_racing|adj_rr|x:1}} as likely to be fatal as a comparable crash with no speeding, after adjusting for the road, light, weather, alcohol and the drivers and vehicles involved. Crashes coded “too fast for conditions”, which make up most of the speeding category and happen on wet roads far more often than other crashes ({{severity/fatal_speeding_type|outcome=fatal;factor=speeding_type;level=too_fast_for_conditions|share_on_wet|pct:0}} of them, against {{severity/fatal_speeding_type|outcome=fatal;factor=speeding_type;level=no|share_on_wet|pct:0}} of crashes without speeding), showed no detectable increase in the risk of being fatal (risk ratio {{severity/fatal_speeding_type|outcome=fatal;factor=speeding_type;level=too_fast_for_conditions|adj_rr|ci:2}}).</p>
+
+    <figure class="fig">
+      <p class="fig-title">How much more likely a crash is to be fatal, by kind of speeding</p>
+      <p class="fig-sub">Adjusted risk ratio compared with crashes with no speeding, police-reported crashes 2016–2024 (CRSS), with 95% confidence intervals</p>
+      {{chart:speeding_types}}
+      <figcaption>A ratio of 1 means no difference from comparable crashes without speeding.</figcaption>
+    </figure>
+
+    <p>Speeding drivers in fatal crashes also had worse records than drivers who were neither speeding nor drinking: {{deaths/driver_records|group=speeding;indicator=licence_invalid|share|pct:0}} had no valid licence, against {{deaths/driver_records|group=neither;indicator=licence_invalid|share|pct:0}}, and {{deaths/driver_records|group=speeding;indicator=prior_speeding|share|pct:0}} had a speeding conviction in the previous five years, against {{deaths/driver_records|group=neither;indicator=prior_speeding|share|pct:0}}.</p>
+
+    <p class="note">Speeding is a judgement police make after the crash. It is recorded more completely when someone died, and recording practice differs between states and agencies.</p>
+    <p class="source">Sources: <a href="data/tables/deaths/victim_roles.csv">deaths/victim_roles</a>, <a href="data/tables/deaths/driver_records.csv">deaths/driver_records</a>, <a href="data/tables/severity/fatal_speeding_type.csv">severity/fatal_speeding_type</a>. Observed counts (FARS); survey estimates with design-based confidence intervals (CRSS).</p>
+  </div>
+</section>
+
+<section class="sec" id="pedestrians" aria-labelledby="pedestrians-h">
+  <div class="wrap">
+    <p class="kicker">Pedestrians</p>
+    <h2 id="pedestrians-h">Pedestrians die mostly in the dark, between intersections, on major urban roads</h2>
+    <p>{{deaths/segments|segment=pedestrians|deaths|,.0f}} pedestrians were killed from 2016 to 2024, {{deaths/segments|segment=pedestrians|share_of_all|pct:0}} of all deaths, and {{deaths/segments|segment=pedestrians|pct_change_2019_2024|pct:0}} more died in 2024 than in 2019. {{deaths/pedestrians|dimension=area;level=urban|share|pct:0}} died in urban areas. {{deaths/pedestrians|dimension=location;level=midblock_roadway|share|pct:0}} were struck on the roadway away from an intersection, and {{deaths/pedestrians|dimension=light;level=daylight|share|pct:0}} in daylight. Arterials, the main through roads below interstates and freeways, accounted for {{deaths/pedestrians|dimension=road_class;level=principal_arterial|share|pct:0}} (principal) and {{deaths/pedestrians|dimension=road_class;level=minor_arterial|share|pct:0}} (minor). In {{deaths/pedestrians|dimension=hit_and_run;level=yes|share|pct:0}} of pedestrian deaths the driver fled.</p>
+
+    <figure class="fig">
+      <p class="fig-title">When and where pedestrians were killed</p>
+      <p class="fig-sub">Share of pedestrian deaths, 2016–2024</p>
+      {{chart:ped_where}}
+      <figcaption>Arterials are the main through roads of a network below interstates and freeways.</figcaption>
+    </figure>
+
+    <h3>Pedestrians struck on faster roads were far more likely to die</h3>
+    <p>Among pedestrians struck in police-reported crashes, {{vulnerable/pedestrian_killed_contrasts|victim=pedestrian;outcome=killed;factor=str_speed_limit;level=<=25|crude_rate|pct:0}} died where the limit was 25 mph or less, {{vulnerable/pedestrian_killed_contrasts|victim=pedestrian;outcome=killed;factor=str_speed_limit;level=40-45|crude_rate|pct:0}} at 40–45 mph and {{vulnerable/pedestrian_killed_contrasts|victim=pedestrian;outcome=killed;factor=str_speed_limit;level=50-55|crude_rate|pct:0}} at 50–55 mph. Holding light, location, the pedestrian’s age and the striking vehicle fixed, the risk at 50–55 mph was still {{vulnerable/pedestrian_killed_contrasts|victim=pedestrian;outcome=killed;factor=str_speed_limit;level=50-55|adj_rr|x:1}} that at 25 mph or less. {{deaths/pedestrians|dimension=speed_limit;level=40-45|share|pct:0}} of pedestrian deaths were on roads limited to 40–45 mph.</p>
+
+    <figure class="fig">
+      <p class="fig-title">Share of struck pedestrians who died, by speed limit</p>
+      <p class="fig-sub">Police-reported crashes, 2016–2024 (CRSS); posted limit where the pedestrian was struck</p>
+      {{chart:ped_speed}}
+      <figcaption>Impact speed is not recorded; the posted limit stands in for it.</figcaption>
+    </figure>
+
+    <p>The size of the vehicle matters too. Compared with being struck by a car, the adjusted risk of death was {{vulnerable/pedestrian_killed_contrasts|victim=pedestrian;outcome=killed;factor=striking;level=suv|adj_rr|x:2}} as high when the vehicle was an SUV, {{vulnerable/pedestrian_killed_contrasts|victim=pedestrian;outcome=killed;factor=striking;level=pickup|adj_rr|x:2}} for a pickup and {{vulnerable/pedestrian_killed_contrasts|victim=pedestrian;outcome=killed;factor=striking;level=large|adj_rr|x:1}} for a large truck or bus. SUVs struck {{vulnerable/fars_pedestrian_deaths_by_striking_vehicle|YEAR=2016|share_suv|pct:0}} of the pedestrians killed in 2016 and {{vulnerable/fars_pedestrian_deaths_by_striking_vehicle|YEAR=2024|share_suv|pct:0}} in 2024.</p>
+
+    <p class="note">The records contain no count of how much people walk, so they show where pedestrians died, not where walking is most dangerous per trip.</p>
+    <p class="source">Sources: <a href="data/tables/deaths/pedestrians.csv">deaths/pedestrians</a>, <a href="data/tables/vulnerable/pedestrian_killed_contrasts.csv">vulnerable/pedestrian_killed_contrasts</a>, <a href="data/tables/vulnerable/fars_pedestrian_deaths_by_striking_vehicle.csv">vulnerable/fars_pedestrian_deaths_by_striking_vehicle</a>. Observed counts (FARS); survey estimates (CRSS).</p>
+  </div>
+</section>
+
+<section class="sec" id="motorcycles" aria-labelledby="motorcycles-h">
+  <div class="wrap">
+    <p class="kicker">Motorcycles</p>
+    <h2 id="motorcycles-h">Motorcyclist deaths rose {{deaths/segments|segment=motorcyclists|pct_change_2019_2024|pct:0}} from 2019 to 2024, and {{deaths/helmet|dimension=overall;level=all|unhelmeted_share|pct:0}} of those killed wore no helmet, where recorded</h2>
+    <p>{{deaths/segments|segment=motorcyclists|deaths|,.0f}} motorcyclists died from 2016 to 2024, {{deaths/segments|segment=motorcyclists|share_of_all|pct:0}} of all deaths. Unlike deaths in cars and light trucks, motorcyclist deaths did not fall after 2021. Among those whose helmet use was recorded, {{deaths/helmet|dimension=overall;level=all|unhelmeted_share|pct:0}} wore none, down from {{deaths/helmet|dimension=year;level=2016|unhelmeted_share|pct:0}} in 2016 to {{deaths/helmet|dimension=year;level=2024|unhelmeted_share|pct:0}} in 2024.</p>
+    <p>A rider and a passenger on the same motorcycle share the same crash, which makes them a natural comparison. In fatal crashes, helmeted riders and passengers were {{matched/double_pair_comparison|analysis=motorcycle_helmet;misreport_fraction=0;component=combined (inverse-variance weighted)|reduction_1_minus_rr|pct:0}} less likely to die than an unhelmeted companion (95% confidence interval {{matched/double_pair_comparison|analysis=motorcycle_helmet;misreport_fraction=0;component=combined (inverse-variance weighted)|reduction_low|pct:0}} to {{matched/double_pair_comparison|analysis=motorcycle_helmet;misreport_fraction=0;component=combined (inverse-variance weighted)|reduction_high|pct:0}}). Applied to the {{deaths/potential_lives|measure=helmets;scenario=as_recorded|deaths_without|,.0f}} unhelmeted motorcyclists who died, that means about {{deaths/potential_lives|measure=helmets;scenario=as_recorded|lives_per_year|rnd:-1}} a year would have been expected to survive with a helmet.</p>
+
+    <figure class="fig">
+      <p class="fig-title">Share of motorcyclists killed who wore no helmet, by state</p>
+      <p class="fig-sub">2016–2024, where helmet use was recorded; one bar per state</p>
+      {{chart:helmet_states}}
+      <figcaption>States are sorted from highest to lowest share. The horizontal line marks the national share.</figcaption>
+    </figure>
+
+    <p class="note">Helmet use is missing for fewer of the dead ({{deaths/helmet|dimension=overall;level=all|unknown_share|pct:0}}) than belt use ({{deaths/restraint|dimension=overall;level=all|unknown_share|pct:0}}). The records contain no count of how much people ride, so changes in motorcyclist deaths cannot be split into more riding and more risk.</p>
+    <p class="source">Sources: <a href="data/tables/deaths/helmet.csv">deaths/helmet</a>, <a href="data/tables/deaths/potential_lives.csv">deaths/potential_lives</a>, <a href="data/tables/matched/double_pair_comparison.csv">matched/double_pair_comparison</a>. Observed counts; effectiveness from a rider–passenger comparison.</p>
+  </div>
+</section>
+
+<section class="sec" id="vehicles" aria-labelledby="vehicles-h">
+  <div class="wrap">
+    <p class="kicker">Vehicles</p>
+    <h2 id="vehicles-h">Even after adjustment, occupants of old vehicles were twice as likely to die in a crash</h2>
+    <p>In the national sample of police-reported crashes, occupants of cars, SUVs, pickups and vans 18 or more years old died {{person/lpv_killed_crude_vs_adjusted|population=lpv;outcome=killed;factor=veh_age_band;level=18+|crude_rr|x:1}} as often as occupants of vehicles under 4 years old. Part of that gap reflects who drives old vehicles, and where. After adjusting for the occupant’s age, sex, seat and belt use, the type of vehicle and of any other vehicle involved, and the time, light, weather, road, area, drivers’ ages, speeding and alcohol, the risk was still {{person/lpv_killed_crude_vs_adjusted|population=lpv;outcome=killed;factor=veh_age_band;level=18+|A_adj_rr|x:1}} as high (95% confidence interval {{person/lpv_killed_crude_vs_adjusted|population=lpv;outcome=killed;factor=veh_age_band;level=18+|A_adj_rr_low|.1f}}–{{person/lpv_killed_crude_vs_adjusted|population=lpv;outcome=killed;factor=veh_age_band;level=18+|A_adj_rr_high|.1f}}).</p>
+
+    <figure class="fig">
+      <p class="fig-title">Risk of death for occupants in a crash, by vehicle age</p>
+      <p class="fig-sub">Adjusted risk ratio compared with vehicles 0–3 years old, police-reported crashes 2016–2024 (CRSS), with 95% confidence intervals</p>
+      {{chart:veh_age_rr}}
+      <figcaption>Vehicle age is the crash year minus the model year.</figcaption>
+    </figure>
+
+    <p>Old vehicles also carried a growing share of the dead. Vehicles 18 or more years old held {{deaths/vehicle_age|YEAR=2016;band=18+|share|pct:0}} of occupants killed in 2016 and {{deaths/vehicle_age|YEAR=2024;band=18+|share|pct:0}} in 2024. Part of that rise reflects an ageing fleet: the records do not show how many old vehicles are on the road.</p>
+
+    <figure class="fig">
+      <p class="fig-title">Share of occupants killed who were in a vehicle 18 or more years old</p>
+      <p class="fig-sub">Cars, SUVs, pickups and vans, FARS</p>
+      {{chart:veh_age_share}}
+      <figcaption>Share of occupants killed with a known vehicle model year.</figcaption>
+    </figure>
+
+    <h3>Large trucks</h3>
+    <p>{{deaths/segments|segment=large_truck_crash|share_of_all|pct:0}} of deaths, {{deaths/segments|segment=large_truck_crash|deaths|,.0f}} people, were in crashes involving a large truck. {{deaths/victim_roles|group=large_truck;role=not_risk_driver|share_of_group|pct:0}} of those killed were not the truck driver, and {{deaths/victim_roles|group=large_truck;role=other_vehicle_occupant|share_of_group|pct:0}} were in another vehicle.</p>
+
+    <figure class="fig">
+      <p class="fig-title">Who died in crashes involving a large truck</p>
+      <p class="fig-sub">2016–2024</p>
+      {{chart:truck_victims}}
+      <figcaption>Large trucks are trucks over 10,000 lb gross vehicle weight.</figcaption>
+    </figure>
+    <p class="source">Sources: <a href="data/tables/person/lpv_killed_crude_vs_adjusted.csv">person/lpv_killed_crude_vs_adjusted</a>, <a href="data/tables/deaths/vehicle_age.csv">deaths/vehicle_age</a>, <a href="data/tables/deaths/victim_roles.csv">deaths/victim_roles</a>. Survey estimates (CRSS); observed counts (FARS).</p>
+  </div>
+</section>
+
+<section class="sec" id="trend" aria-labelledby="trend-h">
+  <div class="wrap">
+    <p class="kicker">Since 2019</p>
+    <h2 id="trend-h">Deaths rose fastest in risky-driving crashes and on urban roads, and deaths on foot, on bicycles and on motorcycles have stayed high</h2>
+    <p>Deaths rose from {{deaths/segments|segment=all|deaths_2019|,.0f}} in 2019 to {{deaths/segments|segment=all|deaths_2021|,.0f}} in 2021, then fell to {{deaths/segments|segment=all|deaths_2024|,.0f}} in 2024, still {{deaths/segments|segment=all|pct_change_2019_2024|pct:0}} above 2019. Deaths rose fastest in crashes involving risky driving: from 2019 to 2021, deaths in crashes with a driver who had no valid licence rose {{deaths/segments|segment=invalid_licence_crash|pct_change_2019_2021|pct:0}}, hit-and-run deaths {{deaths/segments|segment=hit_and_run|pct_change_2019_2021|pct:0}}, drunk-driving deaths {{deaths/segments|segment=alcohol_impaired|pct_change_2019_2021|pct:0}} and speeding deaths {{deaths/segments|segment=speeding|pct_change_2019_2021|pct:0}}.</p>
+    <p>By 2024, deaths of people in cars, SUVs, pickups and vans were back near their 2019 level ({{deaths/segments|segment=pv_occupants|pct_change_2019_2024|pctsign:0}}). The rise was urban: deaths on urban roads were {{deaths/segments|segment=urban|pct_change_2019_2024|pctsign:0}} against 2019, and on rural roads {{deaths/segments|segment=rural|pct_change_2019_2024|pctsign:0}}. Deaths of people on foot, on bicycles and on motorcycles stayed high: motorcyclists {{deaths/segments|segment=motorcyclists|pct_change_2019_2024|pctsign:0}}, cyclists {{deaths/segments|segment=cyclists|pct_change_2019_2024|pctsign:0}} and pedestrians {{deaths/segments|segment=pedestrians|pct_change_2019_2024|pctsign:0}}.</p>
+
+    <figure class="fig">
+      <p class="fig-title">Deaths by road user, 2019 = 100</p>
+      <p class="fig-sub">FARS, 2016–2024</p>
+      {{chart:trend_index}}
+      <figcaption>Each line is indexed to its own 2019 count.</figcaption>
+    </figure>
+
+    <figure class="fig">
+      <p class="fig-title">Change in deaths from 2019</p>
+      <p class="fig-sub">FARS; to 2021, the peak year, and to 2024</p>
+      {{chart:change_bars}}
+      <figcaption>Alcohol from ten imputations; all other groups are observed counts.</figcaption>
+    </figure>
+
+    <p>The drivers in fatal crashes changed too. The share of drivers in fatal crashes without a valid licence rose from {{deaths/driver_records_by_year|YEAR=2019;group=all;indicator=licence_invalid|share|pct:1}} in 2019 to {{deaths/driver_records_by_year|YEAR=2020;group=all;indicator=licence_invalid|share|pct:1}} in 2020, and was {{deaths/driver_records_by_year|YEAR=2024;group=all;indicator=licence_invalid|share|pct:1}} in 2024.</p>
+
+    <figure class="fig">
+      <p class="fig-title">Share of drivers in fatal crashes without a valid licence</p>
+      <p class="fig-sub">Unlicensed, suspended, revoked, expired or cancelled; FARS</p>
+      {{chart:licence_trend}}
+      <figcaption>Share of drivers whose licence status was recorded.</figcaption>
+    </figure>
+
+    <p class="note">The records contain no miles driven. Travel fell in 2020, so these counts do not show how much riskier each mile became.</p>
+    <p class="source">Sources: <a href="data/tables/deaths/annual.csv">deaths/annual</a>, <a href="data/tables/deaths/segments.csv">deaths/segments</a>, <a href="data/tables/deaths/driver_records_by_year.csv">deaths/driver_records_by_year</a>. Observed counts; alcohol estimated from ten imputations.</p>
+  </div>
+</section>
+
+<section class="sec band states-band" id="states" aria-labelledby="states-h">
+  <div class="band-in">
+    <p class="kicker">States</p>
+    <h2 id="states-h">How states compare</h2>
+    <p class="lede">The mix of deaths differs widely between states. These figures show what share of each state’s deaths involved each factor. They are not death rates, which would need population or miles driven, and the records contain neither.</p>
+    <div class="states-tools">
+      <label for="state-filter">Find a state</label>
+      <input id="state-filter" type="search" placeholder="Name or code" autocomplete="off">
+    </div>
+    {{statestable}}
+    <p class="note">Shares are of all deaths in the state, 2016–2024, except “Unbelted” (of occupants killed whose belt use was recorded) and “No helmet” (of motorcyclists killed whose helmet use was recorded). Speeding is recorded differently by police agencies in different states, so compare speeding shares with care. Click a column heading to sort.</p>
+    <p class="source">Source: <a href="data/tables/deaths/states.csv">deaths/states</a>. Observed counts; alcohol estimated from ten imputations.</p>
+  </div>
+</section>
+
+<section class="sec" id="limits" aria-labelledby="limits-h">
+  <div class="wrap">
+    <p class="kicker">Limits</p>
+    <h2 id="limits-h">What these records cannot tell you</h2>
+    <dl class="limits">
+      <dt>Risk per mile or per trip</dt>
+      <dd>The records count deaths and crashes. They contain no miles driven, walked or ridden, and no population, so they show where deaths concentrate, not how dangerous each activity is.</dd>
+      <dt>Exact behaviour</dt>
+      <dd>Speeding, belt use and alcohol are what police and NHTSA recorded after the crash, and recording is more thorough when someone died. Blood alcohol is imputed for drivers who were not tested.</dd>
+      <dt>Drugs</dt>
+      <dd>Drug tests are given mainly to drivers who died, and testing practice differs by state, so drug involvement cannot be compared and is not counted here.</dd>
+      <dt>Cause</dt>
+      <dd>A behaviour present in a fatal crash did not necessarily cause it. The estimates of lives belts and helmets would have saved are model-based.</dd>
+      <dt>What policies achieved</dt>
+      <dd>The records contain no measure of enforcement, cameras, testing or campaigns, so they cannot show what any policy achieved.</dd>
+    </dl>
+    <p><a href="https://github.com/RAHV-FB/nhtsa-stats-US/blob/main/docs/limitations.md">Full list of limitations</a></p>
+  </div>
+</section>
+
+<section class="sec" id="method" aria-labelledby="method-h">
+  <div class="wrap">
+    <p class="kicker">Method</p>
+    <h2 id="method-h">Data and method</h2>
+    <p>The analysis uses only two NHTSA data systems, 2016–2024, as published. <strong>FARS</strong> is a census of every crash on a US public road in which someone died within 30 days. <strong>CRSS</strong> is a national probability sample of police-reported crashes of every severity, the only source of how often a crash of a given kind is fatal. Rows from the two systems are never combined.</p>
+    <p>Counts of deaths are observed FARS counts using NHTSA’s own analytical definitions of speeding-related crashes, belt and helmet use and person type. Drunk-driving crashes are those in which a driver’s blood alcohol concentration was .08 or more in NHTSA’s multiple imputation; every alcohol figure averages its ten imputations. CRSS estimates use the survey weights, strata and primary sampling units, with 95% confidence intervals. Adjusted risk ratios come from survey-weighted logistic models with standardised margins. Belt and helmet effectiveness come from comparing people in the same vehicle (double pair comparison).</p>
+    <p>Every number on this page is filled in from the project’s output tables when the page is built, and each table records the code version and inputs that produced it. The code, the tables and the technical reports are open:</p>
+    <ul class="links">
+      <li><a href="https://github.com/RAHV-FB/nhtsa-stats-US">Source code and data pipeline</a></li>
+      <li><a href="https://github.com/RAHV-FB/nhtsa-stats-US/blob/main/reports/road_deaths.md">Report: where US road deaths concentrate</a></li>
+      <li><a href="https://github.com/RAHV-FB/nhtsa-stats-US/blob/main/reports/findings.md">Report: what makes crashes deadly (severity models)</a></li>
+      <li><a href="https://github.com/RAHV-FB/nhtsa-stats-US/blob/main/docs/methodology.md">Methodology</a></li>
+      <li><a href="https://github.com/RAHV-FB/nhtsa-stats-US/tree/main/outputs/tables">All output tables</a></li>
+    </ul>
+  </div>
+</section>
+
+</main>
+
+<footer class="foot">
+  <div class="wrap">
+    <p>Road Deaths in America is an independent analysis of NHTSA’s FARS and CRSS data. It is not affiliated with or endorsed by NHTSA.</p>
+  </div>
+</footer>
+
+<script>
+{{asset:js}}
+</script>
+</body>
+</html>

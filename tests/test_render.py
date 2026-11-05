@@ -116,3 +116,25 @@ def test_mdtable_missing_text_cell_is_a_dash(tmp_path, monkeypatch):
     out = render.render_text("{{mdtable:m/t||k:K:;txt:Text:}}")
     assert "| b | — |" in out and "nan" not in out
     render._table.cache_clear()
+
+
+@pytest.mark.parametrize(
+    ("value", "fmt", "expected"),
+    [
+        (0.1234, "pctc:0", "88%"),
+        (0.1234, "pctc:1", "87.7%"),
+        (0.0797, "pctsign:0", "+8%"),
+        (-0.123, "pctsign:0", "−12%"),
+        (0.1234, "pctsign:1", "+12.3%"),
+        (0.001, "pctsign:0", "0%"),
+        (11766.3, "rnd:-2", "11,800"),
+        (6906.88, "rnd:-1", "6,910"),
+        (1234.4, "rnd:0", "1,234"),
+        (2.2193, "x:1", "2.2×"),
+        (1.0, "x:2", "1.00×"),
+        (0.6, "in10", "6 in 10"),
+        (0.2487, "oneinN", "1 in 4"),
+    ],
+)
+def test_site_formats(value, fmt, expected):
+    assert render._fmt(value, fmt) == expected

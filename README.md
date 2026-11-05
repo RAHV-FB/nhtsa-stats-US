@@ -20,8 +20,11 @@ No external data are used. Every empirical number traces to the raw archives thr
 `src/nhtsa_stats` and an output table with a provenance sidecar. Hypothetical policy outputs
 are always labelled as such.
 
-> **Start here:** `reports/findings.md` (main results) · `docs/limitations.md` (what the data
-> cannot answer) · `docs/research_plan.md` (questions and design).
+> **Start here:** `reports/road_deaths.md` (where the deaths are: behaviours, victims, driver
+> records, vehicles, places, states; the basis of the public website) · `reports/findings.md`
+> (what makes a police-reported crash deadly: severity models) · `docs/limitations.md` (what the
+> data cannot answer) · `docs/audit_2026-11.md` (November 2026 audit and re-analysis) ·
+> `docs/research_plan.md` (questions and design).
 >
 > **Phase 2** — how overlapping factors (speeding, alcohol, drugs, restraint) combine and which
 > associations survive adjustment and bias analysis: `reports/factor_contributions.md`,
@@ -97,8 +100,9 @@ reports/                  main findings (findings.md, findings.json), seven topi
                           templates/
 outputs/                  generated tables/figures (small, committed) and audit inventory
 tests/                    unit tests (synthetic fixtures) and data tests (real cache)
-website/                  static public site: index.html, assets/, data/ (snapshots synced
-                          from reports/ and outputs/tables/), tools/sync_public_data.py, tests/
+website/                  static public site: templates/index.html (rendered to index.html by
+                          `nhtsa analyze site`), assets/, data/ (CSV downloads synced from
+                          outputs/tables/), tools/sync_public_data.py, tests/
 scripts/                  policy_worked_examples.py; audit/ one-off domain-audit scripts
 ```
 
@@ -184,24 +188,29 @@ presents them as measured effects. Details: `docs/limitations.md`,
 
 ## Public research website
 
-The results are also published as a static public site, **Road Evidence**, live at
-https://rahv-fb.github.io/nhtsa-stats-US/. It presents six plain data stories (deaths by year, who
-died, pedestrians, time of day, age, rural roads) with charts drawn at runtime from the committed
-output tables, the limits of the data, a table explorer and an in-browser library of the full
-reports. The source is in [website/](website/); `.github/workflows/public-site.yml` deploys it on
-each push to `main`, and CI rejects stale data copies or page numbers that no longer match their tables.
+The results are published as a static public site, **Road Deaths in America**, live at
+https://rahv-fb.github.io/nhtsa-stats-US/. It leads with where the deaths are: the four behaviours
+involved in most deaths and how they overlap, who died in drunk-driving, speeding and large-truck
+crashes, the records of the drivers involved, seat belts and the lives they would have saved,
+speed and pedestrians, helmets, vehicle age, what changed after 2019, and a sortable comparison of
+states, followed by the limits of the data and the method.
 
-Run locally from the repository root:
+The page is rendered at build time: `website/templates/index.html` holds the text, with every
+number written as a placeholder that `nhtsa analyze site` looks up in `outputs/tables` (the same
+grammar as the reports), and the charts are drawn from the same tables into static HTML and SVG.
+`tests/test_site.py` fails if the committed page differs from a fresh render or if the template
+contains a number that is not a placeholder. `.github/workflows/public-site.yml` deploys the
+`website/` folder on each push to `main`.
 
 ```bash
-python website/tools/sync_public_data.py            # refresh the snapshots from reports/ and outputs/tables/
-python website/tools/sync_public_data.py --check    # confirm the snapshots are current
-node --test website/tests/site.test.mjs             # functional smoke tests
+uv run nhtsa analyze deaths site                    # refresh the tables and re-render the page
+python website/tools/sync_public_data.py            # copy the downloadable CSVs into website/data/
+python website/tools/sync_public_data.py --check    # confirm the copies are current
+node --test website/tests/site.test.mjs             # page structure and script tests
 python -m http.server 8000 --directory website      # then visit http://localhost:8000
 ```
 
-CI runs the snapshot check and the site tests on pull requests that touch `website/`,
-`reports/`, `docs/` or `outputs/tables/`. [Website details and deployment instructions](website/README.md).
+[Website details](website/README.md).
 
 ## Working on this project with Claude Code
 

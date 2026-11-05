@@ -14,7 +14,10 @@ Placeholder grammar::
 * ``format`` is a Python format spec (``.2f``, ``,.0f``) or one of
   ``pct:N`` (x100, N decimals, with %), ``ci:N`` (``est (low–high)`` using the companion
   columns ``<column>_low`` / ``<column>_high``), ``cipct:N`` (the same, x100 with %),
-  ``cix1000:N`` (the same, x1000), ``x1000:N`` (x1000).
+  ``cix1000:N`` (the same, x1000), ``x1000:N`` (x1000), ``pctc:N`` (complement, ``(1-x)`` as
+  percent), ``pctsign:N`` (signed percent, ``+8%`` / ``−12%``), ``rnd:K`` (``round(x, K)`` with
+  thousands separators, e.g. ``rnd:-2`` gives ``11,800``), ``x:N`` (ratio such as ``2.2×``),
+  ``in10`` (``6 in 10``) and ``oneinN`` (``1 in 4``).
 * A filter value ``a~b`` matches either ``a`` or ``b``.
 * ``column`` may be ``min(col)`` or ``max(col)``: the minimum / maximum of ``col`` over all
   rows the filters select (any number of rows).
@@ -87,6 +90,23 @@ def _fmt(value, fmt: str, row: pd.Series | None = None, column: str | None = Non
         return f"{100 * num(value):.{int(fmt[4:])}f}%"
     if fmt.startswith("x1000:"):
         return f"{1000 * num(value):.{int(fmt[6:])}f}"
+    if fmt.startswith("pctc:"):
+        return f"{100 * (1 - num(value)):.{int(fmt[5:])}f}%"
+    if fmt.startswith("pctsign:"):
+        nd = int(fmt[8:])
+        pct = 100 * num(value)
+        text = f"{abs(pct):.{nd}f}"
+        if float(text) == 0:
+            return f"{text}%"
+        return f"{'+' if pct > 0 else chr(0x2212)}{text}%"
+    if fmt.startswith("rnd:"):
+        return f"{round(num(value), int(fmt[4:])):,.0f}"
+    if fmt.startswith("x:"):
+        return f"{num(value):.{int(fmt[2:])}f}\u00d7"
+    if fmt == "in10":
+        return f"{round(num(value) * 10)} in 10"
+    if fmt == "oneinN":
+        return f"1 in {round(1 / num(value))}"
     if fmt == "":
         return str(value)
     try:
