@@ -30,12 +30,14 @@ here where they add the size of an association.
    recent conviction**: {{deaths/driver_records|group=bac_08_plus;indicator=bac_15_plus|share|pct:1}}
    were at .15 or more and {{deaths/driver_records|group=bac_08_plus;indicator=licence_invalid|share|pct:1}}
    had no valid licence, but only {{deaths/driver_records|group=bac_08_plus;indicator=prior_dwi|share|pct:1}}
-   had a drink-driving conviction in the previous five years.
+   had a DWI conviction on record from the previous five years.
 4. **{{deaths/restraint|dimension=overall;level=all|unbelted_share|pct:1}} of passenger-vehicle
    occupants killed with known belt use were unbelted.** On the project's within-vehicle
-   effectiveness estimates, between {{deaths/potential_lives|measure=seat_belts;scenario=misreport_10pct|lives_per_year|rnd:-2}}
-   and {{deaths/potential_lives|measure=seat_belts;scenario=as_recorded|lives_per_year|rnd:-2}}
-   of them a year would have been expected to survive had they been belted (model-based).
+   effectiveness estimates, up to about {{deaths/potential_lives|measure=seat_belts;scenario=as_recorded|lives_per_year|rnd:-2}}
+   of them a year would have been expected to survive had they been belted (model-based). The
+   figure depends heavily on how accurately belt use is recorded: about
+   {{deaths/potential_lives|measure=seat_belts;scenario=misreport_10pct|lives_per_year|rnd:-2}} if one in ten belted survivors was
+   misrecorded and {{deaths/potential_lives|measure=seat_belts;scenario=misreport_20pct|lives_per_year|rnd:-2}} if one in five.
 5. **Pedestrian deaths are concentrated** on the roadway away from intersections
    ({{deaths/pedestrians|dimension=location;level=midblock_roadway|share|pct:1}}), in darkness
    (only {{deaths/pedestrians|dimension=light;level=daylight|share|pct:1}} in daylight) and on
@@ -43,7 +45,8 @@ here where they add the size of an association.
    hit-and-runs.
 6. **Vehicle age**: occupants of vehicles 18 or more years old had an adjusted risk of death in a
    police-reported crash {{person/lpv_killed_crude_vs_adjusted|population=lpv;outcome=killed;factor=veh_age_band;level=18+|A_adj_rr|ci:2}}
-   times that of occupants of vehicles 0–3 years old, and their share of occupant deaths rose
+   times that of occupants of vehicles 0–3 years old ({{person/lpv_killed_crude_vs_adjusted|population=lpv;outcome=killed;factor=veh_age_band;level=18+|B_adj_rr|ci:2}} when the
+   crash type and number of vehicles are also held fixed), and their share of occupant deaths rose
    from {{deaths/vehicle_age|YEAR=2016;band=18+|share|pct:1}} (2016) to
    {{deaths/vehicle_age|YEAR=2024;band=18+|share|pct:1}} (2024).
 7. **The 2019–2021 rise was steepest for risky driving** (deaths in crashes with a driver
@@ -128,9 +131,10 @@ Drivers in fatal crashes, by blood alcohol (share of drivers with a known record
 Only {{deaths/driver_records|group=bac_08_plus;indicator=prior_dwi|share|pct:1}} of drunk
 drivers had a DWI conviction in the five years before the crash
 ({{deaths/driver_records|group=bac_zero;indicator=prior_dwi|share|pct:1}} of drivers with no
-alcohol). Programmes restricted to convicted drivers could not have reached the remainder. Driver
-records count convictions, not arrests, and can miss out-of-state offences, so this share is a
-lower bound on prior drink-driving.
+alcohol). Driver records count convictions, not arrests, and can miss out-of-state offences and
+offences reduced by plea, so this share is a lower bound on prior impaired driving. Even so, most
+drunk drivers in fatal crashes had no recent conviction for programmes aimed at convicted drivers
+to act on.
 
 ## 4. Seat belts
 
@@ -149,8 +153,8 @@ misrecorded):
 
 {{mdtable:deaths/potential_lives|measure=seat_belts|scenario:Scenario:;effectiveness:Effectiveness:pct:1;lives:Lives 2016–2024:,.0f;lives_per_year:Per year:,.0f;lives_per_year_low:Per year, low:,.0f;lives_per_year_high:Per year, high:,.0f}}
 
-The effectiveness was estimated for drivers and right-front passengers and is applied to every
-seat. These are expectations for the people who died, not the effect of any policy.
+The effectiveness was estimated for drivers and right-front passengers aged 13 and over and is
+applied to every seat and age. These are expectations for the people who died, not the effect of any policy.
 
 ## 5. Speed
 
@@ -201,9 +205,10 @@ would have been expected to survive with a helmet (model-based).
 
 Occupants of light passenger vehicles in police-reported crashes (CRSS), adjusted risk of death by
 vehicle age (model A: occupant age, sex, seat role, belt use, vehicle body, the other vehicle's
-body, and the pre-crash crash set):
+body, and the pre-crash crash set; model B adds crash type and number of vehicles, which may
+partly reflect the vehicle itself):
 
-{{mdtable:person/lpv_killed_crude_vs_adjusted|population=lpv;outcome=killed;factor=veh_age_band|level:Vehicle age:;rate:Crude rate:pct:3;crude_rr:Crude RR:.2f;A_adj_rr:Adjusted RR:ci:2}}
+{{mdtable:person/lpv_killed_crude_vs_adjusted|population=lpv;outcome=killed;factor=veh_age_band|level:Vehicle age:;rate:Crude rate:pct:3;crude_rr:Crude RR:.2f;A_adj_rr:Adjusted RR, model A:ci:2;B_adj_rr:Adjusted RR, model B:ci:2}}
 
 Share of passenger-vehicle occupants killed (known model year) by vehicle age, FARS:
 

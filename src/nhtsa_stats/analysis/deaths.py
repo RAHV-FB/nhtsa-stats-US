@@ -20,6 +20,7 @@ Variable definitions (verified by cross-tabulation against the labelled main-fil
 
 from __future__ import annotations
 
+import json
 import logging
 
 import pandas as pd
@@ -1415,14 +1416,45 @@ def read_effectiveness() -> list[tuple[str, str, float, float, float]] | None:
 # Run
 # ---------------------------------------------------------------------------------------
 
+# Inputs actually read: the death frame uses every FARS file below; the driver frame (licence and
+# record tables) only person, vehicle, veh_aux and miper.
 _INPUTS_DEATH = [
-    "FARS person (INJ_SEV)",
+    "FARS person (INJ_SEV, PER_TYP, AGE, SEX, LOCATION, STR_VEH)",
     "FARS per_aux",
+    "FARS vehicle (L_STATUS, PREV_*, MOD_YEAR, VSPD_LIM)",
     "FARS veh_aux",
+    "FARS accident (LGT_COND)",
     "FARS acc_aux",
     "FARS midrvacc",
     "FARS miper",
 ]
+_INPUTS_DRIVERS = [
+    "FARS person (PER_TYP)",
+    "FARS vehicle (L_STATUS, PREV_*)",
+    "FARS veh_aux (A_SPVEH)",
+    "FARS miper",
+]
+_DRIVER_TABLES = {"driver_records", "driver_records_by_year"}  # states also uses drivers
+_MATCHED_INPUTS = ["matched/belt_effect", "matched/double_pair_comparison"]
+LIVES_METHOD = (
+    "lives = deaths without the device (unbelted passenger-vehicle occupants or unhelmeted "
+    "motorcyclists killed, FARS 2016-2024) x within-vehicle effectiveness (1 - RR) from the "
+    "matched module; lives per year divide by the number of years. Seat belts are shown as "
+    "recorded and under three scenarios in which 5%, 10% or 20% of belted survivors were "
+    "misrecorded; helmets as recorded. Bounds apply the effectiveness interval to the same "
+    "death count (the death count itself is observed). Hypothetical, not a causal estimate"
+)
+
+
+def _input_commits() -> dict[str, str | None]:
+    out: dict[str, str | None] = {}
+    for name in _MATCHED_INPUTS:
+        path = config.TABLES_DIR / f"{name}.json"
+        try:
+            out[f"{name}.csv"] = json.loads(path.read_text()).get("git_commit")
+        except FileNotFoundError:
+            out[f"{name}.csv"] = None
+    return out
 
 
 def run() -> dict[str, pl.DataFrame]:
@@ -1508,6 +1540,15 @@ def run() -> dict[str, pl.DataFrame]:
     }
     for name, df in out.items():
         desc, unit = meta[name]
+        if name == "potential_lives":
+            # effectiveness from the matched tables; deaths without the device from the death frame
+            method = LIVES_METHOD
+            inputs = [f"outputs/tables/{n}.csv" for n in _MATCHED_INPUTS] + _INPUTS_DEATH
+            extra = {"input_git_commits": _input_commits()}
+        else:
+            method = mi_method
+            inputs = _INPUTS_DRIVERS if name in _DRIVER_TABLES else _INPUTS_DEATH
+            extra = None
         save_table(
             df,
             MODULE,
@@ -1516,7 +1557,8 @@ def run() -> dict[str, pl.DataFrame]:
             population="FARS fatal crashes 2016-2024 (census)",
             unit=unit,
             outcome="death (INJ_SEV 4)",
-            method=mi_method,
-            inputs=_INPUTS_DEATH,
+            method=method,
+            inputs=inputs,
+            extra=extra,
         )
     return out

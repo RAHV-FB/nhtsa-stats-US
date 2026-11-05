@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import importlib.util
 import json
 import re
 
@@ -38,36 +39,36 @@ def test_page_is_self_contained_and_clean():
 # ---------------------------------------------------------------------------------------------
 
 EN = "–"
-# Definitional literals allowed in the template's own text. A token mapped to a pattern is
-# allowed only where the surrounding text matches it; None allows it anywhere.
-YEARS = {str(y): None for y in range(2016, 2025)}
-ALLOWED: dict[str, str | None] = {
-    **YEARS,
-    "2016" + EN + "2024": None,
-    "2020" + EN + "21": r"The 2020" + EN + r"21 surge",
-    ".08": None,  # blood alcohol threshold
-    ".15": None,
-    "30": r"within 30 days",  # FARS 30-day definition
-    "10,000": r"10,000 lb",  # large-truck definition
-    "95": r"95% confidence interval",
-    "100": r"2019 = 100",  # the index base
-    "1": r"ratio of 1 means",
-    # speed-limit, vehicle-age and age-band labels (the chart vocabulary)
-    "25": r"\b25 mph",
-    "30" + EN + "35": None,
-    "40" + EN + "45": None,
-    "50" + EN + "55": None,
-    "60" + EN + "65": None,
-    "70": None,
-    "75": None,
-    "13": None,
-    "18": r"\b18 or more years",
-    "4": r"under 4 years",
-    "0" + EN + "3": r"0" + EN + r"3 years",
-    "25" + EN + "34": None,
-    "16" + EN + "24": None,
-    "55" + EN + "74": None,
-    "35" + EN + "54": None,
+# The only numeric literals the template's own prose may contain, each bound to the phrase it may
+# appear in (a regex that must match text overlapping the token). Every other number has to be a
+# placeholder, so it comes from a table. test_allowlist_has_no_unused_entries keeps this list tight.
+ALLOWED: dict[str, list[str]] = {
+    "2016": [r"2016 to (?:in )?2024", r"in 2016 and in 2024"],
+    "2018": [r"start in 2018"],  # first year of the prior-suspension fields
+    "2019": [
+        r"(?:from|Since|against|in|than in|above|their|own) 2019",
+        r"2019 (?:to|=|level|count)",
+    ],
+    "2020": [r"in 2020"],
+    "2021": [r"(?:to|after|in) 2021"],
+    "2024": [r"(?:to|in|By) (?:in )?2024", r"2024 than in 2019"],
+    "2016" + EN + "2024": [r"(?:, |for |crashes |state |truck )2016" + EN + "2024"],
+    "2020" + EN + "21": [r"The 2020" + EN + r"21 surge"],
+    ".08": [r"\.08 or more"],  # legal blood alcohol limit
+    ".15": [r"\.15 or more"],  # the "nearly twice the limit" threshold
+    "30": [r"within 30 days"],  # FARS death definition
+    "10,000": [r"10,000 lb"],  # large-truck definition
+    "95": [r"95% confidence interval"],
+    "100": [r"2019 = 100"],  # the index base
+    "1": [r"ratio of 1 means"],
+    "13": [r"aged 13 and over"],  # age range of the belt-effectiveness estimate
+    "25": [r"25 mph"],
+    "40" + EN + "45": [r"40" + EN + r"45 mph"],
+    "50" + EN + "55": [r"50" + EN + r"55 mph"],
+    "25" + EN + "34": [r"aged 25" + EN + "34"],
+    "0" + EN + "3": [r"0" + EN + r"3 years old"],
+    "18": [r"18 or more years old"],
+    "4": [r"under 4 years old"],
 }
 NUMBER = re.compile(r"(?<![\w.])(?:\.\d+|\d[\d,]*(?:\.\d+)?(?:" + EN + r"\d[\d,]*)?)")
 
@@ -81,21 +82,49 @@ def template_prose() -> str:
     return t
 
 
-def test_no_hand_typed_numbers():
-    prose = template_prose()
+def _bad_numbers(prose: str) -> list[tuple[str, str]]:
+    """Numbers outside the allowlist, or inside it but away from their phrase."""
     bad = []
     for m in NUMBER.finditer(prose):
         token = m.group(0).rstrip(",")
-        if token not in ALLOWED:
-            bad.append((token, prose[max(0, m.start() - 40) : m.end() + 40]))
-            continue
-        needed = ALLOWED[token]
-        window = prose[max(0, m.start() - 40) : m.end() + 40]
-        if needed and not re.search(needed, " ".join(window.split())):
-            bad.append((token, window))
+        end = m.start() + len(token)
+        ok = False
+        for pat in ALLOWED.get(token, []):
+            flex = pat.replace(" ", r"\s+")  # prose wraps across lines
+            for mm in re.finditer(flex, prose):
+                if mm.start() < end and mm.end() > m.start():
+                    ok = True
+        if not ok:
+            window = prose[max(0, m.start() - 40) : m.end() + 40]
+            bad.append((token, " ".join(window.split())))
+    return bad
+
+
+def test_no_hand_typed_numbers():
+    bad = _bad_numbers(template_prose())
     assert not bad, "numbers typed in the template (use a placeholder):\n" + "\n".join(
-        f"  {t!r} in ...{c!r}..." for t, c in bad
+        f"  {t!r} not allowed in context: ...{c}..." for t, c in bad
     )
+
+
+def test_allowlist_has_no_unused_entries():
+    prose = template_prose()
+    present = {m.group(0).rstrip(",") for m in NUMBER.finditer(prose)}
+    assert set(ALLOWED) <= present, (
+        f"allowlisted but absent from the template: {set(ALLOWED) - present}"
+    )
+    # every phrase must occur in the template too
+    flat = " ".join(prose.split())
+    for token, pats in ALLOWED.items():
+        for pat in pats:
+            assert re.search(pat, flat), f"phrase {pat!r} for {token!r} not in the template"
+
+
+def test_allowlisted_number_outside_its_phrase_is_rejected():
+    assert _bad_numbers("aged 13 and over") == []
+    assert _bad_numbers("about 13 people") != []
+    assert _bad_numbers("at .08 or more") == []
+    assert _bad_numbers("at .09 or more") != []
 
 
 def test_number_check_catches_a_typed_number(monkeypatch, tmp_path):
@@ -231,3 +260,63 @@ def test_states_table_pins_us_and_sorts_by_2024_deaths():
     assert out.index("United States") < out.index("Texas") < out.index("California")
     assert 'data-pinned="true"' in out and 'aria-sort="descending"' in out
     assert out.count("<tr") == 1 + 1 + 51 + 1  # head, US, states, empty-state row
+
+
+# ---------------------------------------------------------------------------------------------
+# 4. fixed scales refuse values outside them
+# ---------------------------------------------------------------------------------------------
+
+
+@pytest.mark.parametrize(
+    "build",
+    [
+        lambda: site.hbars([Bar("a", 0.8)], fmt="pct:0", vmax=0.7),
+        lambda: site.hbars([Bar("a", 0.5, 0.4, 0.75)], fmt="pct:0", vmax=0.7),  # CI end
+        lambda: site.hbars([Bar("a", 0.5)], fmt="pct:0", vmax=0.7, ref=(0.9, "All")),
+        lambda: site.pairbars(
+            [Indicator("a", [0.2, 0.31])], [("x", "accent"), ("y", "aqua")], fmt="pct:0", vmax=0.3
+        ),
+        lambda: site.columns([Bar("a", 0.6)], fmt="pct:0", vmax=0.5),
+        lambda: site.columns([Bar("a", 0.4, 0.3, 0.55)], fmt="pct:0", vmax=0.5),
+        lambda: site.strip([Bar("a", 0.9)], fmt="pct:0", ref=(0.3, "US"), vmax=0.8),
+        lambda: site.lines_chart(
+            [Line("a", [0.09, 0.12])], ["2019", "2020"], fmt="pct:0", ydomain=(0.10, 0.18)
+        ),
+        lambda: site.lines_chart(
+            [Line("a", [0.12, 0.2])], ["2019", "2020"], fmt="pct:0", ydomain=(0.10, 0.18)
+        ),
+    ],
+)
+def test_fixed_scale_rejects_out_of_domain_values(build):
+    with pytest.raises(site.SiteError, match="outside the fixed scale"):
+        build()
+
+
+def test_fixed_scale_accepts_values_on_the_boundary():
+    site.hbars([Bar("a", 0.7, 0.6, 0.7)], fmt="pct:0", vmax=0.7)
+    site.lines_chart([Line("a", [0.10, 0.18])], ["2019", "2020"], fmt="pct:0", ydomain=(0.10, 0.18))
+
+
+# ---------------------------------------------------------------------------------------------
+# 5. the CSV links on the page are exactly what the sync tool publishes
+# ---------------------------------------------------------------------------------------------
+
+
+def _sync_tool():
+    path = site.OUTPUT.parent / "tools" / "sync_public_data.py"
+    spec = importlib.util.spec_from_file_location("sync_public_data", path)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
+def test_csv_links_match_the_sync_tool_and_the_files_exist():
+    linked = set(re.findall(r'data/(tables/[^"\'\s>]+\.csv)', site.TEMPLATE.read_text()))
+    synced = set(_sync_tool().sources().values())
+    assert linked == synced, (
+        f"linked but not synced: {sorted(linked - synced)}; "
+        f"synced but never linked: {sorted(synced - linked)}"
+    )
+    data = site.OUTPUT.parent / "data"
+    missing = [t for t in synced if not (data / t).is_file()]
+    assert not missing, f"not under website/data/: {missing} (run sync_public_data.py)"

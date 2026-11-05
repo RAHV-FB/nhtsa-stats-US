@@ -125,6 +125,13 @@ def pos(v: float, lo: float, hi: float) -> float:
     return 100.0 * (v - lo) / (hi - lo)
 
 
+def check_domain(what: str, values: Sequence[float | None], lo: float, hi: float) -> None:
+    """A chart with a fixed scale must raise rather than draw a value outside it."""
+    for v in values:
+        if v is not None and not (lo - 1e-9 <= v <= hi + 1e-9):
+            raise SiteError(f"{what}: value {v} lies outside the fixed scale [{lo}, {hi}]")
+
+
 def p(v: float) -> str:
     return f"{v:.3f}".rstrip("0").rstrip(".") or "0"
 
@@ -294,6 +301,7 @@ def hbars(
     vmax: float | None = None,
     tick_fmt: str | None = None,
     groups: Sequence[tuple[str, Sequence[Bar]]] | None = None,
+    ref_fmt: str | None = None,
 ) -> str:
     """Horizontal ranked bars, optionally with CI whiskers, a reference line and groups that
     share one scale."""
@@ -303,6 +311,12 @@ def hbars(
         top = max((b.high if b.high is not None else b.value) for b in all_bars)
         vmax = nice_ceil(top)
     lo, hi = 0.0, float(vmax)
+    check_domain(
+        "horizontal bars",
+        [x for b in all_bars for x in (b.value, b.low, b.high)] + ([ref[0]] if ref else []),
+        lo,
+        hi,
+    )
     ticks = nice_ticks(lo, hi)
     grid = _hb_grid(ticks, lo, hi)
     refline = (
@@ -318,7 +332,7 @@ def hbars(
 
     parts = ['<div class="chart hb">']
     if ref is not None:
-        parts.append(_hb_refhead(ref, fmt, lo, hi))
+        parts.append(_hb_refhead(ref, ref_fmt or fmt, lo, hi))
     table_rows: list[list[str]] = []
     headers: list[str] = []
     if groups:
@@ -363,8 +377,10 @@ def pairbars(
         hi = vmax if vmax is not None else span_hi
         if lo < 0:
             lo = -nice_ceil(-lo)
+        check_domain("paired bars", vals, lo, hi)
     else:
         lo, hi = 0.0, float(vmax if vmax is not None else nice_ceil(max(vals)))
+    check_domain("paired bars", vals, lo, hi)
     ticks = nice_ticks(lo, hi)
     grid = _hb_grid(ticks, lo, hi)
     zero = f'<i class="hb-zero" style="left:{p(pos(0, lo, hi))}%"></i>' if lo < 0 else ""
@@ -437,7 +453,7 @@ def segbar(
             text = fv(pt.value, fmt)
             inner = ""
             if seg_fits(text, share):
-                on = "seg-on-light" if pt.color == "deemph" else "seg-on-dark"
+                on = f"seg-on-{pt.color}"
                 inner = f'<span class="seg-txt {on}">{esc(text)}</span>'
             blocks.append(
                 f'<div class="seg-block" style="flex:{pt.value:.6f} 1 0;'
@@ -489,6 +505,12 @@ def columns(
     tick_fmt = tick_fmt or fmt
     top = max((c.high if c.high is not None else c.value) for c in cols)
     hi = float(vmax if vmax is not None else nice_ceil(top))
+    check_domain(
+        "columns",
+        [x for c in cols for x in (c.value, c.low, c.high)] + ([ref[0]] if ref else []),
+        0,
+        hi,
+    )
     ticks = nice_ticks(0, hi)
     cells, labels = [], []
     for c in cols:
@@ -537,6 +559,7 @@ def strip(
     are labelled on the chart; every value is in the tooltip and the table view."""
     items = sorted(items, key=lambda b: -b.value)
     hi = float(vmax if vmax is not None else nice_ceil(max(b.value for b in items)))
+    check_domain("state strip", [b.value for b in items] + [ref[0]], 0, hi)
     ticks = nice_ticks(0, hi)
     cells = []
     for i, b in enumerate(items):
@@ -737,6 +760,7 @@ def lines_chart(
         ticks = _ticks_at(ylo, yhi, step)
     else:
         ylo, yhi = ydomain
+        check_domain("line chart", allv, ylo, yhi)
         ticks = nice_ticks(ylo, yhi)
     data = {
         "xs": list(xs),
@@ -856,7 +880,7 @@ def _alcohol_records() -> str:
         ("suspended_or_revoked", "Licence suspended or revoked"),
         ("unlicensed", "Never licensed"),
         ("prior_suspension", "Licence suspended before (since 2018)"),
-        ("prior_dwi", "Drink-driving conviction"),
+        ("prior_dwi", "DWI conviction"),
         ("prior_speeding", "Speeding conviction"),
         ("prior_crash", "Recorded crash"),
     ]
@@ -938,6 +962,7 @@ def _belt_lives() -> str:
         ("as_recorded", "Belt use as recorded"),
         ("misreport_5pct", "If 1 in 20 belted survivors were misrecorded"),
         ("misreport_10pct", "If 1 in 10 were misrecorded"),
+        ("misreport_20pct", "If 1 in 5 were misrecorded"),
     ]
     bars = []
     for k, label in spec:
@@ -968,10 +993,11 @@ def _speeding_types() -> str:
     vmax = math.ceil(max(b.high for b in bars))
     return hbars(
         bars,
-        fmt="x:1",
+        fmt="x:2",
         tick_fmt="x:0",
         vmax=vmax,
         ref=(1, "No speeding"),
+        ref_fmt="x:1",
         value_header="Adjusted risk ratio",
         label_header="Kind of speeding",
     )
@@ -998,7 +1024,10 @@ def _ped_where() -> str:
                 ("Dark, street lights", ["dark_lighted"]),
                 ("Dark, no street lights", ["dark_not_lighted"]),
                 ("Dawn or dusk", ["dawn_dusk"]),
-                ("Other or unknown", ["dark_unknown_lighting", "other_unknown"]),
+                (
+                    "Other, incl. dark with lighting unknown",
+                    ["dark_unknown_lighting", "other_unknown"],
+                ),
             ],
         ),
         (

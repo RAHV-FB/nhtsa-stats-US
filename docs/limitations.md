@@ -175,11 +175,12 @@ policy questions require data that do not exist in this repository.
 * **Driver records** come from each driver's state file and count convictions, suspensions and
   crashes in the five years before the crash. They miss arrests without conviction, offences
   reduced by plea and offences recorded in other states, so prior drink-driving and speeding are
-  undercounted. Suspensions are coded only from 2018.
+  undercounted. The three suspension fields used here (`PREV_SUS1–3`) start in 2018.
 * **Victim roles** depend on which vehicle is coded speeding or has a driver at .08 or more; for
   alcohol the assignment changes across imputations and is averaged.
-* **Recording differs by state.** Speeding coding in particular varies between police agencies,
-  so state speeding shares are not strictly comparable.
+* **Recording differs by state.** Speeding coding varies between police agencies, and the share
+  of occupants killed whose belt use was not recorded ranges from almost none to about one in six
+  by state (`deaths/states`), so state shares are not strictly comparable.
 * **Vehicle age.** The rising share of deaths in vehicles 18 or more years old partly reflects the
   ageing of the fleet, which the data do not measure; the adjusted CRSS risk ratio is the evidence
   on risk, and it is an association conditional on a police-reported crash.

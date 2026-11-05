@@ -355,16 +355,17 @@ killed (FARS person files, `INJ_SEV` = 4) rather than from crash severity.
 * **Driver records.** Drivers (`PER_TYP` 1) of every vehicle in a fatal crash, with licence
   status (`L_STATUS`: invalid = not licensed, suspended, revoked, expired, cancelled/denied) and
   five-year record counts (`PREV_DWI`, `PREV_SPD`, `PREV_ACC`; `PREV_SUS1–3` from 2018). Unknown
-  codes (7/9 for licence; 98/99/998 for counts) leave the base of each share.
+  codes (7/9 for licence; 99/998 for conviction counts; 98/99/998 for prior crashes) leave the
+  base of each share.
 * **Belt and helmet use** shares are among the killed with known use, with bounds that count every
   unknown as protected or unprotected.
 * **Lives belts and helmets would have saved (model-based).** For the unbelted (unhelmeted) people
   killed, U, the expected number who would have survived had they been protected is U × E, where E
   is the within-vehicle fatality reduction from the double pair comparison (`matched/belt_effect`,
-  `matched/double_pair_comparison`; driver–right-front-passenger pairs for belts, rider–passenger
-  pairs for helmets). Belt estimates are reported under the matched module's misrecording
+  `matched/double_pair_comparison`; driver–right-front-passenger pairs aged 13 and over for belts,
+  rider–passenger pairs for helmets). Belt estimates are reported under the matched module's misrecording
   scenarios (0, 5, 10 and 20% of belted survivors assumed unbelted). E is estimated in fatal
-  crashes for front-seat occupants and applied to every seat.
+  crashes for front-seat occupants and applied to every seat and age.
 * **Vehicle age** is the crash year minus the model year, in the bands of the CRSS person model.
 * **States** are FARS state codes; shares are composition of each state's deaths, not rates.
 

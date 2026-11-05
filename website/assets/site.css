@@ -6,7 +6,7 @@
   --surface: #ffffff;
   --ink: #0f1720;
   --ink-2: #3f4a57;
-  --muted: #6b7785;
+  --muted: #5c6773;
   --rule: #dde1e7;
   --axis: #c3c9d1;
   --accent: #2a78d6;
@@ -18,7 +18,10 @@
   --deemph: #c5ccd5;
   --sign: #ffcc00;
   --sign-ink: #111111;
-  --on-fill: #ffffff;
+  --on-accent: #050505;
+  --on-series-2: #050505;
+  --on-aqua: #050505;
+  --on-violet: #ffffff;
   --tip-bg: #0f1720;
   --tip-ink: #f5f6f8;
   --font-ui: "Overpass", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
@@ -44,7 +47,10 @@
     --deemph: #3d4752;
     --sign: #ffcc00;
     --sign-ink: #111111;
-    --on-fill: #ffffff;
+    --on-accent: #050505;
+  --on-series-2: #050505;
+  --on-aqua: #050505;
+  --on-violet: #050505;
     --tip-bg: #e8edf2;
     --tip-ink: #0e1217;
     color-scheme: dark;
@@ -67,7 +73,10 @@
   --deemph: #3d4752;
   --sign: #ffcc00;
   --sign-ink: #111111;
-  --on-fill: #ffffff;
+  --on-accent: #050505;
+  --on-series-2: #050505;
+  --on-aqua: #050505;
+  --on-violet: #050505;
   --tip-bg: #e8edf2;
   --tip-ink: #0e1217;
   color-scheme: dark;
@@ -285,8 +294,11 @@ h3 { font-weight: 800; font-size: 1.25rem; margin: 40px 0 12px; }
 .seg-bar { display: flex; gap: 2px; height: 28px; }
 .seg-block { display: flex; align-items: center; min-width: 3px; border-radius: 4px; }
 .seg-txt { padding-left: 6px; font: 600 0.8125rem/1 var(--font-ui); white-space: nowrap; }
-.seg-on-dark { color: var(--on-fill); }
-.seg-on-light { color: var(--ink); }
+.seg-on-accent { color: var(--on-accent); }
+.seg-on-series-2 { color: var(--on-series-2); }
+.seg-on-aqua { color: var(--on-aqua); }
+.seg-on-violet { color: var(--on-violet); }
+.seg-on-deemph { color: var(--ink); }
 .seg .legend { margin-top: 10px; }
 
 /* vertical columns and the state strip */
@@ -452,9 +464,17 @@ h3 { font-weight: 800; font-size: 1.25rem; margin: 40px 0 12px; }
   .col-label { font-size: 0.8125rem; }
   .sign-n { font-size: 0.75rem; }
   .sign { padding: 3px 3px 4px; }
+  .hb-reflabel { transform: none; }
   .strip .vplot { margin-left: 40px; }
   .states-tools { flex-wrap: wrap; }
   .states-tools input { flex: 1 1 200px; }
+}
+@media (max-width: 420px) {
+  .fig { padding: 10px; }
+  .col-label { padding: 0; }
+  .sign { padding: 2px 1px 3px; border-width: 1px; max-width: 100%; }
+  .sign-t { font-size: 5px; letter-spacing: 0; }
+  .sign-n { font-size: 0.6875rem; letter-spacing: -0.02em; }
 }
 @media (prefers-reduced-motion: reduce) {
   * { transition: none !important; animation: none !important; scroll-behavior: auto !important; }
