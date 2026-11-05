@@ -42,6 +42,17 @@ test("theme tokens and phone layout are present", () => {
   assert.ok(css.includes("prefers-reduced-motion"));
 });
 
+test("monospace text has ligatures turned off", () => {
+  // Overpass Mono squeezes "fi" and "ffi" into one cell, which reads as a missing glyph.
+  // The font shorthand resets ligatures, so each rule must turn them off after it.
+  const css = read("assets/site.css");
+  const rules = css.match(/font:[^;]*var\(--font-mono\);[^;}]*;?/g) || [];
+  assert.ok(rules.length > 0, "no monospace rules found");
+  for (const rule of rules) {
+    assert.match(rule, /font-variant-ligatures:\s*none/, `ligatures not turned off in: ${rule}`);
+  }
+});
+
 const sandbox = { document: { readyState: "loading", addEventListener() {} }, console };
 const api = vm.runInNewContext(script, sandbox);
 const { compareRows, parseCell, tipText, nearestIndex, lineTip, matchesQuery } = api;
