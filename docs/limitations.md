@@ -161,3 +161,25 @@ policy questions require data that do not exist in this repository.
   are withheld for lack of support; they are reported as unsupported, not as zero.
 * **Stage D.** Post-crash survival effects are not identifiable: EMS times are recorded only for
   fatal crashes (FARS) and not at all in CRSS.
+
+## 8. Deaths analysis (November 2026)
+
+* **Composition, not risk.** `deaths/` tables describe how the people killed are distributed
+  across behaviours, road users, vehicles, places and states. Without exposure they cannot show
+  that one state, road, vehicle or group is more dangerous per mile, trip or person.
+* **Lives belts and helmets would have saved** are model-based expectations for the people who
+  died, from within-vehicle effectiveness estimates. They are not the effect of any law,
+  enforcement, campaign or other intervention (section 1 still applies). The belt estimate depends
+  strongly on how accurately surviving occupants' belt use is recorded (scenarios in
+  `deaths/potential_lives`), and the front-seat effectiveness is applied to every seat.
+* **Driver records** come from each driver's state file and count convictions, suspensions and
+  crashes in the five years before the crash. They miss arrests without conviction, offences
+  reduced by plea and offences recorded in other states, so prior drink-driving and speeding are
+  undercounted. Suspensions are coded only from 2018.
+* **Victim roles** depend on which vehicle is coded speeding or has a driver at .08 or more; for
+  alcohol the assignment changes across imputations and is averaged.
+* **Recording differs by state.** Speeding coding in particular varies between police agencies,
+  so state speeding shares are not strictly comparable.
+* **Vehicle age.** The rising share of deaths in vehicles 18 or more years old partly reflects the
+  ageing of the fleet, which the data do not measure; the adjusted CRSS risk ratio is the evidence
+  on risk, and it is an association conditional on a police-reported crash.

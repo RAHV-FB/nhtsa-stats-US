@@ -42,6 +42,7 @@ ANALYSES: dict[str, str] = {
     "restraint_behaviour": "nhtsa_stats.analysis.restraint_behaviour",
     "contributions": "nhtsa_stats.analysis.contributions",
     "stages": "nhtsa_stats.analysis.stages",
+    "deaths": "nhtsa_stats.analysis.deaths",
     "cases": "nhtsa_stats.analysis.cases",
     "policy": "nhtsa_stats.simulation.evidence",
     "figures": "nhtsa_stats.reporting.figures",
