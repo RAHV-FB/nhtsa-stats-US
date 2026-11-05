@@ -28,11 +28,15 @@ def run(name, pop, covs, outcome="killed"):
     print(rows[-1], flush=True)
 
 D=lpv.df
+YR=D.YEAR.astype(int)
 CIRC=list(specs.CIRCUMSTANCE)
 drop=lambda *x:[c for c in base if c not in x]
 run("A_published", lpv, base)
 run("B_published", lpv, base+CIRC)
 # fewer / different adjustment
+import os
+if os.environ.get("QUICK"):
+    rows.clear()
 run("A_minus_speeding_alcohol", lpv, drop("speeding","alcohol_im"))
 run("person_only+YEAR", lpv, ["age_band","sex","role","restraint","body","veh_age_band","YEAR"])
 run("A_minus_other_vehicle_body", lpv, drop("other_vehicle_body"))
@@ -41,7 +45,7 @@ def sub(mask,n): return lpv.subset(np.asarray(mask),n,n)
 run("drivers_only", sub(D.role=="driver","drv"), drop("role"))
 run("belted_only", sub(D.restraint=="belted","belted"), drop("restraint"))
 run("belted_drivers_age25-64", sub((D.restraint=="belted")&(D.role=="driver")&D.age_band.isin(["25-34","35-44","45-54","55-64"]),"bd"), drop("restraint","role"))
-for nm,msk in [("2016-2019",D.YEAR<=2019),("2020-2024",D.YEAR>=2020),("2016-2019_B",D.YEAR<=2019),("2020-2024_B",D.YEAR>=2020)]:
+for nm,msk in [("2016-2019",YR<=2019),("2020-2024",YR>=2020),("2016-2019_B",YR<=2019),("2020-2024_B",YR>=2020)]:
     run("period_"+nm, sub(msk,nm), drop("YEAR")+(CIRC if nm.endswith("_B") else []))
 run("single_vehicle_only", sub(D.n_vehicles.astype(str).isin(["1"]) ,"sv"), drop("other_vehicle_body","any_motorcycle","any_heavy_truck")+[])
 run("urban_only", sub(D.urbanicity.astype(str)=="urban","urb"), drop("urbanicity"))

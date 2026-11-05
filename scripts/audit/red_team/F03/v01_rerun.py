@@ -11,7 +11,7 @@ def run(label, outcome="fatal", drop=(), add=(), keep=None):
     r = severity.factor_contrasts(m, df, "speeding_type", severity.observed_levels(df, "speeding_type")).set_index("level")
     out = {"variant": label, "n": len(df)}
     for k, n in (("exceeded_limit_or_racing","EX"),("too_fast_for_conditions","TF")):
-        if k in r.index: out[n] = f"{r.loc[k,'adj_rr']:.2f} ({r.loc[k,'adj_rr_low']:.2f}-{r.loc[k,'adj_rr_high']:.2f}) crude {r.loc[k,'crude_rr']:.2f}"
+        if k in r.index: out[n] = f"{r.loc[k,'adj_rr']:.2f} ({r.loc[k,'adj_rr_low']:.2f}-{r.loc[k,'adj_rr_high']:.2f})"
     print(out, flush=True)
 run("A_base")
 run("A_no_surf_weather", drop=("surface","weather"))
