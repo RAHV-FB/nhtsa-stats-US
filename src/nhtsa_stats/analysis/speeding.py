@@ -523,9 +523,12 @@ def crss_overrepresentation(
     The published ratio divides the FARS (census) share of fatal crashes by the CRSS share of all
     crashes; the two systems record SPEEDREL with different completeness.  Here both shares come
     from CRSS: ``share_fatal_crss / share_all_crashes``, with a design-based CI from the joint
-    linearisation of the two domain means (they share PSUs; t, 42 df).  Because CRSS records
-    speeding less often in fatal crashes than FARS does (``fars_crss_recording``), the CRSS-only
-    ratio is a lower bound on the over-representation under full recording.  The mixed FARS/CRSS
+    linearisation of the two domain means (they share PSUs; t, 42 df).  CRSS records speeding less
+    often in fatal crashes than FARS does (``fars_crss_recording``), so under-recording in fatal
+    crashes alone would push the CRSS-only ratio down.  It is a lower bound on the
+    over-representation under full recording only if CRSS records speeding in non-fatal crashes
+    at least as fully as in fatal ones; that is untested, and under-recording that is stronger in
+    non-fatal crashes would push the ratio the other way.  The mixed FARS/CRSS
     ratio is repeated for comparison (its CI reflects CRSS sampling of the denominator only).
     """
     if crss is None or design is None:
@@ -851,8 +854,9 @@ def run(cache_dir: Path | None = config.OUTPUT_DIR / "cache") -> dict[str, pd.Da
         "Weighted domain means; ratio of the CRSS fatal-crash share to the CRSS all-crash share "
         "with joint Taylor linearisation (25 strata / 67 PSUs, t 42 df); the mixed ratio divides "
         "the FARS census share by the CRSS all-crash share (CI: CRSS denominator only). The "
-        "CRSS-only ratio is a lower bound if CRSS under-records speeding in fatal crashes "
-        "(see fars_crss_recording)",
+        "CRSS-only ratio is a lower bound on the over-representation under full recording only if "
+        "CRSS records speeding in non-fatal crashes at least as fully as in fatal ones, which is "
+        "untested (see fars_crss_recording)",
         outcome="fatal",
     )
     out["crss_overrepresentation"] = ovr

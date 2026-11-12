@@ -346,7 +346,8 @@ measured-BAC rows for victim roles and prior DWI; belt lives "as recorded, exclu
 use"; large-truck fault caveat; "among the steepest"; periods beside "a year" figures; pedestrian
 speed-limit missingness and unadjusted ratio; the prediction leakage sentence (with the 0.016 AUROC
 from `ml/feature_sensitivity`); RQ5 moved to exploratory; the seven new limitations; "pre-specified in
-the module docstring" and the random-forest qualification.
+the module docstring" and the random-forest qualification; a pinned Python version
+(`.python-version`); `deaths` now fails when its matched inputs are missing (`MatchedInputsError`).
 
 **Red-team numbers confirmed on re-computation.** The 1.06 and 1.18 for "too fast for conditions" and
 the 22% bound; the 1.29 (1.13–1.47) under model B (previously unverified); within-CRSS speeding
@@ -360,12 +361,14 @@ measured BAC; 60.7% of unbelted deaths in single-occupant vehicles; 2022–24 sp
 **Differed from the tables.**
 * Within-CRSS speeding ratio CI is 7.1–10.3 (joint linearisation), not 6.5–11.4.
 * Interstate at 70+ mph is 0.94 (0.63–1.38), not 1.00 (0.67–1.48).
-* Within-configuration belt ratio of RRs for speeding is 1.18 (1.08–1.28) pooling single and
-  multi-vehicle crashes, 1.23 (1.13–1.35) with rollover also crossed, not 1.16 (1.06–1.26); the BAC
-  contrast is 1.02–1.03, null.
+* Within-configuration belt ratio of RRs for speeding (exploratory follow-up) is 1.17 (1.08–1.27)
+  pooling single and multi-vehicle crashes, 1.24 (1.13–1.35) with rollover also crossed, and 1.10
+  to 1.24 across the four layering schemes, not 1.16 (1.06–1.26); the BAC contrast is 0.96–1.03,
+  null. The CIs come from a joint crash bootstrap of both arms (an earlier version treated the
+  arms as independent and gave 1.18 (1.08–1.28) and 1.23 (1.13–1.35)).
 * Model-B composition share runs 24–49% across the four specifications, not up to 56%; without crash
   configuration it is 9–34%.
-* 40.9% of the BAC ≥ .08 driver group is imputed (not 40.5%); 20,998 deaths have unknown belt use (not
+* 40.8% of the BAC ≥ .08 driver group is imputed (not 40.5%); 20,998 deaths have unknown belt use (not
   21,003).
 * Police-reported alcohol does not give a uniformly lower attributable fraction: 13.4% with unknowns
   as a level and 10.6% with unknown as no, but 27.2% for complete cases.
@@ -376,8 +379,7 @@ measured BAC; 60.7% of unbelted deaths in single-occupant vehicles; 2022–24 sp
   97%), the state range of prior-DWI shares, the invalid-licence +40.5% without expired or cancelled
   licences, the imputed-BAC-versus-injury odds ratio (X1), or the crash-type-interaction logistic
   comparison for `model_validation.md` §8. Those statements remain qualitative or are not made.
-* Code and provenance items: a code hash per module in the sidecars, a pinned Python version, and
-  making `deaths` fail when its matched inputs are missing.
+* Code and provenance items: a code hash per module in the sidecars.
 * Attacker-only claims in §6 that this pass did not re-run.
 
 ### Original recommendations (record)

@@ -27,7 +27,7 @@ here where they add the size of an association.
 2. **Between 27.4% and 39.4% of the people
    killed in drunk-driving crashes were not the drunk driver**: the lower figure counts only drivers
    with a measured blood alcohol result, the higher adds drivers whose BAC NHTSA imputed. Of the
-   drivers at .08 or more, 40.9% have an imputed rather than a measured BAC.
+   drivers at .08 or more, 40.8% have an imputed rather than a measured BAC.
    37.4% of those
    killed in speeding crashes were not the speeding driver.
 3. **Drunk drivers in fatal crashes were heavily impaired and often unlicensed, but seldom had a
@@ -145,10 +145,13 @@ driver at .08 or more.
 | not_risk_driver | 41,709 | 39.4% |
 
 Who was killed depends on how the drunk driver is identified. Of the drivers at .08 or more,
-40.9% have a BAC that NHTSA imputed rather than a measured test result
+40.8% have a BAC that NHTSA imputed rather than a measured test result
 (`deaths/driver_bac_imputed_share`). Restricting to measured results (`deaths/victim_roles_bac_basis`),
-the share of deaths who were not the drunk driver is lower. Neither figure is the truth: the measured-only
-figure is itself selected by who was tested, so the two bound a range rather than identify the share:
+the share of deaths who were not the drunk driver is lower. Neither basis is a proven bound on the
+true share. The measured-only figure is plausibly too low, because surviving drunk drivers are tested
+less often than killed ones, so measured cases over-represent drivers who died; the all-BAC figure
+depends on NHTSA's undocumented imputation model. The two bases show how much the answer depends on
+the choice, not a range that contains the truth:
 
 | BAC basis | Role | Deaths | Share |
 |---|---|---|---|
@@ -160,13 +163,13 @@ figure is itself selected by who was tested, so the two bound a range rather tha
 | all_bac_measured_and_imputed | other_nonoccupant | 498 | 0.5% |
 | all_bac_measured_and_imputed | not_risk_driver | 41,709 | 39.4% |
 | all_bac_measured_and_imputed | outside_risk_vehicle | 28,040 | 26.5% |
-| measured_bac_only | total | 65,318 | 100.0% |
-| measured_bac_only | risk_driver | 47,430 | 72.6% |
-| measured_bac_only | risk_passenger | 7,554 | 11.6% |
+| measured_bac_only | total | 65,323 | 100.0% |
+| measured_bac_only | risk_driver | 47,434 | 72.6% |
+| measured_bac_only | risk_passenger | 7,555 | 11.6% |
 | measured_bac_only | other_vehicle_occupant | 7,929 | 12.1% |
 | measured_bac_only | pedestrian_or_cyclist | 2,202 | 3.4% |
 | measured_bac_only | other_nonoccupant | 203 | 0.3% |
-| measured_bac_only | not_risk_driver | 17,888 | 27.4% |
+| measured_bac_only | not_risk_driver | 17,889 | 27.4% |
 | measured_bac_only | outside_risk_vehicle | 10,334 | 15.8% |
 
 Drivers in fatal crashes, by blood alcohol (share of drivers with a known record):
@@ -202,12 +205,12 @@ The same shares for drivers at .08 or more by how the BAC was obtained (`deaths/
 | bac_08_plus_all | licence_invalid | 23.7% | 96,248 |
 | bac_08_plus_all | prior_dwi | 7.4% | 95,411 |
 | bac_08_plus_all | prior_speeding | 21.4% | 95,411 |
-| bac_08_plus_measured_only | licence_invalid | 25.7% | 59,044 |
-| bac_08_plus_measured_only | prior_dwi | 9.5% | 58,503 |
-| bac_08_plus_measured_only | prior_speeding | 22.7% | 58,503 |
-| bac_08_plus_imputed_only | licence_invalid | 20.4% | 37,204 |
-| bac_08_plus_imputed_only | prior_dwi | 4.1% | 36,908 |
-| bac_08_plus_imputed_only | prior_speeding | 19.5% | 36,908 |
+| bac_08_plus_measured_only | licence_invalid | 25.7% | 59,048 |
+| bac_08_plus_measured_only | prior_dwi | 9.5% | 58,507 |
+| bac_08_plus_measured_only | prior_speeding | 22.7% | 58,507 |
+| bac_08_plus_imputed_only | licence_invalid | 20.4% | 37,200 |
+| bac_08_plus_imputed_only | prior_dwi | 4.1% | 36,904 |
+| bac_08_plus_imputed_only | prior_speeding | 19.5% | 36,904 |
 
 Only 7.4% of drunk
 drivers had a DWI conviction in the five years before the crash
@@ -397,8 +400,12 @@ Treat this figure with more caution than the seat-belt one:
 * **It rests on few pairs and covers few of the deaths** (`matched/helmet_pair_coverage`). Only
   455 operator–passenger pairs differ in
   helmet use. 16% of the unhelmeted motorcyclist deaths were in
-  such pairs and 84% were on single-rider motorcycles, so
+  an operator–passenger pair of any kind (not only the discordant pairs) and 84% were on single-rider motorcycles, so
   applying the estimate to all unhelmeted deaths assumes that riders with a passenger are representative of solo riders.
+  (The 18,336 unhelmeted deaths in this coverage table differ from the
+  18,789 in the potential-lives table because the matched module defines
+  motorcycle and no helmet from the harmonised BODY_TYP 80–89 and REST_USE/HELM_USE codes, the deaths module from the
+  FARS auxiliary variables A_BODY = 7 and A_HELMUSE = 2.)
 
 ## 8. Vehicles
 

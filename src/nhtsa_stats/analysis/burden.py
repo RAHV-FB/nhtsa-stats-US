@@ -118,7 +118,15 @@ TYPE_SHIFTS = [
 
 
 def _af_rows(
-    model, df, design, shifts, outcome, fars_deaths, fars_crashes, joint=(SHIFTS[0], SHIFTS[1])
+    model,
+    df,
+    design,
+    shifts,
+    outcome,
+    fars_deaths,
+    fars_crashes,
+    joint=(SHIFTS[0], SHIFTS[1]),
+    scale_to_fars=True,
 ) -> list[dict]:
     base_m, base_z = model.margin_influence(df, None)
     rows = []
@@ -139,7 +147,7 @@ def _af_rows(
             exposed = exposed | df[joint[1].var].isin(joint[1].exposed).to_numpy()
         # Only a fraction of *fatal* crashes can be scaled to FARS. Deaths assume the averted
         # fatal crashes carry the average number of deaths per FARS fatal crash.
-        scale = outcome == "fatal"
+        scale = outcome == "fatal" and scale_to_fars
         rows.append(
             {
                 "shift": sh.name,
@@ -187,6 +195,18 @@ ALCOHOL_CODINGS = {
 PERIODS = {"2016-2024": None, "2022-2024": WINDOW}
 
 
+def scaling_note(outcome: str, scaled: bool) -> str:
+    """Why the FARS-scaled columns are filled or blank for a variant row."""
+    if outcome != "fatal":
+        return "not scaled: fractions of KA crashes are not scaled to FARS deaths"
+    if not scaled:
+        return (
+            "not scaled: the fraction applies only to crashes with a known police alcohol field "
+            "and is not extrapolated to all FARS deaths"
+        )
+    return "scaled to mean annual 2022-2024 FARS fatal crashes and deaths"
+
+
 def af_variants(outcome: str = "fatal") -> pd.DataFrame:
     """Attributable fractions under other defensible periods and alcohol codings.
 
@@ -216,9 +236,15 @@ def af_variants(outcome: str = "fatal") -> pd.DataFrame:
             ]
             joint = (shifts[0], shifts[1])
             model = severity.fit(df, design, outcome, covs)
+            # The complete-case fraction describes only crashes with a known police alcohol
+            # field; applying it to all FARS deaths would extrapolate to the dropped crashes.
+            scale = coding != "police_complete_case"
             part = pd.DataFrame(
-                _af_rows(model, df, design, shifts, outcome, fars_deaths, fars_crashes, joint)
+                _af_rows(
+                    model, df, design, shifts, outcome, fars_deaths, fars_crashes, joint, scale
+                )
             )
+            part["fars_scaling_note"] = scaling_note(outcome, scale)
             part.insert(0, "alcohol_coding", coding)
             part.insert(1, "alcohol_coding_description", ALCOHOL_CODINGS[coding])
             part.insert(2, "model_period", period)

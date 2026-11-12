@@ -144,8 +144,11 @@ policy questions require data that do not exist in this repository.
 
 * **No individual attribution.** No analysis identifies the cause of a particular death or the
   share of a death "due to" each factor. Shapley allocations in `contributions/` and
-  `speeding/shapley` are allocations of model quantities; they depend on the factor set and on
-  the order in which factors are added (the range over orderings is reported).
+  `speeding/shapley` are allocations of model quantities; they change with the scale (risk
+  difference vs log risk ratio), the reference case and the factor set, and are reported precisely
+  to show this. A Shapley value averages over all orders of adding factors, so it does not depend
+  on one order; `speeding/shapley` additionally reports the range of each block's share over
+  single orderings.
 * **Drugs.** CRSS has only police-reported drug involvement (50–70% unknown after 2019) and the
   police co-record drugs with alcohol several times more often than toxicology finds them
   together. No drug severity association, attributable fraction or ranking is reported as a
@@ -215,7 +218,7 @@ earlier item. Numbers are quoted as the named tables give them.
   that among untested FARS drivers the imputed BAC is higher for killed drivers; that result is not
   in a committed table. Figures that use imputed BAC (drunk-driving deaths, victim roles, prior-DWI
   shares) are therefore shown with measured-BAC-only counterparts where available
-  (`deaths/victim_roles_bac_basis`, `deaths/driver_records_measured_bac`; 40.9% of drivers at .08 or
+  (`deaths/victim_roles_bac_basis`, `deaths/driver_records_measured_bac`; 40.8% of drivers at .08 or
   more have an imputed BAC, `deaths/driver_bac_imputed_share`).
 * **CRSS weights are benchmarked to FARS.** The weighted CRSS fatal total reproduces the FARS count
   each year, so agreement between the two systems on fatal totals is partly by construction and not

@@ -40,11 +40,14 @@ Numbers are quoted as the named tables give them. Full text, intervals and cavea
   unbelted-coded deaths to be misrecorded gives 28.2% (26.4–29.9%); the reduction vanishes at
   21.2% survivor misreporting alone and 18.1% with 5% reverse error
   (`matched/belt_misreporting_two_sided_dpc`).
-* Within crash configuration, belts are somewhat *less* protective with a speeding driver: ratio of
-  belt risk ratios 1.23 (1.13–1.35), against 1.01 (0.93–1.09) when crashes are pooled first. The
-  alcohol contrast is null, 1.02 (0.93–1.11)
-  (`restraint_behaviour/dpc_contrast_within_configuration`). This corrects an earlier conclusion that
-  the belt effect does not vary with speeding.
+* Exploratory follow-up: within crash configuration, belts are somewhat *less* protective with a
+  speeding driver. The ratio of belt risk ratios is 1.10 to 1.24 across four ways of layering crashes
+  (lower confidence limits 1.02 or above): 1.24 (1.13–1.35) with single/multi-vehicle and rollover
+  crossed (3 of 4 layers pooled), the largest of the four; the crash-type scheme pools only 3 of its 8
+  crash types. Pooling crashes first gives 1.01 (0.93–1.09). The alcohol contrast is null, 1.02
+  (0.93–1.11) (`restraint_behaviour/dpc_contrast_within_configuration`). The earlier unstratified
+  conclusion that the belt effect does not vary with driver speeding does not hold within crash
+  configuration.
 * Motorcycle helmets: 30.7% (20.6–39.9%) fewer deaths among riders and passengers of the same
   motorcycle, but 455 of 4,735 pairs differ in helmet use, the pair design covers 15.7% of unhelmeted
   deaths, and the effect vanishes at 5.6% survivor misreporting
@@ -81,8 +84,10 @@ Numbers are quoted as the named tables give them. Full text, intervals and cavea
   distraction fields cannot support severity or trend analysis.
 
 **4. The post-2020 rise.** The fatal share of police-reported crashes rose by a factor of 1.25
-(1.14–1.37). The recorded crash mix explains roughly a quarter to a half of it (24–49% across four
-specifications with crash configuration, 9–34% without; `trends/composition_robustness`). The fall in
+(1.14–1.37). The recorded crash mix accounts for 9–34% of it without
+crash configuration (model A) and 24–49% with it (model B, where configuration may itself be a mediator),
+across four specifications and two reference periods; several of the individual intervals include zero
+(`trends/composition_robustness`). "Roughly a quarter to a half" is the model-B range only. The fall in
 reported crashes accounts for 53.6% (29.1–78.1%) of the rise in the share, or 46.2% (28.6–63.8%) under
 the complete-case outcome (`trends/denominator_share`).
 

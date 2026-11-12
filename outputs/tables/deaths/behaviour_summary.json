@@ -25,6 +25,6 @@
   "overcount_ratio"
  ],
  "module": "nhtsa_stats.analysis.deaths",
- "git_commit": "3771f1b-dirty",
- "generated_utc": "2026-11-12T12:07:01Z"
+ "git_commit": "76c08de-dirty",
+ "generated_utc": "2026-11-12T13:05:48Z"
 }

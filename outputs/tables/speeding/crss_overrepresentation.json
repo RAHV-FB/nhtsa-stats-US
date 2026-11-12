@@ -4,7 +4,7 @@
  "population": "CRSS police-reported crashes 2016-2024 with a determinable NHTSA-imputed maximum severity (MAXSEV_IM 0-4)",
  "unit": "crash",
  "outcome": "fatal",
- "method": "Weighted domain means; ratio of the CRSS fatal-crash share to the CRSS all-crash share with joint Taylor linearisation (25 strata / 67 PSUs, t 42 df); the mixed ratio divides the FARS census share by the CRSS all-crash share (CI: CRSS denominator only). The CRSS-only ratio is a lower bound if CRSS under-records speeding in fatal crashes (see fars_crss_recording)",
+ "method": "Weighted domain means; ratio of the CRSS fatal-crash share to the CRSS all-crash share with joint Taylor linearisation (25 strata / 67 PSUs, t 42 df); the mixed ratio divides the FARS census share by the CRSS all-crash share (CI: CRSS denominator only). The CRSS-only ratio is a lower bound on the over-representation under full recording only if CRSS records speeding in non-fatal crashes at least as fully as in fatal ones, which is untested (see fars_crss_recording)",
  "inputs": [
   "data/processed/crss_crash.parquet",
   "data/processed/fars_crash.parquet"

@@ -131,8 +131,11 @@ driver at .08 or more.
 Who was killed depends on how the drunk driver is identified. Of the drivers at .08 or more,
 {{deaths/driver_bac_imputed_share|period=2016-2024|share_imputed|pct:1}} have a BAC that NHTSA imputed rather than a measured test result
 (`deaths/driver_bac_imputed_share`). Restricting to measured results (`deaths/victim_roles_bac_basis`),
-the share of deaths who were not the drunk driver is lower. Neither figure is the truth: the measured-only
-figure is itself selected by who was tested, so the two bound a range rather than identify the share:
+the share of deaths who were not the drunk driver is lower. Neither basis is a proven bound on the
+true share. The measured-only figure is plausibly too low, because surviving drunk drivers are tested
+less often than killed ones, so measured cases over-represent drivers who died; the all-BAC figure
+depends on NHTSA's undocumented imputation model. The two bases show how much the answer depends on
+the choice, not a range that contains the truth:
 
 {{mdtable:deaths/victim_roles_bac_basis|group=alcohol_impaired|basis:BAC basis:;role:Role:;deaths:Deaths:,.0f;share_of_group:Share:pct:1}}
 
@@ -253,8 +256,12 @@ Treat this figure with more caution than the seat-belt one:
 * **It rests on few pairs and covers few of the deaths** (`matched/helmet_pair_coverage`). Only
   {{matched/helmet_pair_coverage|metric=pairs_discordant_helmet_use|count|,.0f}} operator–passenger pairs differ in
   helmet use. {{matched/helmet_pair_coverage|metric=unhelmeted_deaths_in_pair_design|share|pct:0}} of the unhelmeted motorcyclist deaths were in
-  such pairs and {{matched/helmet_pair_coverage|metric=unhelmeted_deaths_single_rider_motorcycle|share|pct:0}} were on single-rider motorcycles, so
+  an operator–passenger pair of any kind (not only the discordant pairs) and {{matched/helmet_pair_coverage|metric=unhelmeted_deaths_single_rider_motorcycle|share|pct:0}} were on single-rider motorcycles, so
   applying the estimate to all unhelmeted deaths assumes that riders with a passenger are representative of solo riders.
+  (The {{matched/helmet_pair_coverage|metric=unhelmeted_motorcyclist_deaths|count|,.0f}} unhelmeted deaths in this coverage table differ from the
+  {{deaths/potential_lives_context|metric=unhelmeted_deaths|deaths|,.0f}} in the potential-lives table because the matched module defines
+  motorcycle and no helmet from the harmonised BODY_TYP 80–89 and REST_USE/HELM_USE codes, the deaths module from the
+  FARS auxiliary variables A_BODY = 7 and A_HELMUSE = 2.)
 
 ## 8. Vehicles
 

@@ -27,6 +27,6 @@
   "share_logrr_retained"
  ],
  "module": "nhtsa_stats.analysis.restraint_behaviour",
- "git_commit": "7ee597e-dirty",
- "generated_utc": "2026-11-12T12:04:25Z"
+ "git_commit": "76c08de-dirty",
+ "generated_utc": "2026-11-12T13:04:29Z"
 }

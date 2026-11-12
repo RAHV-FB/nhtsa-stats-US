@@ -27,8 +27,9 @@ Intervals cover sampling error only, not recording error or model choice, unless
    survivors truly unbelted and 5% of unbelted-coded deaths truly belted the reduction would be
    28% (26–30%), and it would vanish at about
    21%
-   of belted survivors misrecorded. Within crash configuration, belts are somewhat *less* protective
-   when the driver was speeding, and the alcohol contrast is null (`reports/alcohol_drugs_restraints.md`).
+   of belted survivors misrecorded. In an exploratory follow-up, belts are somewhat *less* protective within crash
+   configuration when the driver was speeding (ratio of belt risk ratios 1.10 to 1.24 across four layering
+   schemes), and the alcohol contrast is null (`reports/alcohol_drugs_restraints.md`).
    For motorcycle helmets (operator and passenger of the same motorcycle) the reduction is
    31% (20–40%)
    but it is imprecise and fragile: it vanishes at about
@@ -54,9 +55,9 @@ Intervals cover sampling error only, not recording error or model choice, unless
    distraction fields cannot support severity or trend analysis.
 4. **The post-2020 rise.** The fatal share of police-reported crashes rose by a factor of
    1.25 (1.14–1.37).
-   The recorded crash mix (including crash configuration) accounts for roughly a quarter to a half of
-   the rise (24% to 49% across four covariate specifications and both
-   reference periods; less without crash configuration); the rest is a higher fatal share within the
+   The recorded crash mix accounts for 9% to 34% of the rise without crash
+   configuration (model A) and 24% to 49% with it (model B; configuration may itself be a mediator), across four covariate specifications and both
+   reference periods; several of the individual intervals include zero. The rest is a higher fatal share within the
    same recorded circumstances. Separately, the fall in the number of reported crashes accounts for
    54% (29–78%) of the rise in the share (46% (29–64%) under the complete-case outcome).
 5. **How often a factor appears in fatal crashes is a poor guide to danger.** Pedestrian
@@ -597,17 +598,20 @@ road, weather.
 | vehicle did not roll over | 72,237 | 57% (55–58%) | 14% |
 
   These strata are conditional on a fatal crash in the vehicle and the two partitions overlap.
-* **Heterogeneity by driver behaviour.** Within the same crash configuration (single or
-  multi-vehicle crossed with rollover), the within-vehicle belt risk ratio is higher, that is belts
-  are somewhat less protective, with a speeding driver: ratio of belt risk ratios
-  1.23 (1.13–1.35)
-  (exceeding the limit or racing,
-  1.33 (1.19–1.49)),
-  whereas pooling the crashes first gives 1.01 (0.93–1.09).
-  The unstratified null was a composition effect: speeding drivers are more often in single-vehicle
+* **Heterogeneity by driver behaviour (exploratory follow-up).** The earlier unstratified conclusion that
+  the belt effect does not vary with driver speeding does not hold within crash configuration. Layering
+  crashes four ways (single or multi-vehicle, rollover, both crossed, harmonised crash type), the ratio of
+  belt risk ratios, speeding vs not, runs from 1.10 to 1.24 (smallest lower confidence limit 1.02);
+  above 1 means belts are somewhat less protective with a speeding driver. The crossed scheme gives the
+  largest estimate, 1.24 (1.13–1.35), and the crash-type scheme pools only
+  3 of its 8 crash types, the rest having too few deaths in a cell. For exceeding the limit or racing, the crossed scheme gives
+  1.34 (1.19–1.49).
+  Pooling the crashes first gives 1.01 (0.93–1.09).
+  The unstratified null reflects crash composition: speeding drivers are more often in single-vehicle
   crashes, where belts look more protective. For a driver at BAC .08 or more the within-configuration
   ratio is 1.02 (0.93–1.11),
-  no difference (`restraint_behaviour/dpc_contrast_within_configuration`).
+  no difference (`restraint_behaviour/dpc_contrast_within_configuration`). The layers are pooled as if
+  independent and the follow-up is not multiplicity-adjusted.
 * **Frailty.** Within the same vehicle, belted occupants aged 65+ died more often than belted
   occupants aged 25–44 of the same sex
   (2.81 (2.39–3.35)
@@ -621,12 +625,18 @@ road, weather.
   at about 6%
   survivor misreporting, or 5%
   reverse error. It rests on 455
-  operator-passenger pairs that differ in helmet use, and only
+  operator-passenger pairs that differ in helmet use. Only
   16%
-  of unhelmeted motorcyclist deaths were in such pairs (most were on single-rider motorcycles,
-  84%), so applying it to all
-  unhelmeted deaths assumes two-up riders are representative of solo riders
-  (`matched/helmet_pair_coverage`).
+  of the 18,336 unhelmeted motorcyclist deaths
+  were in an operator-passenger pair of any kind (helmet use and outcome known for both riders, whether
+  or not the pair differs in helmet use); most were on single-rider motorcycles,
+  84%,
+  so applying it to all unhelmeted deaths assumes two-up riders are representative of solo riders
+  (`matched/helmet_pair_coverage`; its 18,336 unhelmeted deaths
+  differ from the 18,789 in `deaths/potential_lives_context`
+  because the two modules define motorcycle and no helmet differently: the matched module uses the harmonised
+  vehicle body type (BODY_TYP 80-89) and the harmonised REST_USE/HELM_USE helmet code, the deaths module the
+  FARS auxiliary-file body type A_BODY = 7 and A_HELMUSE = 2).
 
 Across crashes (CRSS), unbelted light-vehicle occupants were far more likely to die than belted
 ones: crude RR 46.2 (41.0–52.1),
@@ -670,7 +680,7 @@ of the rise in the fatal share under NHTSA's imputed outcome and 46% (29–64%) 
 complete-case outcome (`trends/denominator_share`; intervals cover CRSS sampling only). It is not only a fall in property-damage-only reports: fatal
 crashes also rose as a share of injury crashes (1.28 (1.19–1.38)).
 
-**Composition accounts for roughly a quarter to a half of the rise.** This is a second, separate accounting of the
+**Composition accounts for a modest to substantial part of the rise, depending on the model.** This is a second, separate accounting of the
 same rise, not an addition to the first. Changes in the recorded circumstances of crashes
 (time, road, light, weather, alcohol, speeding, driver and vehicle mix, crash configuration)
 account for 49% (25–73%) of the rise
@@ -686,7 +696,8 @@ Across four covariate specifications (published, without imputed alcohol, withou
 variables, without both) and both reference periods, the composition share with crash configuration
 (model B) runs from 24% to 49%, and without crash configuration (model A)
 from 9% to 34% (`trends/composition_robustness`); "roughly a quarter to a
-half" is the model-B range, and the intervals are wide:
+half" is the model-B range only (model B adds crash configuration, a possible mediator of the rise); the
+intervals are wide and several of them include zero:
 
 | Specification (model B) | Reference period | Composition share (95% CI) |
 |---|---|---|
@@ -850,18 +861,21 @@ from a 2016–2024 model with NHTSA-imputed alcohol, scaled to 2022–2024 death
 | police_unknown_level | 2016-2024 | alcohol_removed | 13.4% (11.6–15.2%) | 5,493 |
 | police_unknown_level | 2022-2024 | speeding_removed | 10.6% (7.4–13.9%) | 4,363 |
 | police_unknown_level | 2022-2024 | alcohol_removed | 13.5% (11.0–16.1%) | 5,550 |
-| police_complete_case | 2016-2024 | speeding_removed | 9.4% (6.9–12.0%) | 3,868 |
-| police_complete_case | 2016-2024 | alcohol_removed | 27.2% (23.8–30.6%) | 11,141 |
-| police_complete_case | 2022-2024 | speeding_removed | 13.2% (9.2–17.1%) | 5,401 |
-| police_complete_case | 2022-2024 | alcohol_removed | 32.0% (26.5–37.6%) | 13,139 |
+| police_complete_case | 2016-2024 | speeding_removed | 9.4% (6.9–12.0%) | — |
+| police_complete_case | 2016-2024 | alcohol_removed | 27.2% (23.8–30.6%) | — |
+| police_complete_case | 2022-2024 | speeding_removed | 13.2% (9.2–17.1%) | — |
+| police_complete_case | 2022-2024 | alcohol_removed | 32.0% (26.5–37.6%) | — |
 | police_unknown_as_no | 2016-2024 | speeding_removed | 9.6% (7.5–11.8%) | 3,953 |
 | police_unknown_as_no | 2016-2024 | alcohol_removed | 10.6% (8.4–12.8%) | 4,344 |
 | police_unknown_as_no | 2022-2024 | speeding_removed | 12.4% (9.7–15.1%) | 5,095 |
 | police_unknown_as_no | 2022-2024 | alcohol_removed | 10.2% (7.3–13.1%) | 4,194 |
 
 The speeding fraction is larger when refitted on the recent years, and the alcohol fraction depends
-strongly on the alcohol coding (police-reported alcohol with unknowns dropped gives the largest
-figure, treating unknown as "no" the smallest). The confidence intervals cover sampling error only;
+strongly on the alcohol coding: police-reported alcohol with unknowns dropped gives the largest
+fraction and treating unknown as "no" the smallest. The complete-case fraction applies only to
+crashes with a known police alcohol field and is not scaled to deaths (its deaths cells are blank),
+because applying it to all FARS deaths would extrapolate to the crashes that were dropped. The
+confidence intervals cover sampling error only;
 they do not include the coding, period or recording-error differences shown here.
 
 ## 12. Prediction models

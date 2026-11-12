@@ -25,8 +25,9 @@ Intervals cover sampling error only, not recording error or model choice, unless
    survivors truly unbelted and 5% of unbelted-coded deaths truly belted the reduction would be
    {{matched/belt_misreporting_two_sided_dpc|analysis=belt_driver_rf;survivor_misreport_f=0.1;death_misreport_g=0.05|reduction_1_minus_rr|cipct:0@reduction}}, and it would vanish at about
    {{matched/belt_misreporting_two_sided_dpc|analysis=belt_driver_rf;survivor_misreport_f=0;death_misreport_g=0|tipping_f_given_g|pct:0}}
-   of belted survivors misrecorded. Within crash configuration, belts are somewhat *less* protective
-   when the driver was speeding, and the alcohol contrast is null (`reports/alcohol_drugs_restraints.md`).
+   of belted survivors misrecorded. In an exploratory follow-up, belts are somewhat *less* protective within crash
+   configuration when the driver was speeding (ratio of belt risk ratios {{restraint_behaviour/dpc_contrast_within_configuration|contrast=driver speeding (any) vs not speeding;layer=pooled within layers|min(ratio_of_rrs)|.2f}} to {{restraint_behaviour/dpc_contrast_within_configuration|contrast=driver speeding (any) vs not speeding;layer=pooled within layers|max(ratio_of_rrs)|.2f}} across four layering
+   schemes), and the alcohol contrast is null (`reports/alcohol_drugs_restraints.md`).
    For motorcycle helmets (operator and passenger of the same motorcycle) the reduction is
    {{matched/double_pair_comparison|analysis=motorcycle_helmet;misreport_fraction=0;component=combined (inverse-variance weighted)|reduction_1_minus_rr|cipct:0@reduction}}
    but it is imprecise and fragile: it vanishes at about
@@ -52,9 +53,9 @@ Intervals cover sampling error only, not recording error or model choice, unless
    distraction fields cannot support severity or trend analysis.
 4. **The post-2020 rise.** The fatal share of police-reported crashes rose by a factor of
    {{trends/numerator_denominator|outcome=fatal;comparison=2020-2024 vs 2016-2019;quantity=ratio_fatal_share|estimate|ci:2}}.
-   The recorded crash mix (including crash configuration) accounts for roughly a quarter to a half of
-   the rise ({{trends/composition_robustness|covariate_set=B;quantity=composition_share_of_change_ref_P0~composition_share_of_change_ref_P1|min(estimate)|pct:0}} to {{trends/composition_robustness|covariate_set=B;quantity=composition_share_of_change_ref_P0~composition_share_of_change_ref_P1|max(estimate)|pct:0}} across four covariate specifications and both
-   reference periods; less without crash configuration); the rest is a higher fatal share within the
+   The recorded crash mix accounts for {{trends/composition_robustness|covariate_set=A;quantity=composition_share_of_change_ref_P0~composition_share_of_change_ref_P1|min(estimate)|pct:0}} to {{trends/composition_robustness|covariate_set=A;quantity=composition_share_of_change_ref_P0~composition_share_of_change_ref_P1|max(estimate)|pct:0}} of the rise without crash
+   configuration (model A) and {{trends/composition_robustness|covariate_set=B;quantity=composition_share_of_change_ref_P0~composition_share_of_change_ref_P1|min(estimate)|pct:0}} to {{trends/composition_robustness|covariate_set=B;quantity=composition_share_of_change_ref_P0~composition_share_of_change_ref_P1|max(estimate)|pct:0}} with it (model B; configuration may itself be a mediator), across four covariate specifications and both
+   reference periods; several of the individual intervals include zero. The rest is a higher fatal share within the
    same recorded circumstances. Separately, the fall in the number of reported crashes accounts for
    {{trends/denominator_share|outcome=fatal;comparison=2020-2024 vs 2016-2019;quantity=denominator_share_of_log_rise|estimate|cipct:0}} of the rise in the share ({{trends/denominator_share|outcome=fatal_cc;comparison=2020-2024 vs 2016-2019;quantity=denominator_share_of_log_rise|estimate|cipct:0}} under the complete-case outcome).
 5. **How often a factor appears in fatal crashes is a poor guide to danger.** Pedestrian
@@ -550,17 +551,20 @@ road, weather.
 {{mdtable:matched/belt_by_crash_type|partition=all~crash type~vehicle rollover|stratum:Stratum:;dpc_n_pairs:Pairs:,.0f;dpc_reduction:Reduction (95% CI):cipct:0;dpc_tipping_point_f:Tipping point:pct:0}}
 
   These strata are conditional on a fatal crash in the vehicle and the two partitions overlap.
-* **Heterogeneity by driver behaviour.** Within the same crash configuration (single or
-  multi-vehicle crossed with rollover), the within-vehicle belt risk ratio is higher, that is belts
-  are somewhat less protective, with a speeding driver: ratio of belt risk ratios
-  {{restraint_behaviour/dpc_contrast_within_configuration|contrast=driver speeding (any) vs not speeding;adjustment=single/multi-vehicle x rollover;layer=pooled within layers|ratio_of_rrs|ci:2@ratio}}
-  (exceeding the limit or racing,
-  {{restraint_behaviour/dpc_contrast_within_configuration|contrast=driver exceeded limit / racing vs not speeding;adjustment=single/multi-vehicle x rollover;layer=pooled within layers|ratio_of_rrs|ci:2@ratio}}),
-  whereas pooling the crashes first gives {{restraint_behaviour/dpc_contrast_within_configuration|contrast=driver speeding (any) vs not speeding;adjustment=none (unstratified);layer=all vehicles|ratio_of_rrs|ci:2@ratio}}.
-  The unstratified null was a composition effect: speeding drivers are more often in single-vehicle
+* **Heterogeneity by driver behaviour (exploratory follow-up).** The earlier unstratified conclusion that
+  the belt effect does not vary with driver speeding does not hold within crash configuration. Layering
+  crashes four ways (single or multi-vehicle, rollover, both crossed, harmonised crash type), the ratio of
+  belt risk ratios, speeding vs not, runs from {{restraint_behaviour/dpc_contrast_within_configuration|contrast=driver speeding (any) vs not speeding;layer=pooled within layers|min(ratio_of_rrs)|.2f}} to {{restraint_behaviour/dpc_contrast_within_configuration|contrast=driver speeding (any) vs not speeding;layer=pooled within layers|max(ratio_of_rrs)|.2f}} (smallest lower confidence limit {{restraint_behaviour/dpc_contrast_within_configuration|contrast=driver speeding (any) vs not speeding;layer=pooled within layers|min(ratio_low)|.2f}});
+  above 1 means belts are somewhat less protective with a speeding driver. The crossed scheme gives the
+  largest estimate, {{restraint_behaviour/dpc_contrast_within_configuration|contrast=driver speeding (any) vs not speeding;adjustment=single/multi-vehicle x rollover;layer=pooled within layers|ratio_of_rrs|ci:2@ratio}}, and the crash-type scheme pools only
+  {{restraint_behaviour/dpc_contrast_within_configuration|contrast=driver speeding (any) vs not speeding;adjustment=crash type;layer=pooled within layers|n_layers_pooled|.0f}} of its 8 crash types, the rest having too few deaths in a cell. For exceeding the limit or racing, the crossed scheme gives
+  {{restraint_behaviour/dpc_contrast_within_configuration|contrast=driver exceeded limit / racing vs not speeding;adjustment=single/multi-vehicle x rollover;layer=pooled within layers|ratio_of_rrs|ci:2@ratio}}.
+  Pooling the crashes first gives {{restraint_behaviour/dpc_contrast_within_configuration|contrast=driver speeding (any) vs not speeding;adjustment=none (unstratified);layer=all vehicles|ratio_of_rrs|ci:2@ratio}}.
+  The unstratified null reflects crash composition: speeding drivers are more often in single-vehicle
   crashes, where belts look more protective. For a driver at BAC .08 or more the within-configuration
   ratio is {{restraint_behaviour/dpc_contrast_within_configuration|contrast=driver BAC >= .08 (MI) vs BAC < .08;adjustment=single/multi-vehicle x rollover;layer=pooled within layers|ratio_of_rrs|ci:2@ratio}},
-  no difference (`restraint_behaviour/dpc_contrast_within_configuration`).
+  no difference (`restraint_behaviour/dpc_contrast_within_configuration`). The layers are pooled as if
+  independent and the follow-up is not multiplicity-adjusted.
 * **Frailty.** Within the same vehicle, belted occupants aged 65+ died more often than belted
   occupants aged 25–44 of the same sex
   ({{matched/double_pair_comparison|analysis=age_65plus_vs_25_44_both_belted_same_sex;component=combined (inverse-variance weighted)|rr_x1_vs_x0|ci:2@rr}}
@@ -574,12 +578,18 @@ road, weather.
   at about {{matched/helmet_misreporting_dpc|analysis=motorcycle_helmet;survivor_misreport_f=0;death_misreport_g=0|tipping_f_given_g|pct:0}}
   survivor misreporting, or {{matched/helmet_misreporting_dpc|analysis=motorcycle_helmet;survivor_misreport_f=0;death_misreport_g=0|tipping_g_given_f|pct:0}}
   reverse error. It rests on {{matched/helmet_pair_coverage|metric=pairs_discordant_helmet_use|count|,.0f}}
-  operator-passenger pairs that differ in helmet use, and only
+  operator-passenger pairs that differ in helmet use. Only
   {{matched/helmet_pair_coverage|metric=unhelmeted_deaths_in_pair_design|share|pct:0}}
-  of unhelmeted motorcyclist deaths were in such pairs (most were on single-rider motorcycles,
-  {{matched/helmet_pair_coverage|metric=unhelmeted_deaths_single_rider_motorcycle|share|pct:0}}), so applying it to all
-  unhelmeted deaths assumes two-up riders are representative of solo riders
-  (`matched/helmet_pair_coverage`).
+  of the {{matched/helmet_pair_coverage|metric=unhelmeted_motorcyclist_deaths|count|,.0f}} unhelmeted motorcyclist deaths
+  were in an operator-passenger pair of any kind (helmet use and outcome known for both riders, whether
+  or not the pair differs in helmet use); most were on single-rider motorcycles,
+  {{matched/helmet_pair_coverage|metric=unhelmeted_deaths_single_rider_motorcycle|share|pct:0}},
+  so applying it to all unhelmeted deaths assumes two-up riders are representative of solo riders
+  (`matched/helmet_pair_coverage`; its {{matched/helmet_pair_coverage|metric=unhelmeted_motorcyclist_deaths|count|,.0f}} unhelmeted deaths
+  differ from the {{deaths/potential_lives_context|metric=unhelmeted_deaths|deaths|,.0f}} in `deaths/potential_lives_context`
+  because the two modules define motorcycle and no helmet differently: the matched module uses the harmonised
+  vehicle body type (BODY_TYP 80-89) and the harmonised REST_USE/HELM_USE helmet code, the deaths module the
+  FARS auxiliary-file body type A_BODY = 7 and A_HELMUSE = 2).
 
 Across crashes (CRSS), unbelted light-vehicle occupants were far more likely to die than belted
 ones: crude RR {{person/lpv_killed_crude_vs_adjusted|factor=restraint;level=none|crude_rr|ci:1}},
@@ -623,7 +633,7 @@ of the rise in the fatal share under NHTSA's imputed outcome and {{trends/denomi
 complete-case outcome (`trends/denominator_share`; intervals cover CRSS sampling only). It is not only a fall in property-damage-only reports: fatal
 crashes also rose as a share of injury crashes ({{trends/numerator_denominator|outcome=fatal;comparison=2020-2024 vs 2016-2019;quantity=ratio_K_share_of_injury_KABC|estimate|ci:2}}).
 
-**Composition accounts for roughly a quarter to a half of the rise.** This is a second, separate accounting of the
+**Composition accounts for a modest to substantial part of the rise, depending on the model.** This is a second, separate accounting of the
 same rise, not an addition to the first. Changes in the recorded circumstances of crashes
 (time, road, light, weather, alcohol, speeding, driver and vehicle mix, crash configuration)
 account for {{trends/decomposition|analysis=model_B;outcome=fatal;quantity=composition_share_of_change_ref_P0|estimate|cipct:0}} of the rise
@@ -639,7 +649,8 @@ Across four covariate specifications (published, without imputed alcohol, withou
 variables, without both) and both reference periods, the composition share with crash configuration
 (model B) runs from {{trends/composition_robustness|covariate_set=B;quantity=composition_share_of_change_ref_P0~composition_share_of_change_ref_P1|min(estimate)|pct:0}} to {{trends/composition_robustness|covariate_set=B;quantity=composition_share_of_change_ref_P0~composition_share_of_change_ref_P1|max(estimate)|pct:0}}, and without crash configuration (model A)
 from {{trends/composition_robustness|covariate_set=A;quantity=composition_share_of_change_ref_P0~composition_share_of_change_ref_P1|min(estimate)|pct:0}} to {{trends/composition_robustness|covariate_set=A;quantity=composition_share_of_change_ref_P0~composition_share_of_change_ref_P1|max(estimate)|pct:0}} (`trends/composition_robustness`); "roughly a quarter to a
-half" is the model-B range, and the intervals are wide:
+half" is the model-B range only (model B adds crash configuration, a possible mediator of the rise); the
+intervals are wide and several of them include zero:
 
 {{mdtable:trends/composition_robustness|covariate_set=B;quantity=composition_share_of_change_ref_P0~composition_share_of_change_ref_P1|specification:Specification (model B):;quantity:Reference period:;estimate:Composition share (95% CI):cipct:0}}
 
@@ -779,8 +790,11 @@ from a 2016–2024 model with NHTSA-imputed alcohol, scaled to 2022–2024 death
 {{mdtable:burden/attributable_fraction_variants|outcome=fatal;shift=speeding_removed~alcohol_removed|alcohol_coding:Alcohol coding:;model_period:Model period:;shift:Hypothetical shift:;af:Share of fatal crashes (95% CI):cipct:1;fars_scaled_deaths_per_year:Deaths per year, FARS-scaled:,.0f}}
 
 The speeding fraction is larger when refitted on the recent years, and the alcohol fraction depends
-strongly on the alcohol coding (police-reported alcohol with unknowns dropped gives the largest
-figure, treating unknown as "no" the smallest). The confidence intervals cover sampling error only;
+strongly on the alcohol coding: police-reported alcohol with unknowns dropped gives the largest
+fraction and treating unknown as "no" the smallest. The complete-case fraction applies only to
+crashes with a known police alcohol field and is not scaled to deaths (its deaths cells are blank),
+because applying it to all FARS deaths would extrapolate to the crashes that were dropped. The
+confidence intervals cover sampling error only;
 they do not include the coding, period or recording-error differences shown here.
 
 ## 12. Prediction models

@@ -221,12 +221,17 @@ def configuration_layers(elig: pd.DataFrame) -> dict[str, dict[str, np.ndarray]]
     return layers
 
 
-def belt_rr(elig: pd.DataFrame, mask: np.ndarray, label: str, rng, n_boot: int) -> dict:
-    """Combined DPC belt RR (crash-bootstrap CI and SE) of the vehicles selected by ``mask``."""
+def _arm_pairs(elig: pd.DataFrame, mask: np.ndarray) -> pd.DataFrame:
+    """Driver / right-front passenger pairs of the vehicles selected by ``mask``."""
     sub = elig.loc[mask]
     drv = (sub["ptype"] == "driver") & (sub["SEAT_POS"] == matched.SEAT_POS_DRIVER)
     rf = (sub["ptype"] == "passenger") & (sub["SEAT_POS"] == matched.SEAT_POS_RIGHT_FRONT)
-    pairs = matched.pair_frame(sub, "belted", drv, rf)
+    return matched.pair_frame(sub, "belted", drv, rf)
+
+
+def belt_rr(elig: pd.DataFrame, mask: np.ndarray, label: str, rng, n_boot: int) -> dict:
+    """Combined DPC belt RR (crash-bootstrap CI and SE) of the vehicles selected by ``mask``."""
+    pairs = _arm_pairs(elig, mask)
     if len(pairs) == 0:
         return {"n_pairs": 0, "rr": np.nan, "se_log": np.nan, "min_death_count": 0.0}
     res = matched.dpc_analysis(pairs, label, "belted", rng, n_boot)
@@ -240,6 +245,41 @@ def belt_rr(elig: pd.DataFrame, mask: np.ndarray, label: str, rng, n_boot: int) 
         "se_log": float(comb["se_log_bootstrap"]),
         "min_death_count": float(comb["min_death_count"]),
     }
+
+
+def joint_log_ratio_se(
+    elig: pd.DataFrame,
+    beh_mask: np.ndarray,
+    ref_mask: np.ndarray,
+    rng: np.random.Generator,
+    n_boot: int,
+) -> float:
+    """Crash-bootstrap SE of log(belt RR, behaviour arm) - log(belt RR, reference arm).
+
+    Vehicles of one crash can sit in both arms (for example a speeding driver's car and the
+    other, non-speeding driver's car), so the two belt RRs are not independent.  Each replicate
+    resamples whole crashes once and recomputes both arms from the same resampled crashes; the SE
+    is the SD of the difference of the two combined DPC log RRs (NaN if more than 10% of the
+    replicates are degenerate).
+    """
+    pb, pr = _arm_pairs(elig, beh_mask), _arm_pairs(elig, ref_mask)
+    if len(pb) == 0 or len(pr) == 0:
+        return float("nan")
+    codes, uniq = pd.factorize(pd.concat([pb["crash_id"], pr["crash_id"]], ignore_index=True))
+    nc = len(uniq)
+    per = []
+    for pairs, c in ((pb, codes[: len(pb)]), (pr, codes[len(pb) :])):
+        m = np.zeros((nc, 16))
+        np.add.at(m, (c, matched.cell_index(pairs)), 1.0)
+        per.append(m)
+    diff = np.empty(n_boot)
+    for b in range(n_boot):
+        w = np.bincount(rng.integers(0, nc, nc), minlength=nc)
+        cb, cr = (w @ m for m in per)
+        diff[b] = matched.dpc_combined(cb.reshape(2, 2, 2, 2)) - matched.dpc_combined(
+            cr.reshape(2, 2, 2, 2)
+        )
+    return matched._boot_sd(diff)
 
 
 def pool_log_ratios(d: np.ndarray, se: np.ndarray) -> dict:
@@ -259,14 +299,23 @@ def pool_log_ratios(d: np.ndarray, se: np.ndarray) -> dict:
 
 
 def config_contrasts(
-    elig: pd.DataFrame, rng: np.random.Generator, n_boot: int = N_BOOT
+    elig: pd.DataFrame,
+    rng: np.random.Generator,
+    n_boot: int = N_BOOT,
+    joint_rng: np.random.Generator | None = None,
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
     """Behaviour / reference ratio of belt RRs, unstratified and within crash configuration.
 
     Layers whose behaviour or reference arm has fewer than ``config.MIN_CELL_N`` deaths in the
     smallest DPC cell (or no finite bootstrap SE) are dropped from the pooled estimate and
-    listed with ``used_in_pooled`` = False.  Returns (contrasts, belt RR per layer and arm).
+    listed with ``used_in_pooled`` = False.  The SE of each ratio comes from a joint crash
+    bootstrap of both arms (:func:`joint_log_ratio_se`, drawn from ``joint_rng``, default a
+    fresh generator seeded ``RANDOM_SEED + 2``), not from combining independent arm SEs; the
+    per-arm RRs and their CIs use ``rng`` exactly as before.  Layers are pooled as if
+    independent, although a multi-vehicle crash can contribute vehicles to several layers.
+    Returns (contrasts, belt RR per layer and arm).
     """
+    joint_rng = np.random.default_rng(config.RANDOM_SEED + 2) if joint_rng is None else joint_rng
     contrasts, rr_rows = [], []
     all_rows = np.ones(len(elig), bool)
     cache: dict[tuple[str, str], dict] = {}
@@ -281,7 +330,7 @@ def config_contrasts(
         a = est((cname, "ref|all"), ref & all_rows, f"{cname}: reference")
         b = est((cname, "beh|all"), beh & all_rows, f"{cname}: behaviour")
         d = np.log(b["rr"]) - np.log(a["rr"])
-        se = float(np.hypot(a["se_log"], b["se_log"]))
+        se = joint_log_ratio_se(elig, beh & all_rows, ref & all_rows, joint_rng, n_boot)
         contrasts.append(
             {
                 "contrast": cname,
@@ -312,8 +361,11 @@ def config_contrasts(
                     and a["rr"] > 0
                     and b["rr"] > 0
                 )
+                se = np.nan
+                if ok:
+                    se = joint_log_ratio_se(elig, beh & lmask, ref & lmask, joint_rng, n_boot)
+                    ok = bool(np.isfinite(se))
                 d = np.log(b["rr"]) - np.log(a["rr"]) if ok else np.nan
-                se = float(np.hypot(a["se_log"], b["se_log"])) if ok else np.nan
                 if ok:
                     ds.append(d)
                     ses.append(se)
@@ -490,7 +542,7 @@ def run(n_boot: int = N_BOOT) -> dict[str, pd.DataFrame]:
         population="FARS 2016-2024 light passenger vehicles with one eligible driver and one right-front passenger (Phase-1 eligibility); vehicles with unknown rollover are excluded from rollover layers",
         unit="vehicle (pair)",
         outcome="death",
-        method=f"Evans double-pair comparison per behaviour arm and layer (crash-cluster percentile bootstrap, {n_boot} replicates, fixed seed independent of the other tables); log ratio of arm RRs with SE = hypot of the bootstrap SEs, 95% Wald CI and z-test; pooled = inverse-variance weighted mean of layer log ratios, Cochran Q p for between-layer heterogeneity; layers with a DPC death count below {MIN_LAYER_DEATHS} in either arm are listed but not pooled",
+        method=f"Evans double-pair comparison per behaviour arm and layer (crash-cluster percentile bootstrap, {n_boot} replicates, fixed seed independent of the other tables); log ratio of arm RRs with SE from a joint crash-cluster bootstrap of both arms (the arms share crashes, so they are not treated as independent; separate seed offset +2), 95% Wald CI and z-test; pooled = inverse-variance weighted mean of layer log ratios, Cochran Q p for between-layer heterogeneity; layers with a DPC death count below {MIN_LAYER_DEATHS} in either arm are listed but not pooled",
         inputs=["data/processed/fars_person.parquet", "data/processed/fars_driver.parquet"],
     )
     save_table(

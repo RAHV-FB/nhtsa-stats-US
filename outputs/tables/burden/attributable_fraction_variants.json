@@ -28,10 +28,11 @@
   "fars_scaled_deaths_low",
   "fars_scaled_deaths_high",
   "kind",
+  "fars_scaling_note",
   "n_crashes_model",
   "n_events_model"
  ],
  "module": "nhtsa_stats.analysis.burden",
- "git_commit": "27f5a22-dirty",
- "generated_utc": "2026-11-12T12:24:41Z"
+ "git_commit": "76c08de-dirty",
+ "generated_utc": "2026-11-12T12:58:34Z"
 }

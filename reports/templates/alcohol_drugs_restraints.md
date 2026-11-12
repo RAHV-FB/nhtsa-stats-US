@@ -60,9 +60,9 @@ census counts and shares), **estimated** (CRSS design-based), **adjusted associa
    {{restraint_behaviour/dpc_by_driver_behaviour|split=driver speeding (any);stratum=driver speeding|rr_belted_vs_unbelted|ci:2@rr}}
    when the driver was speeding: overall, no difference. But speeding drivers' crashes are
    concentrated in single-vehicle crashes, where belts protect more, and within crash
-   configuration belts are *somewhat less* protective with a speeding driver (ratio of
-   risk ratios, pooled within crash type,
-   {{restraint_behaviour/dpc_contrast_within_configuration|contrast=driver speeding (any) vs not speeding;adjustment=crash type;layer=pooled within layers|ratio_of_rrs|ci:2@ratio}}).
+   configuration belts are *somewhat less* protective with a speeding driver (exploratory
+   follow-up; ratio of risk ratios {{restraint_behaviour/dpc_contrast_within_configuration|contrast=driver speeding (any) vs not speeding;layer=pooled within layers|min(ratio_of_rrs)|.2f}} to {{restraint_behaviour/dpc_contrast_within_configuration|contrast=driver speeding (any) vs not speeding;layer=pooled within layers|max(ratio_of_rrs)|.2f}} across four layering schemes, {{restraint_behaviour/dpc_contrast_within_configuration|contrast=driver speeding (any) vs not speeding;adjustment=single/multi-vehicle x rollover;layer=pooled within layers|ratio_of_rrs|ci:2@ratio}} with single/multi-vehicle
+   and rollover crossed).
    For a driver at BAC ≥ .08 the overall within-vehicle ratio is slightly lower
    ({{restraint_behaviour/dpc_by_driver_behaviour|split=driver BAC >= .08 (MI);stratum=driver BAC >= .08|rr_belted_vs_unbelted|ci:2@rr}}),
    but within crash configuration the contrast is null
@@ -312,9 +312,11 @@ behaviour to that without it, pooled across layers, >1 means belts protect less)
 | BAC ≥ .08, by single/multi-vehicle | single vs multi-vehicle | {{restraint_behaviour/dpc_contrast_within_configuration|contrast=driver BAC >= .08 (MI) vs BAC < .08;adjustment=single vs multi-vehicle crash;layer=pooled within layers|ratio_of_rrs|ci:2@ratio}} |
 | BAC ≥ .08, by crash type | crash type | {{restraint_behaviour/dpc_contrast_within_configuration|contrast=driver BAC >= .08 (MI) vs BAC < .08;adjustment=crash type;layer=pooled within layers|ratio_of_rrs|ci:2@ratio}} |
 
-So the earlier statement that the belt effect does not vary with the driver's speeding does not
-survive: within crash configuration belts are somewhat less protective when the driver was
-speeding, while the BAC contrast is null. Belt protection also differs by the *kind of impact*.
+So the earlier unstratified conclusion that the belt effect does not vary with the driver's speeding
+does not hold within crash configuration: across the four layering schemes belts are somewhat less
+protective when the driver was speeding (ratio of RRs {{restraint_behaviour/dpc_contrast_within_configuration|contrast=driver speeding (any) vs not speeding;layer=pooled within layers|min(ratio_of_rrs)|.2f}} to {{restraint_behaviour/dpc_contrast_within_configuration|contrast=driver speeding (any) vs not speeding;layer=pooled within layers|max(ratio_of_rrs)|.2f}}; the crash-type scheme pools only {{restraint_behaviour/dpc_contrast_within_configuration|contrast=driver speeding (any) vs not speeding;adjustment=crash type;layer=pooled within layers|n_layers_pooled|.0f}} of
+its 8 crash types), while the BAC contrast is null. This is an exploratory follow-up, not
+multiplicity-adjusted, and the layers are pooled as if independent. Belt protection also differs by the *kind of impact*.
 By crash type (FARS, within-vehicle double-pair comparison, `matched/belt_by_crash_type`):
 
 {{mdtable:matched/belt_by_crash_type|partition=crash type~vehicle rollover|stratum:Stratum:;dpc_n_pairs:Pairs:,.0f;dpc_rr:RR belted vs unbelted:.2f;dpc_reduction:Risk reduction:cipct:0@dpc_reduction}}
@@ -349,7 +351,7 @@ energy and, possibly, survivor over-reporting of belt use inflate across-crash c
 *Competing explanations.* (i) "Belt non-use only marks drunk or speeding drivers" — the
 within-vehicle comparison holds the driver and crash fixed, and the overall belt risk ratio
 is similar with and without a speeding or drinking driver; within crash configuration the
-speeding contrast is modest and in the direction of *less* protection, which is not what a pure
+speeding contrast (exploratory) is modest and in the direction of *less* protection, which is not what a pure
 marker would produce. (ii) "Survivors over-report belt use" — not testable from the data
 directly, but quantifiable. Phase 1 showed that the within-vehicle reduction would fall from
 {{matched/belt_effect|estimand=fatality_risk_reduction_belt_given_fatal_crash|estimate|pct:0}} to
@@ -373,7 +375,7 @@ survivor misreporting fraction at the tipping value above would remove it entire
 motorcycle) rests on very few informative pairs. Of
 {{matched/helmet_pair_coverage|metric=unhelmeted_motorcyclist_deaths|count|,.0f}} unhelmeted
 motorcyclist deaths, only {{matched/helmet_pair_coverage|metric=unhelmeted_deaths_in_pair_design|share|pct:0}}
-occurred on two-occupant motorcycles with complete information, and
+occurred in an operator-passenger pair with complete information (whether or not the pair differs in helmet use), and
 {{matched/helmet_pair_coverage|metric=unhelmeted_deaths_in_informative_pairs|share|pct:1}}
 in pairs that identify the matched-pair odds ratio; most are on single-rider motorcycles
 ({{matched/helmet_pair_coverage|metric=unhelmeted_deaths_single_rider_motorcycle|share|pct:0}}),

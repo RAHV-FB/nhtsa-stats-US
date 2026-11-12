@@ -452,6 +452,7 @@ def test_config_contrasts_pools_layer_log_ratios(monkeypatch):
         }
 
     monkeypatch.setattr(restraint_behaviour, "belt_rr", fake_belt_rr)
+    monkeypatch.setattr(restraint_behaviour, "joint_log_ratio_se", lambda *a, **k: 0.07)
     contrasts, by_layer = restraint_behaviour.config_contrasts(elig, np.random.default_rng(0), 1)
     c = contrasts[contrasts["contrast"] == "driver speeding (any) vs not speeding"]
     pooled = c[
@@ -480,6 +481,7 @@ def test_config_contrasts_drops_thin_layers_from_the_pool(monkeypatch):
         }
 
     monkeypatch.setattr(restraint_behaviour, "belt_rr", fake_belt_rr)
+    monkeypatch.setattr(restraint_behaviour, "joint_log_ratio_se", lambda *a, **k: 0.1)
     contrasts, _ = restraint_behaviour.config_contrasts(elig, np.random.default_rng(0), 1)
     r = contrasts[
         (contrasts["adjustment"] == "rollover vs no rollover")
@@ -487,6 +489,69 @@ def test_config_contrasts_drops_thin_layers_from_the_pool(monkeypatch):
     ].set_index("layer")
     assert not r.loc["rollover", "used_in_pooled"] and r.loc["no rollover", "used_in_pooled"]
     assert r.loc["pooled within layers", "n_layers_pooled"] == 1
+
+
+def _shared_crash_frame(n_crash: int, shared: bool, seed: int = 0) -> pd.DataFrame:
+    """Two-vehicle crashes; vehicle 1 is a reference-arm vehicle, vehicle 2 a behaviour-arm one.
+
+    With ``shared`` vehicle 2 repeats vehicle 1's belts and deaths (the arms' belt RRs are then
+    identical and perfectly correlated across crashes); otherwise each vehicle is drawn
+    independently.
+    """
+    rng = np.random.default_rng(seed)
+
+    def draw() -> list[tuple[str, int, int, int]]:
+        belts = rng.random(2) < 0.5
+        dead = rng.random() < 0.6
+        out = []
+        for ptype, seat, belted in (
+            ("driver", matched.SEAT_POS_DRIVER, belts[0]),
+            ("passenger", matched.SEAT_POS_RIGHT_FRONT, belts[1]),
+        ):
+            died = bool(dead and rng.random() < (0.3 if belted else 0.6))
+            out.append((ptype, seat, int(belted), int(died)))
+        return out
+
+    rows = []
+    for c in range(n_crash):
+        first = draw()
+        for veh, arm in ((1, "no"), (2, "exceeded_limit_or_racing")):
+            for ptype, seat, belted, died in first if (shared or veh == 1) else draw():
+                rows.append(
+                    {
+                        "crash_id": c,
+                        "vehicle_id": c * 10 + veh,
+                        "ptype": ptype,
+                        "SEAT_POS": seat,
+                        "belted": belted,
+                        "killed": died,
+                        "own_speeding_type": arm,
+                    }
+                )
+    return pd.DataFrame(rows)
+
+
+def test_joint_log_ratio_se_accounts_for_arms_sharing_crashes():
+    """The joint crash bootstrap differs from combining independent arm SEs when the two arms
+    contain vehicles of the same crashes, and equals it (up to noise) when they do not."""
+    n_boot = 400
+    out = {}
+    for shared in (True, False):
+        el = _shared_crash_frame(1500, shared)
+        spd = (el["own_speeding_type"] != "no").to_numpy()
+        joint = restraint_behaviour.joint_log_ratio_se(
+            el, spd, ~spd, np.random.default_rng(1), n_boot
+        )
+        arms = [
+            restraint_behaviour.belt_rr(el, m, "x", np.random.default_rng(2), n_boot)["se_log"]
+            for m in (spd, ~spd)
+        ]
+        out[shared] = (joint, float(np.hypot(*arms)))
+    assert all(np.isfinite(v) for pair in out.values() for v in pair)
+    # identical arms in the same crashes: the difference is (almost) constant across replicates
+    assert out[True][0] < 0.1 * out[True][1]
+    # independent crashes within the same frame: close to the independent-arms value
+    assert out[False][0] == pytest.approx(out[False][1], rel=0.2)
 
 
 def test_nested_sequence_is_nested_and_uses_one_factor():

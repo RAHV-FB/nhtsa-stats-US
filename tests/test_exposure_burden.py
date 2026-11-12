@@ -194,3 +194,22 @@ def test_af_near_zero_without_effect_and_joint_counts_union():
     assert lo < 0 < hi
     union = ((df["speeding"] == "yes") | (df["alcohol_im"] == "yes")).sum()
     assert rows[1]["n_exposed_crss"] == union
+
+
+def test_complete_case_af_is_not_scaled_to_fars():
+    rng = np.random.default_rng(5)
+    burden, df, design, model, _ = _burden_fixture(rng, rr_speed=3.0)
+    rows = burden._af_rows(
+        model, df, design, burden.SHIFTS[:1], "fatal", 1000.0, 900.0, scale_to_fars=False
+    )
+    for col in (
+        "fars_scaled_deaths_per_year",
+        "fars_scaled_fatal_crashes_per_year",
+        "fars_scaled_deaths_low",
+        "fars_scaled_deaths_high",
+    ):
+        assert np.isnan(rows[0][col])
+    assert rows[0]["af"] > 0
+    assert "not scaled" in burden.scaling_note("fatal", False)
+    assert "known police alcohol" in burden.scaling_note("fatal", False)
+    assert "scaled to" in burden.scaling_note("fatal", True)

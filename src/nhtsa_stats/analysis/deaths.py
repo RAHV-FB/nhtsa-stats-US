@@ -1438,7 +1438,8 @@ OUTSIDE_ROLES = ("other_vehicle_occupant", "pedestrian_or_cyclist", "other_nonoc
 def add_measured_bac(drivers: pl.DataFrame, alc: pl.DataFrame) -> pl.DataFrame:
     """Add ``bac_measured`` (a test result exists) and ``m_bac08`` (measured BAC >= .08).
 
-    ``alc`` has ST_CASE, VEH_NO, PER_NO, ALC_RES (thousandths; 940+ = no result).  The NHTSA
+    ``alc`` has ST_CASE, VEH_NO, PER_NO, ALC_RES (thousandths; 0-939 = .000-.939, 940 = ".94 or
+    greater", both measured results; 995+ = no result).  The NHTSA
     imputation fills the implicates of untested drivers; measured drivers carry the same
     value (hundredths, truncated) in every implicate.
     """
@@ -1446,8 +1447,8 @@ def add_measured_bac(drivers: pl.DataFrame, alc: pl.DataFrame) -> pl.DataFrame:
     a = alc.select(*keys, pl.col("ALC_RES").alias("alc_res")).unique(subset=keys)
     d = drivers.join(a, on=keys, how="left")
     return d.with_columns(
-        pl.col("alc_res").is_between(0, 939).fill_null(False).alias("bac_measured"),
-        pl.col("alc_res").is_between(BAC_LIMIT * 10, 939).fill_null(False).alias("m_bac08"),
+        pl.col("alc_res").is_between(0, 940).fill_null(False).alias("bac_measured"),
+        pl.col("alc_res").is_between(BAC_LIMIT * 10, 940).fill_null(False).alias("m_bac08"),
     )
 
 
@@ -1692,7 +1693,7 @@ _DRIVER_TABLES = {
     "driver_bac_imputed_share",
 }  # states also uses drivers
 _MEASURED_BASIS = (
-    "Measured BAC = a test result in FARS person.ALC_RES (0-939 thousandths); NHTSA's "
+    "Measured BAC = a test result in FARS person.ALC_RES (0-940 thousandths; 940 = .94 or greater); NHTSA's "
     "implicates fill untested drivers.  'measured only' counts a driver as BAC >= .08 only "
     "with a measured result >= .08 (observed counts, no imputation SE); 'all' / 'imputed' "
     "use the 10 implicates (mean, MI SE sqrt(1.1 * between-implicate variance))"

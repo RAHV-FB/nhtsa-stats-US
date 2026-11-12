@@ -4,7 +4,7 @@
  "population": "FARS 2016-2024 light passenger vehicles with one eligible driver and one right-front passenger (Phase-1 eligibility); vehicles with unknown rollover are excluded from rollover layers",
  "unit": "vehicle (pair)",
  "outcome": "death",
- "method": "Evans double-pair comparison per behaviour arm and layer (crash-cluster percentile bootstrap, 1000 replicates, fixed seed independent of the other tables); log ratio of arm RRs with SE = hypot of the bootstrap SEs, 95% Wald CI and z-test; pooled = inverse-variance weighted mean of layer log ratios, Cochran Q p for between-layer heterogeneity; layers with a DPC death count below 30 in either arm are listed but not pooled",
+ "method": "Evans double-pair comparison per behaviour arm and layer (crash-cluster percentile bootstrap, 1000 replicates, fixed seed independent of the other tables); log ratio of arm RRs with SE from a joint crash-cluster bootstrap of both arms (the arms share crashes, so they are not treated as independent; separate seed offset +2), 95% Wald CI and z-test; pooled = inverse-variance weighted mean of layer log ratios, Cochran Q p for between-layer heterogeneity; layers with a DPC death count below 30 in either arm are listed but not pooled",
  "inputs": [
   "data/processed/fars_person.parquet",
   "data/processed/fars_driver.parquet"
@@ -27,6 +27,6 @@
   "n_layers_pooled"
  ],
  "module": "nhtsa_stats.analysis.restraint_behaviour",
- "git_commit": "3771f1b-dirty",
- "generated_utc": "2026-11-12T12:06:33Z"
+ "git_commit": "76c08de-dirty",
+ "generated_utc": "2026-11-12T13:05:44Z"
 }

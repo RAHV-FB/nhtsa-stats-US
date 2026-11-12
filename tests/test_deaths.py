@@ -276,6 +276,23 @@ def test_add_measured_bac_flags():
     assert d["m_bac08"].to_list() == [True, False, False, False]
 
 
+def test_add_measured_bac_counts_940_as_a_measured_result():
+    """ALC_RES 940 means '.94 or greater': a measured (and >= .08) result, not a missing one."""
+    drivers = _drivers([{"ST_CASE": i, **_with_p(5)} for i in range(1, 6)])
+    alc = pl.DataFrame(
+        {
+            "YEAR": [2020] * 5,
+            "ST_CASE": [1, 2, 3, 4, 5],
+            "VEH_NO": [1] * 5,
+            "PER_NO": [1] * 5,
+            "ALC_RES": [939, 940, 995, 996, 79],
+        }
+    )
+    d = D.add_measured_bac(drivers, alc).sort("ST_CASE")
+    assert d["bac_measured"].to_list() == [True, True, False, False, True]
+    assert d["m_bac08"].to_list() == [True, True, False, False, False]
+
+
 def test_driver_bac_imputed_share_and_measured_records():
     d = _measured_inputs()
     t = (
