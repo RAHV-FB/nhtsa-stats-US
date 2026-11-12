@@ -1,0 +1,10 @@
+group,indicator,share,mi_se,n_known,n_group,estimate_type
+bac_08_plus_all,licence_invalid,0.236601,0.000396564,96248,100692,estimated (MI)
+bac_08_plus_all,prior_dwi,0.0744307,0.00029833,95411.2,100692,estimated (MI)
+bac_08_plus_all,prior_speeding,0.214296,0.000416729,95411.2,100692,estimated (MI)
+bac_08_plus_measured_only,licence_invalid,0.257164,0,59044,59556,observed
+bac_08_plus_measured_only,prior_dwi,0.095243,0,58503,59556,observed
+bac_08_plus_measured_only,prior_speeding,0.22657,0,58503,59556,observed
+bac_08_plus_imputed_only,licence_invalid,0.203966,0.00104964,37204,41136.5,estimated (MI)
+bac_08_plus_imputed_only,prior_dwi,0.0414414,0.00071132,36908.2,41136.5,estimated (MI)
+bac_08_plus_imputed_only,prior_speeding,0.194841,0.00106489,36908.2,41136.5,estimated (MI)

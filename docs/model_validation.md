@@ -32,7 +32,7 @@ population quantity), *adjusted association* (survey regression), *model-predict
 | Models | (1) logistic, main effects; (2) L2 logistic, C tuned on 2022; (3) logistic + the 13 pre-specified RQ2 interaction products; (4) histogram gradient boosting, small grid tuned on 2022, early stopping on an internal split of the training years; (5) random forest, one modest configuration |
 | Weights | Survey weights (`WEIGHT`, normalised to mean 1) as sample weights in every fit; metrics both weighted and unweighted |
 | Uncertainty | Rao–Wu rescaled bootstrap of variance PSUs (`PSU_VAR`, 67) within strata (`PSUSTRAT`, 25), 200 replicates, seed `config.RANDOM_SEED`; paired model differences on the same replicates |
-| Selection | Pre-specified on 2022: first of logit_main < logit_l2 < logit_interact < hgb < rf whose weighted log loss is within 1% of the best and weighted AUROC within 0.005 of the best |
+| Selection | Pre-specified in the module docstring (`src/nhtsa_stats/models/severity_ml.py`), not in the research plan, and applied on 2022: first of logit_main < logit_l2 < logit_interact < hgb < rf whose weighted log loss is within 1% of the best and weighted AUROC within 0.005 of the best |
 
 Weighted fatal prevalence (estimated share of police-reported crashes that are fatal):
 0.556% (train), 0.663% (2022), 0.602% (test); unweighted sample shares 2.06%, 2.42%, 2.20%.
@@ -48,6 +48,13 @@ of the oldest vehicle, each with a missing indicator. **Stage `pre_crash+circums
 crash type (10 levels) and number of vehicles in transport. Tri-state indicators enter as
 yes / no / unknown; unknown is never "no". The full list with registry timing and declared
 levels is in [`feature_sets`].
+
+**Recorded after the crash.** The registry flags police-judged speeding (`speeding`, `speeding_type`,
+`str_speeding`, `veh_speeding`) as `recorded_after_crash`; `assert_no_leakage` rejects a flagged field
+without a documented reason (`RECORDED_AFTER_CRASH_ALLOWED`). The flag records that these are police
+judgements made after the crash, not measurements; a model using them predicts severity given that the
+police recorded them. NHTSA-imputed alcohol is registered as pre-crash with a note that its imputation
+may use severity.
 
 **Enforcement.** `check_features` runs `harmonize.assert_no_leakage` on the stage's inputs
 with the stage's permitted timings (`pre_crash`; plus `crash_circumstance` for the second
@@ -363,7 +370,7 @@ is causal or says anything about how often such crashes occur.
 
 ## 8. Model selection and recommended use
 
-The pre-specified rule selects **boosting** for both outcomes and stages; it is adequate
+The rule, pre-specified in the module docstring rather than the research plan, selects **boosting** for both outcomes and stages; it is adequate
 (calibration slope 1.01–1.03 and observed/expected 1.04–1.05 for fatal in the test years;
 this overall calibration nets under-prediction in crashes without a hit-and-run,
 observed/expected 1.11 (1.03–1.18), against over-prediction in hit-and-run crashes, 0.60; §5.2),
@@ -379,7 +386,9 @@ contains; the screen points to crash-type-specific effects (§7), two of which w
   over-prediction in the test years) and whose coefficients have
   design-based standard errors. The confirmatory analyses above show which specific
   boosting-detected patterns those models should add.
-* L2 tuning and the random forest bring nothing over the simpler alternatives.
+* L2 tuning changes nothing measurable. The random forest discriminates slightly better than the
+  logistic models (§5.1) but has lower Brier skill and was a single untuned configuration, so it
+  brings nothing that would change the selection; this says nothing about a tuned forest.
 
 ## 9. Model cards
 
@@ -396,7 +405,7 @@ use:** probability of crashing or risk per trip or mile; causal effect of changi
 (speed limit, lighting, enforcement); decisions about individual people, drivers or
 enforcement targets; crashes not reported to police; years far from 2016–2024 without
 recalibration; reading permutation importance as preventability. **Shared limitations:**
-police-reported behaviours (speeding, alcohol) are recorded more thoroughly in severe crashes;
+police-reported behaviours (speeding, alcohol) are recorded differently by severity (speeding judged after the crash; alcohol imputed by NHTSA with an undocumented model);
 some "unknown" inputs partly encode hit-and-run (§2); the fatal share drifts over time (§6);
 CRSS urbanicity describes the sampling area, not the road; outcome is NHTSA's single
 imputation (imputation variance not propagated).
@@ -468,8 +477,12 @@ with `any_motorcycle = "unknown"` returns 0.44% with a proxy flag; `light = "pur
 
 * **Conditional on a reported crash.** Nothing here concerns crash occurrence; a condition
   with a high predicted fatal share may be rare or may prevent many crashes.
-* **Ascertainment.** Speeding, alcohol and unknown codes are recorded after the crash and more
-  thoroughly when someone dies; their predictive value is partly a recording effect.
+* **Ascertainment.** Speeding, alcohol and unknown codes are recorded after the crash and recorded
+  differently when someone dies; their predictive value is partly a recording effect. Police-judged
+  speeding is flagged `recorded_after_crash` in the variable registry; NHTSA-imputed alcohol is
+  registered as pre-crash but may carry outcome information. Refitting without speeding and imputed
+  alcohol lowers the boosted model's circumstance-stage AUROC by 0.016 (0.011 to 0.023)
+  [`feature_sensitivity`], so part of the discrimination rests on them.
 * **Hit-and-run proxy.** Bounded by the proxy-blind refit (§6) but not removed from the
   primary models; the cleaner fix is NHTSA-imputed body type and model year upstream.
 * **Drift.** The fatal share among police-reported crashes rose after 2020; models trained on

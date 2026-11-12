@@ -128,7 +128,9 @@ that leaves the downstream variables out — "A excluding downstream variables",
 columns of `severity/*_crude_vs_adjusted` — is reported as the closer analogue of a total
 association; for the other factors the two coincide. Post-crash variables (ejection, rollover as an
 outcome, fire, towing, airbag deployment, hospital transport, time of death) and outcome
-counts are never covariates (`harmonize.REGISTRY` + `assert_no_leakage`). The conceptual
+counts are never covariates (`harmonize.REGISTRY` + `assert_no_leakage`). Police-judged speeding is
+recorded after the crash and flagged `recorded_after_crash` in the registry; it is allowed with a
+documented reason, and results that use it are conditional on the police having recorded it. The conceptual
 dependency diagram is in `docs/research_plan.md` §5.
 
 The *share of the crude log risk ratio retained* after adjustment, log(RR_adj)/log(RR_crude),

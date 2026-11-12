@@ -1669,8 +1669,8 @@ def run(years: Sequence[int] | None = None, n_boot: int = N_BOOT) -> dict:
     _save(
         belt,
         "belt_effect",
-        "Machine-readable belt-use estimates (FARS within-vehicle designs) for the policy "
-        "simulator.  All estimates are conditional on a crash severe enough to kill an "
+        "Machine-readable belt-use estimates (FARS within-vehicle designs) for downstream "
+        "modules.  All estimates are conditional on a crash severe enough to kill an "
         "occupant of the vehicle (fatal crash); rows with _misreport_fXX are sensitivity "
         "analyses, not alternative primary estimates.  DPC rows: n_vehicles = driver / "
         "right-front pairs with at least one death; conditional-logit rows: matched sets "

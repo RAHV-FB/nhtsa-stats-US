@@ -22,22 +22,28 @@ here where they add the size of an association.
    speeding-related crash ({{deaths/segments|segment=speeding|share_of_all|pct:1}}), an unbelted
    car, SUV, pickup or van occupant ({{deaths/segments|segment=unbelted|share_of_all|pct:1}}) or
    an unhelmeted motorcyclist ({{deaths/segments|segment=unhelmeted|share_of_all|pct:1}}).
-2. **{{deaths/victim_roles|group=alcohol_impaired;role=not_risk_driver|share_of_group|pct:1}} of
-   the people killed in drunk-driving crashes were not the drunk driver**, and
+2. **Between {{deaths/victim_roles_bac_basis|basis=measured_bac_only;group=alcohol_impaired;role=not_risk_driver|share_of_group|pct:1}} and {{deaths/victim_roles_bac_basis|basis=all_bac_measured_and_imputed;group=alcohol_impaired;role=not_risk_driver|share_of_group|pct:1}} of the people
+   killed in drunk-driving crashes were not the drunk driver**: the lower figure counts only drivers
+   with a measured blood alcohol result, the higher adds drivers whose BAC NHTSA imputed. Of the
+   drivers at .08 or more, {{deaths/driver_bac_imputed_share|period=2016-2024|share_imputed|pct:1}} have an imputed rather than a measured BAC.
    {{deaths/victim_roles|group=speeding;role=not_risk_driver|share_of_group|pct:1}} of those
    killed in speeding crashes were not the speeding driver.
 3. **Drunk drivers in fatal crashes were heavily impaired and often unlicensed, but seldom had a
    recent conviction**: {{deaths/driver_records|group=bac_08_plus;indicator=bac_15_plus|share|pct:1}}
    were at .15 or more and {{deaths/driver_records|group=bac_08_plus;indicator=licence_invalid|share|pct:1}}
    had no valid licence, but only {{deaths/driver_records|group=bac_08_plus;indicator=prior_dwi|share|pct:1}}
-   had a DWI conviction on record from the previous five years.
+   had a DWI conviction on record from the previous five years
+   ({{deaths/driver_records_measured_bac|group=bac_08_plus_measured_only;indicator=prior_dwi|share|pct:1}} among drivers with a measured BAC, {{deaths/driver_records_measured_bac|group=bac_08_plus_imputed_only;indicator=prior_dwi|share|pct:1}} among imputed).
 4. **{{deaths/restraint|dimension=overall;level=all|unbelted_share|pct:1}} of passenger-vehicle
    occupants killed with known belt use were unbelted.** On the project's within-vehicle
    effectiveness estimates, up to about {{deaths/potential_lives|measure=seat_belts;scenario=as_recorded|lives_per_year|rnd:-2}}
-   of them a year would have been expected to survive had they been belted (model-based). The
-   figure depends heavily on how accurately belt use is recorded: about
+   of them a year (average of 2016–2024) would have been expected to survive had they been belted
+   (model-based), as recorded and excluding the {{deaths/potential_lives_context|metric=unknown_belt_use_deaths|deaths|,.0f}} deaths with unknown belt use.
+   The figure depends heavily on how accurately belt use is recorded: about
    {{deaths/potential_lives|measure=seat_belts;scenario=misreport_10pct|lives_per_year|rnd:-2}} if one in ten belted survivors was
-   misrecorded and {{deaths/potential_lives|measure=seat_belts;scenario=misreport_20pct|lives_per_year|rnd:-2}} if one in five.
+   misrecorded and {{deaths/potential_lives|measure=seat_belts;scenario=misreport_20pct|lives_per_year|rnd:-2}} if one in five. It
+   also applies a front-seat estimate to deaths of which {{deaths/potential_lives_context|metric=unbelted_deaths_single_occupant_vehicle|share|pct:0}} were in single-occupant vehicles, where
+   no within-vehicle comparison exists.
 5. **Pedestrian deaths are concentrated** on the roadway away from intersections
    ({{deaths/pedestrians|dimension=location;level=midblock_roadway|share|pct:1}}), in darkness
    (only {{deaths/pedestrians|dimension=light;level=daylight|share|pct:1}} in daylight) and on
@@ -49,7 +55,7 @@ here where they add the size of an association.
    crash type and number of vehicles are also held fixed), and their share of occupant deaths rose
    from {{deaths/vehicle_age|YEAR=2016;band=18+|share|pct:1}} (2016) to
    {{deaths/vehicle_age|YEAR=2024;band=18+|share|pct:1}} (2024).
-7. **The 2019–2021 rise was steepest for risky driving** (deaths in crashes with a driver
+7. **The 2019–2021 rise was among the steepest for risky driving** (deaths in crashes with a driver
    without a valid licence {{deaths/segments|segment=invalid_licence_crash|pct_change_2019_2021|pctsign:1}},
    drunk driving {{deaths/segments|segment=alcohol_impaired|pct_change_2019_2021|pctsign:1}},
    all deaths {{deaths/segments|segment=all|pct_change_2019_2021|pctsign:1}}). By 2024
@@ -122,19 +128,33 @@ driver at .08 or more.
 
 {{mdtable:deaths/victim_roles|group=alcohol_impaired|role:Role:;deaths:Deaths:,.0f;share_of_group:Share:pct:1}}
 
+Who was killed depends on how the drunk driver is identified. Of the drivers at .08 or more,
+{{deaths/driver_bac_imputed_share|period=2016-2024|share_imputed|pct:1}} have a BAC that NHTSA imputed rather than a measured test result
+(`deaths/driver_bac_imputed_share`). Restricting to measured results (`deaths/victim_roles_bac_basis`),
+the share of deaths who were not the drunk driver is lower. Neither figure is the truth: the measured-only
+figure is itself selected by who was tested, so the two bound a range rather than identify the share:
+
+{{mdtable:deaths/victim_roles_bac_basis|group=alcohol_impaired|basis:BAC basis:;role:Role:;deaths:Deaths:,.0f;share_of_group:Share:pct:1}}
+
 Drivers in fatal crashes, by blood alcohol (share of drivers with a known record):
 
 {{mdtable:deaths/driver_records|group=bac_08_plus|indicator:Indicator:;share:BAC .08 or more:pct:1;n_known:Drivers with known status:,.0f}}
 
 {{mdtable:deaths/driver_records|group=bac_zero|indicator:Indicator:;share:BAC zero:pct:1;n_known:Drivers with known status:,.0f}}
 
+The same shares for drivers at .08 or more by how the BAC was obtained (`deaths/driver_records_measured_bac`):
+
+{{mdtable:deaths/driver_records_measured_bac||group:BAC basis:;indicator:Indicator:;share:Share:pct:1;n_known:Drivers with known status:,.0f}}
+
 Only {{deaths/driver_records|group=bac_08_plus;indicator=prior_dwi|share|pct:1}} of drunk
 drivers had a DWI conviction in the five years before the crash
 ({{deaths/driver_records|group=bac_zero;indicator=prior_dwi|share|pct:1}} of drivers with no
 alcohol). Driver records count convictions, not arrests, and can miss out-of-state offences and
-offences reduced by plea, so this share is a lower bound on prior impaired driving. Even so, most
-drunk drivers in fatal crashes had no recent conviction for programmes aimed at convicted drivers
-to act on.
+offences reduced by plea, so this share is a lower bound on prior impaired driving. Among drivers
+with a measured BAC the share is higher ({{deaths/driver_records_measured_bac|group=bac_08_plus_measured_only;indicator=prior_dwi|share|pct:1}}, against
+{{deaths/driver_records_measured_bac|group=bac_08_plus_imputed_only;indicator=prior_dwi|share|pct:1}} for imputed BAC), which may reflect testing being more likely when the
+police suspect a driver. Even so, most drunk drivers in fatal crashes had no recent conviction for
+programmes aimed at convicted drivers to act on.
 
 ## 4. Seat belts
 
@@ -151,7 +171,23 @@ occupants killed. Because survivors who were unbelted are sometimes recorded as 
 estimate is shown under four recording scenarios (`misreport` = share of belted survivors assumed
 misrecorded):
 
-{{mdtable:deaths/potential_lives|measure=seat_belts|scenario:Scenario:;effectiveness:Effectiveness:pct:1;lives:Lives 2016–2024:,.0f;lives_per_year:Per year:,.0f;lives_per_year_low:Per year, low:,.0f;lives_per_year_high:Per year, high:,.0f}}
+{{mdtable:deaths/potential_lives|measure=seat_belts|scenario:Scenario:;effectiveness:Effectiveness:pct:1;lives:Lives 2016–2024:,.0f;lives_per_year:Per year (2016–2024 average):,.0f;lives_per_year_low:Per year, low:,.0f;lives_per_year_high:Per year, high:,.0f}}
+
+The "as recorded" row excludes the {{deaths/potential_lives_context|metric=unknown_belt_use_deaths|deaths|,.0f}} killed occupants whose belt
+use is unknown ({{deaths/potential_lives_context|metric=unknown_belt_use_deaths|share|pct:1}} of passenger-vehicle occupant deaths), who are in
+neither the belted nor the unbelted count (`deaths/potential_lives_context`). Of the
+{{deaths/potential_lives_context|metric=unbelted_deaths|deaths|,.0f}} unbelted deaths, {{deaths/potential_lives_context|metric=unbelted_deaths_single_occupant_vehicle|share|pct:1}}
+were in vehicles with one recorded occupant, where no within-vehicle comparison exists.
+
+The scenarios above are one-sided: they move only belted survivors. Misrecording can also run the other
+way (unbelted-coded deaths who were truly belted). With 10% of belted survivors and 5% of unbelted-coded
+deaths misrecorded, the effectiveness is {{matched/belt_misreporting_two_sided_dpc|analysis=belt_driver_rf;survivor_misreport_f=0.1;death_misreport_g=0.05|reduction_1_minus_rr|pct:0}} instead of
+{{matched/belt_misreporting_two_sided_dpc|analysis=belt_driver_rf;survivor_misreport_f=0;death_misreport_g=0|reduction_1_minus_rr|pct:0}}, and it vanishes at about
+{{matched/belt_misreporting_two_sided_dpc|analysis=belt_driver_rf;survivor_misreport_f=0;death_misreport_g=0|tipping_f_given_g|pct:0}}
+misrecorded survivors alone (`matched/belt_misreporting_two_sided_dpc`). The pooled effectiveness also
+averages very different crash types: from {{matched/belt_by_crash_type|partition=crash type|min(dpc_reduction)|pct:0}} in
+multi-vehicle angle crashes to {{matched/belt_by_crash_type|partition=crash type|max(dpc_reduction)|pct:0}} in
+single-vehicle rollovers (`matched/belt_by_crash_type`).
 
 The effectiveness was estimated for drivers and right-front passengers aged 13 and over and is
 applied to every seat and age. These are expectations for the people who died, not the effect of any policy.
@@ -166,7 +202,9 @@ In CRSS, crashes in which a driver exceeded the limit or was racing had an adjus
 fatal {{severity/fatal_speeding_type|outcome=fatal;factor=speeding_type;level=exceeded_limit_or_racing|adj_rr|ci:2}}
 times that of comparable crashes without speeding; "too fast for conditions" had
 {{severity/fatal_speeding_type|outcome=fatal;factor=speeding_type;level=too_fast_for_conditions|adj_rr|ci:2}}
-(model A of `reports/findings.md`, finding 3). Speeding drivers in fatal crashes had no valid
+(model A of `reports/findings.md`, finding 3; the speeding-type split is exploratory, and the
+"too fast for conditions" ratio is {{severity/speeding_type_models|outcome=fatal;model=B;level=too_fast_for_conditions|adj_rr|.2f}}
+when crash configuration is also held fixed, so it is a small association rather than none). Speeding drivers in fatal crashes had no valid
 licence in {{deaths/driver_records|group=speeding;indicator=licence_invalid|share|pct:1}} of cases
 (drivers neither speeding nor at any BAC: {{deaths/driver_records|group=neither;indicator=licence_invalid|share|pct:1}})
 and a speeding conviction in the previous five years in
@@ -183,7 +221,12 @@ and a speeding conviction in the previous five years in
 own imputed blood alcohol (estimated (MI)). In CRSS, the share of struck pedestrians who died rose
 from {{vulnerable/pedestrian_killed_contrasts|victim=pedestrian;outcome=killed;factor=str_speed_limit;level=<=25|crude_rate|pct:1}}
 on roads limited to 25 mph or less to {{vulnerable/pedestrian_killed_contrasts|victim=pedestrian;outcome=killed;factor=str_speed_limit;level=50-55|crude_rate|pct:1}}
-at 50–55 mph (adjusted risk ratio {{vulnerable/pedestrian_killed_contrasts|victim=pedestrian;outcome=killed;factor=str_speed_limit;level=50-55|adj_rr|ci:1}}).
+at 50–55 mph (adjusted risk ratio {{vulnerable/pedestrian_killed_contrasts|victim=pedestrian;outcome=killed;factor=str_speed_limit;level=50-55|adj_rr|ci:1}};
+{{vulnerable/pedestrian_speed_limit_adjustment|victim=pedestrian;outcome=killed;specification=without location, light and time of day;level=50-55|adj_rr|ci:1}}
+without adjustment for location, light and time of day). The striking vehicle's speed limit is unknown for
+{{vulnerable/speed_limit_missingness|victim=pedestrian;outcome=killed;group=not|estimate|pct:0}} of struck pedestrians who survived
+but only {{vulnerable/speed_limit_missingness|victim=pedestrian;outcome=killed;group=fatal / outcome|estimate|pct:0}} of those who died
+(`vulnerable/speed_limit_missingness`), so crude shares who died by limit are not comparable with the adjusted ratios.
 
 ## 7. Motorcycles
 
@@ -196,8 +239,22 @@ In fatal crashes, among rider–passenger pairs on the same motorcycle, a helmet
 reduction in the risk of death (`reduction_1_minus_rr`, double pair comparison). Applied to the
 {{deaths/potential_lives|measure=helmets;scenario=as_recorded|deaths_without|,.0f}} unhelmeted
 motorcyclists killed, about {{deaths/potential_lives|measure=helmets;scenario=as_recorded|lives_per_year|,.0f}}
-a year ({{deaths/potential_lives|measure=helmets;scenario=as_recorded|lives_per_year_low|,.0f}}–{{deaths/potential_lives|measure=helmets;scenario=as_recorded|lives_per_year_high|,.0f}})
-would have been expected to survive with a helmet (model-based).
+a year on average over 2016–2024 ({{deaths/potential_lives|measure=helmets;scenario=as_recorded|lives_per_year_low|,.0f}}–{{deaths/potential_lives|measure=helmets;scenario=as_recorded|lives_per_year_high|,.0f}})
+would have been expected to survive with a helmet (model-based); this excludes the
+{{deaths/potential_lives_context|metric=unknown_helmet_use_deaths|deaths|,.0f}} deaths with unknown helmet use.
+
+Treat this figure with more caution than the seat-belt one:
+
+* **It is fragile to misreporting** (`matched/helmet_misreporting_dpc`). If 5% of helmeted-coded survivors
+  were in fact unhelmeted the reduction would be {{matched/helmet_misreporting_dpc|analysis=motorcycle_helmet;survivor_misreport_f=0.05;death_misreport_g=0|reduction_1_minus_rr|cipct:0@reduction}};
+  it vanishes at about {{matched/helmet_misreporting_dpc|analysis=motorcycle_helmet;survivor_misreport_f=0;death_misreport_g=0|tipping_f_given_g|pct:0}}
+  survivor misreporting, or {{matched/helmet_misreporting_dpc|analysis=motorcycle_helmet;survivor_misreport_f=0;death_misreport_g=0|tipping_g_given_f|pct:0}}
+  of unhelmeted-coded deaths who were truly helmeted.
+* **It rests on few pairs and covers few of the deaths** (`matched/helmet_pair_coverage`). Only
+  {{matched/helmet_pair_coverage|metric=pairs_discordant_helmet_use|count|,.0f}} operator–passenger pairs differ in
+  helmet use. {{matched/helmet_pair_coverage|metric=unhelmeted_deaths_in_pair_design|share|pct:0}} of the unhelmeted motorcyclist deaths were in
+  such pairs and {{matched/helmet_pair_coverage|metric=unhelmeted_deaths_single_rider_motorcycle|share|pct:0}} were on single-rider motorcycles, so
+  applying the estimate to all unhelmeted deaths assumes that riders with a passenger are representative of solo riders.
 
 ## 8. Vehicles
 
@@ -220,9 +277,15 @@ Who died in crashes involving a large truck:
 
 {{mdtable:deaths/victim_roles|group=large_truck|role:Role:;deaths:Deaths:,.0f;share_of_group:Share:pct:1}}
 
+That most of those killed were not the truck driver describes who was in the crash, not who was at fault.
+The share mixes crashes between a truck and a passenger vehicle with single-truck crashes, and nothing in
+this report attributes fault.
+
 ## 9. Change since 2019
 
-*Source: `deaths/segments`.*
+*Source: `deaths/segments`. The 2019–2021 rises in risky-driving groups were among the steepest of the
+groups shown; a ranking depends on how the groups are defined (the invalid-licence group combines
+expired, cancelled, suspended, revoked and unlicensed drivers).*
 
 {{mdtable:deaths/segments|segment=all~any_of_four~alcohol_impaired~speeding~unbelted~unhelmeted~invalid_licence_crash~hit_and_run~pv_occupants~motorcyclists~pedestrians~cyclists~large_truck_crash~rural~urban~night|segment:Group:;deaths_2019:2019:,.0f;deaths_2021:2021:,.0f;deaths_2024:2024:,.0f;pct_change_2019_2021:2019→2021:pctsign:1;pct_change_2019_2024:2019→2024:pctsign:1;estimate_type:Type:}}
 
@@ -245,9 +308,11 @@ differs between police agencies.
 ## 11. Limitations specific to this report
 
 * **No exposure.** Counts and shares only; no rates per mile, trip or person.
-* **Recording.** Behaviours are recorded after the crash and more thoroughly in fatal crashes;
-  belt use of survivors can be misrecorded (scenarios in section 4); alcohol is imputed for
-  untested drivers.
+* **Recording.** Behaviours are recorded after the crash and recorded differently by severity: killed
+  drivers are tested far more often, while police-recorded alcohol, drug and distraction fields are more
+  often unknown in fatal crashes. Belt and helmet use of survivors can be misrecorded, in either direction
+  (sections 4 and 7); alcohol is imputed for untested drivers, and measured-BAC-only figures are shown
+  where they differ (section 3).
 * **Drivers' records** count convictions in the driver's state file and miss arrests, plea
   reductions and out-of-state offences.
 * **Lives-saved figures are model-based** expectations for the people who died, using within-vehicle

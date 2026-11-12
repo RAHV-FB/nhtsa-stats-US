@@ -4,49 +4,89 @@
 `outputs/tables/` when it is rendered
 (`nhtsa analyze report`). Each finding names its source table. Estimate types: **observed**
 (FARS census counts), **estimated** (CRSS design-based), **adjusted association**
-(model-based, conditional on a police-reported crash, not causal), **model-predicted**, and
-**hypothetical**.*
+(model-based, conditional on a police-reported crash, not causal), and **model-predicted**.*
 
 ## Summary
 
-1. **How often a factor appears in fatal crashes is a poor guide to danger.** Pedestrian
+**What these data answer.** Within the same vehicle in the same fatal crash, how much less often
+belted occupants and helmeted riders died (finding 7); which circumstances remain associated with a
+reported crash being fatal after design-based adjustment in CRSS (findings 2–4); how police-recorded
+fields behave (finding 9); and how the fatal share of reported crashes changed after 2020
+(finding 8). **What they cannot answer:** crash rates per mile, trip or driver (there is no exposure
+measure); the effect of any enforcement, camera, testing or campaign (none is recorded); the effect
+of drugs; and any causal effect. Every severity result is conditional on a police-reported crash.
+Intervals cover sampling error only, not recording error or model choice, unless stated.
+
+1. **Belts and helmets, within the same vehicle (FARS).** Given a crash that killed someone in the
+   vehicle, belted drivers and right-front passengers died
+   {{matched/belt_effect|estimand=fatality_risk_reduction_belt_given_fatal_crash|estimate|cipct:1}} less often than their unbelted companion. The pooled figure
+   averages very different crash types: from {{matched/belt_by_crash_type|partition=crash type|min(dpc_reduction)|pct:0}} in multi-vehicle angle crashes to {{matched/belt_by_crash_type|partition=crash type|max(dpc_reduction)|pct:0}}
+   in single-vehicle rollovers. It rests on survivors' reports of belt use: with 10% of belted
+   survivors truly unbelted and 5% of unbelted-coded deaths truly belted the reduction would be
+   {{matched/belt_misreporting_two_sided_dpc|analysis=belt_driver_rf;survivor_misreport_f=0.1;death_misreport_g=0.05|reduction_1_minus_rr|cipct:0@reduction}}, and it would vanish at about
+   {{matched/belt_misreporting_two_sided_dpc|analysis=belt_driver_rf;survivor_misreport_f=0;death_misreport_g=0|tipping_f_given_g|pct:0}}
+   of belted survivors misrecorded. Within crash configuration, belts are somewhat *less* protective
+   when the driver was speeding, and the alcohol contrast is null (`reports/alcohol_drugs_restraints.md`).
+   For motorcycle helmets (operator and passenger of the same motorcycle) the reduction is
+   {{matched/double_pair_comparison|analysis=motorcycle_helmet;misreport_fraction=0;component=combined (inverse-variance weighted)|reduction_1_minus_rr|cipct:0@reduction}}
+   but it is imprecise and fragile: it vanishes at about
+   {{matched/helmet_misreporting_dpc|analysis=motorcycle_helmet;survivor_misreport_f=0;death_misreport_g=0|tipping_f_given_g|pct:0}}
+   misreporting.
+2. **Conditional associations in CRSS that survive adjustment.** Crashes in which a driver
+   exceeded the limit or was racing had an adjusted fatal risk ratio of {{severity/speeding_type_models|outcome=fatal;model=A;level=exceeded_limit_or_racing|adj_rr|.2f}} ({{severity/speeding_type_models|outcome=fatal;model=A;level=exceeded_limit_or_racing|adj_rr_low95|.2f}}–{{severity/speeding_type_models|outcome=fatal;model=A;level=exceeded_limit_or_racing|adj_rr_high95|.2f}})
+   (model A) and {{severity/speeding_type_models|outcome=fatal;model=B;level=exceeded_limit_or_racing|adj_rr|.2f}} ({{severity/speeding_type_models|outcome=fatal;model=B;level=exceeded_limit_or_racing|adj_rr_low95|.2f}}–{{severity/speeding_type_models|outcome=fatal;model=B;level=exceeded_limit_or_racing|adj_rr_high95|.2f}}) with crash configuration also held
+   fixed; motorcycle involvement, {{severity/fatal_crude_vs_adjusted|factor=any_motorcycle;level=yes|A_adj_rr|ci:1}};
+   alcohol, {{measurement/alcohol_coding_sensitivity|period=2016-2024;coding=police, unknown as no|adj_rr|ci:1}}
+   to {{measurement/alcohol_coding_sensitivity|period=2016-2024;coding=police, complete case|adj_rr|ci:1}}
+   depending on the coding; pedestrians struck on 50–55 mph roads against ≤25 mph,
+   {{vulnerable/pedestrian_killed_contrasts|victim=pedestrian;outcome=killed;factor=str_speed_limit;level=50-55|adj_rr|ci:1}};
+   and crashes involving a driver aged 65+, {{severity/fatal_crude_vs_adjusted|factor=older_driver;level=yes|A_adj_rr|ci:2}}.
+   No direction reversed in the red-team stress tests (`docs/red_team_2026-11.md`).
+3. **Measurement.** Killed drivers are tested for alcohol far more often than surviving drivers
+   ({{measurement/alcohol_testing_share|driver_status=killed|share_alcohol_tested|pct:0}} against
+   {{measurement/alcohol_testing_share|driver_status=survived|share_alcohol_tested|pct:0}},
+   FARS 2016–2024), yet police-recorded alcohol, drug and distraction fields are *more* often
+   unknown in fatal crashes (alcohol unknown in {{measurement/unknown_by_severity|kabco=4;field=alcohol|pct_unknown|.0f}}% of fatal
+   and {{measurement/unknown_by_severity|kabco=0;field=alcohol|pct_unknown|.0f}}% of no-injury crashes in CRSS). CRSS alcohol
+   coding broke in 2019, so the alcohol association is reported under three codings. Drug and
+   distraction fields cannot support severity or trend analysis.
+4. **The post-2020 rise.** The fatal share of police-reported crashes rose by a factor of
+   {{trends/numerator_denominator|outcome=fatal;comparison=2020-2024 vs 2016-2019;quantity=ratio_fatal_share|estimate|ci:2}}.
+   The recorded crash mix (including crash configuration) accounts for roughly a quarter to a half of
+   the rise ({{trends/composition_robustness|covariate_set=B;quantity=composition_share_of_change_ref_P0~composition_share_of_change_ref_P1|min(estimate)|pct:0}} to {{trends/composition_robustness|covariate_set=B;quantity=composition_share_of_change_ref_P0~composition_share_of_change_ref_P1|max(estimate)|pct:0}} across four covariate specifications and both
+   reference periods; less without crash configuration); the rest is a higher fatal share within the
+   same recorded circumstances. Separately, the fall in the number of reported crashes accounts for
+   {{trends/denominator_share|outcome=fatal;comparison=2020-2024 vs 2016-2019;quantity=denominator_share_of_log_rise|estimate|cipct:0}} of the rise in the share ({{trends/denominator_share|outcome=fatal_cc;comparison=2020-2024 vs 2016-2019;quantity=denominator_share_of_log_rise|estimate|cipct:0}} under the complete-case outcome).
+5. **How often a factor appears in fatal crashes is a poor guide to danger.** Pedestrian
    crashes are {{descriptive/frequency_vs_severity|factor=crash_type;level=pedestrian|share_all_crashes|pct:1}}
    of police-reported crashes but {{descriptive/frequency_vs_severity|factor=crash_type;level=pedestrian|share_fatal_fars|pct:1}}
    of fatal crashes. Rain, wet roads, intersections and crashes involving teenage drivers are
    common in crashes but *under*-represented among fatal ones.
-2. **Adjustment changes the picture.** Much of the excess severity of night-time crashes is
-   accounted for by other circumstances. Rain-crashes are no less severe than clear-weather
-   crashes on the same road surface; their lower crude severity is accounted for by wet
-   surfaces. Interstates reverse from riskier to safer than comparable roads. The excess
+6. **Adjustment changes the picture.** Much of the excess severity of night-time crashes is
+   accounted for by other circumstances. Rain-crashes show no clear difference in fatal severity
+   from clear-weather crashes on the same road surface (model A {{severity/key_contrasts_ab|factor=weather;level=rain;outcome=fatal;model=A|adj_rr|ci:2}},
+   model B {{severity/key_contrasts_ab|factor=weather;level=rain;outcome=fatal;model=B|adj_rr|ci:2}}) and are somewhat less severe for fatal-or-serious
+   outcomes ({{severity/key_contrasts_ab|factor=weather;level=rain;outcome=ka;model=A|adj_rr|ci:2}} and {{severity/key_contrasts_ab|factor=weather;level=rain;outcome=ka;model=B|adj_rr|ci:2}}).
+   Interstates reverse from riskier to safer than comparable roads, but only on 50–65 mph roads
+   ({{severity/interstate_by_speed_band|outcome=fatal;speed_limit_band=50-65 mph;quantity=RR interstate vs not|estimate|ci:2}}); at 70+ mph the ratio is {{severity/interstate_by_speed_band|outcome=fatal;speed_limit_band=70+ mph;quantity=RR interstate vs not|estimate|ci:2}}. The excess
    severity of crashes involving older drivers is *unmasked*.
-3. **"Speeding" is two different things.** Crashes in which a driver exceeded the limit have an
-   adjusted fatal risk ratio of {{severity/fatal_speeding_type|level=exceeded_limit_or_racing|adj_rr|ci:1}}.
-   "Too fast for conditions" — three-quarters of police-reported speeding-related crashes —
-   shows no detectable excess in the adjusted risk of a fatal outcome
-   ({{severity/fatal_speeding_type|level=too_fast_for_conditions|adj_rr|ci:2}}) and a small one
-   for fatal-or-serious outcomes ({{severity/ka_speeding_type|level=too_fast_for_conditions|adj_rr|ci:2}}).
-4. **The most robust severity associations involve objective circumstances**: motorcycles,
-   pedestrians, the speed environment, unlit darkness and heavy trucks. Alcohol is strongly
-   associated with severity under every coding, although its size depends on the coding. Pedestrian survival falls steeply with the posted speed limit, and is
-   worse when the striking vehicle is an SUV or pickup.
-5. **Some combinations amplify each other**, notably pedestrian crashes in unlit darkness. For
+7. **"Speeding" is two different things (the type split is exploratory).** Exceeding the limit is
+   strongly associated with a fatal outcome (item 2). "Too fast for conditions", three-quarters of
+   police-reported speeding-related crashes, has an adjusted fatal risk ratio of
+   {{severity/speeding_type_models|outcome=fatal;model=A;level=too_fast_for_conditions|adj_rr|.2f}} ({{severity/speeding_type_models|outcome=fatal;model=A;level=too_fast_for_conditions|adj_rr_low95|.2f}}–{{severity/speeding_type_models|outcome=fatal;model=A;level=too_fast_for_conditions|adj_rr_high95|.2f}}) under model A (its 90% interval excludes only effects beyond about
+   ±{{severity/speeding_type_models|outcome=fatal;model=A;level=too_fast_for_conditions|equivalence_bound_pct|.0f}}%), and
+   {{severity/speeding_type_models|outcome=fatal;model=B;level=too_fast_for_conditions|adj_rr|.2f}} ({{severity/speeding_type_models|outcome=fatal;model=B;level=too_fast_for_conditions|adj_rr_low95|.2f}}–{{severity/speeding_type_models|outcome=fatal;model=B;level=too_fast_for_conditions|adj_rr_high95|.2f}}) under model B; for fatal-or-serious outcomes
+   {{severity/speeding_type_models|outcome=ka;model=A;level=too_fast_for_conditions|adj_rr|.2f}} ({{severity/speeding_type_models|outcome=ka;model=A;level=too_fast_for_conditions|adj_rr_low95|.2f}}–{{severity/speeding_type_models|outcome=ka;model=A;level=too_fast_for_conditions|adj_rr_high95|.2f}}) and {{severity/speeding_type_models|outcome=ka;model=B;level=too_fast_for_conditions|adj_rr|.2f}} ({{severity/speeding_type_models|outcome=ka;model=B;level=too_fast_for_conditions|adj_rr_low95|.2f}}–{{severity/speeding_type_models|outcome=ka;model=B;level=too_fast_for_conditions|adj_rr_high95|.2f}}). The data
+   support a small association; they do not support "no excess".
+8. **Some combinations amplify each other**, notably pedestrian crashes in unlit darkness. For
    others that are often assumed to (speeding in darkness, young drivers late at night), no
    interaction is detected for the fatal outcome, although speeding in unlit darkness shows an
    additive excess for fatal-or-serious crashes.
-6. **Crash involvement and crash severity are different problems.** In two-vehicle crashes,
+9. **Crash involvement and crash severity are different problems.** In two-vehicle crashes,
    teenage drivers are over-represented as the culpable party, but crashes involving them are
-   less severe. Drivers aged 75+ are also over-represented as the culpable party, and crashes
-   involving a driver aged 65+ are more severe.
-7. **Within the same vehicle, unbelted occupants die far more often than belted ones.**
-   The size of that difference is very sensitive to how accurately surviving occupants report
-   belt use.
-8. **The post-2020 rise in crash severity is only partly explained by the recorded crash mix.**
-   Changes in the recorded circumstances of crashes account for between {{trends/decomposition|analysis=model_A;outcome=fatal;quantity=composition_share_of_change_ref_P1|estimate|pct:0}} and
-   {{trends/decomposition|analysis=model_B;outcome=fatal;quantity=composition_share_of_change_ref_P0|estimate|pct:0}} of the rise in the fatal share, depending on the model and reference period; the rest is a higher fatal share within the same circumstances, most clearly
-   in speeding-related crashes. Separately, about half of the rise in the share reflects fewer
-   non-fatal crashes being reported rather than more fatal ones.
-9. **Police-recorded behaviours are measured differently by severity.** Drug and distraction
-   fields cannot support severity or trend analysis at all.
+   less severe (model A {{severity/key_contrasts_ab|factor=young_driver;level=yes;outcome=fatal;model=A|adj_rr|ci:2}}; model B, which adds crash
+   configuration, {{severity/key_contrasts_ab|factor=young_driver;level=yes;outcome=fatal;model=B|adj_rr|ci:2}}). Drivers aged 75+ are also
+   over-represented as the culpable party, and crashes involving a driver aged 65+ are more severe.
 10. **The database identifies no intervention effect.** It can show where deaths concentrate,
     how strongly circumstances are associated with severity, and what an intervention would
     have to achieve. It cannot show what cameras, checkpoints or tests would achieve.
@@ -100,6 +140,19 @@ crashes*.
 | Intersection | {{descriptive/frequency_vs_severity|factor=junction;level=intersection|share_all_crashes|pct:1}} | {{descriptive/frequency_vs_severity|factor=junction;level=intersection|share_fatal_fars|pct:1}} | ×{{descriptive/frequency_vs_severity|factor=junction;level=intersection|overrep_ratio|.2f}} | {{descriptive/frequency_vs_severity|factor=junction;level=intersection|fatal_rate|pct:2}} |
 | Driver aged 15–20 involved | {{descriptive/frequency_vs_severity|factor=young_driver;level=yes|share_all_crashes|pct:1}} | {{descriptive/frequency_vs_severity|factor=young_driver;level=yes|share_fatal_fars|pct:1}} | ×{{descriptive/frequency_vs_severity|factor=young_driver;level=yes|overrep_ratio|.2f}} | {{descriptive/frequency_vs_severity|factor=young_driver;level=yes|fatal_rate|pct:2}} |
 | Rear-end collision | {{descriptive/frequency_vs_severity|factor=crash_type;level=mv_rear_end|share_all_crashes|pct:1}} | {{descriptive/frequency_vs_severity|factor=crash_type;level=mv_rear_end|share_fatal_fars|pct:1}} | ×{{descriptive/frequency_vs_severity|factor=crash_type;level=mv_rear_end|overrep_ratio|.2f}} | {{descriptive/frequency_vs_severity|factor=crash_type;level=mv_rear_end|fatal_rate|pct:2}} |
+
+*Mixed systems.* Each ratio above divides a FARS share by a CRSS share, so it mixes two recording
+systems, and its interval reflects CRSS sampling of the denominator only (FARS is a census; recording
+differences between the systems are not in any interval). Police record speeding in fewer CRSS than FARS
+fatal crashes, which inflates the mixed ratio for speeding. Within CRSS alone (`speeding/crss_overrepresentation`)
+the over-representation of limit exceedance among fatal crashes is
+{{speeding/crss_overrepresentation|speeding=exceeded_limit_or_racing|crss_only_ratio|ci:1}},
+against {{speeding/crss_overrepresentation|speeding=exceeded_limit_or_racing|mixed_fars_crss_ratio|ci:1@mixed_ratio}}
+for the mixed FARS/CRSS ratio; for any police-reported speeding the figures are
+{{speeding/crss_overrepresentation|speeding=any_speeding|crss_only_ratio|ci:1}} and
+{{speeding/crss_overrepresentation|speeding=any_speeding|mixed_fars_crss_ratio|ci:1@mixed_ratio}}.
+The within-CRSS ratio is the lower figure because CRSS under-records speeding in fatal crashes; both
+are reported and the truth lies between them only if CRSS under-recording is the whole difference.
 
 *Robustness.* Pooled over 2016–2024, the CRSS-weighted composition of fatal crashes agrees
 with the FARS census within the CRSS confidence interval for darkness
@@ -201,25 +254,40 @@ What changes, and why it matters:
   crude severity is therefore accounted for by wet and icy surfaces (statistical accounting, not
   causal mediation), which remain associated with lower severity
   (wet {{severity/fatal_crude_vs_adjusted|factor=surface;level=wet|A_adj_rr|ci:2}}), plausibly
-  because drivers slow down (speed is not observed).
-* **Interstates reverse.** Crude crashes on interstates are more often fatal, but compared with
+  because drivers slow down (speed is not observed). Model B, which also holds crash configuration
+  fixed, gives {{severity/key_contrasts_ab|factor=weather;level=rain;outcome=fatal;model=B|adj_rr|ci:2}} for rain and the fatal-or-serious outcome gives
+  {{severity/key_contrasts_ab|factor=weather;level=rain;outcome=ka;model=A|adj_rr|ci:2}} (model A) and {{severity/key_contrasts_ab|factor=weather;level=rain;outcome=ka;model=B|adj_rr|ci:2}} (model B)
+  (`severity/key_contrasts_ab`): no clear difference in fatal severity, somewhat lower
+  fatal-or-serious severity.
+* **Interstates reverse, mostly on mid-speed roads.** Crude crashes on interstates are more often fatal, but compared with
   other roads *with the same speed limit* they are less severe. This is consistent with divided,
-  access-controlled design.
+  access-controlled design. The contrast depends on the speed limit
+  (`severity/interstate_by_speed_band`): on roads posted 50–65 mph the fatal risk ratio for
+  interstates is {{severity/interstate_by_speed_band|outcome=fatal;speed_limit_band=50-65 mph;quantity=RR interstate vs not|estimate|ci:2}}, at 70+ mph it is {{severity/interstate_by_speed_band|outcome=fatal;speed_limit_band=70+ mph;quantity=RR interstate vs not|estimate|ci:2}}, and the
+  ratio of the two is {{severity/interstate_by_speed_band|outcome=fatal;speed_limit_band=70+ mph vs 50-65 mph;quantity=ratio of RRs|estimate|ci:2}}. Averaged over speed
+  limits it is {{severity/key_contrasts_ab|factor=interstate;level=yes;outcome=fatal;model=A|adj_rr|ci:2}}
+  (model A) and {{severity/key_contrasts_ab|factor=interstate;level=yes;outcome=fatal;model=B|adj_rr|ci:2}}
+  (model B). At the highest limits there is no detectable safety advantage.
 * **Older drivers are unmasked.** Their crashes happen in low-severity settings (daytime, lower
   speeds), which hides a substantial excess severity once those settings are held constant. The
   likely mechanism is greater physical frailty of older occupants (see finding 7 for
   within-vehicle evidence).
-* **Teenage drivers' crashes are *less* severe** even after adjustment. Their problem is crash
-  *involvement*, not severity (finding 6).
+* **Teenage drivers' crashes are *less* severe** after adjustment under model A
+  ({{severity/key_contrasts_ab|factor=young_driver;level=yes;outcome=fatal;model=A|adj_rr|ci:2}}) and no longer clearly so once crash configuration is held
+  fixed (model B, {{severity/key_contrasts_ab|factor=young_driver;level=yes;outcome=fatal;model=B|adj_rr|ci:2}}; fatal-or-serious
+  {{severity/key_contrasts_ab|factor=young_driver;level=yes;outcome=ka;model=A|adj_rr|ci:2}} and {{severity/key_contrasts_ab|factor=young_driver;level=yes;outcome=ka;model=B|adj_rr|ci:2}}). Their problem is
+  crash *involvement*, not severity (finding 6).
 
 *Robustness.* Fatal-or-serious (KA) outcome: `severity/ka_crude_vs_adjusted`. Year effects are
 included in every model. *Limitations.* Residual confounding is likely: travel speed, vehicle
 mass and occupant health are not recorded.
 
-## 4. Finding 3 — "Speeding" mixes a strong and a weak association
+## 4. Finding 3 — "Speeding" mixes a strong and a weaker association (exploratory split)
 
 *Sources: `severity/fatal_speeding_type`, `descriptive/frequency_vs_severity`,
 `burden/attributable_fractions_fatal`, `interactions/pairs_fatal` (follow-up pairs).*
+
+*The split of speeding by type was motivated by earlier results and is exploratory (section 14).*
 
 Police code a crash as speeding-related when a driver exceeded the limit, was racing, was "too
 fast for conditions", or was speeding of unspecified type. Separating the types changes the
@@ -233,11 +301,18 @@ conclusion:
   {{descriptive/frequency_vs_severity|factor=speeding_type;level=exceeded_limit_or_racing|share_fatal_fars|pct:1}}
   of fatal crashes. Their adjusted fatal risk ratio is
   {{severity/fatal_speeding_type|level=exceeded_limit_or_racing|adj_rr|ci:1}}.
-* **"Too fast for conditions"** — most of the police-reported category — has no detectable
-  excess in the adjusted risk of a fatal outcome
-  ({{severity/fatal_speeding_type|level=too_fast_for_conditions|adj_rr|ci:2}}); for
-  fatal-or-serious (KA) outcomes its adjusted risk ratio is {{severity/ka_speeding_type|level=too_fast_for_conditions|adj_rr|ci:2}}. It is
-  concentrated on wet and icy roads, where crashes are less severe.
+* **"Too fast for conditions"** — most of the police-reported category — has a small adjusted
+  association with a fatal outcome that is compatible with none under model A
+  ({{severity/speeding_type_models|outcome=fatal;model=A;level=too_fast_for_conditions|adj_rr|.2f}} ({{severity/speeding_type_models|outcome=fatal;model=A;level=too_fast_for_conditions|adj_rr_low95|.2f}}–{{severity/speeding_type_models|outcome=fatal;model=A;level=too_fast_for_conditions|adj_rr_high95|.2f}})). That interval is not evidence of no effect: its 90%
+  version excludes only effects beyond about ±{{severity/speeding_type_models|outcome=fatal;model=A;level=too_fast_for_conditions|equivalence_bound_pct|.0f}}%.
+  With crash configuration, a possible mediator, held fixed (model B) the ratio is
+  {{severity/speeding_type_models|outcome=fatal;model=B;level=too_fast_for_conditions|adj_rr|.2f}} ({{severity/speeding_type_models|outcome=fatal;model=B;level=too_fast_for_conditions|adj_rr_low95|.2f}}–{{severity/speeding_type_models|outcome=fatal;model=B;level=too_fast_for_conditions|adj_rr_high95|.2f}}); for fatal-or-serious (KA) outcomes it is
+  {{severity/speeding_type_models|outcome=ka;model=A;level=too_fast_for_conditions|adj_rr|.2f}} ({{severity/speeding_type_models|outcome=ka;model=A;level=too_fast_for_conditions|adj_rr_low95|.2f}}–{{severity/speeding_type_models|outcome=ka;model=A;level=too_fast_for_conditions|adj_rr_high95|.2f}}) (model A) and {{severity/speeding_type_models|outcome=ka;model=B;level=too_fast_for_conditions|adj_rr|.2f}} ({{severity/speeding_type_models|outcome=ka;model=B;level=too_fast_for_conditions|adj_rr_low95|.2f}}–{{severity/speeding_type_models|outcome=ka;model=B;level=too_fast_for_conditions|adj_rr_high95|.2f}})
+  (model B). The category is concentrated on wet and icy roads, where crashes are less severe.
+  All four estimates (`severity/speeding_type_models`):
+
+{{mdtable:severity/speeding_type_models||outcome:Outcome:;model:Model:;level:Speeding type:;adj_rr:Adjusted RR:.2f;adj_rr_low95:Low 95%:.2f;adj_rr_high95:High 95%:.2f}}
+
 * The severity-pathway attributable fraction is
   {{burden/attributable_fractions_fatal|shift=exceeded_limit_removed|af|cipct:1}} of fatal
   crashes for limit exceedance and
@@ -270,9 +345,25 @@ with sensitivity 0.2 and {{measurement/qba_grid|exposure=exceeded_limit;se_fatal
 between 0.1 and 0.05 ({{measurement/qba_grid|exposure=exceeded_limit;se_fatal=0.8;se_nonfatal=0.05;specificity=1|rr_corrected|.2f}}), that is, only if exceedance in
 non-fatal crashes were recorded about a tenth as completely as in fatal crashes.
 
+*Bias analysis by speeding type* (`severity/speeding_type_qba`; the same grid of sensitivities
+applied to the type-specific crude ratio, with the bias factor multiplied into the model-A estimate).
+For limit exceedance the bias-corrected adjusted fatal ratio stays above 1 in every feasible cell, from
+{{severity/speeding_type_qba|outcome=fatal;speeding_type=exceeded_limit_or_racing|min(adj_rr_bias_corrected)|.2f}} to
+{{severity/speeding_type_qba|outcome=fatal;speeding_type=exceeded_limit_or_racing|max(adj_rr_bias_corrected)|.2f}}.
+For "too fast for conditions" it ranges from
+{{severity/speeding_type_qba|outcome=fatal;speeding_type=too_fast_for_conditions|min(adj_rr_bias_corrected)|.2f}} to
+{{severity/speeding_type_qba|outcome=fatal;speeding_type=too_fast_for_conditions|max(adj_rr_bias_corrected)|.2f}},
+so its sign depends on the assumed differential recording and the bias analysis cannot settle it.
+Some cells of that table are blank. The `status` column says why: with a false-positive rate of
+1% (specificity 0.99) the matrix correction is infeasible when the recorded share of non-fatal crashes
+with that speeding type is below the assumed false-positive rate, because the corrected count of
+exposed non-fatal crashes would be negative. That is the case for every specificity-0.99 cell of
+limit exceedance, whose recorded share among non-fatal crashes is under 1%. A blank cell means the
+correction is impossible there, not that the corrected ratio is zero or unchanged.
+
 *Policy relevance.* Automated speed enforcement acts on exceeding the posted limit — the
 component with the strong association. The much larger "too fast for conditions" category is
-not a camera target and shows at most a small excess severity.
+not a camera target; its association with severity is small and imprecise, and the type split is exploratory.
 
 ## 5. Finding 4 — The most robust severity associations
 
@@ -329,7 +420,19 @@ mid-block crossing
 ({{vulnerable/pedestrian_killed_contrasts|victim=pedestrian;outcome=killed;factor=location;level=midblock|adj_rr|ci:1}}
 vs crossing in a crosswalk) and age 75+
 ({{vulnerable/pedestrian_killed_contrasts|victim=pedestrian;outcome=killed;factor=age_band;level=75+|adj_rr|ci:1}}
-vs 25–34) are also strongly associated with pedestrian death. *Limitations*: impact speed, vehicle
+vs 25–34) are also strongly associated with pedestrian death. The posted limit of the striking vehicle is
+unknown for {{vulnerable/speed_limit_missingness|victim=pedestrian;outcome=killed;group=all|estimate|pct:0}}
+of struck pedestrians, and unknown far less often when the pedestrian died
+({{vulnerable/speed_limit_missingness|victim=pedestrian;outcome=killed;group=fatal / outcome|estimate|cipct:0}}
+of fatal cases against {{vulnerable/speed_limit_missingness|victim=pedestrian;outcome=killed;group=not|estimate|cipct:0}}
+of non-fatal ones; `vulnerable/speed_limit_missingness`), so the crude shares who died by posted limit
+depend on how unknown limits are handled; the adjusted ratios keep "unknown" as its own level. The
+speed-limit gradient also reflects where high-limit roads are: without adjustment for location, light
+and time of day the 50–55 mph ratio is
+{{vulnerable/pedestrian_speed_limit_adjustment|victim=pedestrian;outcome=killed;specification=without location, light and time of day;level=50-55|adj_rr|ci:1}},
+against {{vulnerable/pedestrian_speed_limit_adjustment|victim=pedestrian;outcome=killed;specification=full (published);level=50-55|adj_rr|ci:1}}
+adjusted (`vulnerable/pedestrian_speed_limit_adjustment`); the adjusted figure is the one to read.
+*Limitations*: impact speed, vehicle
 mass and front-end geometry are not separately observed. Exposure to being struck is not
 measured, so these ratios describe severity *given* a pedestrian crash.
 
@@ -347,7 +450,7 @@ of risk ratios {{interactions/pairs_fatal|pair=speeding x dark_unlit|ratio_of_rr
 evidence of no interaction. For fatal-or-serious crashes, speeding in unlit darkness does show
 an additive excess of {{interactions/pairs_ka|pair=speeding x dark_unlit|ic|cix1000:1}} per 1,000 crashes (Holm
 p {{interactions/pairs_ka|pair=speeding x dark_unlit|ic_p_holm|.1g}}). The protective-looking speeding × wet interaction
-reflects the mix of speeding types ("too fast for conditions" concentrates on wet roads) and the
+partly reflects the mix of speeding types ("too fast for conditions" concentrates on wet roads) and the
 lower wet-road baseline.
 
 ## 7. Finding 6 — Crash involvement is not crash severity
@@ -368,8 +471,9 @@ and their age and sex are unknown. Relative involvement ratios (RIR), all qualif
 
 * Drivers aged 15–20 are over-represented as the culpable party
   (RIR {{exposure/relative_involvement|factor=age_band;level=15-20;stratum=all|rir|ci:2}}), yet
-  crashes involving them are *less* severe
-  ({{severity/fatal_crude_vs_adjusted|factor=young_driver;level=yes|A_adj_rr|ci:2}}).
+  crashes involving them are *less* severe under model A
+  ({{severity/fatal_crude_vs_adjusted|factor=young_driver;level=yes|A_adj_rr|ci:2}}); with crash
+  configuration also held fixed (model B) the ratio is {{severity/key_contrasts_ab|factor=young_driver;level=yes;outcome=fatal;model=B|adj_rr|ci:2}}.
 * Drivers aged 75+ are also over-represented as the culpable party
   (RIR {{exposure/relative_involvement|factor=age_band;level=75+;stratum=all|rir|ci:2}}), while
   drivers aged 65–74 are not
@@ -422,15 +526,41 @@ road, weather.
   and seat: odds ratio of death, unbelted vs belted,
   {{matched/clogit_coefficients|model=main;term=unbelted|odds_ratio|ci:2@or}}. Deaths are common
   in these vehicles, so this odds ratio overstates the risk ratio.
-* **The estimate depends on truthful reporting by survivors.** Belt use of surviving occupants
-  is largely what they tell police. If 10% of "belted" survivors were in fact unbelted, the
-  reduction would be
+* **The estimate depends on truthful reporting, and the error can run both ways.** Belt use of
+  surviving occupants is largely what they tell police. If 10% of "belted" survivors were in fact
+  unbelted, the reduction would be
   {{matched/belt_effect|estimand=fatality_risk_reduction_belt_given_fatal_crash_misreport_f10|estimate|cipct:1}};
   at 20%, {{matched/belt_effect|estimand=fatality_risk_reduction_belt_given_fatal_crash_misreport_f20|estimate|cipct:1}}.
-  The association would vanish at about
-  {{matched/double_pair_comparison|analysis=belt_driver_rf;misreport_fraction=0;component=combined (inverse-variance weighted)|tipping_point_f|pct:0}}
-  misreporting. The size is therefore uncertain; the direction is not, unless misreporting is
-  very large.
+  Those one-sided scenarios move only survivors. Adding the reverse error, a fraction g of deaths
+  coded unbelted who were truly belted (`matched/belt_misreporting_two_sided_dpc`), lowers the
+  reduction further: with 10% of belted survivors misrecorded and g at 5% it is {{matched/belt_misreporting_two_sided_dpc|analysis=belt_driver_rf;survivor_misreport_f=0.1;death_misreport_g=0.05|reduction_1_minus_rr|cipct:0@reduction}};
+  with both at 10%, {{matched/belt_misreporting_two_sided_dpc|analysis=belt_driver_rf;survivor_misreport_f=0.1;death_misreport_g=0.1|reduction_1_minus_rr|cipct:0@reduction}}; with 20% and 5%, {{matched/belt_misreporting_two_sided_dpc|analysis=belt_driver_rf;survivor_misreport_f=0.2;death_misreport_g=0.05|reduction_1_minus_rr|pct:0}}
+  (a negative reduction means the estimate has reversed). The association would vanish at about
+  {{matched/belt_misreporting_two_sided_dpc|analysis=belt_driver_rf;survivor_misreport_f=0;death_misreport_g=0|tipping_f_given_g|pct:0}}
+  of belted survivors misrecorded with no reverse error, at about
+  {{matched/belt_misreporting_two_sided_dpc|analysis=belt_driver_rf;survivor_misreport_f=0;death_misreport_g=0.05|tipping_f_given_g|pct:0}}
+  if 5% of unbelted-coded deaths were belted, or at about
+  {{matched/belt_misreporting_two_sided_dpc|analysis=belt_driver_rf;survivor_misreport_f=0;death_misreport_g=0|tipping_g_given_f|pct:0}}
+  reverse error alone. The true rates are unknowable from these data. The size is therefore
+  uncertain; the direction is not, unless misreporting is very large.
+* **The pooled figure averages very different crash types** (`matched/belt_by_crash_type`). The
+  reduction in risk of death for a belted occupant, with its tipping point (the share of belted
+  survivors who would have to be misrecorded to remove it):
+
+{{mdtable:matched/belt_by_crash_type|partition=all~crash type~vehicle rollover|stratum:Stratum:;dpc_n_pairs:Pairs:,.0f;dpc_reduction:Reduction (95% CI):cipct:0;dpc_tipping_point_f:Tipping point:pct:0}}
+
+  These strata are conditional on a fatal crash in the vehicle and the two partitions overlap.
+* **Heterogeneity by driver behaviour.** Within the same crash configuration (single or
+  multi-vehicle crossed with rollover), the within-vehicle belt risk ratio is higher, that is belts
+  are somewhat less protective, with a speeding driver: ratio of belt risk ratios
+  {{restraint_behaviour/dpc_contrast_within_configuration|contrast=driver speeding (any) vs not speeding;adjustment=single/multi-vehicle x rollover;layer=pooled within layers|ratio_of_rrs|ci:2@ratio}}
+  (exceeding the limit or racing,
+  {{restraint_behaviour/dpc_contrast_within_configuration|contrast=driver exceeded limit / racing vs not speeding;adjustment=single/multi-vehicle x rollover;layer=pooled within layers|ratio_of_rrs|ci:2@ratio}}),
+  whereas pooling the crashes first gives {{restraint_behaviour/dpc_contrast_within_configuration|contrast=driver speeding (any) vs not speeding;adjustment=none (unstratified);layer=all vehicles|ratio_of_rrs|ci:2@ratio}}.
+  The unstratified null was a composition effect: speeding drivers are more often in single-vehicle
+  crashes, where belts look more protective. For a driver at BAC .08 or more the within-configuration
+  ratio is {{restraint_behaviour/dpc_contrast_within_configuration|contrast=driver BAC >= .08 (MI) vs BAC < .08;adjustment=single/multi-vehicle x rollover;layer=pooled within layers|ratio_of_rrs|ci:2@ratio}},
+  no difference (`restraint_behaviour/dpc_contrast_within_configuration`).
 * **Frailty.** Within the same vehicle, belted occupants aged 65+ died more often than belted
   occupants aged 25–44 of the same sex
   ({{matched/double_pair_comparison|analysis=age_65plus_vs_25_44_both_belted_same_sex;component=combined (inverse-variance weighted)|rr_x1_vs_x0|ci:2@rr}}
@@ -438,8 +568,18 @@ road, weather.
   ({{matched/double_pair_comparison|analysis=female_vs_male_both_belted_age_gap_le5;component=combined (inverse-variance weighted)|rr_x1_vs_x0|ci:2@rr}}).
 * **Motorcycle helmets** (operator and passenger on the same motorcycle): risk ratio of death,
   helmeted vs unhelmeted,
-  {{matched/double_pair_comparison|analysis=motorcycle_helmet;component=combined (inverse-variance weighted)|rr_x1_vs_x0|ci:2@rr}};
-  few motorcycles have riders who differ in helmet use, so this is imprecise.
+  {{matched/double_pair_comparison|analysis=motorcycle_helmet;component=combined (inverse-variance weighted)|rr_x1_vs_x0|ci:2@rr}}.
+  This is imprecise and fragile to misreporting (`matched/helmet_misreporting_dpc`): if 5% of
+  helmeted-coded survivors were unhelmeted the reduction would be {{matched/helmet_misreporting_dpc|analysis=motorcycle_helmet;survivor_misreport_f=0.05;death_misreport_g=0|reduction_1_minus_rr|cipct:0@reduction}}, and it vanishes
+  at about {{matched/helmet_misreporting_dpc|analysis=motorcycle_helmet;survivor_misreport_f=0;death_misreport_g=0|tipping_f_given_g|pct:0}}
+  survivor misreporting, or {{matched/helmet_misreporting_dpc|analysis=motorcycle_helmet;survivor_misreport_f=0;death_misreport_g=0|tipping_g_given_f|pct:0}}
+  reverse error. It rests on {{matched/helmet_pair_coverage|metric=pairs_discordant_helmet_use|count|,.0f}}
+  operator-passenger pairs that differ in helmet use, and only
+  {{matched/helmet_pair_coverage|metric=unhelmeted_deaths_in_pair_design|share|pct:0}}
+  of unhelmeted motorcyclist deaths were in such pairs (most were on single-rider motorcycles,
+  {{matched/helmet_pair_coverage|metric=unhelmeted_deaths_single_rider_motorcycle|share|pct:0}}), so applying it to all
+  unhelmeted deaths assumes two-up riders are representative of solo riders
+  (`matched/helmet_pair_coverage`).
 
 Across crashes (CRSS), unbelted light-vehicle occupants were far more likely to die than belted
 ones: crude RR {{person/lpv_killed_crude_vs_adjusted|factor=restraint;level=none|crude_rr|ci:1}},
@@ -478,11 +618,12 @@ The fatal-or-serious (KA) share shows no clear rise
 ({{trends/numerator_denominator|outcome=fatal;comparison=2020-2024 vs 2016-2019;quantity=ratio_fatal_crashes_numerator|estimate|ci:3}}, matching the FARS census ratio of
 {{trends/numerator_denominator|outcome=fatal;comparison=2020-2024 vs 2016-2019;quantity=FARS_ratio_fatal_crashes (census)|estimate|.3f}}), but the
 number of police-reported crashes fell ({{trends/numerator_denominator|outcome=fatal;comparison=2020-2024 vs 2016-2019;quantity=ratio_reported_crashes_denominator|estimate|ci:3}}).
-The fall in reported crashes accounts for {{trends/numerator_denominator|outcome=fatal;comparison=2020-2024 vs 2016-2019;quantity=denominator_share_of_log_rise|estimate|cipct:0}}
-of the rise in the fatal share. It is not only a fall in property-damage-only reports: fatal
+The fall in reported crashes accounts for {{trends/denominator_share|outcome=fatal;comparison=2020-2024 vs 2016-2019;quantity=denominator_share_of_log_rise|estimate|cipct:0}}
+of the rise in the fatal share under NHTSA's imputed outcome and {{trends/denominator_share|outcome=fatal_cc;comparison=2020-2024 vs 2016-2019;quantity=denominator_share_of_log_rise|estimate|cipct:0}} under the
+complete-case outcome (`trends/denominator_share`; intervals cover CRSS sampling only). It is not only a fall in property-damage-only reports: fatal
 crashes also rose as a share of injury crashes ({{trends/numerator_denominator|outcome=fatal;comparison=2020-2024 vs 2016-2019;quantity=ratio_K_share_of_injury_KABC|estimate|ci:2}}).
 
-**Composition accounts for between {{trends/decomposition|analysis=model_A;outcome=fatal;quantity=composition_share_of_change_ref_P1|estimate|pct:0}} and {{trends/decomposition|analysis=model_B;outcome=fatal;quantity=composition_share_of_change_ref_P0|estimate|pct:0}}.** This is a second, separate accounting of the
+**Composition accounts for roughly a quarter to a half of the rise.** This is a second, separate accounting of the
 same rise, not an addition to the first. Changes in the recorded circumstances of crashes
 (time, road, light, weather, alcohol, speeding, driver and vehicle mix, crash configuration)
 account for {{trends/decomposition|analysis=model_B;outcome=fatal;quantity=composition_share_of_change_ref_P0|estimate|cipct:0}} of the rise
@@ -494,6 +635,14 @@ with the 2020–24 model);
 without the three variables whose "unknown" coding drifted over the period (junction, weather,
 road surface) it is {{trends/decomposition|analysis=sens_B_without_coding_drift_vars;outcome=fatal;quantity=composition_share_of_change_ref_P0|estimate|cipct:0}};
 under the complete-case outcome it is {{trends/decomposition|analysis=model_B;outcome=fatal_cc;quantity=composition_share_of_change_ref_P0|estimate|cipct:0}}.
+Across four covariate specifications (published, without imputed alcohol, without the coding-drift
+variables, without both) and both reference periods, the composition share with crash configuration
+(model B) runs from {{trends/composition_robustness|covariate_set=B;quantity=composition_share_of_change_ref_P0~composition_share_of_change_ref_P1|min(estimate)|pct:0}} to {{trends/composition_robustness|covariate_set=B;quantity=composition_share_of_change_ref_P0~composition_share_of_change_ref_P1|max(estimate)|pct:0}}, and without crash configuration (model A)
+from {{trends/composition_robustness|covariate_set=A;quantity=composition_share_of_change_ref_P0~composition_share_of_change_ref_P1|min(estimate)|pct:0}} to {{trends/composition_robustness|covariate_set=A;quantity=composition_share_of_change_ref_P0~composition_share_of_change_ref_P1|max(estimate)|pct:0}} (`trends/composition_robustness`); "roughly a quarter to a
+half" is the model-B range, and the intervals are wide:
+
+{{mdtable:trends/composition_robustness|covariate_set=B;quantity=composition_share_of_change_ref_P0~composition_share_of_change_ref_P1|specification:Specification (model B):;quantity:Reference period:;estimate:Composition share (95% CI):cipct:0}}
+
 For the 2019→2021 jump alone the split is unstable: composition accounts for
 {{trends/decomposition|analysis=sens_B_2019_vs_2021;outcome=fatal;quantity=composition_share_of_change_ref_P0|estimate|cipct:0}} of it with the 2019
 model as reference but {{trends/decomposition|analysis=sens_B_2019_vs_2021;outcome=fatal;quantity=composition_share_of_change_ref_P1|estimate|cipct:0}}
@@ -548,6 +697,20 @@ any other cause.
 
 *Sources: `measurement/*`.*
 
+* **Recorded differently by severity.** Killed drivers are tested for alcohol far more often than
+  surviving drivers ({{measurement/alcohol_testing_share|driver_status=killed|share_alcohol_tested|pct:0}} against
+  {{measurement/alcohol_testing_share|driver_status=survived|share_alcohol_tested|pct:0}} over 2016–2024,
+  `measurement/alcohol_testing_share`), but the *police-recorded* alcohol, drug and distraction fields
+  in CRSS are more often unknown in fatal crashes than in less severe ones: alcohol unknown in
+  {{measurement/unknown_by_severity|kabco=4;field=alcohol|pct_unknown|.0f}}% of fatal crashes against
+  {{measurement/unknown_by_severity|kabco=0;field=alcohol|pct_unknown|.0f}}% of no-injury crashes, drugs
+  {{measurement/unknown_by_severity|kabco=4;field=drugs|pct_unknown|.0f}}% against
+  {{measurement/unknown_by_severity|kabco=0;field=drugs|pct_unknown|.0f}}%, distraction
+  {{measurement/unknown_by_severity|kabco=4;field=distracted|pct_unknown|.0f}}% against
+  {{measurement/unknown_by_severity|kabco=0;field=distracted|pct_unknown|.0f}}%
+  (`measurement/unknown_by_severity`). What is more complete in severe crashes is toxicology for
+  killed drivers and, in FARS, speeding. The assumption in the bias analyses that recording
+  sensitivity is higher in fatal crashes is not tested by these data.
 * **Alcohol testing is selective.** In 2016, {{measurement/fars_testing|level=national;YEAR=2016;status=killed|pct_alcohol_tested|.0f}}% of
   killed drivers were tested, against {{measurement/fars_testing|level=national;YEAR=2016;status=survived|pct_alcohol_tested|.0f}}% of surviving
   drivers; in 2023 the figures were {{measurement/fars_testing|level=national;YEAR=2023;status=killed|pct_alcohol_tested|.0f}}% and
@@ -562,7 +725,17 @@ any other cause.
   police report, the report identifies BAC ≥ 0.08 in
   {{measurement/police_vs_bac|driver_status=killed|police_sensitivity_vs_bac08|pct:0}} of killed
   and {{measurement/police_vs_bac|driver_status=survived|police_sensitivity_vs_bac08|pct:0}} of
-  surviving drivers.
+  surviving drivers. The two groups are not selected alike: surviving drivers were tested mainly on
+  suspicion, and only {{measurement/alcohol_testing_share|driver_status=survived|share_in_sensitivity_sample|pct:0}}
+  of them (against {{measurement/alcohol_testing_share|driver_status=killed|share_in_sensitivity_sample|pct:0}}
+  of killed drivers) are in this comparison. The survivors' sensitivity falls as testing broadens,
+  from {{measurement/police_vs_bac_selection|scheme=state-year survivor test-rate tercile;group=low;driver_status=survived|police_sensitivity_vs_bac08|pct:1}}
+  in state-years where few survivors were tested to
+  {{measurement/police_vs_bac_selection|scheme=state-year survivor test-rate tercile;group=high;driver_status=survived|police_sensitivity_vs_bac08|pct:1}}
+  where many were, so the high survivor figure partly reflects who was tested
+  (`measurement/police_vs_bac_selection`); the killed drivers' figure ranges
+  {{measurement/police_vs_bac_selection|scheme=state-year survivor test-rate tercile;group=high;driver_status=killed|police_sensitivity_vs_bac08|pct:0}}–{{measurement/police_vs_bac_selection|scheme=state-year survivor test-rate tercile;group=middle;driver_status=killed|police_sensitivity_vs_bac08|pct:0}}
+  over the same terciles.
 * **CRSS alcohol coding broke in 2019.** "Unknown" rose from
   {{measurement/unknown_by_year|field=alcohol;fatal=0;YEAR=2018|pct_unknown|.0f}}% to
   {{measurement/unknown_by_year|field=alcohol;fatal=0;YEAR=2019|pct_unknown|.0f}}% of non-fatal
@@ -591,9 +764,24 @@ the crash still happened:
 
 These are **not** lives saved by any programme. They omit any effect on crash occurrence. They
 assume no unmeasured confounding and correct measurement, and they say nothing about whether an
-intervention can actually change the circumstance. Under plausible under-recording of speeding in
-non-fatal crashes, the speeding fraction shrinks towards zero; the alcohol fraction does not
-(`burden/bias_sensitivity`).
+intervention can actually change the circumstance. Under under-recording of speeding in
+non-fatal crashes the speeding fraction shrinks, and in the severe cells of the bias grid it
+falls to {{burden/bias_sensitivity|shift=speeding_removed|min(af_bias_corrected)|pct:0}} (a negative
+fraction means no excess severity remains; `burden/bias_sensitivity`); the alcohol fraction also shrinks there, to
+{{burden/bias_sensitivity|shift=alcohol_removed|min(af_bias_corrected)|pct:0}} at its lowest,
+although it stays positive. (An earlier version of this report said the alcohol fraction does not
+shrink; that was wrong.) Which cells are "plausible" is not defined by these data.
+
+*Period and coding variants* (`burden/attributable_fraction_variants`). The published fractions come
+from a 2016–2024 model with NHTSA-imputed alcohol, scaled to 2022–2024 deaths. Refitting on
+2022–2024 only and coding alcohol from the police field moves them:
+
+{{mdtable:burden/attributable_fraction_variants|outcome=fatal;shift=speeding_removed~alcohol_removed|alcohol_coding:Alcohol coding:;model_period:Model period:;shift:Hypothetical shift:;af:Share of fatal crashes (95% CI):cipct:1;fars_scaled_deaths_per_year:Deaths per year, FARS-scaled:,.0f}}
+
+The speeding fraction is larger when refitted on the recent years, and the alcohol fraction depends
+strongly on the alcohol coding (police-reported alcohol with unknowns dropped gives the largest
+figure, treating unknown as "no" the smallest). The confidence intervals cover sampling error only;
+they do not include the coding, period or recording-error differences shown here.
 
 ## 12. Prediction models
 
@@ -603,8 +791,15 @@ non-fatal crashes, the speeding fraction shrinks towards zero; the alcohol fract
 on held-out years.*
 
 Prediction models were trained on 2016–2021, tuned and selected on 2022, and evaluated once on
-2023–2024, years used for no modelling choice. Inputs exclude anything recorded after the crash
-and the calendar year, enforced by the same leakage gate as the statistical models. There are
+2023–2024, years used for no modelling choice. Inputs exclude every outcome and outcome-derived count, post-crash consequences (rollover, fire,
+towing, hit-and-run) and the calendar year, enforced by the same leakage gate as the statistical models.
+Two inputs are nevertheless recorded or judged after the crash: police-judged speeding, which the
+registry flags `recorded_after_crash` (`processing/harmonize.py`, with a documented reason for its
+use), and NHTSA-imputed alcohol, which may carry information about severity. Dropping both lowers the
+boosted model's AUROC by
+{{ml/feature_sensitivity|outcome=fatal;stage=pre_crash+circumstance;variant=without speeding and alcohol_im;model=hgb;metric=auroc|diff_vs_main|ci:3@diff_ci}},
+so part of the reported discrimination rests on them (`ml/feature_sensitivity`). The models predict
+severity given that the police recorded these fields. There are
 two input stages: pre-crash circumstances only, and pre-crash circumstances plus crash
 configuration. The outcome is a fatal crash among police-reported crashes; prevalence in the
 test years was {{ml/metrics_test|outcome=fatal;stage=pre_crash+circumstance;model=hgb;domain=all;weighting=weighted;metric=prevalence|estimate|cipct:2@ci}}.
@@ -656,9 +851,11 @@ test-set sampling only, not model selection or training-sample variability.
 ## 14. Exploratory vs confirmatory
 
 The pre-specified analyses are: crude versus adjusted severity (RQ1), the 13 registered interaction pairs,
-the measurement analyses (RQ3), within-vehicle restraint (RQ6), QIE (RQ7), the post-2020
-decomposition (RQ5) and burden (RQ9). These are confirmatory within their stated assumptions. The
-speeding-type split, the two interaction pairs added at implementation and the three
-limit-exceedance follow-ups were motivated by the audit and by earlier results, and are
-exploratory. Machine-learning importance rankings are descriptive of
-the model, not findings about the world.
+the measurement analyses (RQ3), within-vehicle restraint (RQ6), QIE (RQ7) and burden (RQ9). These are
+confirmatory within their stated assumptions, and only these registered families are adjusted for
+multiple testing. The post-2020 decomposition (RQ5) and its subgroup table were added after the
+descriptive results (research plan change log) and are exploratory, as are the speeding-type split, the
+two interaction pairs added at implementation, the three limit-exceedance follow-ups, the
+configuration-stratified belt contrasts and the helmet and two-sided misreporting scenarios, which were
+motivated by the audit and the red-team review (`docs/red_team_2026-11.md`). Machine-learning importance
+rankings are descriptive of the model, not findings about the world.

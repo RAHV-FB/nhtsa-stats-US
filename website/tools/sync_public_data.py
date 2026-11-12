@@ -27,6 +27,14 @@ CITED = [
     "person/lpv_killed_crude_vs_adjusted",
     "matched/belt_effect",
     "matched/double_pair_comparison",
+    "matched/belt_by_crash_type",
+    "matched/belt_misreporting_two_sided_dpc",
+    "matched/helmet_misreporting_dpc",
+    "matched/helmet_pair_coverage",
+    "restraint_behaviour/dpc_contrast_within_configuration",
+    "severity/speeding_type_models",
+    "vulnerable/pedestrian_speed_limit_adjustment",
+    "vulnerable/speed_limit_missingness",
 ]
 
 

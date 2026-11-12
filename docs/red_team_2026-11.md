@@ -6,8 +6,9 @@ significance and irreproducible numbers, and a separate subagent tried to dispro
 published finding. This record says how that was done, what held up, what did not, and which
 corrections are recommended.
 
-The review changes no analysis code, output table, report, website page or documented
-limitation. Every recommended correction is listed in §5 for the owner to accept or reject. Where
+The review itself changed no analysis code, output table, report, website page or documented
+limitation. Every recommended correction is listed in §5, with its status after a later pass that
+applied them. Where
 a correction needs a new number in `reports/`, that number has to come from a new output table
 through the templates (CLAUDE.md). The reviewers' scripts show how to compute it.
 
@@ -320,7 +321,66 @@ committed tables. Each issue carries the label from §1.
 * **Interventions.** No archive column measures or proxies enforcement or cost. "The database
   identifies no intervention effect" stands (F10).
 
-## 5. Recommended corrections (not applied)
+## 5. Corrections: status after re-computation (November 2026)
+
+The review itself changed nothing. A later pass computed the new output tables that the † items
+needed (30 CSVs under `outputs/tables/`) and applied the corrections for
+`README.md`, `reports/templates/findings.md` and `findings.json`, `reports/templates/road_deaths.md`,
+the public website template, `docs/limitations.md`, `docs/model_validation.md` and
+`docs/methodology.md`. The same pass applied the corrections to the Phase-2 report templates
+(`alcohol_drugs_restraints`, `multifactor_interactions`, `factor_contributions`,
+`speeding_confounding`, `interactions`) and reduced `policy_analysis.md` to the observed baseline
+and evidence ledger. `case_comparisons.md` and the hypothetical simulator were deleted, so their
+items no longer apply.
+The original recommendations follow unchanged, as the record.
+
+**Applied (in the files above).** Wording of "too fast for conditions" (models A and B, the ±22%
+equivalence bound, exploratory label, explanation of blank bias-grid rows); within-CRSS speeding
+ratio beside the mixed one; interstate by speed band; rain and teen wording with models A and B;
+belt crash-type table, two-sided misreporting with tipping points, and the corrected Phase-2
+conclusion that belts are somewhat less protective with a speeding driver within crash
+configuration; helmet misreporting and coverage; post-2020 composition "roughly a quarter to a
+half" and both denominator shares; the corrected severity-recording statement and the selection
+caveat for 87% vs 98%; attributable-fraction variants and the withdrawn "alcohol does not shrink";
+measured-BAC rows for victim roles and prior DWI; belt lives "as recorded, excluding unknown belt
+use"; large-truck fault caveat; "among the steepest"; periods beside "a year" figures; pedestrian
+speed-limit missingness and unadjusted ratio; the prediction leakage sentence (with the 0.016 AUROC
+from `ml/feature_sensitivity`); RQ5 moved to exploratory; the seven new limitations; "pre-specified in
+the module docstring" and the random-forest qualification.
+
+**Red-team numbers confirmed on re-computation.** The 1.06 and 1.18 for "too fast for conditions" and
+the 22% bound; the 1.29 (1.13–1.47) under model B (previously unverified); within-CRSS speeding
+×8.60 against ×12.79 mixed; interstate 0.57 on 50–65 mph roads; rain KA 0.89 (0.82–0.97); teen model B
+0.92 (0.84–1.01); belt reductions of 50.9% (angle) and 84.4% (rollover), the 28.2% two-sided scenario
+and the helmet tipping point of 5.6% with 455 discordant pairs and 15.7% coverage; 27.4% and 9.5% on
+measured BAC; 60.7% of unbelted deaths in single-occupant vehicles; 2022–24 speeding fraction 11.9%
+(9.1–14.8); pedestrian 50–55 mph ratio 12.2 without location, light and time of day; union 95.4%,
+87.5% and 57.7%; denominator share 46% (29–64%); AUROC cost 0.016.
+
+**Differed from the tables.**
+* Within-CRSS speeding ratio CI is 7.1–10.3 (joint linearisation), not 6.5–11.4.
+* Interstate at 70+ mph is 0.94 (0.63–1.38), not 1.00 (0.67–1.48).
+* Within-configuration belt ratio of RRs for speeding is 1.18 (1.08–1.28) pooling single and
+  multi-vehicle crashes, 1.23 (1.13–1.35) with rollover also crossed, not 1.16 (1.06–1.26); the BAC
+  contrast is 1.02–1.03, null.
+* Model-B composition share runs 24–49% across the four specifications, not up to 56%; without crash
+  configuration it is 9–34%.
+* 40.9% of the BAC ≥ .08 driver group is imputed (not 40.5%); 20,998 deaths have unknown belt use (not
+  21,003).
+* Police-reported alcohol does not give a uniformly lower attributable fraction: 13.4% with unknowns
+  as a level and 10.6% with unknown as no, but 27.2% for complete cases.
+* Unknown pedestrian speed limit: 29.6% non-fatal vs 10.8% fatal (not 29.7%).
+
+**Still open.**
+* No table carries: the large-truck split by single-truck and truck–passenger-vehicle crashes (55% and
+  97%), the state range of prior-DWI shares, the invalid-licence +40.5% without expired or cancelled
+  licences, the imputed-BAC-versus-injury odds ratio (X1), or the crash-type-interaction logistic
+  comparison for `model_validation.md` §8. Those statements remain qualitative or are not made.
+* Code and provenance items: a code hash per module in the sidecars, a pinned Python version, and
+  making `deaths` fail when its matched inputs are missing.
+* Attacker-only claims in §6 that this pass did not re-run.
+
+### Original recommendations (record)
 
 Wording-only changes can go into the templates directly. Changes marked † need a new output table
 first, because every number in `reports/` comes from `outputs/tables/`.

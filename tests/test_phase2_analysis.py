@@ -207,19 +207,17 @@ def test_shapley_tables_are_efficient():
         assert shap == pytest.approx(joint, rel=1e-6), ps
 
 
-def test_readme_phase2_numbers_match_tables():
+def test_readme_numbers_match_tables():
     readme = (Path(config.PROJECT_ROOT) / "README.md").read_text()
-    km = _t("speeding", "key_models").set_index(["exposure", "outcome", "model"])
-    st = _t("speeding", "strata").set_index(["exposure", "outcome", "stratum"])
-    sh = _t("speeding", "shapley").set_index(["exposure", "outcome", "variant", "block"])
     ov = _t("contributions", "fars_overlap_summary").set_index("factor")
-    checks = {
-        f"of {km.loc[('exceeded', 'fatal', 'crude'), 'rr']:.1f}": True,
-        f"about {100 * sh.loc[('exceeded', 'fatal', 'all_blocks', 'alcohol'), 'shapley_share_of_crude']:.0f}% of its log": True,
-        f"{100 * sh.loc[('exceeded', 'fatal', 'all_blocks', 'retained_after_all_blocks'), 'shapley_share_of_crude']:.0f}% remains": True,
-        f"risk ratio is\n   {st.loc[('exceeded', 'fatal', 'no alcohol'), 'rr']:.1f}": True,
-        f"sum to {100 * ov.loc['sum of the four factor counts', 'share_of_all_deaths']:.0f}% of all deaths": True,
-        f"while {100 * ov.loc['deaths involving at least one factor (union)', 'share_of_all_deaths']:.0f}% of deaths": True,
-    }
+    tr = _t("contributions", "fars_overlap_treatments").set_index("drug_status_handling")
+    sp = _t("speeding", "crss_overrepresentation").set_index("speeding")
+    exc = sp.loc["exceeded_limit_or_racing"]
+    checks = [
+        f"at least {100 * ov.loc['sum of the four factor counts', 'share_of_all_deaths']:.0f}% of deaths",
+        f"between {100 * tr.loc['undetermined = no drug', 'share_with_any_factor']:.1f}%",
+        f"{100 * tr.loc['undetermined = drug', 'share_with_any_factor']:.1f}% involve",
+        f"{exc['crss_only_ratio']:.2f} ({exc['crss_only_ratio_low']:.2f}–{exc['crss_only_ratio_high']:.2f})",
+    ]
     missing = [k for k in checks if k not in readme]
     assert not missing, missing
