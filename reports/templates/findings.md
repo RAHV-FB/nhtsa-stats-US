@@ -116,7 +116,7 @@ The share of police-reported crashes that were fatal was
 
 ## 2. Finding 1 — Frequency is not danger
 
-*Source: `descriptive/frequency_vs_severity`; figure `outputs/figures/figures/overrepresentation.png`.*
+*Source: `descriptive/frequency_vs_severity`; figure `outputs/figures/summary/overrepresentation.png`.*
 
 For each characteristic we compare its share of all police-reported crashes (CRSS, weighted)
 with its share of fatal crashes (FARS, census). The ratio is the **over-representation ratio**.
@@ -172,7 +172,7 @@ not adjust for other circumstances (finding 2).
 
 ## 3. Finding 2 — Adjustment reshapes which circumstances look dangerous
 
-*Source: `severity/fatal_crude_vs_adjusted`; figure `outputs/figures/figures/forest_fatal_crude_vs_adjusted.png`.
+*Source: `severity/fatal_crude_vs_adjusted`; figure `outputs/figures/summary/forest_fatal_crude_vs_adjusted.png`.
 Method: survey-weighted logistic models; standardised risk ratios (g-computation). Model A
 adjusts for all pre-crash circumstances at once (mutually adjusted), so for a factor with
 downstream variables in the dependency diagram — time of day → light, weather → road surface,

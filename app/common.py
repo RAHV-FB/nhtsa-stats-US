@@ -127,11 +127,11 @@ def rate_by_level(
         events = int(np.nansum(y[dom]))
         rse = est.se / est.estimate if est.estimate > 0 else np.inf
         flag = (
-            "suppressed: n < 30"
+            f"suppressed: n < {config.MIN_CELL_N}"
             if n < config.MIN_CELL_N
-            else "unstable: < 5 events"
-            if events < 5
-            else "unstable: RSE > 30%"
+            else f"unstable: < {config.MIN_RATE_EVENTS} events"
+            if events < config.MIN_RATE_EVENTS
+            else f"unstable: RSE > {config.MAX_RSE:.0%}"
             if rse > config.MAX_RSE
             else ""
         )

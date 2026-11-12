@@ -8,6 +8,8 @@ number can be traced back to code and raw archives.
 
 from __future__ import annotations
 
+import hashlib
+import importlib.util
 import json
 import subprocess
 import sys
@@ -54,6 +56,38 @@ def git_commit() -> str:
         return "unknown"
 
 
+def file_sha256(path: Path) -> str:
+    return hashlib.sha256(Path(path).read_bytes()).hexdigest()
+
+
+def module_source_path(module: str) -> Path | None:
+    """Source file of an importable module, found without importing (running) it."""
+    try:
+        spec = importlib.util.find_spec(module)
+    except (ImportError, ValueError):
+        return None
+    if spec is None or not spec.origin or not spec.origin.endswith(".py"):
+        return None
+    return Path(spec.origin)
+
+
+def module_source_sha256(module: str) -> str | None:
+    path = module_source_path(module)
+    return file_sha256(path) if path is not None and path.exists() else None
+
+
+def package_sha256(root: Path | None = None) -> str:
+    """One digest over every ``*.py`` file of the package (sorted relative paths + bytes)."""
+    root = Path(root) if root is not None else Path(__file__).resolve().parents[1]
+    h = hashlib.sha256()
+    for f in sorted(p for p in root.rglob("*.py") if "__pycache__" not in p.parts):
+        h.update(f.relative_to(root).as_posix().encode())
+        h.update(b"\0")
+        h.update(f.read_bytes())
+        h.update(b"\0")
+    return h.hexdigest()
+
+
 def table_path(module: str, name: str) -> Path:
     return config.TABLES_DIR / module / f"{name}.csv"
 
@@ -83,6 +117,7 @@ def save_table(
     if isinstance(df, pl.DataFrame):
         df = df.to_pandas()
     df.to_csv(path, index=False, float_format=float_format)
+    producer = _caller_module(f"nhtsa_stats.analysis.{module}")
     meta = {
         "table": f"{module}/{name}.csv",
         "description": description,
@@ -93,8 +128,10 @@ def save_table(
         "inputs": inputs or [],
         "rows": len(df),
         "columns": list(df.columns),
-        "module": _caller_module(f"nhtsa_stats.analysis.{module}"),
+        "module": producer,
         "git_commit": git_commit(),
+        "source_sha256": module_source_sha256(producer),
+        "package_sha256": package_sha256(),
         "generated_utc": datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ"),
         **(extra or {}),
     }

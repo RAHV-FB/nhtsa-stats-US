@@ -38,6 +38,9 @@ jobs:
         run: node --check website/assets/site.js
       - name: Functional static smoke tests
         run: node --test website/tests/site.test.mjs
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
       - name: Website snapshot consistency
         run: python website/tools/sync_public_data.py --check
 
@@ -56,9 +59,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/configure-pages@v5
+      - name: Stage the site (without tests/ and tools/)
+        run: |
+          mkdir -p _site
+          rsync -a --exclude tests --exclude tools website/ _site/
       - uses: actions/upload-pages-artifact@v4
         with:
-          path: website
+          path: _site
       - name: Deploy GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4

@@ -39,7 +39,7 @@ intervals are design-based (Taylor linearisation, 42 df).
 
 {{mdtable:interactions/pairs_fatal|prespecified=True|pair:Pair (A x B):;adj_p00:Risk with neither (per 1,000):cix1000:1;adj_p11:Risk with both (per 1,000):cix1000:1;rr_A_given_B0:RR of A when B absent:ci:2;rr_A_given_B1:RR of A when B present:ci:2;ic:Additive interaction (per 1,000):cix1000:1;ic_p_holm:Holm p, additive:.2g;ratio_of_rr:Ratio of RRs (multiplicative):ci:2;ratio_of_rr_p_holm:Holm p, multiplicative:.2g;obs_exp_all:Co-occurrence O/E, all crashes:.2f;min_cell_events:Fewest events in a cell:,.0f}}
 
-Figure: `outputs/figures/figures/interactions.png`.
+Figure: `outputs/figures/summary/interactions.png`.
 
 ### What the pattern shows
 

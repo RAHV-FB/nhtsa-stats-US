@@ -55,7 +55,7 @@ intervals are design-based (Taylor linearisation, 42 df).
 | weekend x late_night | 4.7 (4.1–5.4) | 7.9 (6.8–8.9) | 1.25 (1.17–1.34) | 0.91 (0.80–1.02) | -2.0 (-3.1 to -0.9) | 0.003 | 0.72 (0.63–0.83) | 0.00016 | 1.53 | 648 |
 | pedestrian x dark_unlit | 5.0 (4.3–5.7) | 179.2 (149.7–208.8) | 16.91 (13.58–21.04) | 27.30 (22.31–33.42) | 93.6 (70.1–117.1) | 6.7e-09 | 1.62 (1.39–1.88) | 1.8e-06 | 1.45 | 318 |
 
-Figure: `outputs/figures/figures/interactions.png`.
+Figure: `outputs/figures/summary/interactions.png`.
 
 ### What the pattern shows
 

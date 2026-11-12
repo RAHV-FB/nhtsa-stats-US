@@ -11,7 +11,7 @@
     "limitations": "Descriptive ratios; other circumstances are not held constant. Not a rate per mile travelled.",
     "kind": "estimated",
     "evidence": "descriptive/frequency_vs_severity",
-    "figure": "outputs/figures/figures/overrepresentation.png",
+    "figure": "outputs/figures/summary/overrepresentation.png",
     "table": "descriptive/frequency_vs_severity.csv"
   },
   {
@@ -26,7 +26,7 @@
     "limitations": "Associations conditional on a police-reported crash; travel speed, vehicle mass and occupant health not recorded; residual confounding likely.",
     "kind": "adjusted",
     "evidence": "severity/fatal_crude_vs_adjusted",
-    "figure": "outputs/figures/figures/forest_fatal_crude_vs_adjusted.png",
+    "figure": "outputs/figures/summary/forest_fatal_crude_vs_adjusted.png",
     "table": "severity/fatal_crude_vs_adjusted.csv"
   },
   {
@@ -55,7 +55,7 @@
     "limitations": "Impact speed, vehicle mass and front-end geometry not separately observed; exposure to being struck not measured.",
     "kind": "adjusted",
     "evidence": "severity/fatal_crude_vs_adjusted; measurement/alcohol_coding_sensitivity; vulnerable/pedestrian_killed_contrasts",
-    "figure": "outputs/figures/figures/pedestrians.png",
+    "figure": "outputs/figures/summary/pedestrians.png",
     "table": "vulnerable/pedestrian_killed_contrasts.csv"
   },
   {
@@ -70,7 +70,7 @@
     "limitations": "Behavioural factors are recorded differently by severity (more unknowns in fatal crashes in CRSS), which can create apparent interactions; objective circumstances are most trustworthy.",
     "kind": "adjusted",
     "evidence": "interactions/pairs_fatal",
-    "figure": "outputs/figures/figures/interactions.png",
+    "figure": "outputs/figures/summary/interactions.png",
     "table": "interactions/pairs_fatal.csv"
   },
   {
@@ -85,7 +85,7 @@
     "limitations": "No mileage or trip exposure exists in the data; QIE assumes non-culpable drivers represent drivers on the road (the pool is dominated by drivers struck from behind) and unbiased coding of pre-crash actions; single-vehicle crashes are excluded.",
     "kind": "estimated",
     "evidence": "exposure/relative_involvement",
-    "figure": "outputs/figures/figures/relative_involvement_age.png",
+    "figure": "outputs/figures/summary/relative_involvement_age.png",
     "table": "exposure/relative_involvement.csv"
   },
   {
@@ -128,7 +128,7 @@
     "limitations": "Recording completeness itself cannot be validated against an external gold standard in this repository.",
     "kind": "estimated",
     "evidence": "measurement/*",
-    "figure": "outputs/figures/figures/qba_heatmap.png",
+    "figure": "outputs/figures/summary/qba_heatmap.png",
     "table": "measurement/unknown_by_year.csv"
   },
   {

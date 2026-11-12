@@ -23,3 +23,10 @@ def test_named_modules_run_in_dependency_order(monkeypatch):
     ran.clear()
     cli.cmd_analyze(argparse.Namespace(modules=[]))
     assert ran == ["first", "second", "third"]
+
+
+def test_status_command_registered(capsys, monkeypatch):
+    monkeypatch.setattr(cli, "stale_tables", lambda: (["a/b.csv"], ["c/d.csv"], 2))
+    cli.main(["status"])
+    out = capsys.readouterr().out
+    assert "1 stale" in out and "stale     a/b.csv" in out and "no-hash   c/d.csv" in out

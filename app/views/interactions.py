@@ -55,7 +55,7 @@ def _domain(a: it.Exposure, b: it.Exposure) -> str | None:
     return None
 
 
-@st.cache_data(show_spinner="Fitting survey-weighted interaction model (20-90 s)…")
+@st.cache_data(show_spinner="Fitting survey-weighted interaction model…")
 def _fit_pair(
     a_var, a_exp, a_ref, b_var, b_exp, b_ref, outcome, covset, domain=None, extra=()
 ) -> dict:
@@ -119,7 +119,9 @@ def render() -> None:
                     if small
                     else round(svy_total(design, np.ones(design.n), dom).estimate / n_years, -2),
                     "crude_rate": "—" if small else fmt_pct(est.estimate, 3),
-                    "flag": "suppressed" if small else ("few events" if ev < 20 else ""),
+                    "flag": "suppressed"
+                    if small
+                    else ("few events" if ev < it.MIN_TRIPLE_EVENTS else ""),
                 }
             )
     st.subheader("Observed cells (CRSS, weighted)")
@@ -143,9 +145,9 @@ def render() -> None:
             if exp
             else ""
         )
-    if min(r["events"] for r in rows) < 20:
+    if min(r["events"] for r in rows) < it.MIN_TRIPLE_EVENTS:
         st.warning(
-            "At least one cell has fewer than 20 events: adjusted interaction estimates will be unstable."
+            f"At least one cell has fewer than {it.MIN_TRIPLE_EVENTS} events: adjusted interaction estimates will be unstable."
         )
 
     st.subheader("Adjusted interaction")
@@ -269,5 +271,5 @@ def render() -> None:
         st.caption(
             "Additive interaction > 0: the joint excess risk exceeds the sum of the separate excesses. Ratio of RRs "
             "> 1: super-multiplicative. Both are statistical interactions conditional on a reported crash, not "
-            "proof of causal synergy; behavioural factors are recorded more thoroughly in severe crashes."
+            "proof of causal synergy; behavioural factors are recorded differently by severity, which can bias associations in either direction."
         )

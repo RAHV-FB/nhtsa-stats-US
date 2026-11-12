@@ -8,6 +8,7 @@
     nhtsa analyze [MODULE ...]   run analysis modules (default: all, in dependency order)
     nhtsa all         build + analyze
     nhtsa list        list analysis modules
+    nhtsa status      list tables whose producing module changed since they were written
 
 Each analysis module exposes ``run()`` and writes its own tables/figures, so a single module
 can be re-run without rebuilding anything else.
@@ -118,6 +119,47 @@ def cmd_list(_: argparse.Namespace) -> None:
         print(f"{k:14} {v}")
 
 
+def stale_tables() -> tuple[list[str], list[str], int]:
+    """(stale, unhashed, n_checked) from the JSON sidecars under ``outputs/tables``."""
+    import json
+
+    from nhtsa_stats import config
+    from nhtsa_stats.reporting.io import module_source_sha256
+
+    stale: list[str] = []
+    unhashed: list[str] = []
+    n = 0
+    current: dict[str, str | None] = {}
+    for side in sorted(config.TABLES_DIR.rglob("*.json")):
+        try:
+            meta = json.loads(side.read_text())
+        except (OSError, ValueError):
+            continue
+        if not isinstance(meta, dict) or "module" not in meta or "table" not in meta:
+            continue  # not a table sidecar
+        n += 1
+        rel = meta["table"]
+        recorded = meta.get("source_sha256")
+        if not recorded:
+            unhashed.append(rel)
+            continue
+        mod = meta["module"]
+        if mod not in current:
+            current[mod] = module_source_sha256(mod)
+        if current[mod] != recorded:
+            stale.append(rel)
+    return stale, unhashed, n
+
+
+def cmd_status(_: argparse.Namespace) -> None:
+    stale, unhashed, n = stale_tables()
+    print(f"{n} table sidecars: {len(stale)} stale, {len(unhashed)} without source_sha256")
+    for t in stale:
+        print(f"stale     {t}")
+    for t in unhashed:
+        print(f"no-hash   {t}")
+
+
 def main(argv: list[str] | None = None) -> None:
     parser = argparse.ArgumentParser(
         prog="nhtsa", description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
@@ -132,6 +174,7 @@ def main(argv: list[str] | None = None) -> None:
         ("build", cmd_build),
         ("all", cmd_all),
         ("list", cmd_list),
+        ("status", cmd_status),
     ):
         p = sub.add_parser(name)
         p.set_defaults(func=fn)

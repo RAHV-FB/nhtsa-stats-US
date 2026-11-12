@@ -2,17 +2,17 @@
 
 Audit of the 36 NHTSA archives in `data/raw/` before any substantive modelling. Numeric
 tables are generated from code ([`generated/inventory_tables.md`](generated/inventory_tables.md));
-domain-by-domain evidence is in the appendices under [`audit/`](audit/):
+domain-by-domain evidence is in the appendices, kept in Git history only (commit 7ee597e, `docs/audit/`; the files were removed from the working tree):
 
 | Appendix | Scope |
 |---|---|
-| [`audit/crash_environment.md`](audit/crash_environment.md) | time, light, weather, rural/urban, road class, junction, work zone, manner of collision, harmful events, crash counts, crash-related factors |
-| [`audit/vehicle_roadway.md`](audit/vehicle_roadway.md) | body type, model year, roadway at the vehicle, travel speed, pre-crash events, impact, post-crash vehicle outcomes, VIN decode |
-| [`audit/person_injury_restraint.md`](audit/person_injury_restraint.md) | person type, age, sex, KABCO, seat, restraint, helmet, air bag, ejection, death timing, non-motorist location |
-| [`audit/alcohol_drugs.md`](audit/alcohol_drugs.md) | police-reported alcohol/drugs, test status and results, multiply-imputed BAC, toxicology |
-| [`audit/driver_behaviour_factors.md`](audit/driver_behaviour_factors.md) | speeding, distraction, impairment, violations, driver factors, licence history, culpability |
-| [`audit/auxiliary_derived.md`](audit/auxiliary_derived.md) | the unlabelled `A_*` derived variables, reconstructed by cross-tabulation |
-| [`audit/crss_survey_design.md`](audit/crss_survey_design.md) | CRSS strata, PSUs, weights, design effects, imputation, FARS–CRSS comparability |
+| [`audit/crash_environment.md`](https://github.com/RAHV-FB/nhtsa-stats-US/blob/7ee597e/docs/audit/crash_environment.md) | time, light, weather, rural/urban, road class, junction, work zone, manner of collision, harmful events, crash counts, crash-related factors |
+| [`audit/vehicle_roadway.md`](https://github.com/RAHV-FB/nhtsa-stats-US/blob/7ee597e/docs/audit/vehicle_roadway.md) | body type, model year, roadway at the vehicle, travel speed, pre-crash events, impact, post-crash vehicle outcomes, VIN decode |
+| [`audit/person_injury_restraint.md`](https://github.com/RAHV-FB/nhtsa-stats-US/blob/7ee597e/docs/audit/person_injury_restraint.md) | person type, age, sex, KABCO, seat, restraint, helmet, air bag, ejection, death timing, non-motorist location |
+| [`audit/alcohol_drugs.md`](https://github.com/RAHV-FB/nhtsa-stats-US/blob/7ee597e/docs/audit/alcohol_drugs.md) | police-reported alcohol/drugs, test status and results, multiply-imputed BAC, toxicology |
+| [`audit/driver_behaviour_factors.md`](https://github.com/RAHV-FB/nhtsa-stats-US/blob/7ee597e/docs/audit/driver_behaviour_factors.md) | speeding, distraction, impairment, violations, driver factors, licence history, culpability |
+| [`audit/auxiliary_derived.md`](https://github.com/RAHV-FB/nhtsa-stats-US/blob/7ee597e/docs/audit/auxiliary_derived.md) | the unlabelled `A_*` derived variables, reconstructed by cross-tabulation |
+| [`audit/crss_survey_design.md`](https://github.com/RAHV-FB/nhtsa-stats-US/blob/7ee597e/docs/audit/crss_survey_design.md) | CRSS strata, PSUs, weights, design effects, imputation, FARS–CRSS comparability |
 
 ## 1. Repository and archive inventory
 
@@ -126,7 +126,7 @@ the same fatal crashes (§4 of `variable_harmonization.md`). Therefore:
   ratios, FARS-scaled burden) are ratios of separately estimated quantities and are labelled.
 
 Details of the design analysis, including design effects and imputation, are in
-[`audit/crss_survey_design.md`](audit/crss_survey_design.md).
+[`audit/crss_survey_design.md`](https://github.com/RAHV-FB/nhtsa-stats-US/blob/7ee597e/docs/audit/crss_survey_design.md).
 
 Key design facts verified there: `PSU_VAR` is nested in `PSUSTRAT` in every year, keeps its
 stratum across years and leaves no stratum with a single PSU (the sampling `PSU` would, in
@@ -139,7 +139,7 @@ the fatal share, 3.4–11.5 for KA and 105–175 for the rural-PSU share.
 ## 7. Completeness review of the audit
 
 An independent critic checked the seven domain appendices against the full column
-inventory ([`audit/completeness_critique.md`](audit/completeness_critique.md)). It covered
+inventory ([`audit/completeness_critique.md`](https://github.com/RAHV-FB/nhtsa-stats-US/blob/7ee597e/docs/audit/completeness_critique.md)). It covered
 the twelve tables no appendix had discussed (`pbtype`, `nmcrash`, `nmprior`, `nmdistract`,
 `safetyeq`, `cevent`, `vevent`, `vsoe`, `damage`, `vehiclesf`, `pvehiclesf`,
 `vpictrailerdecode`), the FARS EMS times and coordinates, resolved nine contradictions

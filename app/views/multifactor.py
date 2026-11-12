@@ -6,6 +6,8 @@ from __future__ import annotations
 import streamlit as st
 
 from common import BLUE, output_table, point_range
+from nhtsa_stats import config
+from nhtsa_stats.analysis.factorial import MIN_EVENTS
 
 
 def render() -> None:
@@ -14,7 +16,8 @@ def render() -> None:
         "Each analysis links factors to the unit they belong to: crash-level flags for crash outcomes, the "
         "driver's own behaviour for the driver's death, the driver of the vehicle for a passenger's death, and "
         "the striking driver for pedestrians. Risks are standardised (model-based, conditional on a reported "
-        "crash); combinations with fewer than 30 sample units or 10 deaths are withheld. "
+        f"crash); combinations with fewer than {config.MIN_CELL_N} sample units or {MIN_EVENTS} deaths are "
+        "withheld. "
         "Report: `reports/multifactor_interactions.md`."
     )
     meta = output_table("multifactor", "analyses")
