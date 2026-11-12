@@ -1,0 +1,103 @@
+state,bac_basis,n_group,n_known,share,mi_se,small,estimate_type
+AK,all,176,162.1,0.125293,0.00735699,False,estimated (MI)
+AL,all,2244.7,2181.1,0.0923958,0.0021742,False,estimated (MI)
+AR,all,1282.2,1240.1,0.145889,0.00253181,False,estimated (MI)
+AZ,all,2981.3,2688.7,0.0633808,0.00235083,False,estimated (MI)
+CA,all,10339.2,9529.5,0.0976443,0.000730271,False,estimated (MI)
+CO,all,1661.7,1613.9,0.108996,0.00105875,False,estimated (MI)
+CT,all,1011.9,973,0.0427645,0.00161501,False,estimated (MI)
+DC,all,98.2,71.1,0.0311223,0.00698518,True,estimated (MI)
+DE,all,297.1,268.9,0.0513361,0.00537951,False,estimated (MI)
+FL,all,7392.8,7044.7,0.0245727,0.00053485,False,estimated (MI)
+GA,all,3395.2,3182.4,0.0876129,0.00266635,False,estimated (MI)
+HI,all,309.9,289,0.067473,0.00314789,False,estimated (MI)
+IA,all,925.4,911.5,0.134606,0.00360097,False,estimated (MI)
+ID,all,561,528.2,0.116065,0.00281874,False,estimated (MI)
+IL,all,3100.4,2865,0.0200696,0.000652358,False,estimated (MI)
+IN,all,1985.4,1893.6,0.102288,0.00364366,False,estimated (MI)
+KS,all,870.6,833.1,0.0734705,0.00319306,False,estimated (MI)
+KY,all,1455.9,1363.1,0.148415,0.00222343,False,estimated (MI)
+LA,all,1977.6,1792.6,0.073579,0.000883947,False,estimated (MI)
+MA,all,1051.3,1030.9,0.0555729,0.00211547,False,estimated (MI)
+MD,all,1474.6,1357.4,0.0161404,0.000963553,False,estimated (MI)
+ME,all,427.8,425.5,0.0881336,0.00422616,False,estimated (MI)
+MI,all,2486.3,2386.6,0.110836,0.00195192,False,estimated (MI)
+MN,all,907.7,878.7,0.135903,0.00297707,False,estimated (MI)
+MO,all,2283.5,2191.5,0.0641157,0.00145425,False,estimated (MI)
+MS,all,1294.1,1216.9,0.0571966,0.0034037,False,estimated (MI)
+MT,all,643.1,606.1,0.174233,0.00317556,False,estimated (MI)
+NC,all,3666,3556.5,0.0857803,0.00158834,False,estimated (MI)
+ND,all,307.1,291.2,0.200215,0.00438984,False,estimated (MI)
+NE,all,553.1,536.6,0.143726,0.00452181,False,estimated (MI)
+NH,all,326.6,324.5,0.0841662,0.00417015,False,estimated (MI)
+NJ,all,1255.7,1196.9,0.068005,0.00148843,False,estimated (MI)
+NM,all,1042.6,950.7,0.0594227,0.00337811,False,estimated (MI)
+NV,all,926.8,857.5,0.0870181,0.00260422,False,estimated (MI)
+NY,all,2814.8,2698.6,0.0606552,0.00248836,False,estimated (MI)
+OH,all,3599.5,3450.2,0.135715,0.00197272,False,estimated (MI)
+OK,all,1521.5,1475.8,0.0706805,0.00148775,False,estimated (MI)
+OR,all,1554.8,1476.1,0.0514329,0.00159552,False,estimated (MI)
+PA,all,2770.6,2664.4,0.0671094,0.00124118,False,estimated (MI)
+RI,all,211.5,200.4,0.0618891,0.00315264,False,estimated (MI)
+SC,all,3112,3008.6,0.0502617,0.00122052,False,estimated (MI)
+SD,all,341,331,0.180969,0.00413911,False,estimated (MI)
+TN,all,2584.5,2369,0.0838771,0.00116954,False,estimated (MI)
+TX,all,14211.1,13518.9,0.02626,0.000560662,False,estimated (MI)
+UT,all,512.3,478,0.125987,0.00448589,False,estimated (MI)
+VA,all,2238.6,2149.7,0.0854092,0.00194791,False,estimated (MI)
+VT,all,169.6,168.5,0.0789555,0.00338091,False,estimated (MI)
+WA,all,1872.2,1787.4,0.114752,0.00166421,False,estimated (MI)
+WI,all,1604.7,1558.2,0.160174,0.00308423,False,estimated (MI)
+WV,all,554.9,540.5,0.0632736,0.00274056,False,estimated (MI)
+WY,all,306.1,296.8,0.17423,0.00544435,False,estimated (MI)
+AK,measured_only,142,135,0.133333,0,False,observed
+AL,measured_only,1381,1378,0.108853,0,False,observed
+AR,measured_only,925,923,0.169014,0,False,observed
+AZ,measured_only,1138,1109,0.097385,0,False,observed
+CA,measured_only,6119,6061,0.121102,0,False,observed
+CO,measured_only,1340,1337,0.116679,0,False,observed
+CT,measured_only,664,656,0.0503049,0,False,observed
+DC,measured_only,48,39,0.025641,0,True,observed
+DE,measured_only,212,199,0.0603015,0,False,observed
+FL,measured_only,4097,4063,0.0327344,0,False,observed
+GA,measured_only,1707,1656,0.118357,0,False,observed
+HI,measured_only,214,206,0.0776699,0,False,observed
+IA,measured_only,539,532,0.18609,0,False,observed
+ID,measured_only,428,405,0.133333,0,False,observed
+IL,measured_only,1925,1875,0.0250667,0,False,observed
+IN,measured_only,1053,1033,0.126815,0,False,observed
+KS,measured_only,514,499,0.0901804,0,False,observed
+KY,measured_only,1077,1042,0.160269,0,False,observed
+LA,measured_only,1622,1529,0.0804447,0,False,observed
+MA,measured_only,704,697,0.0688666,0,False,observed
+MD,measured_only,1036,1005,0.0199005,0,False,observed
+ME,measured_only,330,330,0.1,0,False,observed
+MI,measured_only,1539,1525,0.131148,0,False,observed
+MN,measured_only,714,704,0.143466,0,False,observed
+MO,measured_only,1654,1637,0.0733048,0,False,observed
+MS,measured_only,544,534,0.088015,0,False,observed
+MT,measured_only,543,518,0.183398,0,False,observed
+NC,measured_only,1930,1912,0.104603,0,False,observed
+ND,measured_only,246,236,0.207627,0,False,observed
+NE,measured_only,429,423,0.158392,0,False,observed
+NH,measured_only,275,274,0.0875912,0,False,observed
+NJ,measured_only,894,890,0.0842697,0,False,observed
+NM,measured_only,551,534,0.0655431,0,False,observed
+NV,measured_only,645,628,0.103503,0,False,observed
+NY,measured_only,1057,1043,0.0987536,0,False,observed
+OH,measured_only,2384,2347,0.172561,0,False,observed
+OK,measured_only,1138,1136,0.0792254,0,False,observed
+OR,measured_only,1019,997,0.0692076,0,False,observed
+PA,measured_only,1543,1529,0.0778286,0,False,observed
+RI,measured_only,146,139,0.0863309,0,False,observed
+SC,measured_only,2137,2096,0.0610687,0,False,observed
+SD,measured_only,285,279,0.18638,0,False,observed
+TN,measured_only,1671,1598,0.10388,0,False,observed
+TX,measured_only,6314,6209,0.0402641,0,False,observed
+UT,measured_only,364,346,0.147399,0,False,observed
+VA,measured_only,1430,1405,0.102491,0,False,observed
+VT,measured_only,149,149,0.0872483,0,False,observed
+WA,measured_only,1194,1176,0.141156,0,False,observed
+WI,measured_only,969,959,0.182482,0,False,observed
+WV,measured_only,363,361,0.0803324,0,False,observed
+WY,measured_only,218,214,0.200935,0,False,observed

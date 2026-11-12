@@ -86,8 +86,9 @@ Not justified
     Probability of crashing (exposure is not observed); causal effects of any feature;
     permutation importance or partial dependence as evidence of preventability; use of the
     model for individual enforcement or triage decisions.  Police-reported behaviours
-    (speeding, alcohol) are ascertained more thoroughly in severe crashes, which can inflate
-    their apparent predictive value.
+    (speeding, alcohol) are recorded differently by severity (more investigation and testing
+    after a death, but police-recorded fields are more often unknown in fatal crashes), which
+    can bias severity associations and the apparent predictive value in either direction.
 """
 
 from __future__ import annotations
@@ -2079,7 +2080,9 @@ CAVEAT = (
     "circumstances is fatal (conditional on the crash having happened and been reported). "
     "It is not the probability of having a crash, not a causal effect of changing any "
     "condition, and not a prediction for an individual person. Police-reported behaviours "
-    "(speeding, alcohol) are ascertained more thoroughly in severe crashes. The interval "
+    "(speeding, alcohol) are recorded differently by severity (more investigation and "
+    "testing after a death, but police-recorded fields are more often unknown in fatal "
+    "crashes), which can bias severity associations in either direction. The interval "
     "reflects survey sampling uncertainty of the fitted model only (not model "
     "misspecification, measurement error or year-to-year drift); 'model_range' shows how "
     "much the fitted model classes disagree. Absolute levels drift between years and are "

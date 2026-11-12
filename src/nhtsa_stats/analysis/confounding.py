@@ -72,7 +72,7 @@ import itertools
 import logging
 import math
 import pickle
-from collections.abc import Callable, Iterable, Sequence
+from collections.abc import Iterable, Sequence
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -260,8 +260,8 @@ def analysis_columns() -> list[str]:
 def load_frame() -> tuple[pd.DataFrame, SurveyDesign]:
     """CRSS crashes with known severity, tri-state labels, and the night exposure column."""
     df, design = data.crss_crash(outcome="fatal", tri_state_cols=specs.CRASH_TRI)
-    if df["ka"].isna().any():
-        raise ValueError("fatal and ka must be known on the same crashes")
+    # ``fatal`` is known on every crash with a known MAXSEV_IM, ``ka`` is unknown where it is 5
+    # (injured, severity unknown); fit_subset restricts each outcome to its own known domain.
     df[NIGHT_COLUMN] = df["night"].map({1: "night", 0: "day"}).fillna("unknown").astype(object)
     df["YEAR"] = df["YEAR"].astype(int)
     keep = [*analysis_columns(), NIGHT_COLUMN, "night", "fatal", "ka", CC_OUTCOME]
@@ -380,7 +380,12 @@ def fit_subset(
     outcome: str,
     ridge: float = RIDGE,
 ) -> SubsetFit:
-    """Exposure + covariate blocks -> standardised exposed / reference margins."""
+    """Exposure + covariate blocks -> standardised exposed / reference margins.
+
+    Fitted on the crashes whose ``outcome`` is known (a domain of the full design)."""
+    known = df[outcome].notna().to_numpy()
+    if not known.all():
+        df, design = df.loc[known].reset_index(drop=True), design.subset(known)
     blocks = frozenset(blocks)
     covs = [exposure.column, *exposure.variables(sorted(blocks, key=exposure.blocks.index))]
     cells, cdesign = collapse_cells(df, design, covs, outcome)
@@ -483,16 +488,6 @@ def shapley_coefficients(players: Sequence[str]) -> dict[str, dict[frozenset[str
                 coefs[s0 | {j}] = coefs.get(s0 | {j}, 0.0) - w
         out[j] = coefs
     return out
-
-
-def shapley_values(
-    v: Callable[[frozenset[str]], float], players: Sequence[str]
-) -> dict[str, float]:
-    """Plain-number Shapley values of the reduction in ``v`` (used for tests and checks)."""
-    return {
-        j: sum(c * v(s) for s, c in coefs.items())
-        for j, coefs in shapley_coefficients(players).items()
-    }
 
 
 # --------------------------------------------------------------------------------------

@@ -750,11 +750,14 @@ def test_figures_render_from_tables(tmp_path, monkeypatch):
 @pytest.mark.processed
 def test_real_data_smoke():
     df = ml.load_crashes()
-    # Outcomes follow the project definition: MAXSEV_IM 4 vs 0-3; 5/6/8 unknown.
+    # Outcomes follow the project definition: fatal = MAXSEV_IM 4 vs 0-3 and 5/6/8 (no crash
+    # death possible: not fatal); ka stays unknown only for 5 (injured, severity unknown).
     assert set(df["fatal"].dropna().unique()) <= {0.0, 1.0}
     assert df.loc[df["MAXSEV_IM"] == 4, "fatal"].eq(1).all()
     assert df.loc[df["MAXSEV_IM"].isin([0, 1, 2, 3]), "fatal"].eq(0).all()
-    assert df.loc[df["MAXSEV_IM"].isin([5, 6, 8]), "fatal"].isna().all()
+    assert df.loc[df["MAXSEV_IM"].isin([5, 6, 8]), "fatal"].eq(0).all()
+    assert df.loc[df["MAXSEV_IM"] == 5, "ka"].isna().all()
+    assert df.loc[df["MAXSEV_IM"].isin([6, 8]), "ka"].eq(0).all()
     for stage in ml.STAGES:
         ml.check_features(ml.stage_features(stage), stage)
     # Tri-state flags keep 'unknown' (never folded into 'no').

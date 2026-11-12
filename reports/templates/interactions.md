@@ -17,9 +17,12 @@ fatal crashes, or because they tend to co-occur in all crashes. Neither pattern 
    the sum of the separate excesses. It is reported as the interaction contrast
    IC = p11 − p10 − p01 + p00, per 1,000 crashes. This scale determines how many *extra*
    fatal crashes the combination produces, so it is the relevant scale for burden and
-   targeting.
+   targeting. A positive additive interaction (IC or RERI > 0) is expected whenever two factors
+   each raise risk and combine multiplicatively, so it shows where excess deaths concentrate
+   (burden), not a special mechanism.
 3. **Multiplicative interaction**: whether the risk ratio of A differs when B is present,
-   reported as RR11 / (RR10 × RR01).
+   reported as RR11 / (RR10 × RR01). A combination is called *amplifying* in this report only
+   when this ratio of risk ratios is above 1 with a confidence interval that excludes 1.
 
 Adjusted risks p00, p10, p01, p11 are standardised predictive margins from a survey-weighted
 logistic model. The model contains the full pre-crash adjustment set (model A; model B adds
@@ -64,16 +67,18 @@ per 1,000. The two scales answer different questions. On the ratio scale, alcoho
 associated with a *smaller* relative excess in motorcycle crashes than in other crashes (the
 combination is sub-multiplicative), but because motorcycle crashes start from a much higher
 baseline, the absolute excess associated with alcohol is far larger.
-A model that is "only multiplicative" would understate how many deaths concentrate in this
-combination.
+The additive excess shows where excess deaths concentrate (burden): it is expected whenever two
+factors each raise risk, even if they combine multiplicatively or less, so it is not evidence
+of a special mechanism.
 
 **Heavy trucks on 50+ mph roads.** The additive excess is
 {{interactions/pairs_fatal|pair=heavy_truck x high_speed_road|ic|cix1000:1}} per 1,000
 (Holm p {{interactions/pairs_fatal|pair=heavy_truck x high_speed_road|ic_p_holm|.2g}}). The ratio
 of risk ratios is {{interactions/pairs_fatal|pair=heavy_truck x high_speed_road|ratio_of_rr|ci:2}}
 (Holm p {{interactions/pairs_fatal|pair=heavy_truck x high_speed_road|ratio_of_rr_p_holm|.2g}}).
-The multiplicative excess counts as supported only if its Holm-adjusted p-value is small; the
-pattern would be consistent with mass incompatibility growing with speed.
+The multiplicative excess counts as supported only if its Holm-adjusted p-value is small and
+the interval for the ratio of risk ratios excludes 1; the additive excess alone shows where
+deaths concentrate, not why.
 
 **Several commonly assumed amplifiers are not detected for the fatal outcome.** Speeding in
 unlit darkness (ratio of RRs {{interactions/pairs_fatal|pair=speeding x dark_unlit|ratio_of_rr|ci:2}})
@@ -89,7 +94,9 @@ shows an additive excess of
 at night has a ratio of risk ratios of
 {{interactions/pairs_ka|pair=young_driver x late_night|ratio_of_rr|ci:2}} for KA crashes (Holm p
 {{interactions/pairs_ka|pair=young_driver x late_night|ratio_of_rr_p_holm|.2g}}). Behavioural
-factors are recorded more thoroughly in severe crashes, which can create such patterns. Rural area × unlit darkness
+factors are recorded differently by severity, which can bias associations in either direction
+(the police-recorded alcohol, drug, distraction and speeding fields are more often unknown in
+fatal crashes, while killed drivers are tested far more often), and can create such patterns. Rural area × unlit darkness
 ({{interactions/pairs_fatal|pair=rural x dark_unlit|ratio_of_rr|ci:2}}), weekend × late night
 ({{interactions/pairs_fatal|pair=weekend x late_night|ratio_of_rr|ci:2}}) and 50+ mph road ×
 unlit darkness ({{interactions/pairs_fatal|pair=high_speed_road x dark_unlit|ratio_of_rr|ci:2}})
@@ -171,7 +178,8 @@ These are estimated only when the fully exposed cell contains at least 20 fatal 
 * **Not justified:** that darkness *causes* additional pedestrian deaths by a given amount
   (crash occurrence, exposure and unrecorded factors such as impact speed are not observed),
   or that two factors which co-occur in fatal crashes interact.
-* Behavioural factors (speeding, alcohol) are recorded more thoroughly in severe crashes
-  (`reports/findings.md`, finding 9). This can create or exaggerate apparent interactions
-  involving them. Interactions among objectively recorded circumstances (light, speed limit,
+* Behavioural factors (speeding, alcohol) are recorded differently by severity, which can bias
+  associations in either direction (`reports/findings.md`, finding 9; police-recorded fields are
+  more often unknown in fatal crashes, while killed drivers are tested far more often). This can
+  create, exaggerate or hide apparent interactions involving them. Interactions among objectively recorded circumstances (light, speed limit,
   crash type, vehicle type) are the most trustworthy.

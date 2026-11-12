@@ -4,7 +4,7 @@
  "population": "FARS 2016-2024 light passenger vehicles with one eligible driver and one right-front passenger (Phase-1 eligibility)",
  "unit": "vehicle (pair)",
  "outcome": "death",
- "method": "Evans double-pair comparison, inverse-variance combination of four components; crash-cluster percentile bootstrap (1000 replicates); heterogeneity z-test on log RR with bootstrap SEs",
+ "method": "Evans double-pair comparison, inverse-variance combination of four components; crash-cluster percentile bootstrap (1000 replicates); heterogeneity z-test on the log ratio of the two strata's RRs with the SE from a joint crash-cluster bootstrap of both strata (they can share crashes; seed offset +2)",
  "inputs": [
   "data/processed/fars_person.parquet",
   "data/processed/fars_driver.parquet"
@@ -25,9 +25,11 @@
   "se_log_bootstrap",
   "flag",
   "heterogeneity_ratio",
+  "heterogeneity_low",
+  "heterogeneity_high",
   "heterogeneity_p"
  ],
  "module": "nhtsa_stats.analysis.restraint_behaviour",
- "git_commit": "76c08de-dirty",
- "generated_utc": "2026-11-12T13:03:33Z"
+ "git_commit": "53bfb34-dirty",
+ "generated_utc": "2026-11-12T17:49:34Z"
 }

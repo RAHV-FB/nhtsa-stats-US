@@ -74,13 +74,18 @@ Intervals cover sampling error only, not recording error or model choice, unless
    (0.57 (0.45–0.73)); at 70+ mph the ratio is 0.94 (0.63–1.38). The excess
    severity of crashes involving older drivers is *unmasked*.
 7. **"Speeding" is two different things (the type split is exploratory).** Exceeding the limit is
-   strongly associated with a fatal outcome (item 2). "Too fast for conditions", three-quarters of
-   police-reported speeding-related crashes, has an adjusted fatal risk ratio of
+   strongly associated with a fatal outcome (item 2). "Too fast for conditions", the larger category (recorded in
+   7.9% of police-reported crashes, against
+   10.1% with any speeding recorded), has an adjusted fatal risk ratio of
    1.06 (0.89–1.26) under model A (its 90% interval excludes only effects beyond about
    ±22%), and
    1.29 (1.13–1.47) under model B; for fatal-or-serious outcomes
    1.18 (1.03–1.36) and 1.29 (1.18–1.42). The data
-   support a small association; they do not support "no excess".
+   support a small association; they do not support "no excess". In an exploratory follow-up added
+   after the red-team review, the pooled model-A risk ratios of finding 4 average over very different
+   crash configurations: they are much larger in multi-vehicle than in single-vehicle crashes for
+   exceeding the limit, alcohol, motorcycles and large trucks, but not for "too fast for conditions"
+   (`severity/fatal_effect_modification`).
 8. **Some combinations amplify each other**, notably pedestrian crashes in unlit darkness. For
    others that are often assumed to (speeding in darkness, young drivers late at night), no
    interaction is detected for the fatal outcome, although speeding in unlit darkness shows an
@@ -462,6 +467,39 @@ adjusted (`vulnerable/pedestrian_speed_limit_adjustment`); the adjusted figure i
 mass and front-end geometry are not separately observed. Exposure to being struck is not
 measured, so these ratios describe severity *given* a pedestrian crash.
 
+**The pooled ratios average over very different crash configurations (exploratory follow-up added
+after the red-team review).** `severity/fatal_effect_modification` refits model A within
+single-vehicle and within multi-vehicle crashes (and within crash types) and tests whether the
+adjusted fatal risk ratio is the same. It is not: the relative association is larger in
+multi-vehicle crashes, where the baseline fatal risk is low (adjusted risk ratios, 95% interval):
+
+| Circumstance | Single-vehicle | Multi-vehicle | Ratio of ratios (multi / single) | Homogeneity p |
+|---|---|---|---|---|
+| Exceeded the limit or racing | 3.3 (2.8–4.0) | 10.1 (7.9–12.9) | 3.01 (2.38–3.80) | 4.2e-12 |
+| Alcohol involved (NHTSA-imputed) | 3.1 (2.6–3.7) | 6.4 (5.2–8.0) | 2.06 (1.71–2.46) | 5.6e-10 |
+| Motorcycle involved | 4.3 (3.7–5.0) | 16.6 (14.6–18.9) | 3.88 (3.20–4.70) | 1.1e-17 |
+| Medium/heavy truck or bus involved | 1.5 (1.3–1.9) | 2.7 (2.4–3.0) | 1.75 (1.38–2.23) | 2.9e-05 |
+| Too fast for conditions | 1.0 (0.9–1.2) | 1.1 (0.8–1.4) | 1.03 (0.75–1.42) | 0.85 |
+
+The pooled model-A ratios quoted above (exceeded limit 5.22, alcohol 4.24, motorcycle 8.6, large truck or bus 1.91) are therefore averages over
+very different crash configurations and describe neither group well; "too fast for conditions" does
+not differ between single- and multi-vehicle crashes (it varies somewhat by crash type, homogeneity
+p 0.03). A ratio is a relative measure: part of the larger multi-vehicle ratios reflects a lower
+baseline risk in multi-vehicle crashes, so these ratios do not rank the absolute harm. This is an
+exploratory, post-hoc analysis (it was added after the red-team review and is outside the registered
+family), and an association conditional on a police-reported crash, not an effect. Strata with
+fewer than 20 fatal crashes in the exposed or reference cell are not estimated.
+
+**Calibration of model A** (`severity/fatal_calibration`; robustness check). Model A is calibrated
+overall (observed over predicted fatal share 1.00 (0.91–1.09)), but it over-predicts in the middle of the
+risk distribution: in deciles 3 to 5 of predicted risk the observed fatal share is
+0.74–0.80 of the predicted share (upper 95% limits at most
+0.95), while the top decile is on target
+(0.99 (0.91–1.07)). The model is fitted and checked on the same data (in-sample, predictions treated as fixed), so
+these intervals omit model-fit variability. Standardised risk ratios are averages of these
+predictions, so miscalibration in the middle deciles makes absolute risks and risk differences, and
+the attributable fractions built on them, less reliable than the relative contrasts.
+
 ## 6. Finding 5 — Which combinations amplify risk
 
 See `reports/interactions.md`. In brief: among the 13 registered pairs, pedestrian crashes in
@@ -478,6 +516,13 @@ an additive excess of 15.5 (8.7–22.2) per 1,000 crashes (Holm
 p 0.0003). The protective-looking speeding × wet interaction
 partly reflects the mix of speeding types ("too fast for conditions" concentrates on wet roads) and the
 lower wet-road baseline.
+
+*How to read the additive scale.* A positive additive interaction (IC or RERI > 0) is expected
+whenever two factors each raise risk and combine multiplicatively, so it shows where excess deaths
+concentrate (burden), not a special mechanism. This report calls a combination "amplifying" only
+when the ratio of risk ratios is above 1 with a confidence interval that excludes 1; a large
+additive excess with a ratio of risk ratios at or below 1 (motorcycle crashes involving alcohol)
+is a statement about where deaths concentrate, not about mechanism.
 
 ## 7. Finding 6 — Crash involvement is not crash severity
 
@@ -657,6 +702,8 @@ by police, partly from survivors' statements.
 
 ## 9. Finding 8 — The post-2020 rise in severity
 
+![Trends in the fatal share of police-reported crashes and in the recorded crash mix](../outputs/figures/summary/trends.png)
+
 *Sources: `trends/numerator_denominator`, `trends/decomposition`, `trends/annual_shares`,
 `trends/within_by_subgroup`, `trends/outcome_definitions_by_year`, `trends/fars_changes`.
 Method: survey-weighted Oaxaca–Blinder-type decomposition with standardised margins: the
@@ -788,6 +835,16 @@ any other cause.
   26% in 2024, whose toxicology records are
   incomplete in these archives.
   Survivors are tested mainly on suspicion.
+* **Imputed BAC leans on the outcome.** Among FARS drivers who were not tested, an imputed BAC of
+  .08 or more is associated with the driver being killed with an adjusted odds ratio of
+  3.85 (3.61–4.10), against 1.14 (1.10–1.18) for a measured BAC of .08 or more among tested drivers (adjusted for age band, sex, vehicle type, crash type, time of day and year;
+  `measurement/imputed_bac_injury`). The much stronger association for imputed values is what one
+  expects if NHTSA's imputation model uses injury severity as a predictor, so FARS figures built on
+  imputed BAC (drunk-driving death counts, the share of victims who were not the drunk driver,
+  FARS-scaled attributable deaths) lean on a model that uses the outcome, and the measured-BAC
+  figures are the more conservative basis. With police alcohol, light, area and weekend also in the
+  model the imputed odds ratio is 3.82 (3.46–4.23)
+  and the measured one 2.54 (2.42–2.65). This is a diagnostic, not a causal estimate, and the tested group is itself selected.
 * **Police reports miss alcohol in killed drivers.** Among tested FARS drivers with a known
   police report, the report identifies BAC ≥ 0.08 in
   87% of killed
@@ -819,6 +876,8 @@ any other cause.
   severity association or prevalence is reported for drugs or distraction.
 
 ## 11. Finding 10 — Burden and what can be said about interventions
+
+![Burden: deaths in overlapping segments and model-based attributable fractions](../outputs/figures/summary/burden.png)
 
 *Sources: `burden/attributable_fractions_fatal`, `policy/evidence_ledger`; details in
 `reports/policy_analysis.md`.*

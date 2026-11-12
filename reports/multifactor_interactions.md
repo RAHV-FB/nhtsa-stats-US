@@ -77,6 +77,13 @@ p11 − p10 − p01 + p00); multiplicative interaction is the same contrast on t
 deaths are withheld with every contrast using them. Holm adjustment across all contrasts of the
 six registered analyses, separately per scale.
 
+*How to read the two scales.* A positive additive interaction (contrast > 0) is expected
+whenever two factors each raise risk and combine multiplicatively, so it shows where excess
+deaths concentrate (burden), not a special mechanism. A combination is called *amplifying*
+here only when the ratio of risk ratios is above 1 with a confidence interval that excludes 1;
+"super-additive" below describes the additive scale only and is not evidence of amplification.
+The interaction margins treat the mixture weights of the factor levels as fixed.
+
 | Analysis | Population | Outcome | n | Deaths | Registered |
 |---|---|---|---|---|---|
 | crash_exceeded_x_alcohol | CRSS police-reported crashes | crash fatal | 467,008 | 9,958 | True |

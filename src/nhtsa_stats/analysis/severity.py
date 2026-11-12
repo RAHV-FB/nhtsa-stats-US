@@ -31,6 +31,7 @@ from collections.abc import Sequence
 
 import numpy as np
 import pandas as pd
+from scipy import stats
 
 from nhtsa_stats import config
 from nhtsa_stats.analysis import data, specs
@@ -41,7 +42,9 @@ from nhtsa_stats.analysis.survey import (
     ModelSpec,
     SurveyDesign,
     SurveyLogit,
+    logit_ci,
     proportion_table,
+    svy_mean,
 )
 from nhtsa_stats.processing import harmonize as h
 from nhtsa_stats.reporting.io import save_json, save_table
@@ -76,6 +79,19 @@ def crash_spec(
         categorical={c: observed_levels(df, c) for c in covariates},
         interactions=list(interactions),
     )
+
+
+POP_KNOWN = "CRSS police-reported crashes 2016-2024 with known maximum severity"
+POP_CC = (
+    "CRSS police-reported crashes 2016-2024 where the complete-case outcome is determined "
+    "(crashes with a person of unknown severity are excluded unless the outcome is already met)"
+)
+
+
+def outcome_population(outcome: str) -> str:
+    """Population string for a crash outcome: complete-case (``*_cc``) outcomes are fitted only
+    where the strict outcome is determined, the imputed outcomes wherever MAXSEV_IM is known."""
+    return POP_CC if outcome.endswith("_cc") else POP_KNOWN
 
 
 def load(outcome: str, years: Sequence[int] | None = None) -> tuple[pd.DataFrame, SurveyDesign]:
@@ -226,7 +242,7 @@ def crude_vs_adjusted(outcome: str = "fatal", years: Sequence[int] | None = None
         MODULE,
         f"{outcome}_model_coefficients",
         description=f"Survey-weighted logistic regression coefficients for crash outcome '{outcome}'",
-        population="CRSS police-reported crashes 2016-2024 with known maximum severity",
+        population=outcome_population(outcome),
         unit="crash",
         outcome=outcome,
         method="Pseudo-ML logistic regression; Taylor-linearised variance (25 strata, 67 PSUs); "
@@ -266,7 +282,7 @@ def export_model(model: SurveyLogit, outcome: str, name: str) -> None:
         {
             "outcome": outcome,
             "model": name,
-            "population": "CRSS police-reported crashes 2016-2024 with known maximum severity",
+            "population": outcome_population(outcome),
             "levels": model.spec.categorical,
             "terms": model.names_,
             "coef": model.coef_.tolist(),
@@ -698,6 +714,377 @@ def run_additional(results: dict[str, pd.DataFrame] | None = None) -> dict[str, 
     return out
 
 
+# --------------------------------------------------------------------------------------
+# Effect modification by crash configuration and calibration of model A
+# --------------------------------------------------------------------------------------
+EM_MIN_EVENTS = 20  # fatal crashes required in both the exposed and the reference cell of a stratum
+# exposure -> (model variable, exposed level, reference level, label); the two speeding
+# exposures come from the speeding-type version of model A (speeding replaced by speeding type).
+EM_EXPOSURES: dict[str, tuple[str, str, str, str]] = {
+    "exceeded_limit": (
+        "speeding_type",
+        "exceeded_limit_or_racing",
+        "no",
+        "Exceeded the posted limit or racing (police-reported)",
+    ),
+    "too_fast_for_conditions": (
+        "speeding_type",
+        "too_fast_for_conditions",
+        "no",
+        "Too fast for conditions (police-reported)",
+    ),
+    "alcohol": ("alcohol_im", "yes", "no", "Alcohol involved (NHTSA-imputed)"),
+    "motorcycle": ("any_motorcycle", "yes", "no", "Motorcycle involved"),
+    "large_truck": ("any_heavy_truck", "yes", "no", "Medium/heavy truck or bus involved"),
+}
+EM_SINGLE, EM_MULTI = "single-vehicle", "multi-vehicle"
+
+
+def homogeneity_test(log_rr: np.ndarray, vcov: np.ndarray, design_df: int) -> dict:
+    """Design-based Wald test that K stratum log risk ratios are equal.
+
+    Tests the K-1 differences from the first stratum with the adjusted-F statistic of
+    :meth:`SurveyLogit.wald_test`; ``vcov`` is the joint design covariance of the K log RRs."""
+    k = len(log_rr)
+    if k < 2:
+        return {"q": 0, "wald_chi2": np.nan, "F": np.nan, "p": np.nan}
+    c = np.hstack([-np.ones((k - 1, 1)), np.eye(k - 1)])
+    d = c @ log_rr
+    v = c @ vcov @ c.T
+    q = k - 1
+    w = float(d @ np.linalg.pinv(v) @ d)
+    if design_df - q + 1 <= 0:
+        return {"q": q, "wald_chi2": w, "F": np.nan, "p": np.nan}
+    f = (design_df - q + 1) / (design_df * q) * w
+    return {
+        "q": q,
+        "wald_chi2": w,
+        "F": f,
+        "p": float(stats.f.sf(f, q, design_df - q + 1)),
+    }
+
+
+def _em_covariates(variable: str) -> list[str]:
+    return (
+        [c if c != "speeding" else "speeding_type" for c in specs.PRE_CRASH]
+        if (variable == "speeding_type")
+        else list(specs.PRE_CRASH)
+    )
+
+
+def _em_modifier(df: pd.DataFrame, kind: str, exposure: str) -> tuple[pd.Series, list[str]]:
+    """Stratum label of every crash and the ordered strata (reference first) for one modifier.
+
+    ``vehicles``: single-vehicle (``n_vehicles`` 1; includes pedestrian and cyclist crashes) vs
+    multi-vehicle.  ``crash_type``: the harmonised crash type; types with fewer than
+    ``EM_MIN_EVENTS`` fatal crashes in the exposed or the reference cell are pooled into
+    ``other crash types`` (itself reported only if it meets the same rule)."""
+    if kind == "vehicles":
+        lab = pd.Series(
+            np.where(df["n_vehicles"].astype(str) == "1", EM_SINGLE, EM_MULTI), index=df.index
+        )
+        return lab, [EM_SINGLE, EM_MULTI]
+    var, lvl, ref, _ = EM_EXPOSURES[exposure]
+    ct = df["crash_type"].astype(str)
+    keep = []
+    for t in specs.CRASH_LEVELS["crash_type"]:
+        m = (ct == t) & (df["fatal"] == 1)
+        if (m & (df[var] == lvl)).sum() >= EM_MIN_EVENTS and (m & (df[var] == ref)).sum() >= (
+            EM_MIN_EVENTS
+        ):
+            keep.append(t)
+    lab = ct.where(ct.isin(keep), "other crash types")
+    strata_order = keep + (["other crash types"] if (lab == "other crash types").any() else [])
+    return lab, strata_order
+
+
+def _em_fit(
+    df: pd.DataFrame, design: SurveyDesign, outcome: str, variable: str, mod: pd.Series, order
+) -> SurveyLogit:
+    """Model A (variable set per exposure) plus the stratum main effect and variable x stratum."""
+    d = df.assign(_stratum=mod.to_numpy())
+    covs = _em_covariates(variable)
+    h.assert_no_leakage(covs, allow_year=True)
+    spec = ModelSpec(
+        categorical={
+            **{c: observed_levels(d, c) for c in covs},
+            "_stratum": list(order),
+        },
+        interactions=[(variable, "_stratum")],
+    )
+    model = SurveyLogit(spec, ridge=RIDGE).fit(d, d[outcome].to_numpy(), design)
+    if not model.converged_:
+        log.warning("effect-modification model for %s did not converge", variable)
+    return model
+
+
+def effect_modification(outcome: str = "fatal") -> pd.DataFrame:
+    """Adjusted fatal RR of five model-A exposures within strata of crash configuration.
+
+    For each exposure and modifier, one survey logistic model holds model A (speeding replaced
+    by speeding type for the two speeding exposures), the stratum main effect and the exposure x
+    stratum interaction; nothing else interacts with the stratum.  The stratum RR is the ratio of
+    predictive margins with the exposure set to its exposed vs reference level for every crash of
+    the stratum (a domain of the full design, so the variance keeps the whole PSU structure).
+    A stratum is reported only if it has at least ``EM_MIN_EVENTS`` fatal crashes in the exposed
+    and in the reference cell (unweighted); smaller strata are listed with ``status`` and no
+    estimate.  ``p_homogeneity_rr`` is a design-based Wald F test that the reported strata's
+    log RRs are equal (joint linearisation of the margins); ``p_interaction_logit`` tests the
+    interaction coefficients (conditional odds-ratio scale) of the same eligible strata.
+    ``pooled_*`` is the unstratified model-A RR (as in ``fatal_crude_vs_adjusted`` and
+    ``fatal_speeding_type``).  Associations conditional on a police-reported crash, not causal
+    effects; crash configuration is a possible mediator, so within-stratum RRs are net of it."""
+    df, design = load(outcome)
+    df["speeding_type"] = df["speeding_type"].fillna("unknown")
+    pooled_models = {
+        "speeding_type": fit(df, design, outcome, _em_covariates("speeding_type")),
+        "other": fit(df, design, outcome, specs.PRE_CRASH),
+    }
+    rows = []
+    for exposure, (var, lvl, ref, label) in EM_EXPOSURES.items():
+        pm = pooled_models["speeding_type" if var == "speeding_type" else "other"]
+        pc = factor_contrasts(pm, df, var, observed_levels(df, var)).set_index("level").loc[lvl]
+        pooled = {
+            "pooled_model_a_rr": pc["adj_rr"],
+            "pooled_model_a_rr_low": pc["adj_rr_low"],
+            "pooled_model_a_rr_high": pc["adj_rr_high"],
+        }
+        for kind in ("vehicles", "crash_type"):
+            mod, order = _em_modifier(df, kind, exposure)
+            model = _em_fit(df, design, outcome, var, mod, order)
+            exposed = (df[var] == lvl).to_numpy()
+            reference = (df[var] == ref).to_numpy()
+            fatal = (df[outcome] == 1).to_numpy()
+            recs, logs, infl = [], [], []
+            for stratum in order:
+                dom = (mod == stratum).to_numpy()
+                ev_e, ev_r = (
+                    int((dom & exposed & fatal).sum()),
+                    int((dom & reference & fatal).sum()),
+                )
+                rec = {
+                    "outcome": outcome,
+                    "exposure": exposure,
+                    "label": label,
+                    "modifier": "single vs multi-vehicle" if kind == "vehicles" else "crash type",
+                    "stratum": stratum,
+                    "n_crashes": int(dom.sum()),
+                    "n_exposed": int((dom & exposed).sum()),
+                    "events_exposed": ev_e,
+                    "events_reference": ev_r,
+                    "min_events_rule": EM_MIN_EVENTS,
+                }
+                ok = ev_e >= EM_MIN_EVENTS and ev_r >= EM_MIN_EVENTS
+                rec["status"] = (
+                    "ok"
+                    if ok
+                    else f"not estimated: fewer than {EM_MIN_EVENTS} fatal crashes in "
+                    "the exposed or reference cell"
+                )
+                if ok:
+                    scen = {
+                        "e": lambda d, var=var, lvl=lvl: d.assign(**{var: lvl}),
+                        "r": lambda d, var=var, ref=ref: d.assign(**{var: ref}),
+                    }
+                    dfm = df.assign(_stratum=mod.to_numpy())
+                    m1, z1 = model.margin_influence(dfm, scen["e"], dom)
+                    m0, z0 = model.margin_influence(dfm, scen["r"], dom)
+                    ms = MarginSet({"e": m1, "r": m0}, {"e": z1, "r": z0}, design)
+                    rr = ms.log_ratio("e", "r")
+                    rd = ms.difference("e", "r")
+                    rec.update(
+                        adj_rate_exposed=m1,
+                        adj_rate_reference=m0,
+                        adj_rr=float(np.exp(rr.estimate)),
+                        adj_rr_low=float(np.exp(rr.ci()[0])),
+                        adj_rr_high=float(np.exp(rr.ci()[1])),
+                        adj_rd=rd.estimate,
+                        adj_rd_low=rd.ci()[0],
+                        adj_rd_high=rd.ci()[1],
+                    )
+                    logs.append(rr.estimate)
+                    infl.append(z1 / m1 - z0 / m0)
+                    rec["_i"] = len(logs) - 1
+                recs.append(rec)
+            # Homogeneity across the estimated strata (RR scale) and the logit-scale interaction.
+            est = [r for r in recs if r["status"] == "ok"]
+            if len(est) >= 2:
+                zmat = np.column_stack(infl)
+                vcov = design.vcov_total(zmat)
+                het = homogeneity_test(np.array(logs), vcov, design.df)
+                kept = {r["stratum"] for r in est}
+                terms = [
+                    n
+                    for n in model.names_
+                    if n.startswith(f"{var}[{lvl}]:_stratum[")
+                    and n.split("_stratum[")[1].rstrip("]") in kept
+                    and n.split("_stratum[")[1].rstrip("]") != order[0]
+                ]
+                # the reference stratum of the model is order[0]; if it was not estimated the
+                # interaction test is skipped (no like-for-like set of terms)
+                lt = (
+                    model.wald_test(terms)
+                    if order[0] in kept and len(terms) == len(kept) - 1
+                    else {"p": np.nan}
+                )
+                ref_est = est[0]
+                v0 = vcov[0, 0]
+                for r in est:
+                    i = r.pop("_i")
+                    dlog = logs[i] - logs[0]
+                    se = float(np.sqrt(max(vcov[i, i] + v0 - 2 * vcov[i, 0], 0.0))) if i else 0.0
+                    r["rr_ratio_to_first_stratum"] = float(np.exp(dlog))
+                    t = design.tcrit()
+                    r["rr_ratio_low"] = float(np.exp(dlog - t * se)) if i else 1.0
+                    r["rr_ratio_high"] = float(np.exp(dlog + t * se)) if i else 1.0
+                for r in recs:
+                    r["first_stratum"] = ref_est["stratum"]
+                    r["n_strata_tested"] = len(est)
+                    r["homogeneity_F"] = het["F"]
+                    r["p_homogeneity_rr"] = het["p"]
+                    r["p_interaction_logit"] = lt["p"]
+            for r in recs:
+                r.pop("_i", None)
+                r.update(pooled)
+            rows += recs
+            log.info("effect modification %s | %s done", exposure, kind)
+    out = pd.DataFrame(rows)
+    for col in (
+        "adj_rate_exposed",
+        "adj_rate_reference",
+        "adj_rr",
+        "adj_rr_low",
+        "adj_rr_high",
+        "adj_rd",
+        "adj_rd_low",
+        "adj_rd_high",
+        "rr_ratio_to_first_stratum",
+        "rr_ratio_low",
+        "rr_ratio_high",
+        "first_stratum",
+        "n_strata_tested",
+        "homogeneity_F",
+        "p_homogeneity_rr",
+        "p_interaction_logit",
+    ):
+        if col not in out:
+            out[col] = np.nan
+    out["note"] = (
+        "association conditional on a police-reported crash, not causal; within-stratum RRs are "
+        "net of crash configuration; strata with fewer than "
+        f"{EM_MIN_EVENTS} fatal crashes in the exposed or reference cell are not estimated"
+    )
+    return out
+
+
+def weighted_deciles(p: np.ndarray, weight: np.ndarray, k: int = 10) -> np.ndarray:
+    """Decile (1..k) of ``p`` such that each holds 1/k of the total weight (ties kept together)."""
+    order = np.argsort(p, kind="stable")
+    cum = np.cumsum(weight[order]) / weight.sum()
+    dec_sorted = np.minimum((np.ceil(cum * k - 1e-12)).astype(int), k)
+    dec = np.empty(len(p), dtype=int)
+    dec[order] = np.maximum(dec_sorted, 1)
+    return dec
+
+
+def calibration_by_decile(
+    p: np.ndarray, y: np.ndarray, design: SurveyDesign, k: int = 10
+) -> pd.DataFrame:
+    """Weighted observed vs mean predicted outcome share by weighted decile of predicted risk.
+
+    Observed share with a logit CI (design-based), predicted share (mean of ``p``) with its CI,
+    and the observed minus predicted difference and the observed / predicted ratio with
+    linearised CIs.  The predictions are held fixed (in-sample fitted values of model A), so the
+    intervals do not include the variability of the fitted model."""
+    dec = weighted_deciles(p, design.weight, k)
+    t = design.tcrit()
+    rows = []
+    for g in [*range(1, k + 1), 0]:  # 0 = all crashes
+        dom = np.ones(len(p), bool) if g == 0 else dec == g
+        obs = svy_mean(design, y, dom)
+        pred = svy_mean(design, p, dom)
+        dif = svy_mean(design, y - p, dom)
+        w = design.weight * dom
+        big = float((w * p).sum())
+        ratio = float((w * y).sum()) / big
+        z = w * (y - ratio * p) / big
+        se_ratio = float(np.sqrt(design.vcov_total(z)[0, 0]))
+        lo, hi = logit_ci(obs.estimate, obs.se, design.df)
+        plo, phi = logit_ci(pred.estimate, pred.se, design.df)
+        rows.append(
+            {
+                "decile": "all" if g == 0 else g,
+                "n_crashes": int(dom.sum()),
+                "n_events": int(y[dom].sum()),
+                "predicted_min": float(p[dom].min()),
+                "predicted_max": float(p[dom].max()),
+                "observed": obs.estimate,
+                "observed_low": lo,
+                "observed_high": hi,
+                "predicted": pred.estimate,
+                "predicted_low": plo,
+                "predicted_high": phi,
+                "difference": dif.estimate,
+                "difference_low": dif.estimate - t * dif.se,
+                "difference_high": dif.estimate + t * dif.se,
+                "ratio_observed_to_predicted": ratio,
+                "ratio_low": ratio - t * se_ratio,
+                "ratio_high": ratio + t * se_ratio,
+            }
+        )
+    return pd.DataFrame(rows)
+
+
+def model_a_calibration(outcome: str = "fatal") -> pd.DataFrame:
+    """Calibration of model A (PRE_CRASH, unchanged specification) by weighted decile of risk."""
+    df, design = load(outcome)
+    model = fit(df, design, outcome, specs.PRE_CRASH)
+    out = calibration_by_decile(model.predict(df), df[outcome].to_numpy(float), design)
+    out.insert(0, "outcome", outcome)
+    return out
+
+
+def run_effect_modification(outcome: str = "fatal") -> dict[str, pd.DataFrame]:
+    """Effect modification by crash configuration and model-A calibration (fatal outcome)."""
+    common = dict(
+        population="CRSS police-reported crashes 2016-2024 with known maximum severity",
+        unit="crash",
+        inputs=["data/processed/crss_crash.parquet"],
+    )
+    out = {"fatal_effect_modification": effect_modification(outcome)}
+    save_table(
+        out["fatal_effect_modification"],
+        MODULE,
+        "fatal_effect_modification",
+        description="Adjusted fatal risk ratios of exceeding the limit, too fast for conditions, "
+        "alcohol, motorcycle and large truck within single- and multi-vehicle crashes and within "
+        "crash types, with design-based Wald tests of homogeneity and the pooled model-A RR",
+        outcome=outcome,
+        method="Model A (speeding replaced by speeding type for the speeding exposures) plus "
+        "stratum main effect and exposure x stratum interaction; stratum RR = ratio of predictive "
+        "margins over the crashes of the stratum (domain of the full design); linearised CIs "
+        f"(t, 42 df); strata need >= {EM_MIN_EVENTS} fatal crashes in the exposed and reference "
+        "cells; Wald F on the equality of the stratum log RRs (RR scale) and on the logit "
+        "interaction terms",
+        **common,
+    )
+    out["fatal_calibration"] = model_a_calibration(outcome)
+    save_table(
+        out["fatal_calibration"],
+        MODULE,
+        "fatal_calibration",
+        description="Model A calibration: weighted observed vs mean predicted fatal share by "
+        "weighted decile of predicted fatal risk, with design-based confidence intervals",
+        outcome=outcome,
+        method="Model A (published specification) fitted values; deciles hold 1/10 of the total "
+        "weight; observed and predicted shares are weighted means (logit CIs); difference and "
+        "ratio linearised; predictions treated as fixed (in-sample), so CIs omit model-fit "
+        "variability",
+        **common,
+    )
+    return out
+
+
 def run(outcomes: Sequence[str] = ("fatal", "ka", "fatal_cc", "ka_cc")) -> dict[str, pd.DataFrame]:
     out = {}
     for oc in outcomes:
@@ -707,7 +1094,7 @@ def run(outcomes: Sequence[str] = ("fatal", "ka", "fatal_cc", "ka_cc")) -> dict[
             MODULE,
             f"{oc}_crude_vs_adjusted",
             description=f"Crude and standardised adjusted risk ratios for crash outcome '{oc}' by factor level",
-            population="CRSS police-reported crashes 2016-2024 with known maximum severity",
+            population=outcome_population(oc),
             unit="crash",
             outcome=oc,
             method="Weighted rates; standardised predictive margins from survey logistic models A (pre-crash) "
@@ -721,7 +1108,7 @@ def run(outcomes: Sequence[str] = ("fatal", "ka", "fatal_cc", "ka_cc")) -> dict[
             MODULE,
             f"{oc}_speeding_type",
             description=f"Adjusted risk ratios for crash outcome '{oc}' by police-reported speeding type",
-            population="CRSS police-reported crashes 2016-2024 with known maximum severity",
+            population=outcome_population(oc),
             unit="crash",
             outcome=oc,
             method="Model A with speeding replaced by speeding type; standardised margins; linearised CIs",
@@ -763,4 +1150,5 @@ def run(outcomes: Sequence[str] = ("fatal", "ka", "fatal_cc", "ka_cc")) -> dict[
         )
         out["fatal_excluding_hit_and_run"] = hr
     out.update(run_additional(out))
+    out.update(run_effect_modification())
     return out

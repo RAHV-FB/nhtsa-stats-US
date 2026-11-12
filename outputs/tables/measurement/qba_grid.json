@@ -20,6 +20,6 @@
   "bias_factor"
  ],
  "module": "nhtsa_stats.analysis.measurement",
- "git_commit": "7ee597e-dirty",
- "generated_utc": "2026-11-12T11:40:07Z"
+ "git_commit": "53bfb34-dirty",
+ "generated_utc": "2026-11-12T18:01:13Z"
 }

@@ -17,6 +17,11 @@ Analyses (outputs/tables/measurement):
 ``police_vs_bac``         accuracy of police-reported alcohol involvement against measured BAC
                           >= 0.08 among tested FARS drivers, killed vs surviving.
 ``restraint_reporting``   reported belt use and unknown restraint among CRSS occupants by KABCO.
+``imputed_bac_injury``    diagnostic of NHTSA's multiple imputation of BAC: among FARS drivers whose BAC
+                          is imputed (not tested, no result), is the imputed BAC >= .08 associated
+                          with the driver being killed, adjusted for the covariates available to
+                          tested and untested drivers alike?  Compared with the same association
+                          among tested drivers.  Not a causal estimate (see the function).
 ``qba_grid``              quantitative bias analysis: the crude fatal risk ratio for speeding,
                           limit exceedance (vs no speeding) and alcohol after correcting for
                           differential sensitivity of recording in fatal vs non-fatal crashes,
@@ -30,13 +35,14 @@ corrected truth.
 from __future__ import annotations
 
 import logging
+from collections.abc import Sequence
 
 import numpy as np
 import pandas as pd
 
 from nhtsa_stats import config
 from nhtsa_stats.analysis import data
-from nhtsa_stats.analysis.survey import svy_mean
+from nhtsa_stats.analysis.survey import ModelSpec, SurveyLogit, svy_mean
 from nhtsa_stats.ingestion.cache import load_table
 from nhtsa_stats.processing import harmonize as h
 from nhtsa_stats.reporting.io import save_table
@@ -545,6 +551,222 @@ def alcohol_coding_sensitivity() -> pd.DataFrame:
     return pd.DataFrame(rows)
 
 
+# --------------------------------------------------------------------------------------
+# Does NHTSA's BAC imputation use injury?  (red-team item X1)
+# --------------------------------------------------------------------------------------
+IMPUTATION_COVARIATES = ("age_band", "sex", "body", "crash_type", "tod", "YEAR")
+# Sensitivity set: adds police-reported alcohol (an input of NHTSA's imputation model, known for
+# tested and untested drivers alike), light, area and weekend.
+IMPUTATION_COVARIATES_EXTENDED = (
+    *IMPUTATION_COVARIATES,
+    "pr_alcohol",
+    "light",
+    "rural",
+    "weekend",
+)
+
+
+def _levels_by_frequency(x: pd.Series) -> list:
+    """Observed levels, most frequent first (the reference level of a dummy coding)."""
+    return list(x.value_counts().index)
+
+
+def imputed_bac_injury(per: pd.DataFrame | None = None) -> pd.DataFrame:
+    """Is the imputed BAC >= .08 associated with being killed, among drivers who were not tested?
+
+    DIAGNOSTIC of whether NHTSA's imputation model uses injury, NOT a causal estimate of the
+    effect of alcohol.  For an untested driver the imputed BAC is a draw from a model; if the
+    model does not use the injury outcome, the imputed ``p08`` (share of the 10 implicates with
+    BAC >= .08) carries only what the covariates already predict about death, and its association
+    with being killed, given those covariates, is expected to be weaker than among tested drivers
+    (whose BAC is measured).  A larger or equal association among the untested suggests that
+    the imputation model does use injury.  Both groups are fitted with the same covariates
+    (age band, sex, vehicle body type, crash type, time of day, year; levels the NHTSA model may
+    have used beyond these are unavailable to us).
+
+    Rows: ``imputed`` (BAC not measured: ``ALC_RES`` outside 0-940, i.e. not tested or no result),
+    ``tested`` (measured BAC; ``p08`` is then 0 or 1) and ``imputed vs tested`` (ratio of the two
+    ORs from one model with a group x p08 interaction, Wald test of the interaction).  The OR is
+    for ``p08`` = 1 versus 0 (BAC >= .08 in every implicate versus none), from a logistic
+    regression of killed (drivers with known survival status) on ``p08`` and the covariates;
+    the CI is cluster-robust (crash = cluster, FARS census; no sampling weights).
+    """
+    per = data.fars_person() if per is None else per
+    d = per[(per["ptype"] == "driver") & per["killed"].notna() & per["p_p08"].notna()].copy()
+    d["killed"] = d["killed"].astype(float)
+    d["measured"] = d["ALC_RES"].between(0, 940)
+    d["group"] = np.where(d["measured"], "tested", "imputed")
+    d["p08"] = d["p_p08"].astype(float)
+    for c in IMPUTATION_COVARIATES_EXTENDED:
+        d[c] = d[c].astype(object).where(d[c].notna(), "unknown")
+    d = d.reset_index(drop=True)
+    design_all = data.fars_design(d)
+    rows = []
+
+    def levels(covariates: Sequence[str]) -> dict[str, list]:
+        return {c: _levels_by_frequency(d[c]) for c in covariates}
+
+    def fit(mask: np.ndarray, covariates: Sequence[str]) -> SurveyLogit:
+        sub = d.loc[mask].reset_index(drop=True)
+        spec = ModelSpec(
+            categorical={c: _levels_by_frequency(sub[c]) for c in covariates}, numeric=["p08"]
+        )
+        return SurveyLogit(spec, ridge=0.01).fit(
+            sub, sub["killed"].to_numpy(), design_all.subset(mask)
+        )
+
+    for set_name, covs in (
+        ("primary", IMPUTATION_COVARIATES),
+        ("plus police alcohol, light, area, weekend", IMPUTATION_COVARIATES_EXTENDED),
+    ):
+        for grp in ("imputed", "tested"):
+            mask = (d["group"] == grp).to_numpy()
+            crude = fit(mask, ()).coef_table().set_index("term").loc["p08"]
+            adj_model = fit(mask, covs)
+            adj = adj_model.coef_table().set_index("term").loc["p08"]
+            rows.append(
+                {
+                    "covariate_set": set_name,
+                    "group": grp,
+                    "n_drivers": int(mask.sum()),
+                    "n_killed": int(d.loc[mask, "killed"].sum()),
+                    "mean_p08": float(d.loc[mask, "p08"].mean()),
+                    "share_p08_above_half": float((d.loc[mask, "p08"] > 0.5).mean()),
+                    "crude_or": crude["odds_ratio"],
+                    "crude_or_low": crude["or_low"],
+                    "crude_or_high": crude["or_high"],
+                    "adj_or": adj["odds_ratio"],
+                    "adj_or_low": adj["or_low"],
+                    "adj_or_high": adj["or_high"],
+                    "p": adj["p"],
+                    "converged": bool(adj_model.converged_),
+                    "adjusted_for": ", ".join(covs),
+                }
+            )
+        # One model for both groups with a group x p08 interaction (a single set of covariate
+        # effects, so a summary contrast rather than the ratio of the two separate fits above).
+        pooled_spec = ModelSpec(
+            categorical={"group": ["tested", "imputed"], **levels(covs)},
+            numeric=["p08"],
+            interactions=[("group", "p08")],
+        )
+        pooled = SurveyLogit(pooled_spec, ridge=0.01).fit(d, d["killed"].to_numpy(), design_all)
+        ct = pooled.coef_table().set_index("term")
+        term = "group[imputed]:p08"
+        rows.append(
+            {
+                "covariate_set": set_name,
+                "group": "imputed vs tested",
+                "n_drivers": len(d),
+                "n_killed": int(d["killed"].sum()),
+                "adj_or": ct.loc[term, "odds_ratio"],
+                "adj_or_low": ct.loc[term, "or_low"],
+                "adj_or_high": ct.loc[term, "or_high"],
+                "p": pooled.wald_test([term])["p"],
+                "converged": bool(pooled.converged_),
+                "adjusted_for": ", ".join(covs),
+            }
+        )
+        log.info("imputed-BAC injury diagnostic: %s done", set_name)
+    out = pd.DataFrame(rows)
+    out["note"] = (
+        "diagnostic of whether NHTSA's BAC imputation uses injury; not a causal estimate; "
+        "OR for imputed/measured BAC >= .08 (p08 = 1) vs 0; last row = ratio of the two ORs"
+    )
+    return out
+
+
+_CRSS_CRASH = "CRSS police-reported crashes 2016-2024"
+_FARS_DRV = "FARS drivers (PER_TYP 1) 2016-2024"
+_TESTED = "FARS drivers with a measured BAC result and a known police alcohol field"
+# (population, unit, outcome, method) of each table, matching the code that builds it.
+META: dict[str, tuple[str, str, str, str]] = {
+    "unknown_by_severity": (
+        f"{_CRSS_CRASH}, stratified by recorded (unimputed) maximum severity "
+        "(KABCO 0-4 and 9 = unknown severity)",
+        "crash (survey-weighted)",
+        "share of crashes with each behavioural field coded unknown / yes",
+        "Design-based weighted means (WEIGHT, PSUSTRAT, PSU_VAR) within severity domains",
+    ),
+    "unknown_by_year": (
+        f"{_CRSS_CRASH}, by year; fatal = recorded MAX_SEV 4, non-fatal = 0-3 "
+        "(unknown-severity crashes excluded)",
+        "crash (survey-weighted)",
+        "share unknown / yes per field; year-on-year change in percentage points",
+        "Design-based weighted means by year and fatal status; changes >= 5 pp flagged as "
+        "potential coding breaks",
+    ),
+    "fars_crss_fatal_composition": (
+        "Fatal crashes 2016-2024: CRSS (fatal outcome known; MAXSEV_IM 4) and FARS (census)",
+        "crash (CRSS survey-weighted, FARS unweighted)",
+        "share of fatal crashes with each attribute",
+        "Design-based CRSS shares with 95% CI compared with FARS census shares; "
+        "ratio CRSS/FARS and whether FARS lies inside the CRSS CI",
+    ),
+    "fars_testing": (
+        f"{_FARS_DRV} by survival status; drug testing 2018+ only; state rows 2022-2024",
+        "driver",
+        "percent alcohol-tested, alcohol test status unknown, and drug-tested",
+        "Unweighted proportions by year x status and by state x status "
+        "(selection into measurement)",
+    ),
+    "police_vs_bac": (
+        f"{_TESTED}, by killed / survived / all",
+        "driver",
+        "police-reported alcohol versus measured BAC >= 0.08 (sensitivity, specificity, PPV)",
+        "2x2 cross-classification of police alcohol report against measured BAC >= 0.08; "
+        "unweighted counts, no sampling error",
+    ),
+    "alcohol_testing_share": (
+        f"{_FARS_DRV} by killed / survived / all with known survival status",
+        "driver",
+        "share alcohol-tested, with a BAC result, and in the police-vs-BAC sample",
+        "Unweighted shares; describes selection into the police-vs-BAC contrast",
+    ),
+    "police_vs_bac_selection": (
+        f"{_TESTED}, in state-years with a survivor test rate; survivors and killed shown "
+        "separately",
+        "driver",
+        "police sensitivity / specificity / PPV against measured BAC >= 0.08 by how widely "
+        "surviving drivers are tested",
+        "Unweighted 2x2 accuracy within state-year and state survivor test-rate terciles and "
+        "cumulative thresholds; Wilson 95% CI for sensitivity (crash clustering ignored); "
+        "descriptive, not a corrected sensitivity",
+    ),
+    "restraint_reporting": (
+        "CRSS occupants of light passenger vehicles aged 13+ 2016-2024, stratified by recorded "
+        "person severity (KABCO 0-4 and 9 = unknown)",
+        "person (survey-weighted)",
+        "percent restraint unknown; percent belted / unbelted among known restraint",
+        "Design-based weighted means within severity domains",
+    ),
+    "qba_grid": (
+        f"{_CRSS_CRASH} with known fatal outcome and known exposure "
+        "(speeding, imputed alcohol, exceeded limit vs no speeding)",
+        "crash (survey-weighted)",
+        "crude fatal risk ratio for the exposure, corrected for recording sensitivity",
+        "Quantitative bias analysis: matrix-method correction over a grid of fatal and "
+        "non-fatal recording sensitivities and specificity; assumptions, not estimates",
+    ),
+    "alcohol_coding_sensitivity": (
+        f"{_CRSS_CRASH} with known fatal outcome, periods 2016-2018, 2019-2024 and 2016-2024 "
+        "(complete-case coding drops unknown-alcohol crashes)",
+        "crash (survey-weighted)",
+        "fatal crash (MAXSEV_IM 4) versus non-fatal; adjusted risk ratio for alcohol",
+        "Design-based logistic model A with the alcohol variable swapped between imputed, "
+        "complete-case and unknown-as-no codings; adjusted RR by marginal standardisation",
+    ),
+    "imputed_bac_injury": (
+        f"{_FARS_DRV} with known survival status and an NHTSA-imputed BAC probability, "
+        "split into untested (imputed) and tested (measured BAC)",
+        "driver (FARS census, crash-clustered)",
+        "driver killed; OR for imputed/measured BAC >= .08 (p08 = 1 vs 0)",
+        "Logistic regression of killed on p08 plus covariates, cluster-robust CI, no sampling "
+        "weights; group x p08 interaction gives the ratio of ORs; diagnostic, not causal",
+    ),
+}
+
+
 def run() -> dict[str, pd.DataFrame]:
     drivers = _driver_status(data.fars_person())
     out = {
@@ -558,6 +780,7 @@ def run() -> dict[str, pd.DataFrame]:
         "restraint_reporting": restraint_reporting(),
         "qba_grid": qba_grid(),
         "alcohol_coding_sensitivity": alcohol_coding_sensitivity(),
+        "imputed_bac_injury": imputed_bac_injury(),
     }
     desc = {
         "unknown_by_severity": "Weighted % unknown / yes by KABCO for police-reported behavioural fields (CRSS crashes)",
@@ -570,14 +793,19 @@ def run() -> dict[str, pd.DataFrame]:
         "restraint_reporting": "Restraint reporting among CRSS light-vehicle occupants aged 13+ by KABCO",
         "qba_grid": "Quantitative bias analysis: crude fatal RR corrected for outcome-dependent exposure sensitivity",
         "alcohol_coding_sensitivity": "Adjusted fatal RR for alcohol under imputed / complete-case / unknown-as-no codings, by period",
+        "imputed_bac_injury": "Diagnostic (not causal): association of NHTSA's imputed BAC >= .08 with the driver being killed among untested FARS drivers, compared with tested drivers, adjusted for age band, sex, vehicle type, crash type, time of day and year",
     }
     for name, df in out.items():
+        pop, unit, outcome, method = META[name]
         save_table(
             df,
             MODULE,
             name,
             description=desc[name],
-            method="See module docstring",
+            population=pop,
+            unit=unit,
+            outcome=outcome,
+            method=method,
             inputs=["data/processed/*.parquet", "data/interim/FARS/drugs"],
         )
     return out

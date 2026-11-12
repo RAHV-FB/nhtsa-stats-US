@@ -261,6 +261,19 @@ to {{severity/speeding_type_qba|outcome=fatal;speeding_type=too_fast_for_conditi
 recording error within the grid is enough to move it on either side of one, so its direction
 is not identified.
 
+**Effect modification by crash configuration (exploratory follow-up added after the red-team
+review).** The pooled Model-A ratios above average over very different crash configurations
+(`severity/fatal_effect_modification`; adjusted fatal risk ratios within single-vehicle and
+within multi-vehicle crashes). For exceeding the limit the ratio is {{severity/fatal_effect_modification|modifier=single vs multi-vehicle;exposure=exceeded_limit;stratum=single-vehicle|adj_rr|ci:2}} in single-vehicle and
+{{severity/fatal_effect_modification|modifier=single vs multi-vehicle;exposure=exceeded_limit;stratum=multi-vehicle|adj_rr|ci:2}} in multi-vehicle crashes (ratio of ratios
+{{severity/fatal_effect_modification|modifier=single vs multi-vehicle;exposure=exceeded_limit;stratum=multi-vehicle|rr_ratio_to_first_stratum|.1f}}, homogeneity p {{severity/fatal_effect_modification|modifier=single vs multi-vehicle;exposure=exceeded_limit;stratum=single-vehicle|p_homogeneity_rr|.1e}}), against a pooled
+{{severity/fatal_effect_modification|modifier=single vs multi-vehicle;exposure=exceeded_limit;stratum=single-vehicle|pooled_model_a_rr|.2f}}. For "too fast for conditions" the ratios are
+{{severity/fatal_effect_modification|modifier=single vs multi-vehicle;exposure=too_fast_for_conditions;stratum=single-vehicle|adj_rr|ci:2}} and {{severity/fatal_effect_modification|modifier=single vs multi-vehicle;exposure=too_fast_for_conditions;stratum=multi-vehicle|adj_rr|ci:2}} (homogeneity p {{severity/fatal_effect_modification|modifier=single vs multi-vehicle;exposure=too_fast_for_conditions;stratum=single-vehicle|p_homogeneity_rr|.2f}}), so the
+weak association does not depend on the configuration split. The relative association of exceeding
+the limit is larger in multi-vehicle crashes, where the baseline fatal risk is low, so the pooled
+ratio describes neither configuration well. An association conditional on a police-reported crash,
+not an effect; the split by crash type is in the same table.
+
 ## 5c. Interstate roads by posted speed limit (exploratory)
 
 *Source: `severity/interstate_by_speed_band`. Adjusted risk ratio of a fatal crash on an
@@ -293,12 +306,13 @@ crashes than among all crashes — for exceedance
 against {{speeding/selection_by_fatality|measure=exceeded limit / racing;population=CRSS all crashes|or|.2f}}.
 Both behaviours raise the chance that a crash is fatal, so a fatal crash without alcohol is more
 likely to have *another* reason to be fatal, such as speeding (collider stratification). FARS
-records both behaviours more completely than CRSS police reports; its odds ratios
+adds toxicology results and crash investigation to the police report, although speeding remains
+a police judgement; its odds ratios
 ({{speeding/selection_by_fatality|measure=any speeding;interval=range over 10 implicates|or|.2f}}
 for any speeding, {{speeding/selection_by_fatality|measure=exceeded limit / racing;interval=range over 10 implicates|or|.2f}}
 for exceedance) are larger than the CRSS fatal-crash values but, for exceedance, still about
 half the all-crash association. Two forces therefore act on FARS-only co-occurrence statistics —
-selection on fatality weakens the association, fuller recording strengthens it — and a
+selection on fatality weakens the association, and recording that differs by system or severity can move it in either direction — and a
 "speeding and alcohol" category among deaths cannot be read as the overlap of the two
 behaviours in the crashes that produced the deaths.
 

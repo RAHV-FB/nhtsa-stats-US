@@ -134,7 +134,23 @@ def test_mdtable_missing_text_cell_is_a_dash(tmp_path, monkeypatch):
         (1.0, "x:2", "1.00×"),
         (0.6, "in10", "6 in 10"),
         (0.2487, "oneinN", "1 in 4"),
+        (5_312_000, "mn:1", "5.3"),
+        (6_849_999, "mn:1", "6.8"),
     ],
 )
 def test_site_formats(value, fmt, expected):
     assert render._fmt(value, fmt) == expected
+
+
+def test_readme_template_is_written_to_the_root(tmp_path):
+    tpl = tmp_path / "tpl"
+    tpl.mkdir()
+    (tpl / "README.md").write_text("root text\n")
+    (tpl / "report.md").write_text("report text\n")
+    out, root = tmp_path / "reports", tmp_path / "root"
+    out.mkdir()
+    root.mkdir()
+    render.render_all(template_dir=tpl, out_dir=out, root_dir=root)
+    assert (root / "README.md").read_text().endswith("root text\n")
+    assert not (out / "README.md").exists()
+    assert (out / "report.md").read_text().endswith("report text\n")

@@ -1,9 +1,12 @@
+<!-- Generated from reports/templates/README.md by `nhtsa analyze report`; every number is looked up in outputs/tables. Edit the template, not this file. -->
+
 # What makes US road crashes deadly? FARS and CRSS, 2016–2024
 
 A reproducible Python research system built on the 36 NHTSA archives in `data/raw/`: **FARS**
 (census of fatal crashes) and **CRSS** (national probability sample of police-reported crashes).
-No other data are used. Every number in `reports/` and on the website is read from an output table
-in `outputs/tables/`, each with a provenance sidecar.
+No other data are used. Every number in `reports/`, on the website and in this README is read from an output table
+in `outputs/tables/`, each with a provenance sidecar. This README is generated from
+`reports/templates/README.md` by `nhtsa analyze report`; edit the template, not this file.
 
 ## What the data answer, and what they cannot
 
@@ -44,8 +47,7 @@ Numbers are quoted as the named tables give them. Full text, intervals and cavea
   speeding driver. The ratio of belt risk ratios is 1.10 to 1.24 across four ways of layering crashes
   (lower confidence limits 1.02 or above): 1.24 (1.13–1.35) with single/multi-vehicle and rollover
   crossed (3 of 4 layers pooled), the largest of the four; the crash-type scheme pools only 3 of its 8
-  crash types. Pooling crashes first gives 1.01 (0.93–1.09). The alcohol contrast is null, 1.02
-  (0.93–1.11) (`restraint_behaviour/dpc_contrast_within_configuration`). The earlier unstratified
+  crash types. Pooling crashes first gives 1.01 (0.93–1.09). The alcohol contrast is null, 1.02 (0.93–1.11) (`restraint_behaviour/dpc_contrast_within_configuration`). The earlier unstratified
   conclusion that the belt effect does not vary with driver speeding does not hold within crash
   configuration.
 * Motorcycle helmets: 30.7% (20.6–39.9%) fewer deaths among riders and passengers of the same
@@ -54,10 +56,9 @@ Numbers are quoted as the named tables give them. Full text, intervals and cavea
   (`matched/helmet_misreporting_dpc`, `matched/helmet_pair_coverage`).
 
 **2. Conditional associations in CRSS that survive adjustment** (associations, not effects).
-* Exceeding the limit or racing: adjusted fatal risk ratio 5.22 (4.34–6.27) under model A and 4.88
-  (4.12–5.79) with crash configuration also held fixed (`severity/speeding_type_models`).
-* Motorcycle involvement 8.6 (7.8–9.6); heavy truck or bus 1.91 (1.72–2.13); unlit darkness 1.74
-  (1.50–2.00); driver aged 65+ 1.66 (1.51–1.81) (`severity/fatal_crude_vs_adjusted`).
+* Exceeding the limit or racing: adjusted fatal risk ratio 5.22 (4.34–6.27) under model A and 4.88 (4.12–5.79)
+  with crash configuration also held fixed (`severity/speeding_type_models`).
+* Motorcycle involvement 8.6 (7.8–9.6); heavy truck or bus 1.91 (1.72–2.13); unlit darkness 1.74 (1.50–2.00); driver aged 65+ 1.66 (1.51–1.81) (`severity/fatal_crude_vs_adjusted`).
 * Alcohol 4.24 (3.58–5.04) with NHTSA's imputation, 5.85 (5.01–6.83) among crashes with known police
   alcohol, 2.79 (2.37–3.29) if unknown is treated as "no" (`measurement/alcohol_coding_sensitivity`).
 * Pedestrians struck on 50–55 mph roads against 25 mph or less: 6.58 (4.83–8.96) adjusted, 12.2 without
@@ -71,6 +72,10 @@ Numbers are quoted as the named tables give them. Full text, intervals and cavea
 * Interstates are safer than comparable roads on 50–65 mph roads, 0.57 (0.45–0.73), but not at 70+ mph,
   0.94 (0.63–1.38) (`severity/interstate_by_speed_band`). Rain and teenage drivers: see
   `severity/key_contrasts_ab` (models A and B).
+* Exploratory follow-up added after the red-team review: the pooled model-A risk ratios above average over very different
+  crash configurations, and the relative association is larger in multi-vehicle crashes, where the baseline fatal risk is low.
+  Adjusted fatal risk ratios in single-vehicle against multi-vehicle crashes: exceeding the limit 3.3 against 10.1; alcohol 3.1 against 6.4; motorcycle 4.3 against 16.6; large truck or bus 1.5 against 2.7 (homogeneity p ≤ 2.9e-05 for each). "Too fast for conditions" does not differ, 1.05 against 1.08 (p 0.85)
+  (`severity/fatal_effect_modification`). Associations conditional on a police-reported crash, not causal effects.
 
 **3. Measurement.**
 * Killed drivers are tested for alcohol far more often than survivors (67.5% against 25.2%,
@@ -83,9 +88,8 @@ Numbers are quoted as the named tables give them. Full text, intervals and cavea
 * CRSS alcohol coding broke in 2019; the alcohol association is reported under three codings. Drug and
   distraction fields cannot support severity or trend analysis.
 
-**4. The post-2020 rise.** The fatal share of police-reported crashes rose by a factor of 1.25
-(1.14–1.37). The recorded crash mix accounts for 9–34% of it without
-crash configuration (model A) and 24–49% with it (model B, where configuration may itself be a mediator),
+**4. The post-2020 rise.** The fatal share of police-reported crashes rose by a factor of 1.25 (1.14–1.37). The recorded crash mix accounts for 9% to 34% of it without
+crash configuration (model A) and 24% to 49% with it (model B, where configuration may itself be a mediator),
 across four specifications and two reference periods; several of the individual intervals include zero
 (`trends/composition_robustness`). "Roughly a quarter to a half" is the model-B range only. The fall in
 reported crashes accounts for 53.6% (29.1–78.1%) of the rise in the share, or 46.2% (28.6–63.8%) under
@@ -97,9 +101,8 @@ at least one, depending on how undetermined drug status is scored (`contribution
 Drug effects cannot be ranked or estimated. Attributable fractions are model-based, change with the alcohol
 coding and model period (`burden/attributable_fraction_variants`), and are not lives saved by any programme.
 
-**Appendix: prediction models** (`docs/model_validation.md`). Boosted trees reach a test AUROC of 0.921
-(0.912–0.929) for fatal crashes in 2023–2024, but they are descriptive, not a finding about causes. Police-judged
-speeding and imputed alcohol are recorded after the crash; dropping both costs 0.016 AUROC
+**Appendix: prediction models** (`docs/model_validation.md`). Boosted trees reach a test AUROC of 0.921 (0.912–0.929) for fatal crashes in 2023–2024, but they are descriptive, not a finding about causes. Police-judged
+speeding and imputed alcohol are recorded after the crash; dropping both changes test AUROC by -0.016
 (`ml/feature_sensitivity`).
 
 **Interventions.** The policy part is an observed baseline (deaths by overlapping segment) and an evidence

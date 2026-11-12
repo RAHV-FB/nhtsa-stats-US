@@ -22,6 +22,6 @@
   "min_death_count"
  ],
  "module": "nhtsa_stats.analysis.restraint_behaviour",
- "git_commit": "76c08de-dirty",
- "generated_utc": "2026-11-12T13:05:44Z"
+ "git_commit": "53bfb34-dirty",
+ "generated_utc": "2026-11-12T17:57:45Z"
 }

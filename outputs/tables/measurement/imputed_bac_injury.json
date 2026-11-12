@@ -1,0 +1,34 @@
+{
+ "table": "measurement/imputed_bac_injury.csv",
+ "description": "Diagnostic (not causal): association of NHTSA's imputed BAC >= .08 with the driver being killed among untested FARS drivers, compared with tested drivers, adjusted for age band, sex, vehicle type, crash type, time of day and year",
+ "population": "",
+ "unit": "",
+ "outcome": "",
+ "method": "See module docstring",
+ "inputs": [
+  "data/processed/*.parquet",
+  "data/interim/FARS/drugs"
+ ],
+ "rows": 6,
+ "columns": [
+  "covariate_set",
+  "group",
+  "n_drivers",
+  "n_killed",
+  "mean_p08",
+  "share_p08_above_half",
+  "crude_or",
+  "crude_or_low",
+  "crude_or_high",
+  "adj_or",
+  "adj_or_low",
+  "adj_or_high",
+  "p",
+  "converged",
+  "adjusted_for",
+  "note"
+ ],
+ "module": "nhtsa_stats.analysis.measurement",
+ "git_commit": "53bfb34-dirty",
+ "generated_utc": "2026-11-12T18:01:13Z"
+}

@@ -29,8 +29,26 @@ log = logging.getLogger(__name__)
 MODULE = "stages"
 
 
+# Longest crash-to-EMS interval treated as plausible (12 h).  Longer intervals, and negative
+# clock differences that are not a short midnight crossing, are set to missing.
+MAX_PLAUSIBLE_EMS_MINUTES = 720
+
+
 def _minutes(h: pl.Expr, m: pl.Expr) -> pl.Expr:
     return pl.when(h.is_between(0, 23) & m.is_between(0, 59)).then(h * 60 + m)
+
+
+def _interval(t_from: pl.Expr, t_to: pl.Expr) -> pl.Expr:
+    """Minutes from ``t_from`` to ``t_to`` (clock times, minutes after midnight).
+
+    A negative difference is a midnight crossing only if the wrapped interval (+24 h) is
+    plausible (<= ``MAX_PLAUSIBLE_EMS_MINUTES``); a clock error such as arrival recorded two
+    minutes before the crash would otherwise become ~1,438 minutes.  Negative differences that
+    do not wrap to a plausible interval, and positive ones above the limit, are missing.
+    """
+    diff = t_to - t_from
+    wrapped = pl.when(diff < 0).then(diff + 1440).otherwise(diff)
+    return pl.when(wrapped <= MAX_PLAUSIBLE_EMS_MINUTES).then(wrapped)
 
 
 def ems_frame() -> pd.DataFrame:
@@ -56,9 +74,9 @@ def ems_frame() -> pd.DataFrame:
         _minutes(pl.col("NOT_HOUR"), pl.col("NOT_MIN")).alias("t_notified"),
         _minutes(pl.col("ARR_HOUR"), pl.col("ARR_MIN")).alias("t_arrived"),
     ).with_columns(
-        # Times are clock times; a negative difference crosses midnight (+24 h).
-        ((pl.col("t_arrived") - pl.col("t_crash")) % 1440).alias("min_crash_to_arrival"),
-        ((pl.col("t_notified") - pl.col("t_crash")) % 1440).alias("min_crash_to_notification"),
+        # Times are clock times; a negative difference is a midnight crossing only when short.
+        _interval(pl.col("t_crash"), pl.col("t_arrived")).alias("min_crash_to_arrival"),
+        _interval(pl.col("t_crash"), pl.col("t_notified")).alias("min_crash_to_notification"),
     )
     return acc.rename({"ST_CASE": "case_id"}).to_pandas()
 
@@ -80,9 +98,10 @@ def death_timing() -> pd.DataFrame:
         columns=["YEAR", "case_id", *[f"drv_bac08_mi_{i}" for i in range(1, 11)]],
     )
     alc = drv.group_by(["YEAR", "case_id"]).agg(
-        pl.mean_horizontal(
-            [pl.col(f"drv_bac08_mi_{i}").max().fill_null(0) for i in range(1, 11)]
-        ).alias("p_alcohol")
+        # Null (no driver with a BAC record in any implicate) stays null: unknown, not 'no'.
+        pl.mean_horizontal([pl.col(f"drv_bac08_mi_{i}").max() for i in range(1, 11)]).alias(
+            "p_alcohol"
+        )
     )
     out = per.join(proc, on=["YEAR", "case_id", "VEH_NO", "PER_NO"], how="left").join(
         alc, on=["YEAR", "case_id"], how="left"
@@ -135,21 +154,29 @@ def timing_table(d: pd.DataFrame) -> pd.DataFrame:
             float(lag[~scene].median() / 60) if (~scene).any() else np.nan
         )
         rows.append(rec)
-    # Alcohol as expected counts over implicates.
+    # Alcohol as expected counts over implicates.  Deaths whose crash has no driver BAC
+    # implicate (no driver record) are unknown: they get weight 0 in both BAC groups and are
+    # reported as their own row instead of being counted as 'no BAC >= .08'.
+    p_alc = d["p_alcohol"]
+    known = p_alc.notna()
+    scene = (d["DOA"] == 7).astype(float)
     for label, w in (
-        ("driver BAC >= .08 in crash (MI)", d["p_alcohol"].fillna(0)),
-        ("no driver BAC >= .08 (MI)", 1 - d["p_alcohol"].fillna(0)),
+        ("driver BAC >= .08 in crash (MI)", p_alc.fillna(0.0)),
+        ("no driver BAC >= .08 (MI)", (1 - p_alc).where(known, 0.0)),
+        ("driver BAC unknown (no driver BAC implicate)", (~known).astype(float)),
     ):
-        scene = (d["DOA"] == 7).astype(float)
+        tot = float(w.sum())
+        if tot == 0:
+            continue
         rows.append(
             {
                 "group": label,
-                "deaths": float(w.sum()),
-                "share_died_at_scene": float((w * scene).sum() / w.sum()),
-                "share_died_en_route": float((w * (d["DOA"] == 8)).sum() / w.sum()),
-                "share_lag_unknown": float((w * d["lag_min"].isna()).sum() / w.sum()),
+                "deaths": tot,
+                "share_died_at_scene": float((w * scene).sum() / tot),
+                "share_died_en_route": float((w * (d["DOA"] == 8)).sum() / tot),
+                "share_lag_unknown": float((w * d["lag_min"].isna()).sum() / tot),
                 "share_within_1_hour": float(
-                    (w * ((d["lag_min"] >= 0) & (d["lag_min"] < 60))).sum() / w.sum()
+                    (w * ((d["lag_min"] >= 0) & (d["lag_min"] < 60))).sum() / tot
                 ),
             }
         )
@@ -221,7 +248,8 @@ def run() -> dict[str, pd.DataFrame]:
         description="Timing of death after the crash (at scene, within 1 h, 1-24 h, 1-30 days) by group",
         population="FARS deaths 2016-2024",
         unit="person killed",
-        method="Census shares; alcohol groups as expected counts over 10 BAC implicates",
+        method="Census shares; alcohol groups as expected counts over 10 BAC implicates; deaths "
+        "in crashes with no driver BAC implicate are a separate 'unknown' row, not 'no BAC >= .08'",
         inputs=["FARS person (raw DOA, LAG_HRS, LAG_MINS)", "data/processed/fars_person.parquet"],
     )
     save_table(
@@ -231,7 +259,9 @@ def run() -> dict[str, pd.DataFrame]:
         description="Availability of EMS arrival time and minutes from crash to EMS arrival, fatal crashes",
         population="FARS fatal crashes 2016-2024",
         unit="crash",
-        method="Clock-time differences modulo 24 h; unknown codes excluded",
+        method="Clock-time differences; unknown codes excluded; a negative difference counts as a "
+        "midnight crossing (+24 h) only if the wrapped interval is <= 12 h, otherwise (clock "
+        "error) and any interval > 12 h the interval is treated as missing",
         inputs=["FARS accident (raw NOT_*, ARR_*, HOSP_*)"],
     )
     save_table(

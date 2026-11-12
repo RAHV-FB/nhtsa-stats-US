@@ -93,6 +93,7 @@ from scipy.special import expit
 from nhtsa_stats import config
 from nhtsa_stats.analysis import data, specs
 from nhtsa_stats.analysis.confounding import cluster_design, data_fingerprint
+from nhtsa_stats.analysis.descriptive import KNOWN_RESTRAINT_USE
 from nhtsa_stats.analysis.survey import (
     MarginSet,
     ModelSpec,
@@ -1136,7 +1137,23 @@ def numerator_denominator(
             )
     out = pd.DataFrame(rows)
     out["definition"] = out["outcome"].map(DEFINITION_LABELS)
+    out["flag"] = _share_of_log_rise_flag(out)
     return out
+
+
+def _share_of_log_rise_flag(out: pd.DataFrame) -> np.ndarray:
+    """Instability flag of the share-of-log-rise rows (same rule as ``decomposition_table``).
+
+    The shares are ratios with the total change, log(ratio of fatal shares), as denominator,
+    so they are unstable when that total change is not distinguishable from zero, i.e. when
+    the CI of ``ratio_fatal_share`` includes 1 (log ratio 0) in the same comparison.
+    """
+    tot = out[out["quantity"] == "ratio_fatal_share"].set_index(["outcome", "comparison"])
+    includes_zero = (tot["low"] <= 1) & (tot["high"] >= 1)
+    key = pd.MultiIndex.from_frame(out[["outcome", "comparison"]])
+    unstable = includes_zero.reindex(key).fillna(False).to_numpy(dtype=bool)
+    share_rows = out["units"].str.startswith("proportion of").to_numpy()
+    return np.where(share_rows & unstable, "total change CI includes 0: shares unstable", "")
 
 
 def outcome_definitions_by_year(ms: MarginSet, fars_counts: pd.Series) -> pd.DataFrame:
@@ -1264,7 +1281,7 @@ def fars_composition() -> tuple[pd.DataFrame, pd.DataFrame]:
         # Unrestrained share among LPV occupant deaths with known restraint use (belted, child
         # restraint or none); 'unknown' and 'not applicable' (e.g. riding in a cargo area) are
         # excluded from the denominator and counted separately.
-        known = lv["restraint"].isin(["belted", "none", "child_restraint"]).to_numpy()
+        known = lv["restraint"].isin(KNOWN_RESTRAINT_USE).to_numpy()
         unr = (lv["restraint"] == "none").to_numpy()
         if known.any():
             lvk = lv[known].reset_index(drop=True)

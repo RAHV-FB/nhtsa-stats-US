@@ -138,22 +138,6 @@ def test_victim_roles_each_group():
     )
 
 
-def test_licence_categories_with_unknown():
-    df = pl.DataFrame({"L_STATUS": [0, 1, 2, 3, 4, 6, 7, 9, None]})
-    got = df.select(D.licence_category().alias("c"))["c"].to_list()
-    assert got == [
-        "unlicensed",
-        "suspended_or_revoked",
-        "suspended_or_revoked",
-        "expired_or_cancelled",
-        "expired_or_cancelled",
-        "valid",
-        "unknown",
-        "unknown",
-        "unknown",
-    ]
-
-
 def test_driver_records_share_excludes_unknown():
     cols = {f"P{m}": 0 for m in D.IMPLICATES}
     rows = [
@@ -395,3 +379,128 @@ def test_read_effectiveness_raises_when_matched_tables_missing(tmp_path, monkeyp
     pl.DataFrame({"analysis": ["a"]}).write_csv(tmp_path / "matched" / "double_pair_comparison.csv")
     with pytest.raises(D.MatchedInputsError, match="belt_effect"):
         D.read_effectiveness()
+
+
+# --------------------------------------------------------------------------------------
+# Red-team follow-up tables
+# --------------------------------------------------------------------------------------
+def test_large_truck_crash_types_split_by_vehicle_mix():
+    veh = pl.DataFrame(
+        {
+            "YEAR": [2020] * 6,
+            "ST_CASE": [1, 2, 2, 3, 3, 4],
+            "A_BODY": [6, 6, 1, 6, 6, 6],
+            "VEH_NO": [1, 1, 2, 1, 2, 1],
+        }
+    )
+    mix = D.crash_vehicle_mix(veh)
+    lt = {"A_LT": 1, "risk_lt": False}
+    deaths = _frame(
+        [
+            # crash 1: single truck; the truck driver and a struck pedestrian die
+            {"ST_CASE": 1, **lt, "ptype": 1, "risk_lt": True, "body": 6},
+            {"ST_CASE": 1, **lt, "ptype": 3, "body": None},
+            # crash 2: truck + car; the car driver, the car passenger and the truck driver die
+            {"ST_CASE": 2, **lt, "ptype": 1, "body": 1},
+            {"ST_CASE": 2, **lt, "ptype": 2, "body": 1},
+            {"ST_CASE": 2, **lt, "ptype": 1, "risk_lt": True, "body": 6},
+            # crash 3: two trucks only
+            {"ST_CASE": 3, **lt, "ptype": 1, "risk_lt": True, "body": 6},
+            {"ST_CASE": 3, **lt, "ptype": 1, "risk_lt": True, "body": 6},
+            # crash 4: another single truck, the truck passenger dies
+            {"ST_CASE": 4, **lt, "ptype": 2, "risk_lt": True, "body": 6},
+            # not a large-truck crash: ignored
+            {"ST_CASE": 5, "ptype": 1},
+        ]
+    )
+    t = D.large_truck_crash_types_table(deaths, mix).to_dicts()
+    by = {r["crash_type"]: r for r in t}
+    assert by["single_truck"]["deaths"] == 3 and by["single_truck"]["not_truck_driver"] == 2
+    assert by["single_truck"]["share_not_truck_driver"] == pytest.approx(2 / 3)
+    assert by["single_truck"]["pedestrian_or_cyclist"] == 1
+    assert by["single_truck"]["truck_passenger"] == 1
+    tp = by["truck_and_passenger_vehicle"]
+    assert tp["deaths"] == 3 and tp["not_truck_driver"] == 2 and tp["crashes"] == 1
+    assert by["other_multi_vehicle_truck"]["share_not_truck_driver"] == 0.0
+    assert by["all"]["deaths"] == 8 and by["all"]["not_truck_driver"] == 4
+    assert sum(by[k]["deaths"] for k in D.TRUCK_CRASH_TYPES) == by["all"]["deaths"]
+    two = by[D.TWO_VEHICLE_TRUCK_PV]  # a non-exclusive subset row: crash 2 only
+    assert not two["exclusive_row"] and two["deaths"] == 3 and two["not_truck_driver"] == 2
+
+
+def test_prior_dwi_by_state_flags_small_states_and_range():
+    rows = []
+    for i in range(120):  # state 1: 120 measured BAC >= .08 drivers, 60 with a prior DWI
+        rows.append({"ST_CASE": i, "STATE": 1, **_with_p(10), "PREV_DWI": 1 if i < 60 else 0})
+    for i in range(1000, 1010):  # state 2: 10 drivers, 10 with a prior DWI
+        rows.append({"ST_CASE": i, "STATE": 2, **_with_p(10), "PREV_DWI": 2})
+    for i in range(2000, 2005):  # state 4: PREV_DWI unknown for 5 of 105 drivers
+        rows.append({"ST_CASE": i, "STATE": 4, **_with_p(10), "PREV_DWI": 99})
+    for i in range(3000, 3100):
+        rows.append({"ST_CASE": i, "STATE": 4, **_with_p(10), "PREV_DWI": 0})
+    drivers = _drivers(rows)
+    alc = drivers.select("YEAR", "ST_CASE", "VEH_NO", "PER_NO").with_columns(
+        pl.lit(100).alias("ALC_RES")
+    )
+    dm = D.add_measured_bac(drivers, alc)
+    t = D.prior_dwi_by_state_table(dm).filter(pl.col("bac_basis") == "all")
+    r = {x["state"]: x for x in t.to_dicts()}
+    assert r["AL"]["share"] == pytest.approx(0.5) and r["AL"]["n_group"] == pytest.approx(120)
+    assert not r["AL"]["small"] and r["AK"]["small"]
+    assert r["AK"]["share"] == pytest.approx(1.0)
+    assert r["AZ"]["n_group"] == pytest.approx(105) and r["AZ"]["n_known"] == pytest.approx(100)
+    assert r["AZ"]["share"] == 0.0
+    meas = D.prior_dwi_by_state_table(dm).filter(pl.col("bac_basis") == "measured_only")
+    assert meas["share"].to_list() == t["share"].to_list()  # every driver is measured here
+    rng = D.prior_dwi_state_range_table(D.prior_dwi_by_state_table(dm))
+    big = rng.filter((pl.col("bac_basis") == "all") & (pl.col("states") != "all states")).row(
+        0, named=True
+    )
+    assert big["n_states"] == 2 and big["min_state"] == "AZ" and big["max_state"] == "AL"
+    alls = rng.filter((pl.col("bac_basis") == "all") & (pl.col("states") == "all states")).row(
+        0, named=True
+    )
+    assert alls["n_states"] == 3 and alls["max_state"] == "AK" and alls["max_share"] == 1.0
+    assert alls["n_states_small"] == 1
+
+
+def test_licence_trend_with_and_without_expired_cancelled():
+    def drv(year, case, status):
+        return {"YEAR": year, "ST_CASE": case, "L_STATUS": status}
+
+    drivers = _drivers(
+        [
+            drv(2019, 1, 1),  # suspended
+            drv(2019, 2, 6),  # valid
+            drv(2019, 3, 3),  # expired
+            drv(2021, 4, 1),
+            drv(2021, 5, 1),
+            drv(2021, 6, 4),  # cancelled
+            drv(2021, 7, 3),  # expired
+            drv(2021, 8, 6),
+            drv(2024, 9, 99),  # unknown status: not in the denominator
+            drv(2024, 10, 6),
+        ]
+    )
+    deaths = _frame(
+        [{"YEAR": y, "ST_CASE": c} for y, c in [(2019, 1), (2019, 1), (2019, 2), (2019, 3)]]
+        + [{"YEAR": 2021, "ST_CASE": c} for c in (4, 5, 6, 7, 8)]
+        + [{"YEAR": 2024, "ST_CASE": 10}]
+    )
+    t = D.licence_trend_table(deaths, drivers)
+
+    def row(definition, measure):
+        return t.filter((pl.col("definition") == definition) & (pl.col("measure") == measure)).row(
+            0, named=True
+        )
+
+    a = row("invalid_incl_expired_cancelled", "deaths_in_invalid_licence_crashes")
+    assert (a["value_2019"], a["value_2021"]) == (3, 4)
+    assert a["pct_change_2019_2021"] == pytest.approx(4 / 3 - 1)
+    b = row("invalid_excl_expired_cancelled", "deaths_in_invalid_licence_crashes")
+    assert (b["value_2019"], b["value_2021"]) == (2, 2)
+    assert b["pct_change_2019_2021"] == pytest.approx(0.0)
+    c = row("invalid_incl_expired_cancelled", "driver_share")
+    assert c["value_2019"] == pytest.approx(2 / 3) and c["value_2021"] == pytest.approx(4 / 5)
+    assert c["value_2024"] == pytest.approx(0.0)  # one valid driver of known status
+    assert row("expired_or_cancelled_only", "drivers")["value_2021"] == 2

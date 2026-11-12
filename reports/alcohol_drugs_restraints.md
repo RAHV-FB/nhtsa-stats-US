@@ -305,25 +305,32 @@ crash-cluster bootstrap CIs), `restraint_behaviour/crss_unbelted_nested` (CRSS, 
 **Within the same vehicle** (driver and right-front passenger; risk ratio of death, belted vs
 unbelted):
 
-| Split | Stratum | Pairs | RR belted vs unbelted | Ratio of RRs (2nd vs 1st stratum) | p (heterogeneity) |
+| Split | Stratum | Pairs | RR belted vs unbelted | Ratio of RRs (2nd vs 1st stratum), 95% CI | p (heterogeneity) |
 |---|---|---|---|---|---|
 | all | all vehicles | 90,240 | 0.34 (0.33–0.35) | — | — |
 | driver speeding (any) | driver not speeding | 71,376 | 0.34 (0.32–0.36) | — | — |
-| driver speeding (any) | driver speeding | 16,457 | 0.34 (0.32–0.36) | 1.01 | 0.88 |
+| driver speeding (any) | driver speeding | 16,457 | 0.34 (0.32–0.36) | 1.01 (0.93–1.09) | 0.88 |
 | driver exceeded limit | driver not speeding | 71,376 | 0.34 (0.32–0.36) | — | — |
-| driver exceeded limit | driver exceeded limit / racing | 6,969 | 0.36 (0.33–0.39) | 1.06 | 0.25 |
+| driver exceeded limit | driver exceeded limit / racing | 6,969 | 0.36 (0.33–0.39) | 1.06 (0.96–1.17) | 0.26 |
 | driver BAC >= .08 (MI) | driver BAC < .08 | 77,920 | 0.35 (0.34–0.37) | — | — |
-| driver BAC >= .08 (MI) | driver BAC >= .08 | 12,320 | 0.32 (0.30–0.34) | 0.90 | 0.01 |
+| driver BAC >= .08 (MI) | driver BAC >= .08 | 12,320 | 0.32 (0.30–0.34) | 0.90 (0.83–0.97) | 0.0099 |
 | driver speeding and alcohol | neither | 65,111 | 0.35 (0.33–0.37) | — | — |
-| driver speeding and alcohol | both | 5,597 | 0.34 (0.30–0.37) | 0.96 | 0.47 |
+| driver speeding and alcohol | both | 5,597 | 0.34 (0.30–0.37) | 0.96 (0.86–1.07) | 0.47 |
 | vehicles in crash | multi-vehicle | 60,288 | 0.44 (0.42–0.46) | — | — |
-| vehicles in crash | single vehicle | 29,952 | 0.27 (0.26–0.29) | 0.61 | 3.1e-38 |
+| vehicles in crash | single vehicle | 29,952 | 0.27 (0.26–0.29) | 0.61 (0.57–0.66) | 3.5e-38 |
 | time | day | 61,345 | 0.35 (0.33–0.37) | — | — |
-| time | night | 28,702 | 0.33 (0.31–0.35) | 0.93 | 0.059 |
+| time | night | 28,702 | 0.33 (0.31–0.35) | 0.93 (0.86–1.00) | 0.055 |
 
 Overall, the within-vehicle belt risk ratio is the same whether or not the driver was
 speeding (and similar with exceedance), and slightly lower with a driver at BAC ≥ .08
 (p 0.01).
+The BAC ≥ .08 splits use NHTSA-imputed BAC (MI) for untested drivers. Among untested
+drivers an imputed BAC of .08 or more is associated with being killed with an adjusted odds ratio of
+3.85 (3.61–4.10), against 1.14 (1.10–1.18) for a measured BAC among tested drivers
+(`measurement/imputed_bac_injury`), which is what one would expect if the imputation model uses
+injury; BAC-based splits therefore lean on a model that uses the outcome, and measured-BAC results
+are the more conservative basis. This is a diagnostic, not a causal estimate.
+
 That overall comparison does not hold crash configuration fixed, and the configuration differs
 between the groups. Within crash configuration the picture changes
 (`restraint_behaviour/dpc_contrast_within_configuration`; ratio of the belt risk ratio with the

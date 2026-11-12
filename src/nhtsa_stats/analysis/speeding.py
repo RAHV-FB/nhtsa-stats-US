@@ -880,10 +880,4 @@ def run(cache_dir: Path | None = config.OUTPUT_DIR / "cache") -> dict[str, pd.Da
     return out
 
 
-def reproduce_phase1(df: pd.DataFrame, design: SurveyDesign) -> float:
-    """Exceedance RR with the model-A block set (should equal severity/fatal_speeding_type)."""
-    ex = EXPOSURES["exceeded"]
-    return float(np.exp(cf.fit_subset(df, design, ex, [*ENV_BLOCKS, "alcohol"], "fatal").log_rr))
-
-
 __all__: Sequence[str] = ("EXPOSURES", "load_frame", "run")

@@ -1,0 +1,36 @@
+{
+ "table": "deaths/large_truck_crash_types.csv",
+ "description": "Deaths in large-truck crashes by who was killed (truck driver or not), for single-truck crashes, truck vs passenger-vehicle crashes and other multi-vehicle truck crashes; not a statement about fault",
+ "population": "FARS fatal crashes 2016-2024 (census)",
+ "unit": "person killed",
+ "outcome": "death (INJ_SEV 4)",
+ "method": "Census counts; large-truck crash = acc_aux A_LT 1; crash type from the number of motor vehicles in the crash and their veh_aux A_BODY (6 large truck, 1-5 passenger vehicle); truck driver = driver of the large-truck vehicle (victim_roles definition)",
+ "inputs": [
+  "FARS person (INJ_SEV, PER_TYP, AGE, SEX, LOCATION, STR_VEH)",
+  "FARS per_aux",
+  "FARS vehicle (L_STATUS, PREV_*, MOD_YEAR, VSPD_LIM)",
+  "FARS veh_aux",
+  "FARS accident (LGT_COND)",
+  "FARS acc_aux",
+  "FARS midrvacc",
+  "FARS miper"
+ ],
+ "rows": 5,
+ "columns": [
+  "crash_type",
+  "exclusive_row",
+  "crashes",
+  "deaths",
+  "truck_driver",
+  "not_truck_driver",
+  "share_not_truck_driver",
+  "truck_passenger",
+  "other_vehicle_occupant",
+  "pedestrian_or_cyclist",
+  "other_nonoccupant",
+  "estimate_type"
+ ],
+ "module": "nhtsa_stats.analysis.deaths",
+ "git_commit": "53bfb34-dirty",
+ "generated_utc": "2026-11-12T17:59:28Z"
+}

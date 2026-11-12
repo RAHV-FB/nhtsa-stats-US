@@ -1,0 +1,6 @@
+crash_type,exclusive_row,crashes,deaths,truck_driver,not_truck_driver,share_not_truck_driver,truck_passenger,other_vehicle_occupant,pedestrian_or_cyclist,other_nonoccupant,estimate_type
+single_truck,True,9048,9324,4213,5111,0.548155,722,0,4156,233,observed
+truck_and_passenger_vehicle,True,28544,32949,1318,31631,0.959999,215,30536,859,21,observed
+other_multi_vehicle_truck,True,4506,4902,1533,3369,0.687271,288,2942,136,3,observed
+two_vehicle_truck_and_passenger_vehicle,False,21766,24634,762,23872,0.969067,138,23184,533,17,observed
+all,True,42098,47175,7064,40111,0.85026,1225,33478,5151,257,observed

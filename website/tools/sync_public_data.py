@@ -33,6 +33,7 @@ CITED = [
     "matched/helmet_pair_coverage",
     "restraint_behaviour/dpc_contrast_within_configuration",
     "severity/speeding_type_models",
+    "severity/fatal_effect_modification",
     "vulnerable/pedestrian_speed_limit_adjustment",
     "vulnerable/speed_limit_missingness",
 ]

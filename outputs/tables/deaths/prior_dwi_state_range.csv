@@ -1,0 +1,5 @@
+bac_basis,states,n_states,min_share,min_state,max_share,max_state,median_share,min_n_group,n_states_small
+all,all states,51,0.0161404,MD,0.200215,ND,0.0841662,98,1
+all,states with >= 100 drivers,50,0.0161404,MD,0.200215,ND,0.0847877,169,1
+measured_only,all states,51,0.0199005,MD,0.207627,ND,0.1,48,1
+measured_only,states with >= 100 drivers,50,0.0199005,MD,0.207627,ND,0.101246,142,1

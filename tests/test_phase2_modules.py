@@ -358,23 +358,76 @@ def test_dpc_by_stratum_heterogeneity_arithmetic(monkeypatch):
 
     monkeypatch.setattr(matched, "pair_frame", fake_pair_frame)
     monkeypatch.setattr(matched, "dpc_analysis", fake_dpc)
+    seen = []
+
+    def fake_joint(el, beh_mask, ref_mask, rng, n_boot):
+        seen.append((int(beh_mask.sum()), int(ref_mask.sum())))
+        return 0.05  # a joint SE well below hypot(0.1, 0.1) = 0.141
+
+    monkeypatch.setattr(restraint_behaviour, "joint_log_ratio_se", fake_joint)
     out = restraint_behaviour.dpc_by_stratum(elig, np.random.default_rng(0), n_boot=1)
+    assert seen  # the test calls the joint bootstrap, one call per two-stratum split
     r = out[(out["split"] == "driver speeding (any)")].set_index("stratum")
     assert np.isnan(
         r.loc["driver not speeding", "heterogeneity_ratio"]
     )  # only on the second stratum
     het = r.loc["driver speeding", "heterogeneity_ratio"]
     assert het == pytest.approx(0.5)
-    z = np.log(0.5) / np.hypot(0.1, 0.1)
+    # The SE is the joint-bootstrap SE (0.05), not hypot of the arm SEs (0.141).
+    z = np.log(0.5) / 0.05
     from scipy import stats
 
     assert r.loc["driver speeding", "heterogeneity_p"] == pytest.approx(2 * stats.norm.sf(abs(z)))
+    assert r.loc["driver speeding", "heterogeneity_low"] == pytest.approx(
+        np.exp(np.log(0.5) - 1.96 * 0.05)
+    )
+    assert r.loc["driver speeding", "heterogeneity_high"] == pytest.approx(
+        np.exp(np.log(0.5) + 1.96 * 0.05)
+    )
     row = r.loc["driver not speeding"]
     assert row["reduction"] == pytest.approx(0.5)
     assert row["reduction_low"] == pytest.approx(1 - 1.0)  # 1 - rr_high
     assert row["reduction_high"] == pytest.approx(1 - 0.25)  # 1 - rr_low
     # The "all" split has one stratum and so no heterogeneity test.
     assert out[out["split"] == "all"]["heterogeneity_p"].isna().all()
+
+
+def test_dpc_by_stratum_heterogeneity_uses_joint_bootstrap_for_shared_crashes(monkeypatch):
+    """Real DPC on synthetic data.  The heterogeneity SE must be ``joint_log_ratio_se`` seeded as
+    documented (RANDOM_SEED + 2), not hypot of the arm SEs: when both strata hold the same
+    crashes the joint SE collapses far below the independent one."""
+    from scipy import stats
+
+    from nhtsa_stats import config
+
+    n_boot = 300
+    full = restraint_behaviour.strata
+    only = lambda e: {"driver exceeded limit": full(e)["driver exceeded limit"]}  # noqa: E731
+    monkeypatch.setattr(restraint_behaviour, "strata", only)
+    se_by = {}
+    for shared in (False, True):
+        elig = _shared_crash_frame(1500, shared)
+        elig["drv_p_p08"] = 0.0
+        elig["n_vehicles"] = "2"
+        elig["night"] = 0
+        out = restraint_behaviour.dpc_by_stratum(elig, np.random.default_rng(1), n_boot=n_boot)
+        r = out.set_index("stratum")
+        a, b = r.loc["driver not speeding"], r.loc["driver exceeded limit / racing"]
+        masks = list(only(elig)["driver exceeded limit"].values())
+        se = restraint_behaviour.joint_log_ratio_se(
+            elig, masks[1], masks[0], np.random.default_rng(config.RANDOM_SEED + 2), n_boot
+        )
+        d = np.log(b["rr_belted_vs_unbelted"]) - np.log(a["rr_belted_vs_unbelted"])
+        hyp = np.hypot(a["se_log_bootstrap"], b["se_log_bootstrap"])
+        # CI half-width on the log scale = 1.96 * joint SE
+        assert (np.log(b["heterogeneity_high"]) - np.log(b["heterogeneity_low"])) / 3.92 == (
+            pytest.approx(se)
+        )
+        if not shared:
+            assert b["heterogeneity_p"] == pytest.approx(2 * stats.norm.sf(abs(d / se)))
+        se_by[shared] = (se, hyp)
+    assert se_by[True][0] < 0.1 * se_by[True][1]  # identical vehicles in both strata
+    assert se_by[False][0] == pytest.approx(se_by[False][1], rel=0.2)
 
 
 def test_pool_log_ratios_inverse_variance_and_heterogeneity():

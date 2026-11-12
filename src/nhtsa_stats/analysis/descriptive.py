@@ -172,6 +172,18 @@ def rec_events(ind: np.ndarray, is_fatal: np.ndarray) -> int:
     return int((ind * is_fatal).sum())
 
 
+# Known restraint use among FARS passenger-vehicle occupant deaths: belted, child restraint
+# (counted as restrained) or none.  'unknown' and 'not applicable' are excluded from the
+# denominator.  Single definition shared with ``trends.fars_composition``.
+KNOWN_RESTRAINT_USE = ("belted", "none", "child_restraint")
+
+
+def unrestrained_share_of_known(restraint: pd.Series) -> float:
+    """Share 'none' among occupants with known restraint use (child restraint = restrained)."""
+    known = restraint[restraint.isin(KNOWN_RESTRAINT_USE)]
+    return float((known == "none").mean()) if len(known) else float("nan")
+
+
 def fars_composition_by_year() -> pd.DataFrame:
     crash = data.fars_crash()
     per = data.fars_person()
@@ -182,7 +194,6 @@ def fars_composition_by_year() -> pd.DataFrame:
     for y, g in crash.groupby("YEAR"):
         k = killed[killed["YEAR"] == y]
         lv = lpv[lpv["YEAR"] == y]
-        known_belt = lv["restraint"].isin(["belted", "none"])
         rows.append(
             {
                 "YEAR": y,
@@ -201,9 +212,9 @@ def fars_composition_by_year() -> pd.DataFrame:
                 * ((k["body"] == "motorcycle") & k["ptype"].isin(["driver", "passenger"])).mean(),
                 "lpv_occupant_deaths": len(lv),
                 "pct_lpv_deaths_unrestrained_of_known": 100
-                * (lv.loc[known_belt, "restraint"] == "none").mean(),
+                * unrestrained_share_of_known(lv["restraint"]),
                 "pct_lpv_deaths_restraint_unknown": 100
-                * (~lv["restraint"].isin(["belted", "none", "child_restraint"])).mean(),
+                * (~lv["restraint"].isin(KNOWN_RESTRAINT_USE)).mean(),
             }
         )
     return pd.DataFrame(rows)

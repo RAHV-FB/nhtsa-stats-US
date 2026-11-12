@@ -293,11 +293,18 @@ crash-cluster bootstrap CIs), `restraint_behaviour/crss_unbelted_nested` (CRSS, 
 **Within the same vehicle** (driver and right-front passenger; risk ratio of death, belted vs
 unbelted):
 
-{{mdtable:restraint_behaviour/dpc_by_driver_behaviour||split:Split:;stratum:Stratum:;n_pairs:Pairs:,.0f;rr_belted_vs_unbelted:RR belted vs unbelted:ci:2@rr;heterogeneity_ratio:Ratio of RRs (2nd vs 1st stratum):.2f;heterogeneity_p:p (heterogeneity):.2g}}
+{{mdtable:restraint_behaviour/dpc_by_driver_behaviour||split:Split:;stratum:Stratum:;n_pairs:Pairs:,.0f;rr_belted_vs_unbelted:RR belted vs unbelted:ci:2@rr;heterogeneity_ratio:Ratio of RRs (2nd vs 1st stratum), 95% CI:ci:2@heterogeneity;heterogeneity_p:p (heterogeneity):.2g}}
 
 Overall, the within-vehicle belt risk ratio is the same whether or not the driver was
 speeding (and similar with exceedance), and slightly lower with a driver at BAC ≥ .08
 (p {{restraint_behaviour/dpc_by_driver_behaviour|split=driver BAC >= .08 (MI);stratum=driver BAC >= .08|heterogeneity_p|.2f}}).
+The BAC ≥ .08 splits use NHTSA-imputed BAC (MI) for untested drivers. Among untested
+drivers an imputed BAC of .08 or more is associated with being killed with an adjusted odds ratio of
+{{measurement/imputed_bac_injury|covariate_set=primary;group=imputed|adj_or|ci:2@adj_or}}, against {{measurement/imputed_bac_injury|covariate_set=primary;group=tested|adj_or|ci:2@adj_or}} for a measured BAC among tested drivers
+(`measurement/imputed_bac_injury`), which is what one would expect if the imputation model uses
+injury; BAC-based splits therefore lean on a model that uses the outcome, and measured-BAC results
+are the more conservative basis. This is a diagnostic, not a causal estimate.
+
 That overall comparison does not hold crash configuration fixed, and the configuration differs
 between the groups. Within crash configuration the picture changes
 (`restraint_behaviour/dpc_contrast_within_configuration`; ratio of the belt risk ratio with the

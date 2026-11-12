@@ -76,7 +76,7 @@ These are associations conditional on a police-reported crash; residual confound
 recording of behaviours after the crash can inflate them (finding 9 in `reports/findings.md`).
 Alcohol involvement is strongly associated with a fatal outcome under every coding
 (`reports/findings.md`, finding 4). Drug involvement cannot support even the association: drug
-status is unknown for about half of fatal crashes, testing is selective by injury severity and
+status is unknown for 53% of fatal crashes in CRSS, testing is selective by injury severity and
 state, coding changed in 2019–2020, and a positive test shows presence, not impairment. Within
 the same vehicle in fatal crashes, belted occupants were less likely to die than unbelted ones
 (`reports/findings.md`, finding 7); that estimate is conditional on a fatal crash and sensitive to

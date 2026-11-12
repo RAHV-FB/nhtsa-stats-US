@@ -1,0 +1,30 @@
+{
+ "table": "deaths/prior_dwi_state_range.csv",
+ "description": "Range and median of the state prior-DWI shares among BAC >= .08 drivers, for all states and for states with at least 100 such drivers",
+ "population": "FARS fatal crashes 2016-2024 (census)",
+ "unit": "state",
+ "outcome": "death (INJ_SEV 4)",
+ "method": "Unweighted min, max and median over the state rows of prior_dwi_by_state",
+ "inputs": [
+  "FARS person (PER_TYP)",
+  "FARS vehicle (L_STATUS, PREV_*)",
+  "FARS veh_aux (A_SPVEH)",
+  "FARS miper"
+ ],
+ "rows": 4,
+ "columns": [
+  "bac_basis",
+  "states",
+  "n_states",
+  "min_share",
+  "min_state",
+  "max_share",
+  "max_state",
+  "median_share",
+  "min_n_group",
+  "n_states_small"
+ ],
+ "module": "nhtsa_stats.analysis.deaths",
+ "git_commit": "53bfb34-dirty",
+ "generated_utc": "2026-11-12T17:59:28Z"
+}

@@ -4,6 +4,7 @@ arithmetic and the stratified bias analysis (synthetic inputs)."""
 from __future__ import annotations
 
 import itertools
+import re
 
 import numpy as np
 import pandas as pd
@@ -207,49 +208,10 @@ def test_shapley_tables_are_efficient():
         assert shap == pytest.approx(joint, rel=1e-6), ps
 
 
-def test_readme_numbers_match_tables():
-    readme = (Path(config.PROJECT_ROOT) / "README.md").read_text()
-    ov = _t("contributions", "fars_overlap_summary").set_index("factor")
-    tr = _t("contributions", "fars_overlap_treatments").set_index("drug_status_handling")
-    sp = _t("speeding", "crss_overrepresentation").set_index("speeding")
-    exc = sp.loc["exceeded_limit_or_racing"]
-    checks = [
-        f"at least {100 * ov.loc['sum of the four factor counts', 'share_of_all_deaths']:.0f}% of deaths",
-        f"between {100 * tr.loc['undetermined = no drug', 'share_with_any_factor']:.1f}%",
-        f"{100 * tr.loc['undetermined = drug', 'share_with_any_factor']:.1f}% involve",
-        f"{exc['crss_only_ratio']:.2f} ({exc['crss_only_ratio_low']:.2f}–{exc['crss_only_ratio_high']:.2f})",
-    ]
-    comp = _t("trends", "composition_robustness")
-    shares = comp[
-        comp["quantity"].isin(
-            ["composition_share_of_change_ref_P0", "composition_share_of_change_ref_P1"]
-        )
-    ]
-    for cov in ("A", "B"):
-        e = shares.loc[shares["covariate_set"] == cov, "estimate"]
-        checks.append(f"{100 * e.min():.0f}–{100 * e.max():.0f}%")
-    assert shares["low"].lt(0).any()  # the README says several intervals include zero
-    cw = _t("restraint_behaviour", "dpc_contrast_within_configuration")
-    spd = cw[cw["contrast"] == "driver speeding (any) vs not speeding"]
-    pooled = spd[spd["layer"] == "pooled within layers"]
-    checks.append(f"{pooled['ratio_of_rrs'].min():.2f} to {pooled['ratio_of_rrs'].max():.2f}")
-    checks.append(f"lower confidence limits {pooled['ratio_low'].min():.2f} or above")
-    crossed = pooled[pooled["adjustment"] == "single/multi-vehicle x rollover"].iloc[0]
-    checks.append(
-        f"{crossed['ratio_of_rrs']:.2f} ({crossed['ratio_low']:.2f}–{crossed['ratio_high']:.2f})"
-    )
-    unstrat = spd[spd["adjustment"].str.startswith("none")].iloc[0]
-    checks.append(
-        f"{unstrat['ratio_of_rrs']:.2f} ({unstrat['ratio_low']:.2f}–{unstrat['ratio_high']:.2f})"
-    )
-    bac = cw[
-        (cw["contrast"] == "driver BAC >= .08 (MI) vs BAC < .08")
-        & (cw["adjustment"] == "single/multi-vehicle x rollover")
-        & (cw["layer"] == "pooled within layers")
-    ].iloc[0]
-    checks.append(f"{bac['ratio_of_rrs']:.2f} ({bac['ratio_low']:.2f}–{bac['ratio_high']:.2f})")
-    ncrash = int(pooled.loc[pooled["adjustment"] == "crash type", "n_layers_pooled"].iloc[0])
-    checks.append(f"pools only {ncrash} of its 8 crash types")
-    flat = " ".join(readme.split())
-    missing = [k for k in checks if k not in flat]
-    assert not missing, missing
+def test_readme_is_generated_from_tables():
+    """README numbers are placeholders in reports/templates/README.md; the in-sync test
+    (tests/test_reports_in_sync.py) guarantees the committed README is a fresh render, so only
+    check that no hand-typed estimate with a confidence interval is left in the template."""
+    template = (Path(config.PROJECT_ROOT) / "reports" / "templates" / "README.md").read_text()
+    stripped = re.sub(r"\{\{.*?\}\}", "", template, flags=re.DOTALL)
+    assert not re.search(r"\d\.\d+ \(\d", stripped), "hand-typed estimate with an interval"

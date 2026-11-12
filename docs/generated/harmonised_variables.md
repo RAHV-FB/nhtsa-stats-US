@@ -85,11 +85,19 @@ Timing classes: `pre_crash` and `crash_circumstance` may enter severity models; 
 
 ### `fatal(col: 'str' = 'INJ_SEV') -> 'pl.Expr'`
 
-1 = fatal (K); 0 = O/C/B/A; null = 5, 6, 8, 9 (severity unknown / not a crash death).
+1 = fatal (K); 0 = O/C/B/A and also 5, 6, 8; null = 9 (unknown).
+
+A person (or crash) with a crash death has code 4, so 5 (injured, severity unknown), 6
+(died prior to the crash, not a crash death) and 8 (MAX_SEV only: no person involved)
+can contain no crash fatality and are 'not fatal'.  Only 9 (unknown) leaves the outcome
+undetermined.  Caveat for the complete-case versions: a crash whose *other* persons are
+unknown (INJ_SEV 9) is handled by ``fatal_cc`` in ``features.build_crss``, not here.
 
 ### `killed_or_serious(col: 'str' = 'INJ_SEV') -> 'pl.Expr'`
 
-1 = K or A; 0 = O/C/B; null = 5, 6, 8, 9.
+1 = K or A; 0 = O/C/B and also 6, 8 (no crash K/A possible); null = 5, 9.
+
+5 (injured, severity unknown) stays null: that person may have had a serious (A) injury.
 
 ### `any_injury(col: 'str' = 'INJ_SEV') -> 'pl.Expr'`
 
@@ -183,6 +191,34 @@ Code 8 is unknown: it cannot distinguish a driverless vehicle from an unknown dr
 ### `speeding_type(col: 'str' = 'SPEEDREL') -> 'pl.Expr'`
 
 
+
+### `distraction_flag(col: 'str' = 'code') -> 'pl.Expr'`
+
+Driver-distraction attribute -> 1 distracted, 0 not distracted, null unknown.
+
+0 'not distracted' and 1 'looked but did not see' -> 0.  Code 1 exists only in 2016-17
+(FARS and CRSS) and was dropped from 2018 on; it is a failure of perception, not an
+inattention attribute, so counting it would give 2016-17 a distracted share that 2018+
+coding cannot reproduce.  16 (no driver present), 96 (not reported), 99 (unknown) and
+null are unknown, never 'not distracted'.  Everything else is a distraction attribute.
+
+### `rollover_flag(col: 'str' = 'ROLLOVER', body: 'str' = 'BODY_TYP') -> 'pl.Expr'`
+
+FARS vehicle ROLLOVER -> 1 rolled over, 0 did not, null unknown / not applicable.
+
+1, 2, 3 (type or untyped rollover) and 9 (rollover, unknown type; 2016-21) -> 1; 0 -> 0.
+2022+ code 8 'Not applicable' is carried only by motorcycle-type bodies (BODY_TYP 80-89:
+two-wheelers, mopeds, scooters), which cannot roll over by definition and which 2016-21
+coded 0, so it is 0 for those bodies; for any other body type it is null.
+
+### `fars_prior_suspensions(year: 'str' = 'YEAR', col: 'str' = 'PREV_SUS1') -> 'pl.Expr'`
+
+PREV_SUS1 (prior suspensions/revocations of the first type), null before 2018.
+
+FARS 2016-17 carry one ``PREV_SUS`` (all suspensions combined; 2016 value 1 in 3,605
+drivers), a different quantity from the 2018+ ``PREV_SUS1/2/3`` (counts by suspension
+type; value 1 in 112 drivers), so it is not harmonised: 2016-17 are explicitly null.
+2018+ keeps the raw codes (0-97 count, 99 unknown, 998 no driver).
 
 ### `hit_and_run(col: 'str' = 'HIT_RUN') -> 'pl.Expr'`
 

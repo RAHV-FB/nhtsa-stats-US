@@ -1,0 +1,10 @@
+definition,licence_status_codes,measure,value_2019,value_2021,value_2024,pct_change_2019_2021,pct_change_2021_2024,pct_change_2019_2024,estimate_type
+invalid_incl_expired_cancelled,"0,1,2,3,4",deaths_in_invalid_licence_crashes,6964,10025,7875,0.439546,-0.214464,0.130816,observed
+invalid_incl_expired_cancelled,"0,1,2,3,4",drivers,6494,9543,7448,0.46951,-0.219533,0.146905,observed
+invalid_incl_expired_cancelled,"0,1,2,3,4",driver_share,0.130438,0.161866,0.139434,0.240943,-0.138587,0.0689644,observed
+invalid_excl_expired_cancelled,"0,1,2",deaths_in_invalid_licence_crashes,6241,8766,6920,0.404583,-0.210586,0.108797,observed
+invalid_excl_expired_cancelled,"0,1,2",drivers,5799,8300,6500,0.431281,-0.216867,0.120883,observed
+invalid_excl_expired_cancelled,"0,1,2",driver_share,0.116479,0.140783,0.121686,0.20866,-0.135645,0.0447109,observed
+expired_or_cancelled_only,"3,4",deaths_in_invalid_licence_crashes,787,1396,1042,0.773825,-0.253582,0.324015,observed
+expired_or_cancelled_only,"3,4",drivers,695,1243,948,0.788489,-0.237329,0.364029,observed
+expired_or_cancelled_only,"3,4",driver_share,0.0139597,0.0210835,0.0177475,0.510308,-0.158229,0.271333,observed

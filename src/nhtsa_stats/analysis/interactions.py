@@ -68,6 +68,12 @@ class Exposure:
     exposed: tuple
     reference: tuple
     label: str
+    # Variables that are set jointly with ``var`` from their observed joint distribution within
+    # the exposed/reference levels, instead of being held at each row's own value.  Used when
+    # setting ``var`` alone would create impossible records: setting ``crash_type`` to a
+    # multi-vehicle type for a one-vehicle crash (or 'pedestrian' for a three-vehicle crash
+    # with no pedestrian) is not a possible crash, so ``n_vehicles`` moves with it.
+    linked: tuple[str, ...] = ()
 
     def state(self, s: int) -> tuple:
         return self.exposed if s == 1 else self.reference
@@ -119,6 +125,7 @@ PEDESTRIAN = Exposure(
         "cyclist",
     ),
     "pedestrian crash (vs all other types)",
+    linked=("n_vehicles",),
 )
 ANGLE = Exposure("crash_type", ("mv_angle",), ("mv_rear_end",), "angle (vs rear-end) collision")
 
@@ -249,10 +256,20 @@ def _indicator(df: pd.DataFrame, e: Exposure) -> np.ndarray:
 
 
 def _level_weights(df: pd.DataFrame, w: np.ndarray, e: Exposure, s: int) -> dict:
+    """Weights of the (level, *linked values) combinations making up state ``s`` of ``e``.
+
+    Keys are tuples ``(level, *linked_values)``; without linked variables they are 1-tuples.
+    """
     levels = e.state(s)
-    tot = {lv: float(w[(df[e.var] == lv).to_numpy()].sum()) for lv in levels}
+    cols = [e.var, *e.linked]
+    keys = df[cols].astype(object)
+    in_state = df[e.var].isin(levels).to_numpy()
+    tot: dict[tuple, float] = {}
+    for key, idx in keys[in_state].groupby(cols, observed=True, sort=True).indices.items():
+        k = key if isinstance(key, tuple) else (key,)
+        tot[k] = float(w[in_state][idx].sum())
     z = sum(tot.values())
-    return {lv: t / z for lv, t in tot.items() if t > 0}
+    return {k: t / z for k, t in tot.items() if t > 0}
 
 
 def combo_margins(
@@ -271,7 +288,12 @@ def combo_margins(
         # all level combinations within this state
         combos: list[tuple[dict, float]] = [({}, 1.0)]
         for e, s, wmap in zip(comb.exposures, st, weights, strict=True):
-            combos = [({**a, e.var: lv}, pw * wl) for a, pw in combos for lv, wl in wmap[s].items()]
+            names = (e.var, *e.linked)
+            combos = [
+                ({**a, **dict(zip(names, lv, strict=True))}, pw * wl)
+                for a, pw in combos
+                for lv, wl in wmap[s].items()
+            ]
         m_tot, z_tot = 0.0, np.zeros(design.n)
         for assign, pw in combos:
             key = tuple(sorted(assign.items()))
@@ -510,26 +532,38 @@ def run_pairs(
     df, design = severity.load(outcome, years)
     n_years = df["YEAR"].nunique()
     rows = []
-    for comb in PAIRS:
+    for comb in [*PAIRS, *(FOLLOW_UP if include_follow_up else [])]:
         try:
             rows.append({**analyse_pair(df, design, outcome, comb, n_years), "period": tag})
             log.info("%s %s %s done", outcome, tag, comb.name)
         except Exception as exc:  # keep going; record the failure explicitly
             log.exception("pair %s failed", comb.name)
             rows.append(
-                {"pair": comb.name, "outcome": outcome, "period": tag, "flag": f"failed: {exc}"}
-            )
-    for comb in FOLLOW_UP if include_follow_up else []:
-        try:
-            rows.append({**analyse_pair(df, design, outcome, comb, n_years), "period": tag})
-            log.info("%s %s %s done", outcome, tag, comb.name)
-        except Exception as exc:  # keep going; record the failure explicitly
-            log.exception("pair %s failed", comb.name)
-            rows.append(
-                {"pair": comb.name, "outcome": outcome, "period": tag, "flag": f"failed: {exc}"}
+                {
+                    "pair": comb.name,
+                    "prespecified": comb.prespecified,
+                    "outcome": outcome,
+                    "period": tag,
+                    "flag": f"failed: {exc}",
+                }
             )
     res = pd.DataFrame(rows)
-    pre = res["prespecified"].fillna(True).astype(bool)
+    return _holm_family(res)
+
+
+def _holm_family(res: pd.DataFrame) -> pd.DataFrame:
+    """Holm / Benjamini-Hochberg adjustment over the pre-specified pairs only.
+
+    A pre-specified pair that failed (or produced no finite p-value) would silently shrink
+    the multiplicity family and make the remaining adjusted p-values too small, so it raises
+    instead.  Exploratory pairs are left unadjusted.
+    """
+    pre = res["prespecified"].astype(bool)
+    bad = res.loc[pre & res["flag"].fillna("").str.startswith("failed"), "pair"].tolist()
+    if bad:
+        raise RuntimeError(
+            f"pre-specified pair(s) failed, so the Holm/BH family would be incomplete: {bad}"
+        )
     for col in ("ic_p", "ratio_of_rr_p", "product_p"):
         if col in res:
             # Multiplicity adjustment within the pre-specified family only.

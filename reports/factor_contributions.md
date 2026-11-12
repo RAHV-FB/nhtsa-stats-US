@@ -93,6 +93,12 @@ and 49% on urban roads. Most of the
 burden is therefore fixed before post-crash care could act, but the data cannot say how many
 later deaths better care would have prevented.
 
+EMS arrival times are recorded for only part of fatal crashes (`stages/ems_availability`): the
+share with a known arrival time ranges from 38% to 45% of urban and
+from 45% to 54% of rural fatal crashes across 2016–2024. Intervals from crash to
+arrival that are negative or longer than 12 hours are treated as missing, so the timing summaries
+describe the crashes with a plausible recorded interval, not all fatal crashes.
+
 ## 1. Ten quantities that are not the same thing
 
 | # | Quantity | Where | Meaning |
@@ -409,7 +415,10 @@ campaign data.*
   returns depends on whether they change the same drivers' behaviour, which the data cannot show.
   The super-additive combinations (exceedance × alcohol, behaviour × belt non-use) indicate
   where a given reduction in one factor would remove the most excess risk, *if* the reduction
-  occurred in those combinations.
+  occurred in those combinations. A positive additive interaction is expected whenever two factors
+  each raise risk and combine multiplicatively, so it shows where excess deaths concentrate
+  (burden), not a special mechanism; "amplifying" is reserved for a ratio of risk ratios above 1
+  with an interval excluding 1.
 * **Targeted campaigns.** Night-time and single-vehicle crashes concentrate exceedance and
   alcohol (`speeding/type_composition`), and unbelted deaths overlap with both more than
   independence would imply (`contributions/fars_pairwise_overlap`); the data identify these as

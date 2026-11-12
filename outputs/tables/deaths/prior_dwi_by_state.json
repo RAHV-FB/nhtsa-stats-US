@@ -1,0 +1,28 @@
+{
+ "table": "deaths/prior_dwi_by_state.csv",
+ "description": "Prior-DWI share of drivers with BAC >= .08 by state (measured BAC only; measured plus imputed), with driver counts and a flag for states with fewer than 100 drivers",
+ "population": "FARS fatal crashes 2016-2024 (census)",
+ "unit": "driver in a fatal crash",
+ "outcome": "death (INJ_SEV 4)",
+ "method": "Measured BAC = a test result in FARS person.ALC_RES (0-940 thousandths; 940 = .94 or greater); NHTSA's implicates fill untested drivers.  'measured only' counts a driver as BAC >= .08 only with a measured result >= .08 (observed counts, no imputation SE); 'all' / 'imputed' use the 10 implicates (mean, MI SE sqrt(1.1 * between-implicate variance)); state = FARS STATE; 'small' = fewer than 100 such drivers",
+ "inputs": [
+  "FARS person (PER_TYP)",
+  "FARS vehicle (L_STATUS, PREV_*)",
+  "FARS veh_aux (A_SPVEH)",
+  "FARS miper"
+ ],
+ "rows": 102,
+ "columns": [
+  "state",
+  "bac_basis",
+  "n_group",
+  "n_known",
+  "share",
+  "mi_se",
+  "small",
+  "estimate_type"
+ ],
+ "module": "nhtsa_stats.analysis.deaths",
+ "git_commit": "53bfb34-dirty",
+ "generated_utc": "2026-11-12T17:59:28Z"
+}

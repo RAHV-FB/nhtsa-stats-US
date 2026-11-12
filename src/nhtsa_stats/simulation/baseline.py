@@ -25,8 +25,10 @@ Not justified
     Any statement about what an intervention would or did prevent.  The database contains no
     data on cameras, enforcement, checkpoints, roadside testing, campaigns or costs, so no
     intervention effect is estimated.  Segment counts are lower bounds (unknown status is not
-    counted); police-reported speeding, alcohol and drug codes are ascertained more thoroughly
-    in fatal crashes; drug involvement is LOW reliability; the adjusted associations carried in
+    counted); police-reported speeding, alcohol and drug codes are recorded differently by
+    severity (more investigation and testing after a death, but police-recorded fields are
+    more often unknown in fatal crashes), which can bias severity associations in either
+    direction; drug involvement is LOW reliability; the adjusted associations carried in
     the baseline are conditional on a reported crash and are not causal effects.
 """
 
@@ -98,7 +100,8 @@ SEGMENTS: dict[str, SegmentDef] = {
         "conditions, unspecified)",
         "same definition (CRSS vehicle SPEEDREL)",
         "moderate",
-        "Police judgement, ascertained more thoroughly in fatal crashes; mixes exceeding the "
+        "Police judgement, recorded differently by severity (more often unknown in fatal "
+        "crashes, which can bias severity associations either way); mixes exceeding the "
         "limit with 'too fast for conditions'. Crashes with unknown status are NOT counted "
         "(count is a lower bound in that respect).",
     ),
@@ -935,7 +938,8 @@ def read_associations(require_severity: bool = True) -> tuple[dict[str, Quantity
                 flag=STALE if stale else "",
                 note="CRSS survey logistic model A (pre-crash adjustment set), standardised "
                 "margins; conditional on a crash; not a causal effect; police-reported exposure "
-                "ascertained more thoroughly in severe crashes",
+                "recorded differently by severity (more testing after a death, but more often "
+                "unknown in fatal crashes), which can bias the association in either direction",
             )
     notes.append(
         "drugs: no adjusted severity association (exposure measurement depends on severity; "

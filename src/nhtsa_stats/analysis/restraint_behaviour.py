@@ -111,8 +111,22 @@ def strata(elig: pd.DataFrame) -> dict[str, dict[str, np.ndarray]]:
 
 
 def dpc_by_stratum(
-    elig: pd.DataFrame, rng: np.random.Generator, n_boot: int = N_BOOT
+    elig: pd.DataFrame,
+    rng: np.random.Generator,
+    n_boot: int = N_BOOT,
+    joint_rng: np.random.Generator | None = None,
 ) -> pd.DataFrame:
+    """Within-vehicle belt RR per stratum and, for two-stratum splits, a heterogeneity test.
+
+    The per-stratum RRs and CIs use ``rng`` exactly as before.  The heterogeneity test (ratio of
+    the second stratum's RR to the first's) takes its SE from a joint crash-cluster bootstrap of
+    both strata (:func:`joint_log_ratio_se`, drawn from ``joint_rng``, default a fresh generator
+    seeded ``RANDOM_SEED + 2`` as in :func:`config_contrasts`), because vehicles of one crash can
+    fall in both strata (for example a speeding driver's car and the other driver's car), so the
+    two RRs are not independent.  ``heterogeneity_low`` / ``heterogeneity_high`` are the 95% Wald
+    limits of the ratio.
+    """
+    joint_rng = np.random.default_rng(config.RANDOM_SEED + 2) if joint_rng is None else joint_rng
     rows = []
     for split, levels in strata(elig).items():
         recs = []
@@ -138,14 +152,19 @@ def dpc_by_stratum(
                 "se_log_bootstrap": comb["se_log_bootstrap"],
                 "flag": comb["flag"],
                 "heterogeneity_ratio": np.nan,
+                "heterogeneity_low": np.nan,
+                "heterogeneity_high": np.nan,
                 "heterogeneity_p": np.nan,
             }
             recs.append(rec)
         if len(recs) == 2:
             a, b = recs
             d = np.log(b["rr_belted_vs_unbelted"]) - np.log(a["rr_belted_vs_unbelted"])
-            se = np.hypot(a["se_log_bootstrap"], b["se_log_bootstrap"])
+            m_a, m_b = (m for m in levels.values())
+            se = joint_log_ratio_se(elig, m_b, m_a, joint_rng, n_boot)
             b["heterogeneity_ratio"] = float(np.exp(d))
+            b["heterogeneity_low"] = float(np.exp(d - 1.96 * se))
+            b["heterogeneity_high"] = float(np.exp(d + 1.96 * se))
             b["heterogeneity_p"] = float(2 * stats.norm.sf(abs(d / se)))
         rows += recs
         log.info("dpc %s done", split)
@@ -510,7 +529,7 @@ def run(n_boot: int = N_BOOT) -> dict[str, pd.DataFrame]:
         population="FARS 2016-2024 light passenger vehicles with one eligible driver and one right-front passenger (Phase-1 eligibility)",
         unit="vehicle (pair)",
         outcome="death",
-        method=f"Evans double-pair comparison, inverse-variance combination of four components; crash-cluster percentile bootstrap ({n_boot} replicates); heterogeneity z-test on log RR with bootstrap SEs",
+        method=f"Evans double-pair comparison, inverse-variance combination of four components; crash-cluster percentile bootstrap ({n_boot} replicates); heterogeneity z-test on the log ratio of the two strata's RRs with the SE from a joint crash-cluster bootstrap of both strata (they can share crashes; seed offset +2)",
         inputs=["data/processed/fars_person.parquet", "data/processed/fars_driver.parquet"],
     )
     nested = crss_nested()

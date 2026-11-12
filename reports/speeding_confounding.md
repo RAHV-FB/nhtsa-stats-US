@@ -361,6 +361,19 @@ to 1.64:
 recording error within the grid is enough to move it on either side of one, so its direction
 is not identified.
 
+**Effect modification by crash configuration (exploratory follow-up added after the red-team
+review).** The pooled Model-A ratios above average over very different crash configurations
+(`severity/fatal_effect_modification`; adjusted fatal risk ratios within single-vehicle and
+within multi-vehicle crashes). For exceeding the limit the ratio is 3.35 (2.82–3.97) in single-vehicle and
+10.06 (7.87–12.88) in multi-vehicle crashes (ratio of ratios
+3.0, homogeneity p 4.2e-12), against a pooled
+5.22. For "too fast for conditions" the ratios are
+1.05 (0.89–1.24) and 1.08 (0.81–1.44) (homogeneity p 0.85), so the
+weak association does not depend on the configuration split. The relative association of exceeding
+the limit is larger in multi-vehicle crashes, where the baseline fatal risk is low, so the pooled
+ratio describes neither configuration well. An association conditional on a police-reported crash,
+not an effect; the split by crash type is in the same table.
+
 ## 5c. Interstate roads by posted speed limit (exploratory)
 
 *Source: `severity/interstate_by_speed_band`. Adjusted risk ratio of a fatal crash on an
@@ -410,12 +423,13 @@ crashes than among all crashes — for exceedance
 against 4.24.
 Both behaviours raise the chance that a crash is fatal, so a fatal crash without alcohol is more
 likely to have *another* reason to be fatal, such as speeding (collider stratification). FARS
-records both behaviours more completely than CRSS police reports; its odds ratios
+adds toxicology results and crash investigation to the police report, although speeding remains
+a police judgement; its odds ratios
 (2.08
 for any speeding, 2.32
 for exceedance) are larger than the CRSS fatal-crash values but, for exceedance, still about
 half the all-crash association. Two forces therefore act on FARS-only co-occurrence statistics —
-selection on fatality weakens the association, fuller recording strengthens it — and a
+selection on fatality weakens the association, and recording that differs by system or severity can move it in either direction — and a
 "speeding and alcohol" category among deaths cannot be read as the overlap of the two
 behaviours in the crashes that produced the deaths.
 

@@ -44,7 +44,9 @@ Method
     * Interactions (pre-specified): restraint x age band and restraint x crash type
       (complete-case: belted vs none only), age band x sex (sex known).  Product terms in
       model A (B for crash type); four standardised margins per cell give the stratum
-      specific RR, the additive interaction contrast (IC), RERI and the ratio of risk ratios,
+      specific RR (for crash type each stratum is standardised over its own persons, since
+      setting the crash type for everyone while the number of vehicles and partner vehicle stay
+      observed would average over impossible crashes), the additive interaction contrast (IC), RERI and the ratio of risk ratios,
       plus a design-adjusted Wald F test of all product terms.
     * Leakage control: every feature is checked against ``harmonize.REGISTRY``; post-crash
       variables (ejection, airbag deployment, rollover) are never used.
@@ -599,23 +601,38 @@ def interaction_table(
     a_exp: str,
     b: str,
     b_levels: Sequence[str],
+    stratum_domain: bool = False,
 ) -> pd.DataFrame:
     """Stratum-specific adjusted RRs of ``a_exp`` vs ``a_ref`` within each level of ``b``,
     and additive / multiplicative interaction measures versus the reference level of ``b``.
 
     Four standardised margins per level (everyone set to the (a, b) combination) share one
     joint linearisation, so every contrast has a design-based CI.
+
+    With ``stratum_domain`` the margins of level ``bv`` average over the persons observed at
+    ``bv`` only (the standardisation population of each stratum is its own).  This is needed
+    when ``b`` is the crash type: setting ``crash_type`` for everyone while the number of
+    vehicles and the partner-vehicle body stay observed would average over impossible crashes
+    (e.g. an angle collision in a crash with one vehicle, a single-vehicle crash type with a
+    partner vehicle).  The stratum-specific RRs are then effects in each stratum's own
+    population, and IC / RERI / ratio of RRs compare those strata-specific effects.
     """
     b_ref = b_levels[0]
 
     def key(av: str, bv: str) -> str:
         return f"{a}={av}|{b}={bv}"
 
-    scenarios = {key(av, bv): _setter({a: av, b: bv}) for bv in b_levels for av in (a_ref, a_exp)}
-    ms: MarginSet = model.margins(df, scenarios)
-    y = df[outcome].to_numpy(dtype=float)
     av_obs = df[a].to_numpy()
     bv_obs = df[b].to_numpy()
+    values, influence = {}, {}
+    for bv in b_levels:
+        dom = (bv_obs == bv) if stratum_domain else None
+        for av in (a_ref, a_exp):
+            values[key(av, bv)], influence[key(av, bv)] = model.margin_influence(
+                df, _setter({a: av, b: bv}), dom
+            )
+    ms = MarginSet(values, influence, model.design_)
+    y = df[outcome].to_numpy(dtype=float)
     rows = []
     ref_flag = ""
     for bv in b_levels:
@@ -749,7 +766,15 @@ def run_interaction(pop: Population, outcome: str, ispec: InteractionSpec) -> di
     b_levels = levels_for(sub, ispec.b)
     lean = sub.df[[*covs, outcome]]
     tab = interaction_table(
-        model, lean, outcome, ispec.a, ispec.a_ref, ispec.a_exp, ispec.b, b_levels
+        model,
+        lean,
+        outcome,
+        ispec.a,
+        ispec.a_ref,
+        ispec.a_exp,
+        ispec.b,
+        b_levels,
+        stratum_domain=ispec.b == "crash_type",
     )
     tab.insert(0, "interaction", ispec.name)
     terms = [t for t in model.names_ if ":" in t]

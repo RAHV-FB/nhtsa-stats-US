@@ -34,8 +34,8 @@
   "estimate_type"
  ],
  "module": "nhtsa_stats.analysis.deaths",
- "git_commit": "76c08de-dirty",
- "generated_utc": "2026-11-12T13:05:48Z",
+ "git_commit": "53bfb34-dirty",
+ "generated_utc": "2026-11-12T17:59:28Z",
  "input_git_commits": {
   "matched/belt_effect.csv": "7ee597e-dirty",
   "matched/double_pair_comparison.csv": "7ee597e-dirty"

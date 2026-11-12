@@ -374,13 +374,38 @@ measured BAC; 60.7% of unbelted deaths in single-occupant vehicles; 2022–24 sp
   as a level and 10.6% with unknown as no, but 27.2% for complete cases.
 * Unknown pedestrian speed limit: 29.6% non-fatal vs 10.8% fatal (not 29.7%).
 
+**Applied in the follow-up pass (tables now exist).** The items that were open above now have
+committed tables, text in the reports, website and `docs/limitations.md`, and these outcomes:
+* *Large-truck split* (`deaths/large_truck_crash_types`): the 55% not the truck driver in single-truck
+  crashes is confirmed. The 97% holds only under the strict definition of exactly one truck and one
+  passenger vehicle (two-vehicle crashes, 96.9%); the broader truck-and-passenger-vehicle definition
+  gives 96.0%.
+* *Invalid licence* (`deaths/licence_trend`): the rise in deaths in invalid-licence crashes from 2019
+  to 2021 is +44% with expired and cancelled licences counted and +40.5% without; both confirmed.
+* *State range of prior-DWI shares* (`deaths/prior_dwi_state_range`, `deaths/prior_dwi_by_state`):
+  now tabulated, with measured-BAC-only shares beside the all-driver shares; the spread is wide and
+  partly reflects state record completeness.
+* *Imputed BAC and injury* (`measurement/imputed_bac_injury`): the reviewer's odds ratio of 1.62 was
+  **not reproduced**. The project's specification (age band, sex, vehicle type, crash type, time of
+  day, year) gives about 3.8 for imputed BAC of .08 or more among untested drivers, against about
+  1.1 for measured BAC among tested drivers. The direction the reviewer suspected (the imputation
+  uses injury) is supported; the size differs because the specifications differ. A diagnostic, not a
+  causal estimate.
+* *Calibration* (`severity/fatal_calibration`): the suspected miscalibration of model A is
+  confirmed. It is calibrated overall and over-predicts in the middle deciles (observed/predicted
+  about 0.74 to 0.80).
+* *Code hash per module*: done; every sidecar carries `source_sha256` and `package_sha256`, and
+  `nhtsa status` lists stale tables.
+* *Crash-type interaction comparison for `model_validation.md` §8*: partly answered by
+  `severity/fatal_effect_modification` (adjusted fatal risk ratios differ sharply between single-
+  and multi-vehicle crashes for exceeding the limit, alcohol, motorcycles and large trucks, not for
+  "too fast for conditions"); the boosting-versus-interacted-logistic AUROC comparison was not done.
+* *Attacker-only claims in §6*: P03, P04 and W06 were confirmed on recomputation, and G01 was
+  applied.
+
 **Still open.**
-* No table carries: the large-truck split by single-truck and truck–passenger-vehicle crashes (55% and
-  97%), the state range of prior-DWI shares, the invalid-licence +40.5% without expired or cancelled
-  licences, the imputed-BAC-versus-injury odds ratio (X1), or the crash-type-interaction logistic
-  comparison for `model_validation.md` §8. Those statements remain qualitative or are not made.
-* Code and provenance items: a code hash per module in the sidecars.
-* Attacker-only claims in §6 that this pass did not re-run.
+* Attacker-only claims in §6 other than those listed above, which this pass did not re-run.
+* The boosting-versus-interacted-logistic AUROC comparison (`docs/model_validation.md` §8).
 
 ### Original recommendations (record)
 
@@ -462,6 +487,9 @@ first, because every number in `reports/` comes from `outputs/tables/`.
   * P04: same-driver ORs and non-differential bounds;
   * W06: helmet tipping point;
   * G01.
+
+  (Status after the follow-up pass, §5: P03, P04 and W06 were confirmed on recomputation and G01
+  was applied.)
 * **Stopped early.** Several late reviewers were stopped and reported partial work. Their reports
   list what they did not test, for example X1's belt-ejection check, X3's interaction-contrast
   jackknife, X4's lives-saved heterogeneity and X6's seed-sensitivity run. Partial scripts

@@ -133,14 +133,22 @@ def test_linear_and_ratio_contrasts_match_numeric_delta_method():
     assert se == pytest.approx(num.se, rel=1e-4)
 
 
-def test_shapley_values_additive_game_and_symmetry():
+def _shapley(v, players):
+    """Plain-number Shapley values from the coefficients the pipeline uses (shapley_table)."""
+    return {
+        j: sum(c * v(s) for s, c in coefs.items())
+        for j, coefs in C.shapley_coefficients(players).items()
+    }
+
+
+def test_shapley_coefficients_additive_game_and_symmetry():
     players = ["a", "b", "c", "d"]
     a = {"a": 0.3, "b": -0.1, "c": 0.0, "d": 0.25}
-    phi = C.shapley_values(lambda s: 1.0 - sum(a[j] for j in s), players)
+    phi = _shapley(lambda s: 1.0 - sum(a[j] for j in s), players)
     for j in players:
         assert phi[j] == pytest.approx(a[j])
     # Pure interaction between a and b: split equally; c, d get nothing.
-    phi = C.shapley_values(lambda s: -1.0 if {"a", "b"} <= s else 0.0, players)
+    phi = _shapley(lambda s: -1.0 if {"a", "b"} <= s else 0.0, players)
     assert phi["a"] == pytest.approx(0.5) and phi["b"] == pytest.approx(0.5)
     assert phi["c"] == pytest.approx(0.0) and phi["d"] == pytest.approx(0.0)
     # Efficiency for an arbitrary game.
@@ -148,7 +156,7 @@ def test_shapley_values_additive_game_and_symmetry():
     vals = {
         frozenset(s): rng.normal() for r in range(5) for s in itertools.combinations(players, r)
     }
-    phi = C.shapley_values(lambda s: vals[s], players)
+    phi = _shapley(lambda s: vals[s], players)
     assert sum(phi.values()) == pytest.approx(vals[frozenset()] - vals[frozenset(players)])
 
 

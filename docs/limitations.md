@@ -215,8 +215,14 @@ earlier item. Numbers are quoted as the named tables give them.
   motorcyclist deaths (`matched/helmet_pair_coverage`); applying it to all unhelmeted deaths assumes
   riders with a passenger represent solo riders.
 * **FARS imputed BAC may use injury.** NHTSA's imputation model is undocumented. A reviewer found
-  that among untested FARS drivers the imputed BAC is higher for killed drivers; that result is not
-  in a committed table. Figures that use imputed BAC (drunk-driving deaths, victim roles, prior-DWI
+  that among untested FARS drivers the imputed BAC is higher for killed drivers; the committed
+  table `measurement/imputed_bac_injury` now reproduces this under the project's specification:
+  among untested drivers an imputed BAC of .08 or more has an adjusted odds ratio for the driver
+  being killed of about 3.8, against about 1.1 for a measured BAC of .08 or more among tested
+  drivers (adjusted for age band, sex, vehicle type, crash type, time of day and year). This is a
+  diagnostic, not a causal estimate; it is what one would expect if the imputation uses injury, so
+  FARS figures built on imputed BAC lean on a model that uses the outcome and the measured-BAC
+  figures are the more conservative basis. Figures that use imputed BAC (drunk-driving deaths, victim roles, prior-DWI
   shares) are therefore shown with measured-BAC-only counterparts where available
   (`deaths/victim_roles_bac_basis`, `deaths/driver_records_measured_bac`; 40.8% of drivers at .08 or
   more have an imputed BAC, `deaths/driver_bac_imputed_share`).
@@ -237,3 +243,44 @@ earlier item. Numbers are quoted as the named tables give them.
 * **Intervals cover sampling error only.** Confidence intervals for the mixed FARS/CRSS ratios,
   attributable fractions and composition shares reflect CRSS sampling (the denominator or model), not
   recording error, coding choices or the variance of NHTSA's imputations.
+
+## 10. Additions after the red-team review (follow-up, November 2026)
+
+These items were added after the review and the follow-up analyses it prompted; none replaces an
+earlier limitation. Numbers are quoted as the named tables give them.
+
+* **Degrees of freedom for small domains.** CRSS intervals use the design degrees of freedom (42),
+  which is standard practice. Rural-only contrasts rest on far fewer primary sampling units (21
+  PSUs in 9 strata, about 12 degrees of freedom), so their intervals may be up to about 8% too
+  narrow. The same applies, less severely, to other small domains.
+* **Interaction margins treat level-mixture weights as fixed.** The standardised margins for
+  interactions average predictions over the observed mix of factor levels and do not carry the
+  sampling variability of that mix into the intervals. The effect is small.
+* **The pooled model-A risk ratios average over very different crash configurations.**
+  `severity/fatal_effect_modification` (exploratory, added after the review) shows that the
+  adjusted fatal risk ratios for exceeding the limit, alcohol, motorcycles and large trucks differ
+  sharply between single-vehicle and multi-vehicle crashes (homogeneity p < 0.001 for each), with
+  the larger ratios in multi-vehicle crashes, where the baseline fatal risk is low; "too fast for
+  conditions" does not differ. A pooled ratio therefore describes neither configuration well, and
+  the table is an association conditional on a police-reported crash, not an effect.
+* **Model A is calibrated overall but not within the risk distribution.**
+  `severity/fatal_calibration` shows observed/predicted fatal shares of about 0.74 to 0.80 in the
+  middle deciles of predicted risk (over-prediction) with overall calibration. The check is
+  in-sample and its intervals omit model-fit variability. Absolute risks, risk differences and the
+  attributable fractions built on them are therefore less reliable than the relative contrasts.
+* **Imputed BAC and injury.** See the revised "FARS imputed BAC may use injury" item above and
+  `measurement/imputed_bac_injury`: BAC-based figures in FARS depend on a model that appears to use
+  the outcome.
+* **EMS intervals are known for only part of crashes.** The share of fatal crashes with a recorded
+  EMS arrival time is about half or less in every year (`stages/ems_availability`), and intervals that are
+  negative or longer than 12 hours are set to missing, so timing summaries describe the crashes with
+  a plausible interval and may not represent all fatal crashes.
+* **Prior-DWI shares vary widely by state.** Among drivers at .08 or more the state shares range
+  from about 2% to 20% (`deaths/prior_dwi_state_range`, `deaths/prior_dwi_by_state`); this reflects
+  state record completeness as well as behaviour and is not a ranking of states.
+* **Large-truck victim roles describe who was in the crash, not fault.** The share not the truck
+  driver is about 55% in single-truck crashes and about 96% in crashes between a truck and a
+  passenger vehicle (`deaths/large_truck_crash_types`).
+* **The rise in invalid-licence crashes is robust to the definition.** It appears with and without
+  counting expired or cancelled licences as invalid (`deaths/licence_trend`), but licence status is
+  a state-file field with uneven completeness.

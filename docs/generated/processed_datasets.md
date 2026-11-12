@@ -82,11 +82,11 @@ _Generated from `data/processed/*.parquet` by `nhtsa_stats.reporting.docs_gen`. 
 | `n_vehicles` | String | 0.0 | 1, 2, 3+ | crash_circumstance |
 | `speed_limit` | String | 0.0 | 30-35, 40-45, 50-55, 60-65, 70+, <=25, none_nontrafficway, unknown | pre_crash |
 | `crash_type` | String | 0.0 | cyclist, mv_angle, mv_head_on, mv_other, mv_rear_end, mv_sideswipe, pedestrian, sv_off_roadway, sv_on_roadway, sv_rollov | crash_circumstance |
-| `fatal` | Int8 | 0.4 | 0 – 1 | outcome |
+| `fatal` | Int8 | 0.0 | 0 – 1 | outcome |
 | `ka` | Int8 | 0.4 | 0 – 1 | outcome |
 | `injury` | Int8 | 0.0 | 0 – 1 | outcome |
 | `kabco` | Int8 | 0.4 | 0 – 4 | outcome |
-| `fatal_cc` | Int8 | 8.0 | 0 – 1 | outcome |
+| `fatal_cc` | Int8 | 7.7 | 0 – 1 | outcome |
 | `ka_cc` | Int8 | 7.6 | 0 – 1 | outcome |
 | `alcohol` | Int8 | 30.4 | 0 – 1 | pre_crash |
 | `alcohol_im` | Int8 | 0.0 | 0 – 1 | pre_crash |
@@ -126,7 +126,7 @@ _Generated from `data/processed/*.parquet` by `nhtsa_stats.reporting.docs_gen`. 
 | `ptype` | String | 0.0 | cyclist, driver, other_nonmotorist, passenger, pedestrian |  |
 | `age` | Int64 | 6.3 | 0 – 120 | pre_crash |
 | `sex` | String | 0.0 | female, male, unknown | pre_crash |
-| `killed` | Int8 | 0.2 | 0 – 1 | outcome |
+| `killed` | Int8 | 0.0 | 0 – 1 | outcome |
 | `killed_or_serious` | Int8 | 0.2 | 0 – 1 | outcome |
 | `injured` | Int8 | 0.0 | 0 – 1 |  |
 | `kabco` | Int8 | 0.2 | 0 – 4 | outcome |
@@ -141,7 +141,7 @@ _Generated from `data/processed/*.parquet` by `nhtsa_stats.reporting.docs_gen`. 
 | `airbag_deployed` | Int8 | 12.2 | 0 – 1 | post_crash |
 | `age_band` | String | 0.0 | 0-14, 15-20, 21-24, 25-34, 35-44, 45-54, 55-64, 65-74, 75+, unknown | pre_crash |
 | `age_im` | Int64 | 0.0 | 0 – 120 |  |
-| `killed_cc` | Int8 | 3.7 | 0 – 1 | outcome |
+| `killed_cc` | Int8 | 3.5 | 0 – 1 | outcome |
 | `killed_or_serious_cc` | Int8 | 3.7 | 0 – 1 | outcome |
 | `body` | String | 3.8 | bus, car, light_truck_other, light_unknown_type, medium_heavy_truck, motorcycle, other, pickup, suv, truck_unknown_type, | pre_crash |
 | `veh_age` | Int64 | 7.0 | 0 – 60 |  |
@@ -177,7 +177,7 @@ _Generated from `data/processed/*.parquet` by `nhtsa_stats.reporting.docs_gen`. 
 | `alcohol_im` | Int8 | 0.0 | 0 – 1 | pre_crash |
 | `any_heavy_truck` | Int8 | 3.4 | 0 – 1 | pre_crash |
 | `any_motorcycle` | Int8 | 2.6 | 0 – 1 | pre_crash |
-| `crash_fatal` | Int8 | 0.4 | 0 – 1 |  |
+| `crash_fatal` | Int8 | 0.0 | 0 – 1 |  |
 | `crash_ka` | Int8 | 0.4 | 0 – 1 |  |
 | `other_vehicle_body` | String | 0.0 | bus, car, light_truck_other, light_unknown_type, medium_heavy_truck, motorcycle, none_or_multi, other, pickup, suv, truc | crash_circumstance |
 | `role` | String | 0.0 | cargo_exterior_passenger, cyclist, driver, front_passenger, other_nonmotorist, passenger_seat_unknown, pedestrian, rear_ | pre_crash |
@@ -213,7 +213,7 @@ _Generated from `data/processed/*.parquet` by `nhtsa_stats.reporting.docs_gen`. 
 | `speeding` | Int8 | 7.2 | 0 – 1 | pre_crash |
 | `speeding_type` | String | 0.0 | exceeded_limit_or_racing, no, speeding_unspecified, too_fast_for_conditions, unknown | pre_crash |
 | `hit_and_run` | Int8 | 0.1 | 0 – 1 | post_crash |
-| `distracted` | Int8 | 65.0 | 0 – 1 | pre_crash |
+| `distracted` | Int8 | 65.1 | 0 – 1 | pre_crash |
 | `rollover_any` | Int8 | 0.0 | 0 – 1 | post_crash |
 | `fire_any` | Int8 | 0.0 | 0 – 1 | post_crash |
 | `any_motorcycle` | Int8 | 2.8 | 0 – 1 | pre_crash |
@@ -284,7 +284,7 @@ _Generated from `data/processed/*.parquet` by `nhtsa_stats.reporting.docs_gen`. 
 | `ptype` | String | 0.0 | cyclist, driver, other_nonmotorist, parked_vehicle_occupant, passenger, pedestrian |  |
 | `age` | Int64 | 2.5 | 0 – 119 | pre_crash |
 | `sex` | String | 0.0 | female, male, unknown | pre_crash |
-| `killed` | Int8 | 1.8 | 0 – 1 | outcome |
+| `killed` | Int8 | 1.5 | 0 – 1 | outcome |
 | `killed_or_serious` | Int8 | 1.8 | 0 – 1 | outcome |
 | `injured` | Int8 | 1.5 | 0 – 1 |  |
 | `kabco` | Int8 | 1.8 | 0 – 4 | outcome |
@@ -331,7 +331,7 @@ _Generated from `data/processed/*.parquet` by `nhtsa_stats.reporting.docs_gen`. 
 | `other_vehicle_body` | String | 0.0 | bus, car, light_truck_other, light_unknown_type, medium_heavy_truck, motorcycle, none_or_multi, other, pickup, suv, truc | crash_circumstance |
 | `role` | String | 0.0 | cargo_exterior_passenger, cyclist, driver, front_passenger, other_nonmotorist, parked_vehicle_occupant, passenger_seat_u | pre_crash |
 
-## `crss_driver` — 825,957 rows × 75 columns
+## `crss_driver` — 825,957 rows × 74 columns
 
 | column | type | % null | values | timing |
 |---|---|---|---|---|
@@ -352,7 +352,7 @@ _Generated from `data/processed/*.parquet` by `nhtsa_stats.reporting.docs_gen`. 
 | `drv_age` | Int64 | 6.3 | 4 – 120 |  |
 | `drv_age_band` | String | 0.2 | 0-14, 15-20, 21-24, 25-34, 35-44, 45-54, 55-64, 65-74, 75+, unknown |  |
 | `drv_sex` | String | 0.2 | female, male, unknown |  |
-| `drv_killed` | Int8 | 0.4 | 0 – 1 |  |
+| `drv_killed` | Int8 | 0.2 | 0 – 1 |  |
 | `drv_killed_or_serious` | Int8 | 0.4 | 0 – 1 |  |
 | `drv_restraint` | String | 0.2 | belted, none, not_applicable, unknown |  |
 | `drv_helmet` | String | 0.2 | helmet, none, not_applicable, unknown |  |
@@ -403,12 +403,11 @@ _Generated from `data/processed/*.parquet` by `nhtsa_stats.reporting.docs_gen`. 
 | `alcohol` | Int8 | 29.4 | 0 – 1 | pre_crash |
 | `alcohol_im` | Int8 | 0.0 | 0 – 1 | pre_crash |
 | `drugs` | Int8 | 41.8 | 0 – 1 | pre_crash |
-| `hit_and_run_right` | Int8 | 0.0 | 0 – 1 |  |
 | `n_killed` | UInt32 | 0.0 | 0 – 6 | outcome |
 | `n_ka` | UInt32 | 0.0 | 0 – 9 |  |
-| `fatal` | Int8 | 0.4 | 0 – 1 | outcome |
-| `ka` | Int8 | 0.4 | 0 – 1 | outcome |
-| `fatal_cc` | Int8 | 7.8 | 0 – 1 | outcome |
+| `fatal` | Int8 | 0.0 | 0 – 1 | outcome |
+| `ka` | Int8 | 0.3 | 0 – 1 | outcome |
+| `fatal_cc` | Int8 | 7.5 | 0 – 1 | outcome |
 | `n_killed_outside_veh` | UInt32 | 0.0 | 0 – 5 |  |
 
 ## `fars_driver` — 501,389 rows × 86 columns
@@ -434,7 +433,7 @@ _Generated from `data/processed/*.parquet` by `nhtsa_stats.reporting.docs_gen`. 
 | `drv_age` | Int64 | 3.3 | 4 – 103 |  |
 | `drv_age_band` | String | 0.7 | 0-14, 15-20, 21-24, 25-34, 35-44, 45-54, 55-64, 65-74, 75+, unknown |  |
 | `drv_sex` | String | 0.7 | female, male, unknown |  |
-| `drv_killed` | Int8 | 3.0 | 0 – 1 |  |
+| `drv_killed` | Int8 | 2.8 | 0 – 1 |  |
 | `drv_killed_or_serious` | Int8 | 3.0 | 0 – 1 |  |
 | `drv_restraint` | String | 0.7 | belted, none, not_applicable, unknown |  |
 | `drv_helmet` | String | 0.7 | helmet, none, not_applicable, unknown |  |

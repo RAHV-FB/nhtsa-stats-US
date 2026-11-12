@@ -1,0 +1,30 @@
+{
+ "table": "deaths/licence_trend.csv",
+ "description": "Change in licence-invalid crashes and drivers 2019-2021-2024 with and without expired or cancelled licences counted as invalid",
+ "population": "FARS fatal crashes 2016-2024 (census)",
+ "unit": "person killed / driver in a fatal crash",
+ "outcome": "death (INJ_SEV 4)",
+ "method": "Census counts; invalid = L_STATUS 0-4 (all) or 0-2 (without expired/cancelled); driver share among L_STATUS 0-4 and 6",
+ "inputs": [
+  "FARS person (PER_TYP)",
+  "FARS vehicle (L_STATUS, PREV_*)",
+  "FARS veh_aux (A_SPVEH)",
+  "FARS miper"
+ ],
+ "rows": 9,
+ "columns": [
+  "definition",
+  "licence_status_codes",
+  "measure",
+  "value_2019",
+  "value_2021",
+  "value_2024",
+  "pct_change_2019_2021",
+  "pct_change_2021_2024",
+  "pct_change_2019_2024",
+  "estimate_type"
+ ],
+ "module": "nhtsa_stats.analysis.deaths",
+ "git_commit": "53bfb34-dirty",
+ "generated_utc": "2026-11-12T17:59:28Z"
+}

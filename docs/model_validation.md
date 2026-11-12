@@ -386,6 +386,15 @@ contains; the screen points to crash-type-specific effects (§7), two of which w
   over-prediction in the test years) and whose coefficients have
   design-based standard errors. The confirmatory analyses above show which specific
   boosting-detected patterns those models should add.
+* **What the comparison with the interacted logistic model does and does not show.** The statement
+  above that the gain over the logistic models "does not come from the RQ2 interactions" is partly
+  answered by `severity/fatal_effect_modification` (added after the red-team review): the crash-type
+  interactions it tests are large and statistically clear for exceeding the limit, alcohol,
+  motorcycles and large trucks, and absent for "too fast for conditions". That table estimates
+  effect modification within the survey model; it is not a prediction comparison. The head-to-head
+  comparison of boosting against a logistic model that includes the crash-type interactions (AUROC
+  and the other proper scoring rules, with paired intervals) **was not done**, so it remains
+  untested whether boosting's advantage disappears once those interactions are in the logistic model.
 * L2 tuning changes nothing measurable. The random forest discriminates slightly better than the
   logistic models (§5.1) but has lower Brier skill and was a single untuned configuration, so it
   brings nothing that would change the selection; this says nothing about a tuned forest.
@@ -545,7 +554,7 @@ Phase-2 models are explanatory survey logistic models (no tuning), documented in
 `docs/methodology.md` §12. Validation specific to them:
 
 * **Reproduction of Phase 1.** The speeding lattice's model with the six model-A blocks
-  reproduces the Phase-1 adjusted exceedance RR exactly (`speeding.reproduce_phase1`; 5.22).
+  reproduces the Phase-1 adjusted exceedance RR exactly (5.22; compare the model-A row of the speeding lattice with `severity/fatal_speeding_type`).
 * **Convergence and support.** Every factorial model records convergence and the number of
   withheld combinations (`multifactor/analyses`).
 * **Predictive contribution.** `contributions/predictive` uses the Phase-1 temporal split

@@ -39,6 +39,8 @@ from nhtsa_stats import config
 PLACEHOLDER = re.compile(r"\{\{(.+?)\}\}", re.DOTALL)
 TEMPLATE_DIR = config.PROJECT_ROOT / "reports" / "templates"
 REPORT_DIR = config.PROJECT_ROOT / "reports"
+# Templates written to the repository root instead of ``reports/`` (README.md is generated too).
+ROOT_TEMPLATES = frozenset({"README.md"})
 
 
 class RenderError(RuntimeError):
@@ -101,6 +103,9 @@ def _fmt(value, fmt: str, row: pd.Series | None = None, column: str | None = Non
         return f"{'+' if pct > 0 else chr(0x2212)}{text}%"
     if fmt.startswith("rnd:"):
         return f"{round(num(value), int(fmt[4:])):,.0f}"
+    if fmt.startswith("mn:"):
+        # Millions, e.g. "mn:1" renders 5_312_000 as "5.3" (the template adds "million").
+        return f"{num(value) / 1e6:.{int(fmt[3:])}f}"
     if fmt.startswith("x:"):
         return f"{num(value):.{int(fmt[2:])}f}\u00d7"
     if fmt == "in10":
@@ -200,7 +205,14 @@ def render_text(text: str) -> str:
     return out
 
 
-def render_all(template_dir: Path = TEMPLATE_DIR, out_dir: Path = REPORT_DIR) -> list[Path]:
+def render_all(
+    template_dir: Path = TEMPLATE_DIR,
+    out_dir: Path = REPORT_DIR,
+    root_dir: Path | None = None,
+) -> list[Path]:
+    """Render every template; ``ROOT_TEMPLATES`` (README.md) go to ``root_dir``
+    (the repository root by default), the rest to ``out_dir``."""
+    root_dir = config.PROJECT_ROOT if root_dir is None else root_dir
     _table.cache_clear()
     _json.cache_clear()
     written = []
@@ -209,7 +221,7 @@ def render_all(template_dir: Path = TEMPLATE_DIR, out_dir: Path = REPORT_DIR) ->
             f"<!-- Generated from reports/templates/{tpl.name} by `nhtsa analyze report`; "
             "every number is looked up in outputs/tables. Edit the template, not this file. -->\n\n"
         )
-        out = out_dir / tpl.name
+        out = (root_dir if tpl.name in ROOT_TEMPLATES else out_dir) / tpl.name
         out.write_text(header + render_text(tpl.read_text()))
         written.append(out)
     for tpl in sorted(template_dir.glob("*.json")):

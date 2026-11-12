@@ -336,3 +336,46 @@ def test_denominator_share_matches_numerator_denominator_and_adds_to_one():
     assert (
         pivot["numerator_share_of_log_rise"] + pivot["denominator_share_of_log_rise"]
     ).to_numpy() == pytest.approx(1.0)
+
+
+def test_numerator_denominator_flags_unstable_shares_like_decomposition_table():
+    # No change in the fatal share (same distribution in both periods): the ratio CI includes 1,
+    # so the share-of-log-rise rows are flagged exactly as decomposition_table does.
+    rng = np.random.default_rng(5)
+    n = 30000
+    years = rng.choice(list(T.P0_YEARS + T.P1_YEARS), n)
+    kab = rng.choice(5, n, p=[0.70, 0.15, 0.10, 0.04, 0.01]).astype(float)
+    df = pd.DataFrame({"YEAR": years, "kabco": kab, "fatal_cc": np.where(kab == 4, 1.0, 0.0)})
+    stratum = rng.integers(0, 4, n)
+    design = SurveyDesign.from_arrays(
+        rng.uniform(1, 3, n), stratum, stratum * 10 + rng.integers(0, 3, n)
+    )
+    ms = T.kabco_marginset(df, design)
+    fars = pd.Series(1000.0, index=list(T.P0_YEARS + T.P1_YEARS))
+    nd = T.numerator_denominator(ms, fars)
+    for comp, grp in nd.groupby("comparison"):
+        tot = grp.set_index("quantity").loc["ratio_fatal_share"]
+        unstable = tot["low"] <= 1 <= tot["high"]
+        shares = grp["quantity"].isin(
+            ["numerator_share_of_log_rise", "denominator_share_of_log_rise"]
+        )
+        assert (grp.loc[shares, "flag"] == "total change CI includes 0: shares unstable").all() == (
+            unstable
+        ), comp
+        assert (grp.loc[~shares, "flag"] == "").all()
+    assert (nd["flag"] != "").any()
+    # A clear rise carries no flag.
+    df2, design2 = _kabco_frame()
+    nd2 = T.numerator_denominator(T.kabco_marginset(df2, design2), fars)
+    clear = nd2[nd2["comparison"] == "2020-2024 vs 2016-2019"]
+    assert (clear["flag"] == "").all()
+
+
+def test_unrestrained_share_definition_is_shared_and_counts_child_restraint():
+    from nhtsa_stats.analysis import descriptive as D
+
+    assert D.KNOWN_RESTRAINT_USE == ("belted", "none", "child_restraint")
+    r = pd.Series(["belted"] * 6 + ["none"] * 2 + ["child_restraint"] * 2 + ["unknown"] * 5)
+    # child restraint counts as restrained; unknown is excluded: 2 / 10, not 2 / 8
+    assert D.unrestrained_share_of_known(r) == pytest.approx(0.2)
+    assert T.KNOWN_RESTRAINT_USE is D.KNOWN_RESTRAINT_USE

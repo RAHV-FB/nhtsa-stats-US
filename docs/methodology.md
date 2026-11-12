@@ -373,3 +373,48 @@ killed (FARS person files, `INJ_SEV` = 4) rather than from crash severity.
 The public website (`website/index.html`) is rendered from `website/templates/index.html` by
 `nhtsa analyze site`, with the same placeholder grammar as the reports, so every number on the page
 is looked up in `outputs/tables` at build time.
+
+## 14. Changes after the red-team review (November 2026)
+
+These record what changed in the pipeline; numbers are in the tables named, not here.
+
+* **Recodes** (details in `docs/variable_harmonization.md`).
+  * CRSS fatal is 0, not missing, when the maximum severity (`MAXSEV_IM`) is "injured, severity
+    unknown" (5), "died prior to crash" (6) or "no person involved" (8): none of them can contain a
+    crash death. The same rule applies to person-level killed and to the complete-case outcomes,
+    which still require every person's severity to be known unless a death is recorded. The old
+    coding dropped those crashes and overstated fatal shares slightly (relatively, and more in
+    early years), so most CRSS numbers shift a little after a re-run.
+  * "Looked but did not see" (2016–17 only) no longer counts as distracted.
+  * FARS rollover code 8 is 0 for motorcycles and missing otherwise.
+  * FARS 2016–17 `PREV_SUS` is a different quantity from `PREV_SUS1` and is explicitly missing.
+* **Interaction margins** (`analysis/interactions.py`) set the crash type together with the number
+  of vehicles from their observed joint distribution inside the exposed or reference level, so a
+  multi-vehicle crash type is never assigned to a one-vehicle crash. Margins therefore average over
+  coherent crash-type and vehicle-count combinations; the mixture weights of those combinations are
+  treated as fixed (see `docs/limitations.md` §10).
+* **Person-level margins** (`analysis/person.py`): when the interaction modifier is the crash type,
+  each stratum is standardised over its own persons (a stratum domain in the linearisation), because
+  setting the crash type for everyone while the number of vehicles and partner vehicle stay observed
+  would average over impossible crashes.
+* **Effect modification and calibration** (`analysis/severity.py`): model A is refitted within
+  single-vehicle and multi-vehicle crashes and within crash types (`severity/fatal_effect_modification`;
+  exploratory, with a homogeneity test and a minimum of 20 events in the exposed and reference
+  cells), and its calibration by weighted decile of predicted risk is tabulated
+  (`severity/fatal_calibration`; in-sample, so predictions are treated as fixed).
+* **Imputed-BAC diagnostic** (`analysis/measurement.py`): `measurement/imputed_bac_injury` compares
+  the adjusted association of imputed BAC of .08 or more with being killed, among untested drivers,
+  with that of measured BAC among tested drivers. It is a diagnostic, not a causal estimate.
+* **Shared unrestrained-share definition.** The share of unrestrained occupants among passenger-
+  vehicle occupant deaths with known restraint use (belted, child restraint counted as restrained,
+  or none; unknown and not applicable leave the denominator) is defined once
+  (`analysis/descriptive.py`, `unrestrained_share_of_known`) and used by both the FARS composition table
+  and the trend module.
+* **EMS intervals** (`analysis/stages.py`): crash-to-arrival intervals that are negative or longer
+  than 12 hours are set to missing, and the timing tables add a "driver BAC unknown" row.
+* **Sidecar source hashes.** Every table's JSON sidecar records the SHA-256 of the producing
+  module's source (`source_sha256`) and of the package (`package_sha256`). `nhtsa status` lists the
+  tables whose producing module has changed since they were written, and those without a hash, so a
+  stale table is visible before it is quoted.
+* **README.** `README.md` is rendered from `reports/templates/README.md` by `nhtsa analyze report`
+  like the reports, and `tests/test_reports_in_sync.py` fails if it is stale.

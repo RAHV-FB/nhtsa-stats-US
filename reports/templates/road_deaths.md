@@ -135,7 +135,15 @@ the share of deaths who were not the drunk driver is lower. Neither basis is a p
 true share. The measured-only figure is plausibly too low, because surviving drunk drivers are tested
 less often than killed ones, so measured cases over-represent drivers who died; the all-BAC figure
 depends on NHTSA's undocumented imputation model. The two bases show how much the answer depends on
-the choice, not a range that contains the truth:
+the choice, not a range that contains the truth.
+
+The imputed basis has a further problem. Among untested drivers, an imputed BAC of .08 or more is
+associated with the driver being killed with an adjusted odds ratio of {{measurement/imputed_bac_injury|covariate_set=primary;group=imputed|adj_or|ci:2@adj_or}}, against
+{{measurement/imputed_bac_injury|covariate_set=primary;group=tested|adj_or|ci:2@adj_or}} for a measured BAC of .08 or more among tested drivers
+(`measurement/imputed_bac_injury`). That is what one would expect if NHTSA's imputation model uses
+injury severity, so figures built on imputed BAC lean on a model that uses the outcome, and the
+measured-BAC figures are the more conservative basis. The comparison is a diagnostic, not a causal
+estimate.
 
 {{mdtable:deaths/victim_roles_bac_basis|group=alcohol_impaired|basis:BAC basis:;role:Role:;deaths:Deaths:,.0f;share_of_group:Share:pct:1}}
 
@@ -158,6 +166,12 @@ with a measured BAC the share is higher ({{deaths/driver_records_measured_bac|gr
 {{deaths/driver_records_measured_bac|group=bac_08_plus_imputed_only;indicator=prior_dwi|share|pct:1}} for imputed BAC), which may reflect testing being more likely when the
 police suspect a driver. Even so, most drunk drivers in fatal crashes had no recent conviction for
 programmes aimed at convicted drivers to act on.
+
+The share also varies widely by state (`deaths/prior_dwi_state_range`, `deaths/prior_dwi_by_state`).
+Among states with at least 100 drivers at .08 or more, the prior-DWI share runs from
+{{deaths/prior_dwi_state_range|bac_basis=all;states=states with >= 100 drivers|min_share|pct:1}} ({{deaths/prior_dwi_state_range|bac_basis=all;states=states with >= 100 drivers|min_state|}}) to {{deaths/prior_dwi_state_range|bac_basis=all;states=states with >= 100 drivers|max_share|pct:1}} ({{deaths/prior_dwi_state_range|bac_basis=all;states=states with >= 100 drivers|max_state|}}), with a median of {{deaths/prior_dwi_state_range|bac_basis=all;states=states with >= 100 drivers|median_share|pct:1}}
+(among drivers with a measured BAC: {{deaths/prior_dwi_state_range|bac_basis=measured_only;states=states with >= 100 drivers|min_share|pct:1}} to {{deaths/prior_dwi_state_range|bac_basis=measured_only;states=states with >= 100 drivers|max_share|pct:1}}). Differences in how completely states
+record and report convictions contribute to that spread, so it is not a ranking of states.
 
 ## 4. Seat belts
 
@@ -286,7 +300,15 @@ Who died in crashes involving a large truck:
 
 That most of those killed were not the truck driver describes who was in the crash, not who was at fault.
 The share mixes crashes between a truck and a passenger vehicle with single-truck crashes, and nothing in
-this report attributes fault.
+this report attributes fault. Separating them (`deaths/large_truck_crash_types`):
+
+{{mdtable:deaths/large_truck_crash_types|exclusive_row=True|crash_type:Crash type:;crashes:Crashes:,.0f;deaths:Deaths:,.0f;truck_driver:Truck driver:,.0f;share_not_truck_driver:Not the truck driver:pct:1}}
+
+In single-truck crashes {{deaths/large_truck_crash_types|crash_type=single_truck|share_not_truck_driver|pct:0}} of those killed
+were not the truck driver (pedestrians, cyclists and truck passengers among them), against
+{{deaths/large_truck_crash_types|crash_type=truck_and_passenger_vehicle|share_not_truck_driver|pct:0}} in crashes between a large
+truck and a passenger vehicle. Restricting to two-vehicle crashes with one truck and one passenger vehicle
+gives {{deaths/large_truck_crash_types|crash_type=two_vehicle_truck_and_passenger_vehicle|share_not_truck_driver|pct:0}}.
 
 ## 9. Change since 2019
 
@@ -300,8 +322,14 @@ The share of drivers in fatal crashes without a valid licence was
 {{deaths/driver_records_by_year|YEAR=2019;group=all;indicator=licence_invalid|share|pct:1}} in
 2019, {{deaths/driver_records_by_year|YEAR=2020;group=all;indicator=licence_invalid|share|pct:1}}
 in 2020 and {{deaths/driver_records_by_year|YEAR=2024;group=all;indicator=licence_invalid|share|pct:1}}
-in 2024 (`deaths/driver_records_by_year`). FARS has no exposure, so these are changes in counts,
-not in risk per mile.
+in 2024 (`deaths/driver_records_by_year`). The rise from 2019 to 2021 does not depend on counting
+expired or cancelled licences as invalid (`deaths/licence_trend`): deaths in crashes with an invalid-licence
+driver rose {{deaths/licence_trend|definition=invalid_incl_expired_cancelled;measure=deaths_in_invalid_licence_crashes|pct_change_2019_2021|pctsign:1}} with them
+counted and {{deaths/licence_trend|definition=invalid_excl_expired_cancelled;measure=deaths_in_invalid_licence_crashes|pct_change_2019_2021|pctsign:1}} without, and the driver share
+rose {{deaths/licence_trend|definition=invalid_incl_expired_cancelled;measure=driver_share|pct_change_2019_2021|pctsign:1}} and
+{{deaths/licence_trend|definition=invalid_excl_expired_cancelled;measure=driver_share|pct_change_2019_2021|pctsign:1}} (relative change). Expired and cancelled licences alone rose by more in
+relative terms ({{deaths/licence_trend|definition=expired_or_cancelled_only;measure=deaths_in_invalid_licence_crashes|pct_change_2019_2021|pctsign:0}} in deaths) from a small base. FARS has no
+exposure, so these are changes in counts, not in risk per mile.
 
 ## 10. States
 

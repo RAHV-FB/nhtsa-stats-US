@@ -615,6 +615,8 @@ h3 { font-weight: 800; font-size: 1.25rem; margin: 40px 0 12px; }
     <p>Most drunk drivers in fatal crashes were far over the limit. 66% had a blood alcohol concentration of .15 or more, nearly twice the legal limit. 24% were driving without a valid licence, against 12% of drivers with no alcohol.</p>
     <p>Yet only 7.4% had a DWI conviction on their record from the previous five years (9.5% among drivers with a measured blood alcohol result, 4.1% among those whose result was imputed). Driver records miss some convictions and their completeness varies by state, so the true share is higher, but most of these drivers had no recent conviction for measures aimed at convicted drivers, such as court-ordered ignition interlocks, to act on.</p>
 
+    <p>The share with a recent conviction also varies widely between states: among states with enough such drivers it runs from 2% in MD to 20% in ND. Part of that spread reflects how completely states record and share convictions, so it is not a ranking of states.</p>
+
     <figure class="fig">
       <p class="fig-title">Driver records: drunk drivers compared with drivers with no alcohol</p>
       <p class="fig-sub">Drivers in fatal crashes, 2016–2024, share of those with a known record</p>
@@ -623,7 +625,7 @@ h3 { font-weight: 800; font-size: 1.25rem; margin: 40px 0 12px; }
     </figure>
 
     <p class="note">NHTSA imputes blood alcohol for drivers who were not tested, from the circumstances of the crash; the figures here average its ten imputations. Driver records show convictions, not arrests, and can miss offences in other states.</p>
-    <p class="source">Sources: <a href="data/tables/deaths/victim_roles.csv">deaths/victim_roles</a>, <a href="data/tables/deaths/victim_roles_bac_basis.csv">deaths/victim_roles_bac_basis</a>, <a href="data/tables/deaths/driver_records.csv">deaths/driver_records</a>, <a href="data/tables/deaths/driver_records_measured_bac.csv">deaths/driver_records_measured_bac</a>, <a href="data/tables/deaths/driver_bac_imputed_share.csv">deaths/driver_bac_imputed_share</a>. Estimated from ten imputations unless marked measured only.</p>
+    <p class="source">Sources: <a href="data/tables/deaths/victim_roles.csv">deaths/victim_roles</a>, <a href="data/tables/deaths/victim_roles_bac_basis.csv">deaths/victim_roles_bac_basis</a>, <a href="data/tables/deaths/driver_records.csv">deaths/driver_records</a>, <a href="data/tables/deaths/driver_records_measured_bac.csv">deaths/driver_records_measured_bac</a>, <a href="data/tables/deaths/driver_bac_imputed_share.csv">deaths/driver_bac_imputed_share</a>, <a href="data/tables/deaths/prior_dwi_state_range.csv">deaths/prior_dwi_state_range</a>, <a href="data/tables/deaths/prior_dwi_by_state.csv">deaths/prior_dwi_by_state</a>. Estimated from ten imputations unless marked measured only.</p>
   </div>
 </section>
 
@@ -673,6 +675,7 @@ h3 { font-weight: 800; font-size: 1.25rem; margin: 40px 0 12px; }
 
     <h3>Exceeding the limit was the most often fatal kind of speeding</h3>
     <p>Police record two kinds of speeding: exceeding the posted limit (or racing), and driving too fast for conditions. In the national sample of police-reported crashes, a crash in which a driver exceeded the limit was 5.2× as likely to be fatal as a comparable crash with no speeding, after adjusting for the road, light, weather, alcohol and the drivers and vehicles involved. Crashes coded “too fast for conditions”, which make up most of the speeding category and happen on wet roads far more often than other crashes (24% of them, against 13% of crashes without speeding), showed a small association with a fatal outcome that the data cannot tell apart from none (risk ratio 1.06 (0.89–1.26)). That interval rules out only associations larger than about 22 percent either way, and when the type of crash is also held fixed the ratio is 1.29 (1.13–1.47). Splitting speeding by type was an exploratory analysis, prompted by earlier results rather than planned in advance, so treat these figures as leads.</p>
+    <p>The overall figure for exceeding the limit averages over very different kinds of crash. A follow-up added after an independent review found the ratio is 3.3× in crashes involving one vehicle and 10.1× in crashes involving several, where the chance that any crash is fatal is lower to begin with. The same pattern appears for alcohol, motorcycles and large trucks, but not for driving too fast for conditions. These too are associations, not effects.</p>
 
     <figure class="fig">
       <p class="fig-title">How much more likely a crash is to be fatal, by kind of speeding</p>
@@ -684,7 +687,7 @@ h3 { font-weight: 800; font-size: 1.25rem; margin: 40px 0 12px; }
     <p>Speeding drivers in fatal crashes also had worse records than drivers who were neither speeding nor drinking: 24% had no valid licence, against 10%, and 24% had a speeding conviction in the previous five years, against 16%.</p>
 
     <p class="note">Speeding is a judgement police make after the crash. FARS records it for more fatal crashes than the police-reported sample does, and recording practice differs between states and agencies.</p>
-    <p class="source">Sources: <a href="data/tables/deaths/victim_roles.csv">deaths/victim_roles</a>, <a href="data/tables/deaths/driver_records.csv">deaths/driver_records</a>, <a href="data/tables/severity/fatal_speeding_type.csv">severity/fatal_speeding_type</a>, <a href="data/tables/severity/speeding_type_models.csv">severity/speeding_type_models</a>. Observed counts (FARS); survey estimates with design-based confidence intervals (CRSS).</p>
+    <p class="source">Sources: <a href="data/tables/deaths/victim_roles.csv">deaths/victim_roles</a>, <a href="data/tables/deaths/driver_records.csv">deaths/driver_records</a>, <a href="data/tables/severity/fatal_speeding_type.csv">severity/fatal_speeding_type</a>, <a href="data/tables/severity/speeding_type_models.csv">severity/speeding_type_models</a>, <a href="data/tables/severity/fatal_effect_modification.csv">severity/fatal_effect_modification</a>. Observed counts (FARS); survey estimates with design-based confidence intervals (CRSS).</p>
   </div>
 </section>
 
@@ -761,7 +764,7 @@ h3 { font-weight: 800; font-size: 1.25rem; margin: 40px 0 12px; }
     </figure>
 
     <h3>Large trucks</h3>
-    <p>13% of deaths, 47,175 people, were in crashes involving a large truck. 85% of those killed were not the truck driver, and 71% were in another vehicle. That describes who was in these crashes. It does not show who was at fault.</p>
+    <p>13% of deaths, 47,175 people, were in crashes involving a large truck. 85% of those killed were not the truck driver, and 71% were in another vehicle. That describes who was in these crashes. It does not show who was at fault. The share depends on the kind of crash: in crashes involving only the truck, 55% of those killed were not the truck driver (pedestrians, cyclists and truck passengers among them), against 96% in crashes between a large truck and a passenger vehicle.</p>
 
     <figure class="fig">
       <p class="fig-title">Who died in crashes involving a large truck</p>
@@ -769,7 +772,7 @@ h3 { font-weight: 800; font-size: 1.25rem; margin: 40px 0 12px; }
       <div class="chart seg-set"><div class="seg"><div class="seg-bar" role="img" aria-label="The truck driver 15%; Truck passengers 3%; People in other vehicles 71%; Pedestrians and cyclists 11%; Others 1%"><div class="seg-block" style="flex:0.149740 1 0;background:var(--accent)" data-tip="The truck driver: 15%" title="The truck driver: 15%"><span class="seg-txt seg-on-accent">15%</span></div><div class="seg-block" style="flex:0.025967 1 0;background:var(--series-2)" data-tip="Truck passengers: 3%" title="Truck passengers: 3%"></div><div class="seg-block" style="flex:0.709656 1 0;background:var(--aqua)" data-tip="People in other vehicles: 71%" title="People in other vehicles: 71%"><span class="seg-txt seg-on-aqua">71%</span></div><div class="seg-block" style="flex:0.109189 1 0;background:var(--violet)" data-tip="Pedestrians and cyclists: 11%" title="Pedestrians and cyclists: 11%"></div><div class="seg-block" style="flex:0.005448 1 0;background:var(--deemph)" data-tip="Others: 1%" title="Others: 1%"></div></div><ul class="legend"><li><i class="sw sw-swatch" style="background:var(--accent)"></i>The truck driver</li><li><i class="sw sw-swatch" style="background:var(--series-2)"></i>Truck passengers</li><li><i class="sw sw-swatch" style="background:var(--aqua)"></i>People in other vehicles</li><li><i class="sw sw-swatch" style="background:var(--violet)"></i>Pedestrians and cyclists</li><li><i class="sw sw-swatch" style="background:var(--deemph)"></i>Others</li></ul></div></div><details class="dataview"><summary>Show the data</summary><div class="table-wrap"><table><thead><tr><th scope="col">Part</th><th scope="col">Share</th></tr></thead><tbody><tr><th scope="row">The truck driver</th><td class="num">15%</td></tr><tr><th scope="row">Truck passengers</th><td class="num">3%</td></tr><tr><th scope="row">People in other vehicles</th><td class="num">71%</td></tr><tr><th scope="row">Pedestrians and cyclists</th><td class="num">11%</td></tr><tr><th scope="row">Others</th><td class="num">1%</td></tr></tbody></table></div></details>
       <figcaption>Large trucks are trucks over 10,000 lb gross vehicle weight.</figcaption>
     </figure>
-    <p class="source">Sources: <a href="data/tables/person/lpv_killed_crude_vs_adjusted.csv">person/lpv_killed_crude_vs_adjusted</a>, <a href="data/tables/deaths/vehicle_age.csv">deaths/vehicle_age</a>, <a href="data/tables/deaths/victim_roles.csv">deaths/victim_roles</a>. Survey estimates (CRSS); observed counts (FARS).</p>
+    <p class="source">Sources: <a href="data/tables/person/lpv_killed_crude_vs_adjusted.csv">person/lpv_killed_crude_vs_adjusted</a>, <a href="data/tables/deaths/vehicle_age.csv">deaths/vehicle_age</a>, <a href="data/tables/deaths/victim_roles.csv">deaths/victim_roles</a>, <a href="data/tables/deaths/large_truck_crash_types.csv">deaths/large_truck_crash_types</a>. Survey estimates (CRSS); observed counts (FARS).</p>
   </div>
 </section>
 
@@ -794,7 +797,7 @@ h3 { font-weight: 800; font-size: 1.25rem; margin: 40px 0 12px; }
       <figcaption>Alcohol from ten imputations; all other groups are observed counts.</figcaption>
     </figure>
 
-    <p>The drivers in fatal crashes changed too. The share of drivers in fatal crashes without a valid licence rose from 13.0% in 2019 to 16.7% in 2020, and was 13.9% in 2024.</p>
+    <p>The drivers in fatal crashes changed too. The share of drivers in fatal crashes without a valid licence rose from 13.0% in 2019 to 16.7% in 2020, and was 13.9% in 2024. The rise does not depend on counting expired or cancelled licences as invalid: deaths in crashes with a driver without a valid licence rose +44% from 2019 to 2021 when they are counted and +40% when they are not.</p>
 
     <figure class="fig">
       <p class="fig-title">Share of drivers in fatal crashes without a valid licence</p>
@@ -804,7 +807,7 @@ h3 { font-weight: 800; font-size: 1.25rem; margin: 40px 0 12px; }
     </figure>
 
     <p class="note">The records contain no miles driven. Travel fell in 2020, so these counts do not show how much riskier each mile became.</p>
-    <p class="source">Sources: <a href="data/tables/deaths/annual.csv">deaths/annual</a>, <a href="data/tables/deaths/segments.csv">deaths/segments</a>, <a href="data/tables/deaths/driver_records_by_year.csv">deaths/driver_records_by_year</a>. Observed counts; alcohol estimated from ten imputations.</p>
+    <p class="source">Sources: <a href="data/tables/deaths/annual.csv">deaths/annual</a>, <a href="data/tables/deaths/segments.csv">deaths/segments</a>, <a href="data/tables/deaths/driver_records_by_year.csv">deaths/driver_records_by_year</a>, <a href="data/tables/deaths/licence_trend.csv">deaths/licence_trend</a>. Observed counts; alcohol estimated from ten imputations.</p>
   </div>
 </section>
 
