@@ -98,16 +98,7 @@ def vehicle_level(source: str, years: Sequence[int]) -> pl.DataFrame:
     dist = load_table(source, "distract", years, [*kv[1:], "MDRDSTRD", "DRDISTRACT"])
     dist = (
         dist.with_columns(pl.coalesce("DRDISTRACT", "MDRDSTRD").alias("code"))
-        .with_columns(
-            # 16 'no driver present / unknown if driver present' cannot be told apart from
-            # an unknown driver, so it is unknown rather than 'not distracted'.
-            pl.when(pl.col("code") == 0)
-            .then(pl.lit(0, dtype=pl.Int8))
-            .when(pl.col("code").is_in([16, 96, 99]) | pl.col("code").is_null())
-            .then(pl.lit(None, dtype=pl.Int8))
-            .otherwise(pl.lit(1, dtype=pl.Int8))
-            .alias("distracted")
-        )
+        .with_columns(h.distraction_flag("code").alias("distracted"))
         .group_by(kv)
         # A driver with any substantive distraction code is distracted; with only 'not
         # distracted' codes is not; otherwise unknown.
@@ -124,11 +115,7 @@ def vehicle_level(source: str, years: Sequence[int]) -> pl.DataFrame:
         (pl.col("VSPD_LIM") == 0).alias("speed_limit_zero"),
         h.hit_and_run().alias("hit_and_run"),
         # Post-crash consequences, kept only for mediation/descriptive use.
-        pl.when(pl.col("ROLLOVER").is_in([1, 2, 3, 9]))
-        .then(pl.lit(1, dtype=pl.Int8))
-        .when(pl.col("ROLLOVER").is_in([0, 8]))
-        .then(pl.lit(0, dtype=pl.Int8))
-        .alias("rollover"),
+        h.rollover_flag("ROLLOVER", "BODY_TYP").alias("rollover"),
         h.binary("FIRE_EXP", yes=[1], no=[0]).alias("fire"),
     )
     out = out.with_columns(h.vehicle_age_band().alias("veh_age_band"))
@@ -139,7 +126,11 @@ def vehicle_level(source: str, years: Sequence[int]) -> pl.DataFrame:
         )
     else:
         # DR_DRINK: driver drinking (police-reported alcohol involvement) 0 no, 1 yes.
-        out = out.with_columns(h.binary("DR_DRINK", yes=[1], no=[0]).alias("veh_alcohol"))
+        out = out.with_columns(
+            h.binary("DR_DRINK", yes=[1], no=[0]).alias("veh_alcohol"),
+            # 2016-17 PREV_SUS is a different quantity: explicit null, see the helper.
+            h.fars_prior_suspensions().alias("PREV_SUS1"),
+        )
     return out
 
 
@@ -416,13 +407,13 @@ def build_crss(years: Sequence[int] = config.YEARS) -> tuple[pl.DataFrame, pl.Da
         # is unknown (INJ_SEV 9; for KA also 5 'injured, severity unknown').
         pl.when(pl.col("MAX_SEV") == 4)
         .then(pl.lit(1, dtype=pl.Int8))
-        .when(pl.col("MAX_SEV").is_between(0, 3) & (pl.col("n_sev_unknown") == 0))
+        .when(pl.col("MAX_SEV").is_in([0, 1, 2, 3, 5, 6, 8]) & (pl.col("n_sev_unknown") == 0))
         .then(pl.lit(0, dtype=pl.Int8))
         .alias("fatal_cc"),
         pl.when(pl.col("MAX_SEV").is_in([3, 4]))
         .then(pl.lit(1, dtype=pl.Int8))
         .when(
-            pl.col("MAX_SEV").is_between(0, 2)
+            pl.col("MAX_SEV").is_in([0, 1, 2, 6, 8])
             & (pl.col("n_sev_unknown") == 0)
             & (pl.col("n_sev_injured_unknown") == 0)
         )

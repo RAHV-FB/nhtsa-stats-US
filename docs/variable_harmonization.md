@@ -35,7 +35,7 @@ commit 7ee597e; the consolidated audit is `docs/audit_2026-11.md`.
 
 | Variable | Level | Source fields (both sources unless noted) | Harmonised categories | Breaks / issues handled | Reliability |
 |---|---|---|---|---|---|
-| `fatal`, `ka`, `injury`, `kabco` | crash / person | CRSS crash `MAXSEV_IM`, CRSS person `INJSEV_IM`; FARS `INJ_SEV` | K; K+A; any injury; ordinal O–K. Codes 5 (injured, severity unknown), 6 (died before crash), 8 → null | Imputation fills only unknown codes (person 9). Weighted imputed fatal total = FARS within 0.9% every year; unimputed `MAX_SEV` falls 0.6–12.8% short (year-dependent) | High |
+| `fatal`, `ka`, `injury`, `kabco` | crash / person | CRSS crash `MAXSEV_IM`, CRSS person `INJSEV_IM`; FARS `INJ_SEV` | K; K+A; any injury; ordinal O–K. `fatal` = 0 for codes 5 (injured, severity unknown), 6 (died before crash) and 8 (no person involved): a crash death has code 4. `ka` = 0 for 6 and 8 but stays null for 5 (that person may have had an A injury). Only person code 9 stays null. See section 5 | Imputation fills only unknown codes (person 9). Weighted imputed fatal total = FARS within 0.9% every year; unimputed `MAX_SEV` falls 0.6–12.8% short (year-dependent) | High |
 | `fatal_cc`, `ka_cc`; `killed_cc`, `killed_or_serious_cc` | crash / person | CRSS `MAX_SEV`, `INJ_SEV` | Strict complete case: crash negative only if no person has `INJ_SEV` 9 (and, for KA, 5); ~8% of crashes null | Sensitivity only: levels and trends differ from the imputed outcome | — |
 | `light`, `dark` | crash | `LGT_COND` | daylight / dawn-dusk / dark-lit / dark-unlit / dark-unknown lighting / unknown | Code 6 drifts upward slowly; no break | High |
 | `weather` | crash | `WEATHER` | clear / cloudy / rain (incl. freezing) / snow-sleet / fog / other / unknown | FARS 2016–19 `WEATHER1/2`; 2020+ multi-row `weather` table — the crash-level `WEATHER` field is available all years in both sources and used throughout | Medium (CRSS 3–6% unknown) |
@@ -54,7 +54,7 @@ commit 7ee597e; the consolidated audit is `docs/audit_2026-11.md`.
 | `alcohol` | crash | CRSS `ALCOHOL` | yes / no / unknown | **2019 coding break**: unknown 12–14% → 32–40%; unknown is outcome-dependent (47% of fatal crashes) → sensitivity only | Low for trends |
 | `driver_bac08_prob`, `p_p08` | crash / person | FARS `midrvacc` A1–A10, `miper` P1–P10 | mean over 10 implicates of BAC ≥ .08 g/dL | Implicates in hundredths, `ALC_RES` in thousandths (verified 99.97%); FARS 2024 toxicology incomplete (~26% killed drivers not reported) | High (FARS) |
 | `drugs` | crash / person | `DRUGS` (police) | yes / no / unknown | **2019–2020 breaks**; unknown 40–70%; testing selective; presence ≠ impairment → descriptive only, never a model exposure | Low |
-| `distracted` | vehicle / crash | `distract.MDRDSTRD` (2016–19) → `DRDISTRACT` (2020+) | yes / no (0) / unknown (16 "no driver present / unknown if driver present", 96, 99) | Column renamed 2020 (same codes); code 1 only 2016–17; unknown rose 25% → 50%+ (non-fatal) and 36% → 74% (fatal) 2017–2020 → not used as a model exposure | Low |
+| `distracted` | vehicle / crash | `distract.MDRDSTRD` (2016–19) → `DRDISTRACT` (2020+) | yes / no (0) / unknown (16 "no driver present / unknown if driver present", 96, 99) | Column renamed 2020 (same codes); code 1 'looked but did not see' (2016–17 only) → not distracted, section 5; unknown rose 25% → 50%+ (non-fatal) and 36% → 74% (fatal) 2017–2020 → not used as a model exposure | Low |
 | `young_driver`, `older_driver` | crash | CRSS driver `AGE_IM` (NHTSA-imputed); FARS driver `AGE` | any driver 15–20 / 65+ (tri-state) | Reported age is unknown for 9.6% of CRSS crashes' drivers, and 92% of those crashes are hit-and-run: an 'unknown' level would adjust for leaving the scene (post-crash) by proxy, so CRSS uses the imputed age (unknown 0.05%). FARS has no imputed age (998/999 → unknown) | High |
 | `body` | vehicle | `BODY_TYP` | car / SUV / van / pickup / other light truck / light vehicle of unknown type (49) / bus / medium-heavy truck / motorcycle / truck of unknown type (73, 79) / other / unknown (98, 99) | Pickup codes 30–32 merged into 34 (2017) — absorbed by grouping. Code 49 rises from 0.7% to ~3.7% of CRSS light-vehicle occupants from 2018 and code 79 to ~1.1% of vehicles in 2022–24, so both are kept apart from the known groups (light passenger vehicles = car, SUV, van, pickup, other light truck, unknown light type); aux `A_BODY` breaks in 2020 (not used) | High (known groups) |
 | `veh_age`, `veh_age_band` | vehicle | `YEAR − MOD_YEAR` | 0–3 / 4–7 / 8–12 / 13–17 / 18+ / unknown | −1 → 0; ≤ −2 and 9998/9999 → missing | High |
@@ -62,7 +62,7 @@ commit 7ee597e; the consolidated audit is `docs/audit_2026-11.md`.
 | `restraint` | person | `REST_USE` + `BODY_TYP` + `SEAT_POS` | belted / none / child restraint / not applicable / unknown — **defined only for occupants of vehicles with BODY_TYP 1–79 in seat rows 1–4 (SEAT_POS 11–49) or an unrecorded seat (SEAT_POS 98/99); everyone else is not applicable** | 2016 codes 0/7 merged into 20 in 2017; helmet codes left `REST_USE` in 2019 (from 2019 every motorcyclist has 20 = "not applicable"); CRSS code 8 declines (within "belted") | Medium (survivor self-report) |
 | `helmet` | person | `REST_USE` (2016–18) / `HELM_USE` (2019+) | helmet / none / unknown / not applicable — defined for motorcycle riders (BODY_TYP 80–89) only; everyone else is not applicable | Field move in 2019 handled by year | Medium |
 | `seat`, `role` | person | `SEAT_POS`, `PER_TYP` | front-left / front-other / second row / third+ / cargo-exterior; driver / front_passenger / rear_passenger / cargo_exterior_passenger / passenger_seat_unknown (SEAT_POS 98/99) / non-occupant person types | `PER_TYP` 8 vs 11–13 split only 2020–21 (non-motorists) | High |
-| `ejected`, `airbag_deployed`, `rollover`, `fire` | person / vehicle | `EJECTION`, `AIR_BAG`, `ROLLOVER`, `FIRE_EXP` | post-crash consequences (never covariates) | `AIR_BAG` 2016 codes 0/28; `ROLLOVER` recoded 2022 (1/2/9 → 3; 8 added) | — |
+| `ejected`, `airbag_deployed`, `rollover`, `fire` | person / vehicle | `EJECTION`, `AIR_BAG`, `ROLLOVER`, `FIRE_EXP` | post-crash consequences (never covariates) | `AIR_BAG` 2016 codes 0/28; `ROLLOVER` recoded 2022 (1/2/9 → 3; 8 added; 8 → 0 for motorcycle bodies only, else null, section 5) | — |
 | `culp_c1` (QIE, primary) | driver | `SPEEDREL`, `P_CRASH2`, driver factors `DR_SF1-4` (2016–19) / `driverrf` (2020+), `distract` 1 (2016–17) | culpable: speeding, culpable pre-crash event class, or common error code (6, 8, 102, 103, 36, 50, 51, 58; looked-but-did-not-see); non-culpable: none of these, SPEEDREL = 0, non-culpable/neutral pre-crash event, no 'unknown' driver-factor code; else undetermined | driver factor 99/999 unknown codes (999 only 2020–21; folded into 0 'None noted' from 2022); 2023 split of code 8 into 102/103 | Medium |
 | `culp_viol` (QIE, sensitivity) | driver | `violatn.MVIOLATN` (2016–19) / `VIOLATION` (2020+) | any moving violation charged / none / unknown | **outcome-dependent** (dead drivers are rarely charged); column rename 2020 | Low for QIE |
 | `striking` (non-motorists) | person | person `STR_VEH` → vehicle `BODY_TYP` | car / SUV / pickup / van / large / motorcycle / other | linked for 100% of CRSS non-motorists | High |
@@ -99,3 +99,38 @@ CRSS uses imputed, FARS reported driver age) do not. Nor do speeding-related (CR
 on fuller investigation.
 CRSS-based severity associations for these variables are therefore interpreted with the
 measurement analysis in mind.
+
+## 5. Recode corrections from the year-by-year label audit
+
+Effects below are from a scratch rebuild (`NHTSA_DATA_DIR` copy of `data/interim`) compared with
+the previous `data/processed`. Run `uv run nhtsa features` to refresh `data/processed`.
+
+1. **CRSS `fatal` for `MAXSEV_IM` 5, 6, 8** (`harmonize.fatal`, `features.build_crss`). A crash with a
+   crash death has maximum severity 4, so 5 (1,808 crashes), 6 (20) and 8 "No person involved" (157)
+   hold none and `fatal` is 0 (was null; no null remains). `ka` is 0 for 6 and 8 and null for 5.
+   Person `killed` (`INJSEV_IM`/`INJ_SEV` 5) is 0 (CRSS 2,836 persons at `INJSEV_IM` 5; nulls 2,867 → 0),
+   `killed_or_serious` likewise. Complete-case `fatal_cc`/`ka_cc` follow the same rule when no person is
+   INJ_SEV 9. Weighted fatal share (`WEIGHT`), old → new: 2016 0.5123% → 0.5094% (old overstated by
+   0.56%), 2017 0.48%, 2018 0.42%, 2019 0.39%, 2020 0.34%, 2021 0.20%, 2022 0.21%, 2023 0.22%,
+   2024 0.21% (relative overstatement). The old denominator dropped the 1,985 crashes.
+2. **`distracted`** (`harmonize.distraction_flag`). Code 1 "Looked but did not see" exists only in 2016–17
+   (FARS 701 vehicle rows, CRSS 1,324) and is now not distracted, like 2018+. A driver with any other
+   distraction code stays distracted. Weighted CRSS driver share: 2016 9.99% → 9.06%, 2017 11.18% →
+   10.50%; FARS persons (killed or not) 2016 10.16% → 9.33%, 2017 13.20% → 11.85%. 2018+ unchanged.
+3. **FARS `ROLLOVER` 8 "Not applicable"** (2022–24, 18,799 vehicles; `harmonize.rollover_flag`).
+   All carry `BODY_TYP` 80–89 (motorcycles, mopeds, scooters; `UNITTYPE` 1), which cannot roll over and
+   which 2016–21 coded 0, so they remain 0 (explicitly, by body type); code 8 on any other body is null.
+   Passenger vehicles with two front-seat occupants affected: 0 (no vehicle-level difference).
+4. **`PREV_SUS1`** (`harmonize.fars_prior_suspensions`). FARS 2016–17 hold one `PREV_SUS` (all suspensions
+   combined; 1 in 3,605 drivers in 2016) while 2018+ `PREV_SUS1/2/3` count by type (1 in 112 drivers), so
+   they are not harmonised: 2016–17 are explicitly null (no change from the loader's silent fill).
+   Consumers: only `analysis/deaths.py` reads the field (from `data/interim`, `PREV_SUS1-3`) and guards it
+   with `YEAR >= 2018` (`prior_suspension`); `processing/features.py` carries it into `fars_person`, read
+   by nothing else in `src/` or `app/`.
+5. **`crss_driver.hit_and_run_right`** was a join-suffix duplicate of the crash-level flag; no code in
+   `src/`, `app/` or `tests/` reads it (only the generated `docs/generated/processed_datasets.md` lists
+   it). Removed from `drivers.CRSS_CRASH_COLS`; `hit_and_run` there is the vehicle-level flag.
+6. **FARS `ALC_RES` 800–895** (10 persons; 178 in 500–939, none exceed 930) are probable entry errors. No
+   code uses BAC as a continuous value: all uses are presence of a result, or thresholds at .08
+   (`bac_measured`, `bac08_measured`, `m_bac08`). No plausibility cap is applied; document only. Add one
+   (for example null above .50) if any mean or high-BAC band is introduced.

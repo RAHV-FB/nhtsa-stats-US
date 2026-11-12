@@ -371,7 +371,6 @@ CRSS_CRASH_COLS = [
     "alcohol",
     "alcohol_im",
     "drugs",
-    "hit_and_run",
     "n_killed",
     "n_ka",
     "fatal",
