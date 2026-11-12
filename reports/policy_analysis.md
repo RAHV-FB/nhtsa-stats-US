@@ -35,6 +35,16 @@ BAC ≥ 0.08) is an expected value over NHTSA's 10 multiply-imputed BAC values, 
 | Drugs (police-reported) | low | 4,998 | 12.2% | 22,086 |
 | Unrestrained occupants of light vehicles | moderate | 10,155 | 24.8% | 2,470 |
 
+**The drug segment is driven by missing data, not by drug involvement.** The counted segment
+is a lower bound on drug-positive crashes and mostly reflects who was tested and recorded: the
+22,086 deaths per year
+in crashes of unknown drug status (not counted) far outnumber the
+4,998 counted. Testing is
+selective by injury severity and state (`reports/alcohol_drugs_restraints.md`), and the police
+field used here and the toxicology-based count used elsewhere in the reports are different
+definitions of drug involvement, so this row neither shows how many deaths drugs contribute nor
+allows a comparison with the other segments.
+
 The segments overlap heavily, so their deaths cannot be added:
 
 | Segment A | Segment B | Deaths per year in both | Share of A also in B | Share of B also in A |

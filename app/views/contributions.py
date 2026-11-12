@@ -170,6 +170,28 @@ def render() -> None:
             ov[["factor", "deaths", "share_of_all_deaths", "share_also_involving_another_factor"]],
             hide_index=True,
         )
+        st.caption(
+            "The drug count covers crashes in which any driver is drug-positive; other drivers may be "
+            "undetermined, so it is a floor."
+        )
+        tr = output_table("contributions", "fars_overlap_treatments")
+        if tr is not None:
+            st.markdown(
+                "**Floor and ceiling.** Undetermined drug status scored as no drug (floor) or as "
+                "drug-positive (ceiling), or dropped:"
+            )
+            st.dataframe(
+                tr[
+                    [
+                        "treatment",
+                        "deaths_n",
+                        "share_with_any_factor",
+                        "mean_factors_per_death",
+                        "mean_factors_per_death_with_any",
+                    ]
+                ],
+                hide_index=True,
+            )
 
     rk = output_table("contributions", "ranking")
     rp = output_table("contributions", "rank_probabilities")
@@ -178,6 +200,8 @@ def render() -> None:
         st.dataframe(rk, hide_index=True)
     if rp is not None:
         st.caption(
-            "Probability of each rank (joint sampling distribution of the adjusted estimates)"
+            "Probability of each rank (joint sampling distribution of the adjusted estimates). "
+            "Covers CRSS sampling error only: it excludes outcome-dependent recording, coding "
+            "changes and specification uncertainty."
         )
         st.dataframe(rp, hide_index=True)

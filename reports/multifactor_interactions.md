@@ -18,7 +18,13 @@ police-reported crash, not causal effects.*
    for a passenger's death, 3.6 (2.8–4.6)
    for the death of an occupant of the *other* vehicle, and only
    1.22 (0.93–1.60)
-   for the death of a struck pedestrian (environment held fixed).
+   for the death of a struck pedestrian (environment held fixed) — small *in relative terms*
+   only: the pedestrian's baseline risk is high, so the absolute risk difference has a larger
+   point estimate than for any occupant but is imprecise
+   (19.3 (-7.6 to 46.2)
+   per 1,000 struck pedestrians; §6). These unit-specific
+   ratios come from models with different adjustment sets and are not comparable across units
+   (§6).
 2. **Speeding and alcohol combine super-additively but sub-multiplicatively at the crash level.**
    Crashes in which a driver exceeded the limit and alcohol was involved are fatal
    15.6 (11.8–20.7)
@@ -97,6 +103,27 @@ six registered analyses, separately per scale.
 * Ratio of risk ratios: 0.49 (0.40–0.61) (Holm p 3.1e-07).
 * Exceedance within alcohol strata: 6.76 (5.60–8.15) without and 3.33 (2.66–4.18) with alcohol.
 
+*Does the speeding-by-alcohol pattern survive crash configuration?* The strata specification
+above does not adjust for crash configuration (single- vs multi-vehicle, impact type). Adding it
+(`multifactor/speeding_alcohol_strata_configuration`, fatal outcome) changes the comparison of
+the two behaviours:
+
+| Behaviour | Specification | RR, no alcohol | RR, alcohol | Ratio (alcohol / no alcohol) |
+|---|---|---|---|---|
+| Exceeded the limit | without configuration | 6.5 (5.5–7.8) | 3.3 (2.7–4.1) | 0.50 (0.42–0.61) |
+| Exceeded the limit | with configuration | 5.4 (4.5–6.3) | 3.7 (3.0–4.5) | 0.68 (0.57–0.82) |
+| Any speeding | without configuration | 1.9 (1.5–2.3) | 1.6 (1.2–2.0) | 0.82 (0.66–1.01) |
+| Any speeding | with configuration | 2.0 (1.8–2.3) | 2.0 (1.7–2.4) | 1.00 (0.84–1.19) |
+
+For exceedance the speeding risk ratio is smaller where alcohol is present with or without
+configuration (the ratio stays below one), though less so with configuration. For any speeding
+the apparent attenuation by alcohol without configuration (ratio
+0.82 (0.66–1.01))
+disappears once configuration is held fixed
+(1.00 (0.84–1.19)).
+The sub-multiplicative pattern for speeding × alcohol therefore depends on the specification
+for any speeding and should be read as specification-dependent, not as a stable property.
+
 *Checks.* Police-reported alcohol instead of imputed: ratio of RRs
 0.41 (0.32–0.52),
 additive 13.5 (3.3–23.6).
@@ -173,7 +200,7 @@ cannot say which of the two matters.
 *Reading.* Belt non-use carries by far the largest risk ratio for occupants
 (35
 for drivers, 30
-for passengers), much larger than the within-vehicle ratio of about 3
+for passengers), much larger than the within-vehicle ratio
 (`reports/alcohol_drugs_restraints.md` §6): across crashes, unbelted occupants are in more
 violent crashes, and survivors may over-report belt use (not testable here). On the additive
 scale the pairs involving belt non-use are positive; an unbelted passenger of a drinking or
@@ -239,6 +266,35 @@ effect and are not used for ranking.
 | other-vehicle occupant killed (the other driver's behaviour) | 639,410 | 3,040 | 0.10% (0.09–0.12%) | 1.31 (0.95–1.83) | 3.60 (2.84–4.58) | 7.33 (4.78–11.25) | 1.55 (1.03–2.32) |
 | pedestrian killed (striking driver's behaviour) | 24,651 | 1,777 | 8.05% (6.86–9.43%) | 1.03 (0.71–1.50) | 1.22 (0.93–1.60) | 1.58 (0.86–2.90) | 1.25 (0.58–2.66) |
 
+**Unit-specific ratios are not comparable across units.** Each row above comes from a model
+with its own adjustment set (the unit-specific specification), so a risk ratio cannot be
+compared between rows: part of any difference is the adjustment, not the unit. The table below
+re-estimates the alcohol-only association for the same four victims with one **common**
+specification (environment, victim age band and sex) and with crash configuration added
+(`multifactor/victims_common_spec`), next to the published unit-specific estimates, with the
+risk difference per 1,000.
+
+| Victim | Specification | Alcohol only, RR | Risk difference per 1,000 |
+|---|---|---|---|
+| driver killed (own behaviour) | unit-specific (published) | 2.72 (2.07–3.58) | 2.5 (1.5–3.5) |
+| driver killed (own behaviour) | common: environment + victim age band + sex | 6.21 (4.68–8.24) | 6.7 (4.6–8.8) |
+| driver killed (own behaviour) | common + crash configuration | 3.32 (2.52–4.37) | 3.2 (2.0–4.4) |
+| passenger killed (their driver's behaviour) | unit-specific (published) | 4.34 (3.30–5.72) | 4.8 (3.3–6.3) |
+| passenger killed (their driver's behaviour) | common: environment + victim age band + sex | 8.83 (6.46–12.06) | 10.4 (7.3–13.6) |
+| passenger killed (their driver's behaviour) | common + crash configuration | 6.15 (4.38–8.63) | 7.1 (4.6–9.5) |
+| other-vehicle occupant killed (the other driver's behaviour) | unit-specific (published) | 3.60 (2.84–4.58) | 2.7 (1.8–3.6) |
+| other-vehicle occupant killed (the other driver's behaviour) | common: environment + victim age band + sex | 3.97 (3.03–5.19) | 3.1 (2.0–4.2) |
+| other-vehicle occupant killed (the other driver's behaviour) | common + crash configuration | 2.27 (1.70–3.01) | 1.3 (0.7–2.0) |
+| pedestrian killed (striking driver's behaviour) | unit-specific (published) | 1.22 (0.93–1.60) | 17.8 (-8.5 to 44.2) |
+| pedestrian killed (striking driver's behaviour) | common: environment + victim age band + sex | 1.24 (0.94–1.63) | 19.3 (-7.6 to 46.2) |
+| pedestrian killed (striking driver's behaviour) | common + crash configuration | 1.24 (0.94–1.63) | 19.3 (-7.6 to 46.3) |
+
+The ranking of units changes with the specification, so the contrast between units (for
+instance occupant vs pedestrian) is stable only in the broad sense that the pedestrian ratio is
+small in relative terms under every specification. The pedestrian risk difference has the
+largest point estimate of the four because the baseline risk is high, but its interval includes
+zero.
+
 * For **the impaired or speeding driver** and **their passengers**, both behaviours are
   associated with death, alcohol more than speeding (any type).
 * *(This table is exploratory; it is not part of the Holm family.)* For **occupants of the other
@@ -248,7 +304,7 @@ effect and are not used for ranking.
   (ratio 1.55 (1.03–2.32)).
 * For **pedestrians**, once the speed limit, light and pedestrian age are held fixed, the
   associations with the striking driver's recorded speeding and alcohol are imprecise and much
-  smaller than for occupants (intervals compatible with no association and with modest ones, but
+  smaller *in relative terms* than for occupants (intervals compatible with no association and with modest ones, but
   not with occupant-sized ratios). One hypothesis is that the posted limit already captures much
   of the impact-speed variation that matters for a pedestrian; the data cannot test it.
   Police-recorded speeding is rare in pedestrian crashes

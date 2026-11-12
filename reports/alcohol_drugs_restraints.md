@@ -20,21 +20,30 @@ census counts and shares), **estimated** (CRSS design-based), **adjusted associa
    18%
    when they did not) and injury severity. CRSS contains no drug test results at all.
 2. **The police record alcohol and drugs together far more often than toxicology finds them
-   together.** Among tested killed drivers, the odds ratio between BAC ≥ .08 and a psychoactive
-   drug is 1.23 (1.20–1.26);
-   in police reports for the same population it is
-   5.0 (4.9–5.2),
-   and among survivors 13.8 (13.2–14.4)
-   against 1.84 (1.74–1.94).
-   Police-recorded "drug involvement" is therefore partly a marker of an impaired-driving
+   together, among the very same drivers.** Take the
+   68,755 killed drivers who were drug-tested with a determinate
+   result, had a measured BAC and had both police fields known. For them the odds ratio between
+   BAC ≥ .08 and a psychoactive drug is 1.44 (1.40–1.49) by toxicology and
+   3.5 (3.4–3.6) by police report; among the
+   31,791 surviving drivers in the same kind of set it is
+   2.05 (1.93–2.18) by toxicology against
+   4.1 (3.9–4.4) by police report. Pairing one police field with one
+   toxicology result gives values in between
+   (1.7 and 1.9 for killed
+   drivers), so the excess comes from both fields being police-recorded together. Because the
+   comparison uses one driver set, it is not an artefact of comparing differently selected
+   drivers. Police-recorded "drug involvement" is therefore partly a marker of an impaired-driving
    investigation, not an independent measurement.
 3. **A CRSS severity association for drugs is not identified.** The crude fatal risk ratio of
    police-reported drug involvement in 2019–2024 ranges from
    1.7 to 73
    depending only on how the
    54% of
-   crashes with unknown drug status are allocated. No defensible point estimate exists, so no
-   drug contribution is reported anywhere in Phase 2.
+   crashes with unknown drug status are allocated. Restricting to non-differential allocations
+   (the same rule in fatal and non-fatal crashes) narrows this only to
+   1.7–19
+   (§4). No defensible point estimate exists, so no drug contribution is reported anywhere in
+   Phase 2.
 4. **Where both are measured most completely, alcohol is the stronger correlate of dying.** In
    the 4
    states that test at least half of both killed and surviving drivers for both alcohol and
@@ -45,16 +54,23 @@ census counts and shares), **estimated** (CRSS design-based), **adjusted associa
    times, mutually adjusted. This is the comparison of the two in this project made where testing is least
    selective (drug-tested: 69%–88% of killed and 51%–80% of surviving drivers in these states) — and
    it is conditional on a fatal crash, on being tested, and on four small states.
-5. **Restraint acts at a different stage from the behaviours.** Within the same vehicle, belted
-   front-seat occupants' risk of death relative to unbelted ones is
+5. **Restraint acts at a different stage from the behaviours, and its protection depends on
+   how the crash happened.** Within the same vehicle, belted front-seat occupants' risk of
+   death relative to unbelted ones is
    0.34 (0.32–0.36)
    when the driver was not speeding and
    0.34 (0.32–0.36)
-   when the driver was speeding — the driver's speeding does not change it — and only slightly
-   more protective with a driver at BAC ≥ .08
-   (0.32 (0.30–0.34)).
-   It does differ by *kind of impact* (single- vs multi-vehicle crash).
-   Across crashes, by contrast, the unbelted risk ratio in CRSS falls from
+   when the driver was speeding: overall, no difference. But speeding drivers' crashes are
+   concentrated in single-vehicle crashes, where belts protect more, and within crash
+   configuration belts are *somewhat less* protective with a speeding driver (ratio of
+   risk ratios, pooled within crash type,
+   1.22 (1.10–1.35)).
+   For a driver at BAC ≥ .08 the overall within-vehicle ratio is slightly lower
+   (0.32 (0.30–0.34)),
+   but within crash configuration the contrast is null
+   (0.99 (0.91–1.09)).
+   Belt protection also differs by *kind of impact* (single- vs multi-vehicle crash, rollover
+   or not). Across crashes, by contrast, the unbelted risk ratio in CRSS falls from
    46 to
    19 as crash
    circumstances, the driver's own behaviour and configuration are added: unbelted occupants are
@@ -127,19 +143,39 @@ in 2022–2024) is not comparable with killed drivers' because survivors are tes
 
 ## 3. Are alcohol and drugs recorded together? (observed)
 
-*Source: `drugs/co_occurrence`, `drugs/police_validity`.*
+*Source: `drugs/same_driver_cooccurrence`, `drugs/police_validity`.*
 
-| Population | Measure | n | Drug among alcohol-positive | Drug among alcohol-negative | Odds ratio |
-|---|---|---|---|---|---|
-| Killed drivers tested for both | toxicology | 123,991 | 51% | 46% | 1.23 (1.20–1.26) |
-| Killed drivers, both police fields known | police report | 113,883 | 43% | 13% | 5.01 (4.86–5.17) |
-| Surviving drivers tested for both | toxicology | 40,408 | 49% | 35% | 1.84 (1.74–1.94) |
-| Surviving drivers, both police fields known | police report | 161,488 | 39% | 4% | 13.77 (13.19–14.36) |
+All four rows use one set of drivers per survival status: drug-tested with a determinate
+result, BAC measured, and both police fields (alcohol, drugs) known
+(`drugs/same_driver_cooccurrence`). "Cross" rows pair one police field with one toxicology
+result.
+
+**Killed drivers**
+
+| Measure | Drivers | Alcohol-positive | Drug-positive | Both | Odds ratio | Drug prevalence ratio (alcohol-positive vs negative) |
+|---|---|---|---|---|---|---|
+| toxicology: BAC >= .08 and any psychoactive drug | 68,755 | 31% | 46% | 16% | 1.44 (1.40–1.49) | 1.21 (1.19–1.23) |
+| police report: alcohol and drugs both recorded | 68,755 | 32% | 30% | 15% | 3.51 (3.39–3.63) | 2.30 (2.25–2.35) |
+| cross: police alcohol and toxicology drug | 68,755 | 32% | 46% | 18% | 1.71 (1.65–1.76) | 1.31 (1.29–1.34) |
+| cross: toxicology BAC >= .08 and police drugs | 68,755 | 31% | 30% | 12% | 1.91 (1.84–1.97) | 1.55 (1.51–1.58) |
+
+**Surviving drivers**
+
+| Measure | Drivers | Alcohol-positive | Drug-positive | Both | Odds ratio | Drug prevalence ratio (alcohol-positive vs negative) |
+|---|---|---|---|---|---|---|
+| toxicology: BAC >= .08 and any psychoactive drug | 31,791 | 15% | 35% | 7% | 2.05 (1.93–2.18) | 1.53 (1.48–1.58) |
+| police report: alcohol and drugs both recorded | 31,791 | 22% | 26% | 11% | 4.13 (3.90–4.36) | 2.59 (2.50–2.69) |
+| cross: police alcohol and toxicology drug | 31,791 | 22% | 35% | 12% | 2.66 (2.52–2.80) | 1.77 (1.72–1.82) |
+| cross: toxicology BAC >= .08 and police drugs | 31,791 | 15% | 26% | 6% | 2.59 (2.43–2.77) | 1.91 (1.83–1.98) |
 
 *(Woolf intervals ignore the clustering of drivers within crashes; they are indicative.)*
 
-By toxicology, drug detection is only modestly more common among alcohol-positive drivers. By
-police report, it is several times more common. The police report is also an insensitive
+By toxicology, drug detection is only modestly more common among alcohol-positive killed
+drivers (prevalence ratio
+1.21).
+By police report, among the same drivers, it is
+2.30
+times more common. The police report is also an insensitive
 measure: among killed drivers whose toxicology found a psychoactive drug, the police recorded
 drug involvement for only
 36%
@@ -150,6 +186,28 @@ investigation is already under way; (ii) drivers who combine alcohol with drugs 
 visible impairment. The data cannot distinguish (i) from (ii), but either way the police field
 over-states the overlap between alcohol and drugs and cannot serve as an independent drug
 measure in models that also contain alcohol.
+
+**Selection caveat for police-versus-BAC checks.** Comparing the police alcohol field with
+measured BAC is possible only for drivers who were tested and whose police field is known:
+43% of
+killed and 21%
+of surviving drivers (alcohol-tested:
+67% and
+25%).
+Police sensitivity against BAC ≥ .08 is
+87%
+for killed and 98%
+for surviving drivers in that sample, but the sample is selected on suspicion. Among surviving
+drivers, BAC ≥ .08 prevalence in the tested sample falls from
+39%
+in the lowest survivor-test-rate tercile to
+14%
+in the highest, and the share of police-recorded alcohol that BAC confirms (positive predictive
+value) from
+75%
+to 67%.
+The agreement figures therefore describe the tested, suspected-impaired subset and may not hold
+for untested drivers.
 
 ## 4. Bounds on a drug severity association in CRSS (estimated)
 
@@ -167,12 +225,44 @@ between 1.7 and
 73. Even the two extreme codings — all unknown
 negative (7.8) and all
 unknown positive (2.1) —
-differ by a factor of three. Model-A adjusted ratios are
+differ widely. Model-A adjusted ratios are
 4.29 (3.07–6.01) (complete case) and
 2.97 (2.23–3.96) (unknown as no); their
 narrow intervals reflect sampling error only and say nothing about which allocation of the
 unknowns is right. Because testing and recording depend on severity (§2), the plausible
 scenarios are those with k_f ≠ k_n, which is exactly where the bounds are widest.
+
+**Non-differential allocations.** If unknown drug status is allocated by the same rule in fatal
+and non-fatal crashes (`drugs/crss_bounds_nondifferential`), the range narrows but does not
+close: proportional to the known prevalence (the same multiplier k in both), the crude ratio
+lies between
+7.8 and
+19.1;
+with the same absolute prevalence among unknown fatal and non-fatal crashes, between
+1.7 and
+7.8;
+the extreme-corner grid above spans
+1.7–73.
+The non-differential values are **point estimates of assumed scenarios**: they carry no
+sampling interval and no uncertainty about which scenario holds, and non-differential
+allocation is itself implausible when testing and recording depend on severity. They show that
+the conclusion does not rest on the extreme corners alone, not that a non-differential
+association is the right one.
+
+**Two drug definitions.** The reports use two different definitions of a drug-involved fatal
+crash (`drugs/drug_definition_reconciliation`). Definition A, the police crash-level drug field
+recorded as yes, covers
+43,552
+deaths in 2016–2024; definition B, any driver drug-positive on toxicology, covers
+84,207.
+Both hold in 34,915
+deaths; A without B accounts for
+8,637 and B
+without A for 49,292.
+A is a police judgement that exists in CRSS as well; B requires toxicology and exists only in
+FARS, and many deaths fall in crashes where no driver is positive but some driver is untested or
+indeterminate, so B is a floor. Neither is a measure of impairment and
+the two cannot be substituted for one another.
 
 **Verdict.** No drug severity association, drug attributable fraction or drug position in any
 ranking is reported in Phase 2. This is a finding, not an omission.
@@ -207,7 +297,7 @@ stronger correlate of dying. In the general population of crashes, selective tes
 police tendency to record the two together prevent any defensible comparison; police-recorded
 drug involvement should not be used as an adjustment variable for alcohol or speeding.
 
-## 6. Restraint: Stage C, independent of how the crash happened
+## 6. Restraint: Stage C, with protection that depends on the kind of impact and (somewhat) on speeding
 
 *Sources: `restraint_behaviour/dpc_by_driver_behaviour` (FARS double-pair comparison,
 crash-cluster bootstrap CIs), `restraint_behaviour/crss_unbelted_nested` (CRSS, design-based).*
@@ -231,15 +321,49 @@ unbelted):
 | time | day | 61,345 | 0.35 (0.33–0.37) | — | — |
 | time | night | 28,702 | 0.33 (0.31–0.35) | 0.93 | 0.059 |
 
-The within-vehicle belt risk ratio is the same whether or not the driver was speeding or had
-exceeded the limit, and only slightly more protective when the driver had a BAC ≥ .08
+Overall, the within-vehicle belt risk ratio is the same whether or not the driver was
+speeding (and similar with exceedance), and slightly lower with a driver at BAC ≥ .08
 (p 0.01).
-It *does* differ by crash type: belts are associated with a larger reduction in single-vehicle
-crashes (73%)
+That overall comparison does not hold crash configuration fixed, and the configuration differs
+between the groups. Within crash configuration the picture changes
+(`restraint_behaviour/dpc_contrast_within_configuration`; ratio of the belt risk ratio with the
+behaviour to that without it, pooled across layers, >1 means belts protect less):
+
+| Driver behaviour | Layers | Ratio of RRs (95% CI) |
+|---|---|---|
+| Speeding (any), by single/multi-vehicle | single vs multi-vehicle | 1.18 (1.08–1.28) |
+| Speeding (any), by rollover | rollover vs not | 1.10 (1.02–1.19) |
+| Speeding (any), by crash type | crash type | 1.22 (1.10–1.35) |
+| Exceeded limit / racing, by crash type | crash type | 1.35 (1.16–1.58) |
+| BAC ≥ .08, by single/multi-vehicle | single vs multi-vehicle | 1.03 (0.95–1.13) |
+| BAC ≥ .08, by crash type | crash type | 0.99 (0.91–1.09) |
+
+So the earlier statement that the belt effect does not vary with the driver's speeding does not
+survive: within crash configuration belts are somewhat less protective when the driver was
+speeding, while the BAC contrast is null. Belt protection also differs by the *kind of impact*.
+By crash type (FARS, within-vehicle double-pair comparison, `matched/belt_by_crash_type`):
+
+| Stratum | Pairs | RR belted vs unbelted | Risk reduction |
+|---|---|---|---|
+| single vehicle, rollover first | 4,561 | 0.16 | 84% (82–87%) |
+| single vehicle, no rollover first | 18,089 | 0.31 | 69% (67–71%) |
+| multi-vehicle, angle | 25,972 | 0.49 | 51% (47–54%) |
+| multi-vehicle, head-on | 14,143 | 0.46 | 54% (50–58%) |
+| multi-vehicle, rear-end | 9,749 | 0.35 | 65% (60–70%) |
+| multi-vehicle, sideswipe | 4,337 | 0.34 | 66% (58–72%) |
+| other (multi-vehicle other, non-motorist) | 13,389 | 0.32 | 68% (61–74%) |
+| vehicle rolled over (any crash type) | 18,003 | 0.23 | 77% (76–78%) |
+| vehicle did not roll over | 72,237 | 0.43 | 57% (55–58%) |
+
+Belts are associated with a larger reduction in single-vehicle crashes
+(73%)
 than in multi-vehicle crashes (56%),
-consistent with ejection in rollovers and roadway departures being largely prevented by belts.
-The mechanism the data support is therefore: belt protection depends on the *kind of impact*,
-not on the behaviour that led to it.
+and the reduction is largest when the vehicle rolled over
+(77%
+vs 57%), and
+smallest in multi-vehicle angle and head-on crashes, consistent with ejection in rollovers and
+roadway departures being largely prevented by belts. A single pooled belt estimate therefore
+averages over crash types in which the protection differs substantially.
 
 **Across crashes** (CRSS light-vehicle occupants aged 15+; same sample at every step):
 
@@ -261,23 +385,70 @@ configuration. Unbelted occupants
 are disproportionately in crashes with impaired or speeding drivers and in more violent crash
 types. Even fully adjusted, the across-crash ratio is several times the within-vehicle ratio
 (about 0.34,
-i.e. unbelted about three times the risk), which is what one expects if unmeasured crash
+i.e. a large within-vehicle protective association), which is what one expects if unmeasured crash
 energy and, possibly, survivor over-reporting of belt use inflate across-crash comparisons.
 
-*Competing explanations tested.* (i) "Belt non-use only marks drunk or speeding drivers" —
-rejected for the within-vehicle comparison, which holds the driver and crash fixed and does not
-vary with the driver's behaviour. (ii) "Survivors over-report belt use" — not testable here;
-Phase 1 showed the within-vehicle reduction would fall from
+*Competing explanations.* (i) "Belt non-use only marks drunk or speeding drivers" — the
+within-vehicle comparison holds the driver and crash fixed, and the overall belt risk ratio
+is similar with and without a speeding or drinking driver; within crash configuration the
+speeding contrast is modest and in the direction of *less* protection, which is not what a pure
+marker would produce. (ii) "Survivors over-report belt use" — not testable from the data
+directly, but quantifiable. Phase 1 showed that the within-vehicle reduction would fall from
 66% to
 38%
-if 10% of 'belted' survivors were unbelted (`matched/belt_effect`). The direction is robust; the size is not.
+if 10% of 'belted' survivors were unbelted (`matched/belt_effect`). The error can run in both
+directions: a fraction g of deaths coded unbelted may truly have been belted. Crossing the two
+(`matched/belt_misreporting_two_sided_dpc`):
+
+| Belted survivors truly unbelted (f) | Unbelted deaths truly belted (g) | RR belted vs unbelted | Risk reduction |
+|---|---|---|---|
+| 0.00 | 0.00 | 0.34 (0.33–0.35) | 66% (65–67%) |
+| 0.05 | 0.00 | 0.48 (0.46–0.49) | 52% (51–54%) |
+| 0.10 | 0.00 | 0.62 (0.61–0.64) | 38% (36–39%) |
+| 0.20 | 0.00 | 0.96 (0.93–0.98) | 4% (2–7%) |
+| 0.00 | 0.05 | 0.42 (0.41–0.44) | 58% (56–59%) |
+| 0.05 | 0.05 | 0.56 (0.55–0.58) | 44% (42–45%) |
+| 0.10 | 0.05 | 0.72 (0.70–0.74) | 28% (26–30%) |
+| 0.20 | 0.05 | 1.07 (1.05–1.09) | -7% (-9 to -5%) |
+| 0.00 | 0.10 | 0.51 (0.49–0.52) | 49% (48–51%) |
+| 0.05 | 0.10 | 0.66 (0.64–0.67) | 34% (33–36%) |
+| 0.10 | 0.10 | 0.82 (0.80–0.84) | 18% (16–20%) |
+| 0.20 | 0.10 | 1.19 (1.16–1.21) | -19% (-21 to -16%) |
+
+The belt effect is estimated to disappear if about
+21%
+of 'belted' survivors were truly unbelted with no reverse error, and reverse error (g) moves the
+tipping fraction down
+(15%
+at g = 0.10).
+The direction of the association is robust to modest misreporting; its size is not, and a
+survivor misreporting fraction at the tipping value above would remove it entirely.
+
+**Helmets.** The same design applied to motorcycle riders (operator and passenger on the same
+motorcycle) rests on very few informative pairs. Of
+18,336 unhelmeted
+motorcyclist deaths, only 16%
+occurred on two-occupant motorcycles with complete information, and
+1.2%
+in pairs that identify the matched-pair odds ratio; most are on single-rider motorcycles
+(84%),
+where no within-motorcycle comparison exists. The helmeted-versus-unhelmeted risk ratio is
+0.69 (0.60–0.79)
+as recorded, but it is far more fragile to misreporting than the belt estimate: with 5% of
+'helmeted' survivors truly unhelmeted it is
+0.96 (0.86–1.09)
+and it reaches one at a misreporting fraction of
+6%.
+The helmet association should be read as suggestive only.
 
 **Answer to D.** Among comparable occupants (same vehicle, same crash), belt use is associated
-with roughly a two-thirds lower risk of death given a fatal crash, and this association is
-unchanged by the driver's speeding and only slightly larger with a drinking driver; it is
-larger in single-vehicle than in multi-vehicle crashes. Across crashes the unbelted
-association is far larger and shrinks substantially under adjustment, so across-crash ratios
-should not be read as belt effectiveness.
+with roughly a two-thirds lower risk of death given a fatal crash. Overall the association is
+the same with and without a speeding driver and slightly larger with a drinking driver; within
+crash configuration it is somewhat smaller with a speeding driver and unchanged with a drinking
+one. It is larger in single-vehicle crashes and in rollovers than in multi-vehicle crashes.
+Across crashes the unbelted association is far larger and shrinks substantially under
+adjustment, so across-crash ratios should not be read as belt effectiveness. The size of the
+within-vehicle association is sensitive to misreporting of belt use in either direction.
 
 ## 7. Implications for official statistics
 
@@ -287,8 +458,9 @@ should not be read as belt effectiveness.
 * "Alcohol and drugs" combined categories built from police reports overstate how often the
   two coincide relative to toxicology.
 * "Unrestrained occupant deaths" are deaths of occupants who were unbelted — not deaths caused
-  by being unbelted. Within-vehicle evidence supports a large protective association that is
-  independent of driver behaviour; across-crash counts mix it with crash violence.
+  by being unbelted. Within-vehicle evidence supports a large protective association that
+  varies with the kind of crash (and somewhat with the driver's speeding) and is sensitive to
+  misreporting of belt use; across-crash counts mix it with crash violence.
 
 ## 8. What stronger evidence would require
 

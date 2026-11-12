@@ -12,14 +12,20 @@ and **predictive** (out-of-sample prediction).*
    {{contributions/fars_overlap_summary|factor=all deaths|deaths|,.0f}} US road deaths in
    2016–2024 (FARS, observed), {{contributions/fars_overlap_summary|factor=speeding-related crash|deaths|,.0f}}
    occurred in speeding-related crashes, {{contributions/fars_overlap_summary|factor=driver BAC >= .08 (MI)|deaths|,.0f}}
-   in crashes with a driver at BAC ≥ .08, at least {{contributions/fars_overlap_summary|factor=driver drug-positive (determinate crashes only)|deaths|,.0f}}
-   in crashes with a drug-positive driver, and {{contributions/fars_overlap_summary|factor=victim an unbelted vehicle occupant|deaths|,.0f}}
+   in crashes with a driver at BAC ≥ .08, at least {{drugs/drug_definition_reconciliation|row_type=definition;definition=B: any driver drug-positive on toxicology|deaths|,.0f}}
+   in crashes with a drug-positive driver (any driver positive; other drivers may be
+   undetermined), and {{contributions/fars_overlap_summary|factor=victim an unbelted vehicle occupant|deaths|,.0f}}
    were unbelted occupants. These four counts sum to
    {{contributions/fars_overlap_summary|factor=sum of the four factor counts|share_of_all_deaths|pct:0}}
    of all deaths, but only {{contributions/fars_overlap_summary|factor=deaths involving at least one factor (union)|share_of_all_deaths|pct:0}}
-   of deaths involve any of them: each death in this group is counted
+   of deaths involve any of them when undetermined drug status is scored as no drug (a floor;
+   scoring every undetermined death as drug-positive gives a ceiling of
+   {{contributions/fars_overlap_treatments|treatment=undetermined drug status scored positive (ceiling)|share_with_any_factor|pct:0}}):
+   each death in the group is counted
    {{contributions/fars_overlap_summary|factor=all deaths|overcount_ratio_sum_over_union|.2f}}
-   times on average. About {{contributions/fars_overlap_summary|factor=speeding-related crash|share_also_involving_another_factor|pct:0}}
+   times on average at the floor and
+   {{contributions/fars_overlap_treatments|treatment=undetermined drug status scored positive (ceiling)|mean_factors_per_death_with_any|.2f}}
+   at the ceiling (§4a). About {{contributions/fars_overlap_summary|factor=speeding-related crash|share_also_involving_another_factor|pct:0}}
    of speeding-related deaths also involve one of the other three factors.
 2. **Statistical attribution is also non-additive.** In the severity-pathway model, removing
    speeding accounts for {{contributions/burden_shapley|player_set=speeding_alcohol;quantity=AF[speeding]|estimate|cipct:1}}
@@ -50,7 +56,7 @@ and **predictive** (out-of-sample prediction).*
 | A | How much of the speeding–fatality association is explained statistically by alcohol and other recorded factors? | For exceeding the limit, alcohol accounts for {{speeding/shapley|exposure=exceeded;outcome=fatal;variant=all_blocks;block=alcohol|shapley_share_of_crude|pct:0}} of the crude log-RR on average over orderings ({{speeding/shapley|exposure=exceeded;outcome=fatal;variant=all_blocks;block=alcohol|min_share_any_order|pct:0}}–{{speeding/shapley|exposure=exceeded;outcome=fatal;variant=all_blocks;block=alcohol|max_share_any_order|pct:0}}); all recorded circumstances together leave {{speeding/shapley|exposure=exceeded;outcome=fatal;variant=all_blocks;block=retained_after_all_blocks|shapley_share_of_crude|pct:0}} (`reports/speeding_confounding.md`) |
 | B | Does exceeding the limit remain independently associated with fatal severity? | Yes: adjusted RR {{speeding/key_models|exposure=exceeded;outcome=fatal;model=all_blocks|rr|ci:1}}; {{speeding/strata|exposure=exceeded;outcome=fatal;stratum=no alcohol|rr|ci:1}} without alcohol; robust to moderate recording bias (same report) |
 | C | Can alcohol and drugs be separated reliably? | Only in a narrow, selected population (tested drivers in fatal crashes, four high-testing states); not in general (`reports/alcohol_drugs_restraints.md`) |
-| D | How much does restraint use change fatality associations within comparable occupants? | Within the same vehicle, belted occupants' risk is {{restraint_behaviour/dpc_by_driver_behaviour|split=all|rr_belted_vs_unbelted|ci:2@rr}} times unbelted occupants', unchanged by the driver's speeding or alcohol (same report) |
+| D | How much does restraint use change fatality associations within comparable occupants? | Within the same vehicle, belted occupants' risk is {{restraint_behaviour/dpc_by_driver_behaviour|split=all|rr_belted_vs_unbelted|ci:2@rr}} times unbelted occupants'. Overall it is similar with and without a speeding driver, but within crash configuration belts are somewhat less protective with a speeding driver (ratio of RRs {{restraint_behaviour/dpc_contrast_within_configuration|contrast=driver speeding (any) vs not speeding;adjustment=crash type;layer=pooled within layers|ratio_of_rrs|ci:2@ratio}}); the BAC contrast is null within configuration ({{restraint_behaviour/dpc_contrast_within_configuration|contrast=driver BAC >= .08 (MI) vs BAC < .08;adjustment=crash type;layer=pooled within layers|ratio_of_rrs|ci:2@ratio}}) (same report) |
 | E | Which combinations show interaction? | Super-additive: exceedance × alcohol, behaviour × belt non-use; sub-multiplicative at crash level, multiplicative for single-vehicle drivers; three-way terms not detected; four-way with drugs not estimable (`reports/multifactor_interactions.md`) |
 | F | How much do contributions depend on units, definitions, specifications and missingness? | Strongly: crash vs driver vs passenger vs pedestrian (alcohol RR from {{multifactor/victims|victim=pedestrian killed (striking driver's behaviour)|rr_alcohol_only|.1f}} to {{multifactor/victims|victim=crash fatal (any driver's behaviour)|rr_alcohol_only|.1f}}); "any speeding" vs exceedance; with or without configuration; police drugs as a covariate; drug unknowns (§2–§5 below) |
 | G | Can a principal cause of an individual death be identified? | No (`docs/limitations.md` §7) |
@@ -131,7 +137,7 @@ survey logistic models; every step uses the same crashes.*
   {{contributions/nested_models|factor=alcohol;step=+ driver/vehicle mix|rr|.2f}} to
   {{contributions/nested_models|factor=alcohol;step=+ police-reported drugs|rr|.2f}}, but this
   is not evidence that drugs explain the alcohol association: police record drugs mainly when
-  they are already investigating alcohol (`drugs/co_occurrence`), so the drug field partly
+  they are already investigating alcohol (`drugs/co_occurrence`, `drugs/same_driver_cooccurrence`), so the drug field partly
   re-measures alcohol involvement. This step is reported separately and is not used for
   ranking.
 * **Adding crash configuration** (a likely mediator) reduces alcohol to
@@ -184,7 +190,36 @@ alcohol-related deaths were in speeding-related crashes
 ({{contributions/fars_pairwise_overlap|pair=speeding & alcohol|observed_over_expected|.2f}}
 times the overlap expected if the two were independent among deaths). The drug count is a
 lower bound: {{contributions/fars_overlap_summary|factor=all deaths|deaths_undetermined_drug_status|,.0f}}
-deaths occurred in crashes where some driver's drug status is undetermined.
+deaths ({{contributions/fars_overlap_treatments|treatment=undetermined drug status scored positive (ceiling)|share_deaths_undetermined_drug_status|pct:0}})
+occurred in crashes where some driver's drug status is undetermined.
+
+**Floor and ceiling for the overlap.** Because the drug factor is undetermined for most deaths,
+the overlap statistics depend on how undetermined status is treated
+(`contributions/fars_overlap_treatments`). The published figures score undetermined as no drug,
+which is a floor; the ceiling scores it as drug-positive; the other rows drop the undetermined
+deaths, which restricts the population to crashes that were tested.
+
+{{mdtable:contributions/fars_overlap_treatments||treatment:Treatment of undetermined drug status:;deaths_n:Deaths:,.0f;share_with_any_factor:Share with any factor:pct:0;mean_factors_per_death:Mean factors per death:.2f;mean_factors_per_death_with_any:Mean factors per death with any:.2f}}
+
+The conclusion that the counts overlap and cannot be added holds at both ends, but the share of
+deaths involving any factor and the average number of counts per death are bounded, not
+pinned down.
+
+**Two drug definitions.** Two different "drug-involved" death counts circulate
+(`drugs/drug_definition_reconciliation`). Definition A, the police crash-level drug field
+recorded as yes, covers
+{{drugs/drug_definition_reconciliation|row_type=definition;definition=A: police crash-level drugs field = yes|deaths|,.0f}}
+deaths; definition B, any driver drug-positive on toxicology (the one used here), covers
+{{drugs/drug_definition_reconciliation|row_type=definition;definition=B: any driver drug-positive on toxicology|deaths|,.0f}}
+deaths, {{drugs/drug_definition_reconciliation|row_type=definition;definition=B: any driver drug-positive on toxicology|deaths_ratio_to_A|.1f}}
+times as many. They overlap in
+{{drugs/drug_definition_reconciliation|row_type=overlap;definition=A and B|deaths|,.0f}}
+deaths; {{drugs/drug_definition_reconciliation|row_type=overlap;definition=A not B|deaths|,.0f}}
+deaths have the police field set without a positive toxicology result and
+{{drugs/drug_definition_reconciliation|row_type=overlap;definition=B not A|deaths|,.0f}}
+have a positive toxicology result without the police field. The two are therefore different
+measures, not two estimates of the same count, and neither should be quoted as "the" number of
+drug-involved deaths.
 
 **(b) Deaths statistically attributed (severity pathway, model-predicted).** Fractions of
 fatal crashes that the model predicts would not have been fatal had the factor been absent,
@@ -218,7 +253,10 @@ restraint is occupant-level and police-recorded drugs are not rankable.*
 
 {{mdtable:contributions/ranking||factor:Factor:;prevalence_all_crashes:Share of crashes:pct:2;prevalence_fatal_crashes:Share of fatal crashes:pct:1;crude_rr:Crude RR:.2f;adjusted_rr:Adjusted RR:.2f;adjusted_rd:Adjusted RD per 1,000:x1000:1;shapley_test_r2_of_block:Shapley test R²:.3f;shapley_share_joint_af:Shapley AF:pct:1;fars_deaths_in_crashes_with_factor:FARS deaths 2016–2024:,.0f;note:Note:}}
 
-Probability of each rank (joint sampling distribution of the adjusted estimates from one model):
+Probability of each rank (joint sampling distribution of the adjusted estimates from one model).
+These probabilities cover **CRSS sampling error only**; they exclude outcome-dependent
+recording, coding changes and specification uncertainty, so they overstate how certain the
+ordering is:
 
 {{mdtable:contributions/rank_probabilities||metric:Metric:;factor:Factor:;estimate:Estimate:.4g;p_rank_1:P(rank 1):.2f;p_rank_2:P(rank 2):.2f;p_rank_3:P(rank 3):.2f}}
 
@@ -236,10 +274,11 @@ Probability of each rank (joint sampling distribution of the adjusted estimates 
   ({{contributions/ranking|factor=unbelted (occupant)|adjusted_rr|.0f}} across crashes after
   environment, person and the driver's own behaviour;
   {{restraint_behaviour/crss_unbelted_nested|step=+ crash configuration|rr|.0f}} after crash
-  configuration as well; about 3 within vehicles) answers a different question (whether a person survives a crash) from the
+  configuration as well; within vehicles, belted vs unbelted RR
+  {{restraint_behaviour/dpc_by_driver_behaviour|split=all|rr_belted_vs_unbelted|.2f}}) answers a different question (whether a person survives a crash) from the
   crash-level factors (whether a crash is fatal).
 
-**The hypothesised ranking drugs > alcohol > seatbelt non-use > speeding is not defensible.**
+**The hypothesised ranking drugs > alcohol > seatbelt non-use > speeding cannot be evaluated.**
 Drugs cannot be placed; seat-belt non-use is not on the same scale; and whether alcohol or
 speeding comes first depends on whether one asks about the risk per crash (exceeding the limit)
 or the number of deaths involved and statistically attributed (alcohol). Generic "speeding"
@@ -275,9 +314,10 @@ campaign data.*
   drivers are tested three times as often as survivors, and police co-record drugs with alcohol.
   Better measurement (routine toxicology in crashes of all severities) is a precondition for
   any evidence-based drug-testing target.
-* **Seat-belt enforcement.** Belt protection given a fatal crash is about two-thirds, does not
-  depend on whether the driver was speeding and is only slightly larger with a drinking driver (`reports/alcohol_drugs_restraints.md`
-  §6). Belts and impaired-driving or speed measures therefore act on different stages; an
+* **Seat-belt enforcement.** Belt protection given a fatal crash is about two-thirds
+  ({{restraint_behaviour/dpc_by_driver_behaviour|split=all|reduction|pct:0}} lower risk
+  of death). Within crash configuration it is somewhat smaller with a speeding driver and
+  not different with a drinking driver (`reports/alcohol_drugs_restraints.md` §6). Belts and impaired-driving or speed measures therefore act on different stages; an
   unbelted occupant of a drunk or speeding driver carries a much larger *excess* risk than either
   factor alone implies (super-additivity, `reports/multifactor_interactions.md` §4), so
   combinations matter for targeting even though the ratio-scale effects are sub-multiplicative.

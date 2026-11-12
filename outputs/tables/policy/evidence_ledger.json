@@ -28,6 +28,6 @@
   "phase2_evidence"
  ],
  "module": "nhtsa_stats.simulation.evidence",
- "git_commit": "8fe8986",
- "generated_utc": "2026-10-23T09:41:58Z"
+ "git_commit": "4ef247b-dirty",
+ "generated_utc": "2026-11-12T12:35:48Z"
 }

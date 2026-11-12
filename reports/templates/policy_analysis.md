@@ -33,6 +33,16 @@ BAC ≥ 0.08) is an expected value over NHTSA's 10 multiply-imputed BAC values, 
 | Drugs (police-reported) | {{simulation/baseline|name=fars.deaths_per_year.drugs|reliability|}} | {{simulation/baseline|name=fars.deaths_per_year.drugs|value|,.0f}} | {{simulation/baseline|name=fars.share_of_deaths.drugs|value|pct:1}} | {{simulation/baseline|name=fars.deaths_per_year.drugs.status_unknown|value|,.0f}} |
 | Unrestrained occupants of light vehicles | {{simulation/baseline|name=fars.deaths_per_year.unrestrained_lpv|reliability|}} | {{simulation/baseline|name=fars.deaths_per_year.unrestrained_lpv|value|,.0f}} | {{simulation/baseline|name=fars.share_of_deaths.unrestrained_lpv|value|pct:1}} | {{simulation/baseline|name=fars.deaths_per_year.unrestrained_lpv.status_unknown|value|,.0f}} |
 
+**The drug segment is driven by missing data, not by drug involvement.** The counted segment
+is a lower bound on drug-positive crashes and mostly reflects who was tested and recorded: the
+{{simulation/baseline|name=fars.deaths_per_year.drugs.status_unknown|value|,.0f}} deaths per year
+in crashes of unknown drug status (not counted) far outnumber the
+{{simulation/baseline|name=fars.deaths_per_year.drugs|value|,.0f}} counted. Testing is
+selective by injury severity and state (`reports/alcohol_drugs_restraints.md`), and the police
+field used here and the toxicology-based count used elsewhere in the reports are different
+definitions of drug involvement, so this row neither shows how many deaths drugs contribute nor
+allows a comparison with the other segments.
+
 The segments overlap heavily, so their deaths cannot be added:
 
 {{mdtable:simulation/segment_overlap|nested=False|segment_a:Segment A:;segment_b:Segment B:;deaths_both:Deaths per year in both:,.0f;share_of_a_also_in_b:Share of A also in B:pct:0;share_of_b_also_in_a:Share of B also in A:pct:0}}

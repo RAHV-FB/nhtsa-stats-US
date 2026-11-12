@@ -91,7 +91,12 @@ def render() -> None:
     vic = output_table("multifactor", "victims")
     if vic is not None:
         st.subheader("Driver versus occupant versus other road user")
-        st.caption("The same recorded driver behaviour, related to the death of different people.")
+        st.caption(
+            "The same recorded driver behaviour, related to the death of different people. Each row "
+            "uses its own adjustment set, so ratios are not comparable across rows; the common "
+            "specification below puts them on one footing. The pedestrian ratio is small in relative "
+            "terms only."
+        )
         st.dataframe(
             vic[
                 [
@@ -108,3 +113,19 @@ def render() -> None:
             ],
             hide_index=True,
         )
+        common = output_table("multifactor", "victims_common_spec")
+        if common is not None:
+            st.markdown("**Alcohol only, same victims under a common specification**")
+            st.dataframe(
+                common[
+                    [
+                        "victim",
+                        "specification",
+                        "rr_alcohol_only",
+                        "rr_alcohol_only_low",
+                        "rr_alcohol_only_high",
+                        "rd_alcohol_only",
+                    ]
+                ],
+                hide_index=True,
+            )

@@ -1,6 +1,6 @@
 {
  "table": "simulation/baseline.csv",
- "description": "Layer A empirical baseline for the intervention simulator: every quantity with provenance (observed / estimated / adjusted_association) and source",
+ "description": "Layer A empirical baseline of deaths and crashes by target segment: every quantity with provenance (observed / estimated / adjusted_association) and source",
  "population": "FARS fatal crashes and deaths 2022-2024 (census); CRSS police-reported crashes 2022-2024 (sample)",
  "unit": "see 'unit' column",
  "outcome": "",
@@ -28,9 +28,9 @@
   "flag",
   "note"
  ],
- "module": "nhtsa_stats.simulation.engine",
- "git_commit": "ef704fd",
- "generated_utc": "2026-10-23T03:46:10Z",
+ "module": "nhtsa_stats.simulation.baseline",
+ "git_commit": "4ef247b-dirty",
+ "generated_utc": "2026-11-12T12:35:50Z",
  "baseline": {
   "window": [
    2022,
@@ -203,7 +203,7 @@
     "n": 14995,
     "reliability": "low",
     "flag": "",
-    "note": "LOW reliability: drug status is unknown for about half of fatal crashes, testing is selective by injury severity and state, and presence is not impairment (docs/audit/alcohol_drugs.md 4.1, 5.5)."
+    "note": "LOW reliability: drug status is unknown for about half of fatal crashes, testing is selective by injury severity and state, and presence is not impairment (docs/limitations.md; reports/alcohol_drugs_restraints.md)."
    },
    "fars.share_of_deaths.drugs": {
     "name": "fars.share_of_deaths.drugs",
@@ -1270,7 +1270,7 @@
     "fars": "any driver with police-reported drug involvement (DRUGS = 1)",
     "crss": "same definition",
     "reliability": "low",
-    "note": "LOW reliability: drug status is unknown for about half of fatal crashes, testing is selective by injury severity and state, and presence is not impairment (docs/audit/alcohol_drugs.md 4.1, 5.5)."
+    "note": "LOW reliability: drug status is unknown for about half of fatal crashes, testing is selective by injury severity and state, and presence is not impairment (docs/limitations.md; reports/alcohol_drugs_restraints.md)."
    },
    "unrestrained_lpv": {
     "name": "unrestrained_lpv",

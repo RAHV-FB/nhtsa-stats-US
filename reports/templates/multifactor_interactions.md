@@ -16,7 +16,13 @@ police-reported crash, not causal effects.*
    for a passenger's death, {{multifactor/victims|victim=other-vehicle occupant killed (the other driver's behaviour)|rr_alcohol_only|ci:1@rr_alcohol_only}}
    for the death of an occupant of the *other* vehicle, and only
    {{multifactor/victims|victim=pedestrian killed (striking driver's behaviour)|rr_alcohol_only|ci:2@rr_alcohol_only}}
-   for the death of a struck pedestrian (environment held fixed).
+   for the death of a struck pedestrian (environment held fixed) — small *in relative terms*
+   only: the pedestrian's baseline risk is high, so the absolute risk difference has a larger
+   point estimate than for any occupant but is imprecise
+   ({{multifactor/victims_common_spec|specification=common: environment + victim age band + sex;victim=pedestrian killed (striking driver's behaviour)|rd_alcohol_only|cix1000:1}}
+   per 1,000 struck pedestrians; §6). These unit-specific
+   ratios come from models with different adjustment sets and are not comparable across units
+   (§6).
 2. **Speeding and alcohol combine super-additively but sub-multiplicatively at the crash level.**
    Crashes in which a driver exceeded the limit and alcohol was involved are fatal
    {{multifactor/margins|analysis=crash_exceeded_x_alcohol;combination=exceeded + alcohol|rr_vs_none|ci:1}}
@@ -79,6 +85,27 @@ six registered analyses, separately per scale.
 * Ratio of risk ratios: {{multifactor/interactions|analysis=crash_exceeded_x_alcohol;contrast=exceeded x alcohol|multiplicative_ratio|ci:2}} (Holm p {{multifactor/interactions|analysis=crash_exceeded_x_alcohol;contrast=exceeded x alcohol|multiplicative_ratio_p_holm|.2g}}).
 * Exceedance within alcohol strata: {{multifactor/single_factor|analysis=crash_exceeded_x_alcohol;factor=exceeded;other_factors=alcohol=no|rr|ci:2}} without and {{multifactor/single_factor|analysis=crash_exceeded_x_alcohol;factor=exceeded;other_factors=alcohol=yes|rr|ci:2}} with alcohol.
 
+*Does the speeding-by-alcohol pattern survive crash configuration?* The strata specification
+above does not adjust for crash configuration (single- vs multi-vehicle, impact type). Adding it
+(`multifactor/speeding_alcohol_strata_configuration`, fatal outcome) changes the comparison of
+the two behaviours:
+
+| Behaviour | Specification | RR, no alcohol | RR, alcohol | Ratio (alcohol / no alcohol) |
+|---|---|---|---|---|
+| Exceeded the limit | without configuration | {{multifactor/speeding_alcohol_strata_configuration|exposure=exceeded;outcome=fatal;specification=published strata specification (no crash configuration);stratum=alcohol: no alcohol|rr|ci:1}} | {{multifactor/speeding_alcohol_strata_configuration|exposure=exceeded;outcome=fatal;specification=published strata specification (no crash configuration);stratum=alcohol: alcohol|rr|ci:1}} | {{multifactor/speeding_alcohol_strata_configuration|exposure=exceeded;outcome=fatal;specification=published strata specification (no crash configuration);stratum=alcohol: alcohol|ratio_alcohol_to_no_alcohol|ci:2@ratio}} |
+| Exceeded the limit | with configuration | {{multifactor/speeding_alcohol_strata_configuration|exposure=exceeded;outcome=fatal;specification=+ crash configuration;stratum=alcohol: no alcohol|rr|ci:1}} | {{multifactor/speeding_alcohol_strata_configuration|exposure=exceeded;outcome=fatal;specification=+ crash configuration;stratum=alcohol: alcohol|rr|ci:1}} | {{multifactor/speeding_alcohol_strata_configuration|exposure=exceeded;outcome=fatal;specification=+ crash configuration;stratum=alcohol: alcohol|ratio_alcohol_to_no_alcohol|ci:2@ratio}} |
+| Any speeding | without configuration | {{multifactor/speeding_alcohol_strata_configuration|exposure=speeding_any;outcome=fatal;specification=published strata specification (no crash configuration);stratum=alcohol: no alcohol|rr|ci:1}} | {{multifactor/speeding_alcohol_strata_configuration|exposure=speeding_any;outcome=fatal;specification=published strata specification (no crash configuration);stratum=alcohol: alcohol|rr|ci:1}} | {{multifactor/speeding_alcohol_strata_configuration|exposure=speeding_any;outcome=fatal;specification=published strata specification (no crash configuration);stratum=alcohol: alcohol|ratio_alcohol_to_no_alcohol|ci:2@ratio}} |
+| Any speeding | with configuration | {{multifactor/speeding_alcohol_strata_configuration|exposure=speeding_any;outcome=fatal;specification=+ crash configuration;stratum=alcohol: no alcohol|rr|ci:1}} | {{multifactor/speeding_alcohol_strata_configuration|exposure=speeding_any;outcome=fatal;specification=+ crash configuration;stratum=alcohol: alcohol|rr|ci:1}} | {{multifactor/speeding_alcohol_strata_configuration|exposure=speeding_any;outcome=fatal;specification=+ crash configuration;stratum=alcohol: alcohol|ratio_alcohol_to_no_alcohol|ci:2@ratio}} |
+
+For exceedance the speeding risk ratio is smaller where alcohol is present with or without
+configuration (the ratio stays below one), though less so with configuration. For any speeding
+the apparent attenuation by alcohol without configuration (ratio
+{{multifactor/speeding_alcohol_strata_configuration|exposure=speeding_any;outcome=fatal;specification=published strata specification (no crash configuration);stratum=alcohol: alcohol|ratio_alcohol_to_no_alcohol|ci:2@ratio}})
+disappears once configuration is held fixed
+({{multifactor/speeding_alcohol_strata_configuration|exposure=speeding_any;outcome=fatal;specification=+ crash configuration;stratum=alcohol: alcohol|ratio_alcohol_to_no_alcohol|ci:2@ratio}}).
+The sub-multiplicative pattern for speeding × alcohol therefore depends on the specification
+for any speeding and should be read as specification-dependent, not as a stable property.
+
 *Checks.* Police-reported alcohol instead of imputed: ratio of RRs
 {{multifactor/interactions|analysis=crash_exceeded_x_alcohol_police;contrast=exceeded x alcohol|multiplicative_ratio|ci:2}},
 additive {{multifactor/interactions|analysis=crash_exceeded_x_alcohol_police;contrast=exceeded x alcohol|additive_contrast|cix1000:1}}.
@@ -122,7 +149,7 @@ cannot say which of the two matters.
 *Reading.* Belt non-use carries by far the largest risk ratio for occupants
 ({{multifactor/margins|analysis=lpv_driver_speeding_x_alcohol_x_unbelted;combination=unbelted|rr_vs_none|.0f}}
 for drivers, {{multifactor/margins|analysis=passenger_driver_speeding_x_driver_alcohol_x_unbelted;combination=unbelted|rr_vs_none|.0f}}
-for passengers), much larger than the within-vehicle ratio of about 3
+for passengers), much larger than the within-vehicle ratio
 (`reports/alcohol_drugs_restraints.md` §6): across crashes, unbelted occupants are in more
 violent crashes, and survivors may over-report belt use (not testable here). On the additive
 scale the pairs involving belt non-use are positive; an unbelted passenger of a drinking or
@@ -165,6 +192,22 @@ effect and are not used for ranking.
 
 {{mdtable:multifactor/victims||victim:Victim (behaviour of):;n:n:,.0f;n_events:Deaths:,.0f;risk_neither:Risk with neither:cipct:2@risk_neither;rr_speeding_only:Speeding only, RR:ci:2@rr_speeding_only;rr_alcohol_only:Alcohol only, RR:ci:2@rr_alcohol_only;rr_both:Both, RR:ci:2@rr_both;multiplicative_ratio:Ratio of RRs:ci:2}}
 
+**Unit-specific ratios are not comparable across units.** Each row above comes from a model
+with its own adjustment set (the unit-specific specification), so a risk ratio cannot be
+compared between rows: part of any difference is the adjustment, not the unit. The table below
+re-estimates the alcohol-only association for the same four victims with one **common**
+specification (environment, victim age band and sex) and with crash configuration added
+(`multifactor/victims_common_spec`), next to the published unit-specific estimates, with the
+risk difference per 1,000.
+
+{{mdtable:multifactor/victims_common_spec||victim:Victim:;specification:Specification:;rr_alcohol_only:Alcohol only, RR:ci:2@rr_alcohol_only;rd_alcohol_only:Risk difference per 1,000:cix1000:1@rd_alcohol_only}}
+
+The ranking of units changes with the specification, so the contrast between units (for
+instance occupant vs pedestrian) is stable only in the broad sense that the pedestrian ratio is
+small in relative terms under every specification. The pedestrian risk difference has the
+largest point estimate of the four because the baseline risk is high, but its interval includes
+zero.
+
 * For **the impaired or speeding driver** and **their passengers**, both behaviours are
   associated with death, alcohol more than speeding (any type).
 * *(This table is exploratory; it is not part of the Holm family.)* For **occupants of the other
@@ -174,7 +217,7 @@ effect and are not used for ranking.
   (ratio {{multifactor/victims|victim=other-vehicle occupant killed (the other driver's behaviour)|multiplicative_ratio|ci:2}}).
 * For **pedestrians**, once the speed limit, light and pedestrian age are held fixed, the
   associations with the striking driver's recorded speeding and alcohol are imprecise and much
-  smaller than for occupants (intervals compatible with no association and with modest ones, but
+  smaller *in relative terms* than for occupants (intervals compatible with no association and with modest ones, but
   not with occupant-sized ratios). One hypothesis is that the posted limit already captures much
   of the impact-speed variation that matters for a pedestrian; the data cannot test it.
   Police-recorded speeding is rare in pedestrian crashes

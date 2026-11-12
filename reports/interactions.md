@@ -115,8 +115,10 @@ more severe than the separate factors imply.
 **Speeding on wet roads is less severe than expected.** The additive interaction is
 -3.5 (-5.2 to -1.8) per 1,000. Police
 "speeding-related" is mostly "too fast for conditions", which concentrates on wet and icy roads
-and carries no detectable excess fatal risk (`reports/findings.md`, finding 3), so the pair mixes two
-different exposures. The exploratory analysis below separates drivers who exceeded the limit.
+and carries little excess fatal risk (`reports/findings.md`, finding 3), so the pair mixes two
+different exposures; a mix of speeding types is one possible reason for the deficit, not an
+established one. The exploratory analysis below separates drivers who exceeded the limit, and
+the deficit persists there.
 
 ## Exploratory pairs (not in the registered family)
 
@@ -140,19 +142,19 @@ They are outside the Holm family and are hypothesis-generating; p-values are una
   environment multiplies pedestrian risk by a somewhat larger factor than other risks
   (exploratory, unadjusted p 0.04; KA
   1.13 (1.02–1.25)), and from a much higher baseline.
-* **Exceeding the limit on wet roads.** On the ratio scale, the risk ratio for limit
-  exceedance on wet roads (4.75 (3.37–6.69))
-  is compared with that on dry roads (5.26 (4.39–6.32)).
-  On the additive scale the excess on wet roads is
-  -7.1 (-12.3 to -1.8) per 1,000; crashes on wet
-  roads start from a lower baseline. The ratio-scale estimate,
-  0.90 (0.68–1.20), is imprecise: it is compatible both with no
-  wet-road difference and with the deficit of the registered speeding × wet pair. For
-  fatal-or-serious crashes the deficit is present on both scales (ratio of RRs
-  0.78 (0.62–0.98); additive
-  -26.3 (-44.0 to -8.6) per 1,000). So the mix of speeding types and the
-  lower wet-road baseline explain part of the protective-looking speeding × wet pattern, but a
-  smaller excess for exceeding the limit on wet roads cannot be ruled out.
+* **Exceeding the limit on wet roads keeps its deficit.** The risk ratio for limit exceedance
+  is 4.75 (3.37–6.69) on wet roads and
+  5.26 (4.39–6.32) on dry roads. The
+  additive interaction (the excess for exceedance on wet roads relative to dry roads) is
+  -7.1 (-12.3 to -1.8) per 1,000 fatal crashes
+  (unadjusted p 0.0093), and for
+  fatal-or-serious crashes -26.3 (-44.0 to -8.6) per
+  1,000. The ratio-scale estimate, 0.90 (0.68–1.20)
+  for fatal crashes (0.78 (0.62–0.98) for KA),
+  is imprecise for fatal crashes. The deficit on the additive scale therefore does not depend on
+  the mix of speeding types, so the registered speeding × wet pattern is not explained by that
+  mix alone; the lower baseline risk on wet roads and the unobserved impact speed remain
+  candidate explanations that these data cannot separate.
 * **Exceeding the limit on 50+ mph roads**: ratio of RRs
   0.61 (0.48–0.77); below 1
   means the relative excess of exceeding the limit is smaller on roads that are already fast.

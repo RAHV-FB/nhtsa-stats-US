@@ -86,6 +86,29 @@ snow and ice and on 60+ mph roads. Among fatal crashes about a third of recorded
 exceedance, against under a tenth among minor crashes. The overlap of exceedance with alcohol is
 what makes the confounding question real.
 
+**Over-representation among fatal crashes, within one recording system.** Comparing the share of
+fatal crashes that record each speeding type with the share of *all* crashes that do, both taken
+from CRSS (`speeding/crss_overrepresentation`), avoids mixing FARS's fuller recording of fatal
+crashes with CRSS's police-report recording of all crashes. The mixed FARS-over-CRSS ratio is
+the larger figure and overstates over-representation because FARS records speeding more
+completely than CRSS does.
+
+| Speeding record | Share of all CRSS crashes | Share of CRSS fatal crashes | Within-CRSS ratio | Mixed FARS/CRSS ratio | Within-CRSS / mixed |
+|---|---|---|---|---|---|
+| exceeded limit / racing | 0.9% | 7.3% | 8.6 (7.1–10.3) | 12.8 (10.4–15.7) | 0.67 |
+| too fast for conditions | 7.9% | 9.1% | 1.1 (1.0–1.4) | 1.5 (1.1–2.0) | 0.78 |
+| speeding, type unspecified | 1.3% | 4.0% | 3.1 (2.4–3.9) | 3.6 (2.6–5.0) | 0.86 |
+| any police-reported speeding | 10.1% | 20.4% | 2.0 (1.7–2.5) | 2.7 (2.1–3.5) | 0.75 |
+
+Exceeding the limit is recorded
+8.6 (7.1–10.3)
+times as often among fatal crashes as among all crashes within CRSS, against
+12.8 (10.4–15.7)
+when FARS fatal crashes are set against CRSS all crashes; "too fast for conditions" is
+over-represented only slightly
+(1.15 (0.95–1.39)
+within CRSS). This is a ratio of shares, not a risk ratio, and it is not adjusted.
+
 ## 3. Sequential and Shapley accounting (adjusted association)
 
 *Sources: `speeding/key_models`, `speeding/shapley`, `speeding/sequential`,
@@ -282,6 +305,89 @@ a fifth. In the alcohol stratum the same scenarios give
 and 0.84.
 The association survives moderate differential recording; only severe under-recording in
 non-fatal crashes would remove it, and the alcohol-stratum association is the more fragile.
+
+## 5b. Speeding type: Model A and Model B (exploratory)
+
+*Source: `severity/speeding_type_models`, `severity/speeding_type_qba`. These speeding-type
+estimates, their equivalence bounds and the bias grid are **exploratory**: they were not part
+of the registered Phase-2 analyses and are not in the Holm family. Model A is the published
+specification; Model B adds crash type and number of vehicles (crash configuration).*
+
+| Model | Speeding record | Adjusted RR | 95% low | 95% high | RD per crash | Equivalence bound (%) |
+|---|---|---|---|---|---|---|
+| A | exceeded_limit_or_racing | 5.22 | 4.34 | 6.27 | 0.0216 | 508 |
+| A | too_fast_for_conditions | 1.06 | 0.89 | 1.26 | 0.0003 | 22 |
+| A | speeding_unspecified | 2.62 | 1.91 | 3.59 | 0.0083 | 241 |
+| A | unknown | 1.84 | 1.48 | 2.29 | 0.0043 | 121 |
+| B | exceeded_limit_or_racing | 4.88 | 4.12 | 5.79 | 0.0197 | 463 |
+| B | too_fast_for_conditions | 1.29 | 1.13 | 1.47 | 0.0015 | 44 |
+| B | speeding_unspecified | 2.55 | 1.89 | 3.42 | 0.0078 | 226 |
+| B | unknown | 1.56 | 1.27 | 1.91 | 0.0028 | 85 |
+
+The *equivalence bound* is the smallest symmetric margin, in percent on the risk-ratio scale,
+within which the 90% interval (two one-sided 5% tests) lies; only a small bound would support
+a claim of "no meaningful association", and a large bound means the data cannot show
+equivalence. For "too fast for conditions" the adjusted RR is
+1.06
+(0.89–1.26)
+in Model A, with an equivalence bound of
+22%,
+and 1.29
+(1.13–1.47)
+in Model B, with a bound of
+44%.
+"Weakly associated" is therefore the supportable description: the association is small next to
+that of exceedance
+(5.2
+in Model A), but in Model B it is distinguishable from none, and it is not shown to be
+negligible.
+
+**Bias grid for outcome-dependent recording.** Speeding type is recorded after the crash and
+possibly less completely in non-fatal crashes. The grid varies sensitivity among fatal crashes
+(0.7–1.0), among non-fatal crashes (0.3–1.0) and specificity (1.00 and 0.99) and corrects the
+crude counts, then rescales the Model-A ratio. For exceedance every cell with
+specificity 0.99
+is **infeasible**, not benign: exceedance is recorded in only
+0.9%
+of crashes, which is less than the false-positive rate that specificity implies, so the
+corrected count of exposed non-fatal crashes would be negative. Across the feasible cells
+(specificity 1.00) the bias-corrected Model-A ratio for exceedance ranges from
+1.59
+to 7.62,
+so the exceedance association stays above one wherever the grid can be computed. For "too fast
+for conditions" the corrected ratio ranges from
+0.25
+to 1.64:
+recording error within the grid is enough to move it on either side of one, so its direction
+is not identified.
+
+## 5c. Interstate roads by posted speed limit (exploratory)
+
+*Source: `severity/interstate_by_speed_band`. Adjusted risk ratio of a fatal crash on an
+interstate versus other roads within each posted-limit band; an association, not the effect of
+road type.*
+
+| Posted limit | Interstate crashes | RR interstate vs other | RD |
+|---|---|---|---|
+| <=25 mph | 294 | 0.67 (0.16–2.81) | -0.0009 |
+| 30-35 mph | 755 | 0.64 (0.35–1.18) | -0.0014 |
+| 40-45 mph | 1,569 | 1.28 (0.69–2.36) | 0.0015 |
+| 50-55 mph | 7,595 | 0.58 (0.42–0.80) | -0.0053 |
+| 60-65 mph | 14,816 | 0.54 (0.40–0.74) | -0.0052 |
+| 50-65 mph | 22,411 | 0.57 (0.45–0.73) | -0.0053 |
+| 70+ mph | 16,621 | 0.94 (0.63–1.38) | -0.0007 |
+
+Averaged over limits, interstates have a lower fatal-crash risk than other roads, but the
+average hides a pattern by band: the ratio is below one at 50–65 mph
+(0.57 (0.45–0.73))
+and near one at 70+ mph
+(0.94 (0.63–1.38)),
+and the 70+ band differs from the 50–65 band by a ratio of
+1.64 (1.06–2.55)
+(interaction p 0.001).
+Speed-limit bands with few interstate crashes (25 mph and below, 30–35 mph) have wide
+intervals. The interstate advantage therefore weakens at the highest posted limits, which is
+compatible with, but does not show, a role for travel speed.
 
 ## 6. Selection by fatality: why co-occurrence among deaths misleads
 

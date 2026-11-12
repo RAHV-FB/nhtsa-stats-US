@@ -99,8 +99,10 @@ more severe than the separate factors imply.
 **Speeding on wet roads is less severe than expected.** The additive interaction is
 {{interactions/pairs_fatal|pair=speeding x wet|ic|cix1000:1}} per 1,000. Police
 "speeding-related" is mostly "too fast for conditions", which concentrates on wet and icy roads
-and carries no detectable excess fatal risk (`reports/findings.md`, finding 3), so the pair mixes two
-different exposures. The exploratory analysis below separates drivers who exceeded the limit.
+and carries little excess fatal risk (`reports/findings.md`, finding 3), so the pair mixes two
+different exposures; a mix of speeding types is one possible reason for the deficit, not an
+established one. The exploratory analysis below separates drivers who exceeded the limit, and
+the deficit persists there.
 
 ## Exploratory pairs (not in the registered family)
 
@@ -118,19 +120,19 @@ They are outside the Holm family and are hypothesis-generating; p-values are una
   environment multiplies pedestrian risk by a somewhat larger factor than other risks
   (exploratory, unadjusted p {{interactions/pairs_fatal|pair=pedestrian x high_speed_road|ratio_of_rr_p|.2f}}; KA
   {{interactions/pairs_ka|pair=pedestrian x high_speed_road|ratio_of_rr|ci:2}}), and from a much higher baseline.
-* **Exceeding the limit on wet roads.** On the ratio scale, the risk ratio for limit
-  exceedance on wet roads ({{interactions/pairs_fatal|pair=exceeded_limit x wet|rr_A_given_B1|ci:2}})
-  is compared with that on dry roads ({{interactions/pairs_fatal|pair=exceeded_limit x wet|rr_A_given_B0|ci:2}}).
-  On the additive scale the excess on wet roads is
-  {{interactions/pairs_fatal|pair=exceeded_limit x wet|ic|cix1000:1}} per 1,000; crashes on wet
-  roads start from a lower baseline. The ratio-scale estimate,
-  {{interactions/pairs_fatal|pair=exceeded_limit x wet|ratio_of_rr|ci:2}}, is imprecise: it is compatible both with no
-  wet-road difference and with the deficit of the registered speeding × wet pair. For
-  fatal-or-serious crashes the deficit is present on both scales (ratio of RRs
-  {{interactions/pairs_ka|pair=exceeded_limit x wet|ratio_of_rr|ci:2}}; additive
-  {{interactions/pairs_ka|pair=exceeded_limit x wet|ic|cix1000:1}} per 1,000). So the mix of speeding types and the
-  lower wet-road baseline explain part of the protective-looking speeding × wet pattern, but a
-  smaller excess for exceeding the limit on wet roads cannot be ruled out.
+* **Exceeding the limit on wet roads keeps its deficit.** The risk ratio for limit exceedance
+  is {{interactions/pairs_fatal|pair=exceeded_limit x wet|rr_A_given_B1|ci:2}} on wet roads and
+  {{interactions/pairs_fatal|pair=exceeded_limit x wet|rr_A_given_B0|ci:2}} on dry roads. The
+  additive interaction (the excess for exceedance on wet roads relative to dry roads) is
+  {{interactions/pairs_fatal|pair=exceeded_limit x wet|ic|cix1000:1}} per 1,000 fatal crashes
+  (unadjusted p {{interactions/pairs_fatal|pair=exceeded_limit x wet|ic_p|.2g}}), and for
+  fatal-or-serious crashes {{interactions/pairs_ka|pair=exceeded_limit x wet|ic|cix1000:1}} per
+  1,000. The ratio-scale estimate, {{interactions/pairs_fatal|pair=exceeded_limit x wet|ratio_of_rr|ci:2}}
+  for fatal crashes ({{interactions/pairs_ka|pair=exceeded_limit x wet|ratio_of_rr|ci:2}} for KA),
+  is imprecise for fatal crashes. The deficit on the additive scale therefore does not depend on
+  the mix of speeding types, so the registered speeding × wet pattern is not explained by that
+  mix alone; the lower baseline risk on wet roads and the unobserved impact speed remain
+  candidate explanations that these data cannot separate.
 * **Exceeding the limit on 50+ mph roads**: ratio of RRs
   {{interactions/pairs_fatal|pair=exceeded_limit x high_speed_road|ratio_of_rr|ci:2}}; below 1
   means the relative excess of exceeding the limit is smaller on roads that are already fast.

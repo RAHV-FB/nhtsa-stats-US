@@ -130,7 +130,7 @@ SEGMENTS: dict[str, SegmentDef] = {
         "low",
         "LOW reliability: drug status is unknown for about half of fatal crashes, testing is "
         "selective by injury severity and state, and presence is not impairment "
-        "(docs/audit/alcohol_drugs.md 4.1, 5.5).",
+        "(docs/limitations.md; reports/alcohol_drugs_restraints.md).",
     ),
     "unrestrained_lpv": SegmentDef(
         "unrestrained_lpv",
@@ -1202,15 +1202,13 @@ def run(window: tuple[int, int] = DEFAULT_WINDOW) -> dict[str, Any]:
             "outputs/tables/matched/belt_effect.csv",
         ],
     }
-    # Metadata strings below (module, descriptions) are kept verbatim from the committed tables
-    # so that re-running this module reproduces the same files; they still use the old names.
-    meta = {"module": "nhtsa_stats.simulation.engine"}
+    meta = {"module": "nhtsa_stats.simulation.baseline"}
     paths = {}
     paths["baseline"] = save_table(
         base.to_frame(),
         MODULE,
         "baseline",
-        description="Layer A empirical baseline for the intervention simulator: every quantity "
+        description="Layer A empirical baseline of deaths and crashes by target segment: every quantity "
         "with provenance (observed / estimated / adjusted_association) and source",
         unit="see 'unit' column",
         method="FARS counts (window mean); CRSS design-based totals (Taylor linearisation, "
@@ -1229,8 +1227,8 @@ def run(window: tuple[int, int] = DEFAULT_WINDOW) -> dict[str, Any]:
         method="Cells = combinations of segments; FARS alcohol membership is the mean over "
         "10 BAC implicates, so cells are expected counts. CRSS cells: design-based SE "
         "(Taylor linearisation, 42 df); value blanked and flagged 'suppressed' if n<30 "
-        "sampled records, 'unstable' if RSE>30%, 'no_sample_records' if empty (the engine "
-        "uses every cell, see baseline.json)",
+        "sampled records, 'unstable' if RSE>30%, 'no_sample_records' if empty (every cell is kept in "
+        "baseline.json)",
         extra=meta,
         **common,
     )

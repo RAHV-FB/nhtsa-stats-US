@@ -364,7 +364,7 @@ def build_ledger() -> pd.DataFrame:
             "assumptions_required": "cameras act on exceeding the posted limit, not on 'too fast for conditions'; "
             "camera units -> coverage of speeding exposure; behavioural response (reduction in speeding prevalence "
             "where covered; spillover); effect on crash occurrence; effect on severity of remaining crashes",
-            "numeric_estimate_possible": "Only conditional/hypothetical (simulator + break-even).",
+            "numeric_estimate_possible": "None: the data contain no intervention, so no effect can be estimated.",
             "evidence_grade_target_association": "strong for exceeding the limit (large association); none detected for "
             "'too fast for conditions'; aggregate magnitude sensitive to ascertainment",
             "phase2_evidence": p2.get("speeding", ""),
@@ -428,7 +428,7 @@ def build_ledger() -> pd.DataFrame:
             "severity_pathway_af": "not estimated",
             "evidence_intervention_changes_factor": NO_INTERVENTION_DATA,
             "assumptions_required": "everything: prevalence of impairment, impairment-specific risk, test coverage, deterrence",
-            "numeric_estimate_possible": "No defensible estimate from these data; simulator can only show what effect sizes would be required",
+            "numeric_estimate_possible": "No defensible estimate from these data.",
             "evidence_grade_target_association": "insufficient",
             "phase2_evidence": p2.get("drugs", ""),
         },
@@ -454,7 +454,7 @@ def build_ledger() -> pd.DataFrame:
             "interactions": "restraint x age / crash type: person module",
             "most_affected": f"{seg['unrestrained_lpv_occupants']['pct_male']:.0f}% male; {seg['unrestrained_lpv_occupants']['pct_age_15_34']:.0f}% aged 15-34; "
             f"{seg['unrestrained_lpv_occupants']['pct_night']:.0f}% at night",
-            "severity_pathway_af": "use belt effectiveness x unrestrained deaths in simulator",
+            "severity_pathway_af": "not estimated",
             "evidence_intervention_changes_factor": NO_INTERVENTION_DATA,
             "assumptions_required": "share of unbelted occupants who would buckle up under enforcement; whether converters resemble "
             "other unbelted occupants (likely riskier)",
@@ -559,7 +559,7 @@ def build_ledger() -> pd.DataFrame:
             "evidence_intervention_changes_factor": "None for programmes; the contrasts compare existing conditions, not interventions",
             "assumptions_required": "that adding lighting / lowering limits changes conditions to those of currently lit / lower-limit roads "
             "without changing exposure",
-            "numeric_estimate_possible": "Conditional/hypothetical via the simulator's generic segment intervention",
+            "numeric_estimate_possible": "None: the contrasts compare existing conditions, not interventions.",
             "evidence_grade_target_association": "strong (large, objective measures, consistent across adjustment)",
             "phase2_evidence": "Phase 2: given a pedestrian is struck, the striking driver's recorded speeding and alcohol add "
             "little once the posted limit and light are held fixed (multifactor/victims).",
