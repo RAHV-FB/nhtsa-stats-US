@@ -51,8 +51,8 @@
   "cc_undetermined_share_high"
  ],
  "module": "nhtsa_stats.analysis.trends",
- "git_commit": "ef704fd",
- "generated_utc": "2026-10-23T03:18:34Z",
+ "git_commit": "27f5a22-dirty",
+ "generated_utc": "2026-11-12T12:27:49Z",
  "definitions": {
   "fatal": "NHTSA-imputed maximum severity (MAXSEV_IM)",
   "fatal_cc": "complete-case maximum severity (MAX_SEV; crashes with a person of unknown severity excluded unless fatal)"

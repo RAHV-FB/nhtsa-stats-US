@@ -1,0 +1,37 @@
+{
+ "table": "speeding/crss_overrepresentation.csv",
+ "description": "Over-representation of police-reported speeding in fatal crashes: CRSS-only ratio (fatal-crash share over all-crash share, both CRSS) next to the mixed FARS/CRSS ratio",
+ "population": "CRSS police-reported crashes 2016-2024 with a determinable NHTSA-imputed maximum severity (MAXSEV_IM 0-4)",
+ "unit": "crash",
+ "outcome": "fatal",
+ "method": "Weighted domain means; ratio of the CRSS fatal-crash share to the CRSS all-crash share with joint Taylor linearisation (25 strata / 67 PSUs, t 42 df); the mixed ratio divides the FARS census share by the CRSS all-crash share (CI: CRSS denominator only). The CRSS-only ratio is a lower bound if CRSS under-records speeding in fatal crashes (see fars_crss_recording)",
+ "inputs": [
+  "data/processed/crss_crash.parquet",
+  "data/processed/fars_crash.parquet"
+ ],
+ "rows": 4,
+ "columns": [
+  "speeding",
+  "label",
+  "n_crss_crashes",
+  "n_crss_fatal",
+  "crss_share_all_crashes",
+  "crss_share_all_crashes_low",
+  "crss_share_all_crashes_high",
+  "crss_share_fatal_crashes",
+  "crss_share_fatal_crashes_low",
+  "crss_share_fatal_crashes_high",
+  "crss_only_ratio",
+  "crss_only_ratio_low",
+  "crss_only_ratio_high",
+  "n_fars_fatal",
+  "fars_share_fatal_crashes",
+  "mixed_fars_crss_ratio",
+  "mixed_ratio_low",
+  "mixed_ratio_high",
+  "crss_only_over_mixed"
+ ],
+ "module": "nhtsa_stats.analysis.speeding",
+ "git_commit": "27f5a22-dirty",
+ "generated_utc": "2026-11-12T12:22:42Z"
+}

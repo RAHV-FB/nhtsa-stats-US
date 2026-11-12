@@ -18,6 +18,6 @@
   "rr_corrected"
  ],
  "module": "nhtsa_stats.analysis.speeding",
- "git_commit": "8fe8986",
- "generated_utc": "2026-10-23T09:19:20Z"
+ "git_commit": "27f5a22-dirty",
+ "generated_utc": "2026-11-12T12:22:41Z"
 }

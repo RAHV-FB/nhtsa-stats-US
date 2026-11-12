@@ -1,0 +1,11 @@
+victim,outcome,group,quantity,n_persons,n_unknown,estimate,low,high
+pedestrian,killed,fatal / outcome,share with unknown speed limit,1777,161,0.107725,0.0689697,0.164413
+pedestrian,killed,not,share with unknown speed limit,22874,6935,0.296129,0.20908,0.401043
+pedestrian,killed,all,share with unknown speed limit,24651,7096,0.281114,0.198195,0.382189
+pedestrian,killed,outcome minus not,difference in share unknown,,,-0.188403,-0.27234,-0.104467
+pedestrian,killed,outcome over not,ratio of shares unknown,,,0.363779,0.245513,0.539014
+cyclist,killed,fatal / outcome,share with unknown speed limit,256,22,0.104811,0.0613817,0.173294
+cyclist,killed,not,share with unknown speed limit,16034,4317,0.250776,0.17949,0.338688
+cyclist,killed,all,share with unknown speed limit,16290,4339,0.248426,0.17798,0.335379
+cyclist,killed,outcome minus not,difference in share unknown,,,-0.145965,-0.230729,-0.0612015
+cyclist,killed,outcome over not,ratio of shares unknown,,,0.417946,0.243884,0.716238

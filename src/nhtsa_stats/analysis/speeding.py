@@ -503,6 +503,90 @@ def fars_crss_recording(df: pd.DataFrame, design: SurveyDesign) -> pd.DataFrame:
     return pd.DataFrame(rows)
 
 
+def _domain_mean_influence(
+    design: SurveyDesign, y: np.ndarray, domain: np.ndarray
+) -> tuple[float, np.ndarray]:
+    """Weighted domain mean and its per-row linearised contribution."""
+    w = design.weight * np.asarray(domain, dtype=float)
+    big_w = w.sum()
+    m = float(w @ y / big_w)
+    return m, w * (y - m) / big_w
+
+
+def crss_overrepresentation(
+    crss: pd.DataFrame | None = None,
+    design: SurveyDesign | None = None,
+    fars_types: pd.Series | None = None,
+) -> pd.DataFrame:
+    """Over-representation of speeding in fatal crashes using CRSS for numerator and denominator.
+
+    The published ratio divides the FARS (census) share of fatal crashes by the CRSS share of all
+    crashes; the two systems record SPEEDREL with different completeness.  Here both shares come
+    from CRSS: ``share_fatal_crss / share_all_crashes``, with a design-based CI from the joint
+    linearisation of the two domain means (they share PSUs; t, 42 df).  Because CRSS records
+    speeding less often in fatal crashes than FARS does (``fars_crss_recording``), the CRSS-only
+    ratio is a lower bound on the over-representation under full recording.  The mixed FARS/CRSS
+    ratio is repeated for comparison (its CI reflects CRSS sampling of the denominator only).
+    """
+    if crss is None or design is None:
+        crss, design = data.crss_crash(outcome=None, tri_state_cols=specs.CRASH_TRI)
+    if fars_types is None:
+        fars_types = data.fars_crash()["speeding_type"]
+    fatal = crss["fatal"].to_numpy(dtype=float)
+    is_fatal = fatal == 1
+    everyone = np.ones(len(crss), dtype=bool)
+    st = crss["speeding_type"].fillna("unknown").astype(str)
+    fst = fars_types.fillna("unknown").astype(str)
+    t = design.tcrit()
+    groups = {
+        "exceeded_limit_or_racing": (["exceeded_limit_or_racing"], "exceeded limit / racing"),
+        "too_fast_for_conditions": (["too_fast_for_conditions"], "too fast for conditions"),
+        "speeding_unspecified": (["speeding_unspecified"], "speeding, type unspecified"),
+        "any_speeding": (
+            ["exceeded_limit_or_racing", "too_fast_for_conditions", "speeding_unspecified"],
+            "any police-reported speeding",
+        ),
+    }
+    rows = []
+    for key, (levels, label) in groups.items():
+        ind = st.isin(levels).to_numpy(float)
+        p_all, z_all = _domain_mean_influence(design, ind, everyone)
+        p_fat, z_fat = _domain_mean_influence(design, ind, is_fatal)
+        ratio = p_fat / p_all
+        se_log = float(np.sqrt(design.vcov_total(z_fat / p_fat - z_all / p_all)[0, 0]))
+        se_fat = float(np.sqrt(design.vcov_total(z_fat)[0, 0]))
+        lo_f, hi_f = logit_ci(p_fat, se_fat, design.df)
+        se_all = float(np.sqrt(design.vcov_total(z_all)[0, 0]))
+        lo_a, hi_a = logit_ci(p_all, se_all, design.df)
+        fars_share = float(fst.isin(levels).mean())
+        # Mixed ratio: FARS census share of fatal crashes over the CRSS share of all crashes.
+        mixed = fars_share / p_all
+        rows.append(
+            {
+                "speeding": key,
+                "label": label,
+                "n_crss_crashes": len(crss),
+                "n_crss_fatal": int(is_fatal.sum()),
+                "crss_share_all_crashes": p_all,
+                "crss_share_all_crashes_low": lo_a,
+                "crss_share_all_crashes_high": hi_a,
+                "crss_share_fatal_crashes": p_fat,
+                "crss_share_fatal_crashes_low": lo_f,
+                "crss_share_fatal_crashes_high": hi_f,
+                "crss_only_ratio": ratio,
+                "crss_only_ratio_low": ratio * float(np.exp(-t * se_log)),
+                "crss_only_ratio_high": ratio * float(np.exp(t * se_log)),
+                "n_fars_fatal": len(fst),
+                "fars_share_fatal_crashes": fars_share,
+                "mixed_fars_crss_ratio": mixed,
+                "mixed_ratio_low": mixed * float(np.exp(-t * se_all / p_all)),
+                "mixed_ratio_high": mixed * float(np.exp(t * se_all / p_all)),
+                "crss_only_over_mixed": ratio / mixed,
+            }
+        )
+    return pd.DataFrame(rows)
+
+
 SE_FATAL = (0.8, 0.9, 1.0)
 SE_NONFATAL = (0.2, 0.3, 0.5, 0.7, 0.9, 1.0)
 
@@ -758,6 +842,20 @@ def run(cache_dir: Path | None = config.OUTPUT_DIR / "cache") -> dict[str, pd.Da
         outcome="fatal",
     )
     out["stratified_qba"] = qba
+    ovr = crss_overrepresentation()
+    _save(
+        ovr,
+        "crss_overrepresentation",
+        "Over-representation of police-reported speeding in fatal crashes: CRSS-only ratio "
+        "(fatal-crash share over all-crash share, both CRSS) next to the mixed FARS/CRSS ratio",
+        "Weighted domain means; ratio of the CRSS fatal-crash share to the CRSS all-crash share "
+        "with joint Taylor linearisation (25 strata / 67 PSUs, t 42 df); the mixed ratio divides "
+        "the FARS census share by the CRSS all-crash share (CI: CRSS denominator only). The "
+        "CRSS-only ratio is a lower bound if CRSS under-records speeding in fatal crashes "
+        "(see fars_crss_recording)",
+        outcome="fatal",
+    )
+    out["crss_overrepresentation"] = ovr
     ev = e_values(out["key_models"], strata)
     _save(
         ev,

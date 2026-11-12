@@ -1,0 +1,37 @@
+{
+ "table": "burden/attributable_fraction_variants.csv",
+ "description": "Attributable fractions refitted on 2022-2024 only and with police-reported alcohol (three codings), next to the published 2016-2024 imputed-alcohol fractions",
+ "population": "CRSS police-reported crashes 2016-2024 (model); FARS deaths 2022-2024 (scaling)",
+ "unit": "crash",
+ "outcome": "fatal; ka",
+ "method": "g-computation with survey logistic model A; AF = (observed - counterfactual predicted)/observed; linearised CI; for the fatal outcome only, FARS-scaled = AF x mean annual FARS fatal crashes (or deaths) 2022-2024, assuming the averted fatal crashes carry the average number of deaths per fatal crash; fractions of KA crashes are not scaled; variants: model period 2016-2024 or 2022-2024, alcohol NHTSA-imputed or police-reported (unknown as a level, dropped, or as no); deaths scaling always uses the 2022-2024 FARS means; intervals cover sampling only",
+ "inputs": [
+  "data/processed/crss_crash.parquet",
+  "data/processed/fars_crash.parquet"
+ ],
+ "rows": 80,
+ "columns": [
+  "alcohol_coding",
+  "alcohol_coding_description",
+  "model_period",
+  "shift",
+  "description",
+  "outcome",
+  "n_exposed_crss",
+  "af",
+  "af_low",
+  "af_high",
+  "fars_deaths_per_year_window",
+  "fars_fatal_crashes_per_year_window",
+  "fars_scaled_fatal_crashes_per_year",
+  "fars_scaled_deaths_per_year",
+  "fars_scaled_deaths_low",
+  "fars_scaled_deaths_high",
+  "kind",
+  "n_crashes_model",
+  "n_events_model"
+ ],
+ "module": "nhtsa_stats.analysis.burden",
+ "git_commit": "27f5a22-dirty",
+ "generated_utc": "2026-11-12T12:24:41Z"
+}

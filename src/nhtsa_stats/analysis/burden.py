@@ -24,6 +24,7 @@ exposed-crash formula AF = P(E|fatal) x (1 - 1/RR)).
 
 from __future__ import annotations
 
+import dataclasses
 import logging
 from collections.abc import Callable
 from dataclasses import dataclass
@@ -116,12 +117,14 @@ TYPE_SHIFTS = [
 ]
 
 
-def _af_rows(model, df, design, shifts, outcome, fars_deaths, fars_crashes) -> list[dict]:
+def _af_rows(
+    model, df, design, shifts, outcome, fars_deaths, fars_crashes, joint=(SHIFTS[0], SHIFTS[1])
+) -> list[dict]:
     base_m, base_z = model.margin_influence(df, None)
     rows = []
     for sh in shifts:
         if sh.name == "speeding_and_alcohol_removed":
-            s1, s2 = SHIFTS[0].setter(), SHIFTS[1].setter()
+            s1, s2 = joint[0].setter(), joint[1].setter()
 
             def setter(d, s1=s1, s2=s2):
                 return s2(s1(d))
@@ -133,7 +136,7 @@ def _af_rows(model, df, design, shifts, outcome, fars_deaths, fars_crashes) -> l
         lo, hi = af.ci()
         exposed = df[sh.var].isin(sh.exposed).to_numpy()
         if sh.name == "speeding_and_alcohol_removed":
-            exposed = exposed | df[SHIFTS[1].var].isin(SHIFTS[1].exposed).to_numpy()
+            exposed = exposed | df[joint[1].var].isin(joint[1].exposed).to_numpy()
         # Only a fraction of *fatal* crashes can be scaled to FARS. Deaths assume the averted
         # fatal crashes carry the average number of deaths per FARS fatal crash.
         scale = outcome == "fatal"
@@ -173,6 +176,57 @@ def attributable_fractions(outcome: str = "fatal") -> pd.DataFrame:
     model_t = severity.fit(df, design, outcome, covs)
     rows += _af_rows(model_t, df, design, TYPE_SHIFTS, outcome, fars_deaths, fars_crashes)
     return pd.DataFrame(rows)
+
+
+ALCOHOL_CODINGS = {
+    "imputed": "NHTSA-imputed alcohol (ALCHL_IM), as published",
+    "police_unknown_level": "police-reported alcohol, unknown kept as its own level",
+    "police_complete_case": "police-reported alcohol, crashes with unknown alcohol dropped",
+    "police_unknown_as_no": "police-reported alcohol, unknown counted as no alcohol",
+}
+PERIODS = {"2016-2024": None, "2022-2024": WINDOW}
+
+
+def af_variants(outcome: str = "fatal") -> pd.DataFrame:
+    """Attributable fractions under other defensible periods and alcohol codings.
+
+    The published fractions come from a model fitted to CRSS 2016-2024 with NHTSA-imputed
+    alcohol and are scaled to 2022-24 FARS deaths.  Here the same g-computation (model A, same
+    shifts) is repeated (i) on 2022-24 crashes only, the window the deaths refer to, and (ii) with
+    police-reported alcohol instead of the imputed variable (unknown kept as a level, dropped, or
+    counted as no).  The first row (2016-2024, imputed) reproduces the published table.
+    Intervals are sampling-only and the variants are not independent of each other.
+    """
+    fars = data.fars_crash(WINDOW)
+    fars_deaths = float(fars["FATALS"].sum()) / len(WINDOW)
+    fars_crashes = len(fars) / len(WINDOW)
+    rows = []
+    for coding in ALCOHOL_CODINGS:
+        for period, years in PERIODS.items():
+            df, design = severity.load(outcome, years)
+            var = "alcohol_im" if coding == "imputed" else "alcohol"
+            if coding == "police_complete_case":
+                keep = (df["alcohol"] != "unknown").to_numpy()
+                df, design = df.loc[keep].reset_index(drop=True), design.subset(keep)
+            elif coding == "police_unknown_as_no":
+                df["alcohol"] = df["alcohol"].replace({"unknown": "no"})
+            covs = [var if c == "alcohol_im" else c for c in specs.PRE_CRASH]
+            shifts = [
+                dataclasses.replace(sh, var=var) if sh.var == "alcohol_im" else sh for sh in SHIFTS
+            ]
+            joint = (shifts[0], shifts[1])
+            model = severity.fit(df, design, outcome, covs)
+            part = pd.DataFrame(
+                _af_rows(model, df, design, shifts, outcome, fars_deaths, fars_crashes, joint)
+            )
+            part.insert(0, "alcohol_coding", coding)
+            part.insert(1, "alcohol_coding_description", ALCOHOL_CODINGS[coding])
+            part.insert(2, "model_period", period)
+            part["n_crashes_model"] = len(df)
+            part["n_events_model"] = int(df[outcome].sum())
+            rows.append(part)
+            log.info("AF variant %s %s %s done", outcome, coding, period)
+    return pd.concat(rows, ignore_index=True)
 
 
 def bias_sensitivity(af: pd.DataFrame) -> pd.DataFrame:
@@ -220,6 +274,9 @@ def run() -> dict[str, pd.DataFrame]:
     out = {"attributable_fractions_fatal": attributable_fractions("fatal")}
     out["attributable_fractions_ka"] = attributable_fractions("ka")
     out["bias_sensitivity"] = bias_sensitivity(out["attributable_fractions_fatal"])
+    out["attributable_fraction_variants"] = pd.concat(
+        [af_variants("fatal"), af_variants("ka")], ignore_index=True
+    )
     common = dict(
         population="CRSS police-reported crashes 2016-2024 (model); FARS deaths 2022-2024 (scaling)",
         unit="crash",
@@ -244,6 +301,20 @@ def run() -> dict[str, pd.DataFrame]:
         description="Severity-pathway attributable fractions of KA crashes",
         outcome="ka",
         **common,
+    )
+    save_table(
+        out["attributable_fraction_variants"],
+        MODULE,
+        "attributable_fraction_variants",
+        description="Attributable fractions refitted on 2022-2024 only and with police-reported "
+        "alcohol (three codings), next to the published 2016-2024 imputed-alcohol fractions",
+        outcome="fatal; ka",
+        **{
+            **common,
+            "method": common["method"] + "; variants: model period 2016-2024 or 2022-2024, alcohol "
+            "NHTSA-imputed or police-reported (unknown as a level, dropped, or as no); deaths "
+            "scaling always uses the 2022-2024 FARS means; intervals cover sampling only",
+        },
     )
     if len(out["bias_sensitivity"]):
         save_table(

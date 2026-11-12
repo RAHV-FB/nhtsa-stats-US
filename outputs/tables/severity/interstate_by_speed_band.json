@@ -1,0 +1,32 @@
+{
+ "table": "severity/interstate_by_speed_band.csv",
+ "description": "Interstate vs other roads within posted speed-limit bands, and the ratio of the 70+ mph to the 50-65 mph risk ratio",
+ "population": "CRSS police-reported crashes 2016-2024 with known maximum severity",
+ "unit": "crash",
+ "outcome": "fatal; ka",
+ "method": "Model A plus interstate x speed-limit interaction; margins standardised within each band (domain of the full design); linearised CIs (t, 42 df)",
+ "inputs": [
+  "data/processed/crss_crash.parquet"
+ ],
+ "rows": 16,
+ "columns": [
+  "outcome",
+  "speed_limit_band",
+  "quantity",
+  "n_crashes",
+  "n_interstate_crashes",
+  "n_events",
+  "adj_rate_interstate",
+  "adj_rate_other",
+  "estimate",
+  "low",
+  "high",
+  "rd",
+  "rd_low",
+  "rd_high",
+  "interaction_wald_p"
+ ],
+ "module": "nhtsa_stats.analysis.severity",
+ "git_commit": "7ee597e-dirty",
+ "generated_utc": "2026-11-12T12:02:23Z"
+}

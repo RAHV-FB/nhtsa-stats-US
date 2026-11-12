@@ -23,6 +23,6 @@
   "adj_rr_ratio_cc_vs_primary"
  ],
  "module": "nhtsa_stats.analysis.severity",
- "git_commit": "ef704fd",
- "generated_utc": "2026-10-23T02:33:05Z"
+ "git_commit": "7ee597e-dirty",
+ "generated_utc": "2026-11-12T11:59:20Z"
 }

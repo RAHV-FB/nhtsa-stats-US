@@ -1,0 +1,28 @@
+{
+ "table": "severity/speeding_type_qba.csv",
+ "description": "Bias analysis of outcome-dependent recording for each speeding type; 'status' says why a row is blank",
+ "population": "CRSS police-reported crashes 2016-2024 with known maximum severity",
+ "unit": "crash",
+ "outcome": "fatal; ka",
+ "method": "Matrix-method correction (measurement.corrected_rr) of the crude RR of type vs no speeding for sensitivities and specificity on the measurement-module grid; the bias factor multiplies the model-A adjusted RR",
+ "inputs": [
+  "data/processed/crss_crash.parquet"
+ ],
+ "rows": 256,
+ "columns": [
+  "outcome",
+  "speeding_type",
+  "se_fatal",
+  "se_nonfatal",
+  "specificity",
+  "crude_rr_observed",
+  "crude_rr_corrected",
+  "bias_factor",
+  "adj_rr_model_A",
+  "adj_rr_bias_corrected",
+  "status"
+ ],
+ "module": "nhtsa_stats.analysis.severity",
+ "git_commit": "7ee597e-dirty",
+ "generated_utc": "2026-11-12T12:01:28Z"
+}

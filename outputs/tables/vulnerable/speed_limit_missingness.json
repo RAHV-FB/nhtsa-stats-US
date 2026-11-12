@@ -1,0 +1,28 @@
+{
+ "table": "vulnerable/speed_limit_missingness.csv",
+ "description": "Share of struck pedestrians / cyclists whose striking vehicle's speed limit is unknown, by killed vs not killed",
+ "population": "CRSS pedestrians / pedalcyclists 2016-2024 with known injury severity",
+ "unit": "person",
+ "outcome": "killed",
+ "method": "Weighted domain shares (logit CIs); difference and ratio with joint Taylor linearisation (25 strata / 67 PSUs, t 42 df)",
+ "inputs": [
+  "data/interim/CRSS/person",
+  "data/interim/CRSS/vehicle",
+  "data/processed/crss_crash.parquet"
+ ],
+ "rows": 10,
+ "columns": [
+  "victim",
+  "outcome",
+  "group",
+  "quantity",
+  "n_persons",
+  "n_unknown",
+  "estimate",
+  "low",
+  "high"
+ ],
+ "module": "nhtsa_stats.analysis.vulnerable",
+ "git_commit": "27f5a22-dirty",
+ "generated_utc": "2026-11-12T12:24:57Z"
+}

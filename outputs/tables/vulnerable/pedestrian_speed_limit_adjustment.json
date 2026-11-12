@@ -1,0 +1,32 @@
+{
+ "table": "vulnerable/pedestrian_speed_limit_adjustment.csv",
+ "description": "Pedestrian speed-limit risk ratios (vs <=25 mph) with and without adjustment for location, light and time of day",
+ "population": "CRSS pedestrians / pedalcyclists 2016-2024 with known injury severity",
+ "unit": "person",
+ "outcome": "killed; killed_or_serious",
+ "method": "Survey logistic regression; standardised margins; Taylor-linearised CIs (t, 42 df)",
+ "inputs": [
+  "data/interim/CRSS/person",
+  "data/interim/CRSS/vehicle",
+  "data/processed/crss_crash.parquet"
+ ],
+ "rows": 80,
+ "columns": [
+  "victim",
+  "outcome",
+  "specification",
+  "dropped",
+  "level",
+  "n",
+  "n_events",
+  "adj_rr",
+  "adj_rr_low",
+  "adj_rr_high",
+  "adj_rd",
+  "adj_rd_low",
+  "adj_rd_high"
+ ],
+ "module": "nhtsa_stats.analysis.vulnerable",
+ "git_commit": "27f5a22-dirty",
+ "generated_utc": "2026-11-12T12:24:59Z"
+}

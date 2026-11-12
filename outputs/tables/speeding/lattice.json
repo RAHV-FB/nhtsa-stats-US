@@ -28,6 +28,6 @@
   "converged"
  ],
  "module": "nhtsa_stats.analysis.speeding",
- "git_commit": "8fe8986",
- "generated_utc": "2026-10-23T09:17:28Z"
+ "git_commit": "27f5a22-dirty",
+ "generated_utc": "2026-11-12T12:21:28Z"
 }

@@ -34,8 +34,10 @@ import pandas as pd
 
 from nhtsa_stats import config
 from nhtsa_stats.analysis import data, specs
+from nhtsa_stats.analysis.measurement import corrected_rr
 from nhtsa_stats.analysis.survey import (
     Estimate,
+    MarginSet,
     ModelSpec,
     SurveyDesign,
     SurveyLogit,
@@ -347,6 +349,355 @@ def outcome_definition_sensitivity(primary: pd.DataFrame, cc: pd.DataFrame) -> p
     return m
 
 
+# --------------------------------------------------------------------------------------
+# Additional tables (red-team follow-up, docs/red_team_2026-11.md)
+# --------------------------------------------------------------------------------------
+CI_LEVELS = (0.95, 0.90)
+
+
+def _speeding_type_covariates(model: str) -> list[str]:
+    covs = [c if c != "speeding" else "speeding_type" for c in specs.PRE_CRASH]
+    return covs + (list(specs.CIRCUMSTANCE) if model == "B" else [])
+
+
+def speeding_type_models(outcome: str = "fatal") -> pd.DataFrame:
+    """Speeding-type risk ratios under model A and model B, with 95% and 90% intervals.
+
+    Model A is the published specification (``speeding_type_contrasts``); model B adds crash
+    configuration (crash type, vehicles), a plausible mediator, so the two bracket the
+    association.  The 90% interval gives the two one-sided 5% tests of equivalence: ratios
+    outside [low90, high90] are rejected, and ``equivalence_bound_pct`` is the symmetric
+    percentage bound max(|log low90|, |log high90|) on the log scale.  An interval that excludes
+    1 is not an equivalence result and a null interval does not show absence of an effect.
+    """
+    df, design = load(outcome)
+    df["speeding_type"] = df["speeding_type"].fillna("unknown")
+    rows = []
+    for model_name in ("A", "B"):
+        model = fit(df, design, outcome, _speeding_type_covariates(model_name))
+        levels = observed_levels(df, "speeding_type")
+        scen = {str(lv): (lambda d, lv=lv: d.assign(speeding_type=lv)) for lv in levels}
+        ms = model.margins(df, scen)
+        crude = crude_table(df, design, outcome, "speeding_type", levels, df["YEAR"].nunique())
+        for lv in levels:
+            if lv == levels[0]:
+                continue
+            rr = ms.log_ratio(str(lv), str(levels[0]))
+            rd = ms.difference(str(lv), str(levels[0]))
+            lo95, hi95 = rr.ci(0.95)
+            lo90, hi90 = rr.ci(0.90)
+            c = crude.set_index("level").loc[lv]
+            rows.append(
+                {
+                    "outcome": outcome,
+                    "model": model_name,
+                    "level": lv,
+                    "n": int(c["n"]),
+                    "n_events": int(c["n_events"]),
+                    "crude_rr": float(c["crude_rr"]),
+                    "adj_rr": float(np.exp(rr.estimate)),
+                    "adj_rr_low95": float(np.exp(lo95)),
+                    "adj_rr_high95": float(np.exp(hi95)),
+                    "adj_rr_low90": float(np.exp(lo90)),
+                    "adj_rr_high90": float(np.exp(hi90)),
+                    "adj_rd": rd.estimate,
+                    "adj_rd_low95": rd.ci(0.95)[0],
+                    "adj_rd_high95": rd.ci(0.95)[1],
+                    "equivalence_bound_pct": 100 * (float(np.exp(max(abs(lo90), abs(hi90)))) - 1)
+                    if np.isfinite(lo90)
+                    else np.nan,
+                }
+            )
+    return pd.DataFrame(rows)
+
+
+# Non-differential recording sensitivities for the speeding-type bias analysis: same grid as
+# ``measurement.qba_grid`` (fatal 0.7-1, non-fatal 0.3-1, specificity 1 and 0.99).
+QBA_SE_FATAL = (0.7, 0.8, 0.9, 1.0)
+QBA_SE_NONFATAL = (0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0)
+QBA_SPECIFICITY = (1.0, 0.99)
+QBA_TYPES = ("exceeded_limit_or_racing", "too_fast_for_conditions")
+
+
+def qba_status(a: float, b: float, c: float, d: float, se_f: float, se_n: float, sp: float) -> str:
+    """Why a matrix-method correction (``measurement.corrected_rr``) is or is not feasible.
+
+    The corrected true counts are a_true = (a - (1-sp) F) / (se_f + sp - 1) for the exposed
+    fatal crashes (F = all fatal crashes) and b_true = (b - (1-sp) N) / (se_n + sp - 1) for the
+    exposed non-fatal crashes (N = all non-fatal crashes); the unexposed counts are the
+    remainders.  The correction is infeasible when any corrected count is not positive.  With
+    specificity below 1 this happens whenever the exposed crashes are fewer than (1 - sp) of the
+    outcome group, i.e. the assumed false-positive rate already exceeds the recorded exposure
+    share.
+    """
+    fat, non = a + c, b + d
+    a_t = (a - (1 - sp) * fat) / (se_f + sp - 1)
+    b_t = (b - (1 - sp) * non) / (se_n + sp - 1)
+    c_t, d_t = fat - a_t, non - b_t
+    bad = [
+        name
+        for name, v in (
+            ("exposed fatal", a_t),
+            ("exposed non-fatal", b_t),
+            ("unexposed fatal", c_t),
+            ("unexposed non-fatal", d_t),
+        )
+        if v <= 0
+    ]
+    if not bad:
+        return "ok"
+    detail = ""
+    if sp < 1 and "exposed non-fatal" in bad:
+        detail = (
+            f"; recorded exposure share among non-fatal crashes {b / non:.4f} "
+            f"< assumed false-positive rate {1 - sp:.2f}"
+        )
+    elif sp < 1 and "exposed fatal" in bad:
+        detail = (
+            f"; recorded exposure share among fatal crashes {a / fat:.4f} "
+            f"< assumed false-positive rate {1 - sp:.2f}"
+        )
+    return "infeasible: corrected count not positive (" + ", ".join(bad) + ")" + detail
+
+
+def speeding_type_qba(
+    models: pd.DataFrame, outcomes: Sequence[str] = ("fatal", "ka")
+) -> pd.DataFrame:
+    """Bias analysis for outcome-dependent recording of each speeding type.
+
+    Crude counts (type vs no speeding; other types and unknown left out, as in
+    ``measurement.qba_grid``) are corrected for sensitivities ``se_fatal`` / ``se_nonfatal`` and
+    specificity; the bias factor (corrected / observed crude RR) multiplies the model-A adjusted
+    RR, as in ``burden.bias_sensitivity``.  ``status`` says why a row is blank.  Covers CRSS
+    sampling only; the sensitivities are assumptions, not estimates.  ``models`` is the output of
+    ``speeding_type_models`` (model-A rows supply the adjusted RR).
+    """
+    rows = []
+    for outcome in outcomes:
+        df, design = load(outcome)
+        df["speeding_type"] = df["speeding_type"].fillna("unknown")
+        st = df["speeding_type"].astype(str).to_numpy()
+        y = df[outcome].to_numpy(float)
+        w = design.weight
+        adj = models[(models["outcome"] == outcome) & (models["model"] == "A")].set_index("level")
+        for lv in QBA_TYPES:
+            known = (st == lv) | (st == "no")
+            x = (st == lv).astype(float)
+            a = w[known & (x == 1) & (y == 1)].sum()
+            b = w[known & (x == 1) & (y == 0)].sum()
+            c = w[known & (x == 0) & (y == 1)].sum()
+            d = w[known & (x == 0) & (y == 0)].sum()
+            rr_obs = (a / (a + b)) / (c / (c + d))
+            for se_f in QBA_SE_FATAL:
+                for se_n in QBA_SE_NONFATAL:
+                    for sp in QBA_SPECIFICITY:
+                        rr = corrected_rr(a, b, c, d, se_f, se_n, sp)
+                        status = qba_status(a, b, c, d, se_f, se_n, sp)
+                        if status == "ok" and not np.isfinite(rr):
+                            status = "infeasible: corrected risk ratio undefined"
+                        ok = status == "ok"
+                        rr_model = float(adj.loc[lv, "adj_rr"])
+                        rows.append(
+                            {
+                                "outcome": outcome,
+                                "speeding_type": lv,
+                                "se_fatal": se_f,
+                                "se_nonfatal": se_n,
+                                "specificity": sp,
+                                "crude_rr_observed": rr_obs,
+                                "crude_rr_corrected": rr if ok else np.nan,
+                                "bias_factor": rr / rr_obs if ok else np.nan,
+                                "adj_rr_model_A": rr_model,
+                                "adj_rr_bias_corrected": rr_model * rr / rr_obs if ok else np.nan,
+                                "status": status,
+                            }
+                        )
+    return pd.DataFrame(rows)
+
+
+INTERSTATE_BANDS: dict[str, tuple[str, ...]] = {
+    "<=25 mph": ("<=25",),
+    "30-35 mph": ("30-35",),
+    "40-45 mph": ("40-45",),
+    "50-55 mph": ("50-55",),
+    "60-65 mph": ("60-65",),
+    "50-65 mph": ("50-55", "60-65"),
+    "70+ mph": ("70+",),
+}
+
+
+def interstate_by_speed_band(outcome: str = "fatal") -> pd.DataFrame:
+    """Interstate vs other roads within posted speed-limit bands (model A with interstate x
+    speed-limit interaction; margins standardised over the crashes of each band).
+
+    The published interstate RR is one number averaged over bands.  Rows give the RR within each
+    band, and the ratio of the 70+ mph RR to the 50-65 mph RR (``ratio_of_rr``) with its CI.
+    The model also contains the interaction of the speed-limit band with the (unknown) interstate
+    level; the band is the posted limit of the crash's road.
+    """
+    df, design = load(outcome)
+    model = fit(df, design, outcome, specs.PRE_CRASH, interactions=[("interstate", "speed_limit")])
+    doms = {}
+    scen = {
+        "yes": lambda d: d.assign(interstate="yes"),
+        "no": lambda d: d.assign(interstate="no"),
+    }
+    values, infl = {}, {}
+    for band, lvls in INTERSTATE_BANDS.items():
+        dom = df["speed_limit"].isin(lvls).to_numpy()
+        doms[band] = dom
+        for k, setter in scen.items():
+            m, z = model.margin_influence(df, setter, dom)
+            values[f"{band}|{k}"], infl[f"{band}|{k}"] = m, z
+    ms_all = MarginSet(values, infl, design)
+    rows = []
+    for band in INTERSTATE_BANDS:
+        rr = ms_all.log_ratio(f"{band}|yes", f"{band}|no")
+        rd = ms_all.difference(f"{band}|yes", f"{band}|no")
+        dom = doms[band]
+        inter = (df["interstate"] == "yes").to_numpy()
+        rows.append(
+            {
+                "outcome": outcome,
+                "speed_limit_band": band,
+                "quantity": "RR interstate vs not",
+                "n_crashes": int(dom.sum()),
+                "n_interstate_crashes": int((dom & inter).sum()),
+                "n_events": int(df.loc[dom, outcome].sum()),
+                "adj_rate_interstate": values[f"{band}|yes"],
+                "adj_rate_other": values[f"{band}|no"],
+                "estimate": float(np.exp(rr.estimate)),
+                "low": float(np.exp(rr.ci()[0])),
+                "high": float(np.exp(rr.ci()[1])),
+                "rd": rd.estimate,
+                "rd_low": rd.ci()[0],
+                "rd_high": rd.ci()[1],
+            }
+        )
+    hi, lo = "70+ mph", "50-65 mph"
+    ror = ms_all.contrast(
+        lambda m: float(np.log((m[f"{hi}|yes"] / m[f"{hi}|no"]) / (m[f"{lo}|yes"] / m[f"{lo}|no"])))
+    )
+    # Wald test of the interaction terms (heterogeneity across all bands).
+    terms = [n for n in model.names_ if "interstate" in n and "speed_limit" in n]
+    wt = model.wald_test(terms) if terms else {}
+    rows.append(
+        {
+            "outcome": outcome,
+            "speed_limit_band": f"{hi} vs {lo}",
+            "quantity": "ratio of RRs",
+            "estimate": float(np.exp(ror.estimate)),
+            "low": float(np.exp(ror.ci()[0])),
+            "high": float(np.exp(ror.ci()[1])),
+            "interaction_wald_p": float(wt.get("p", np.nan)) if wt else np.nan,
+        }
+    )
+    return pd.DataFrame(rows)
+
+
+KEY_CONTRASTS = (
+    ("young_driver", "yes", "Driver aged 15-20 involved vs not"),
+    ("weather", "rain", "Rain vs clear weather"),
+    ("surface", "wet", "Wet vs dry surface"),
+    ("interstate", "yes", "Interstate vs other roads (averaged over speed limits)"),
+)
+
+
+def key_contrasts_side_by_side(results: dict[str, pd.DataFrame]) -> pd.DataFrame:
+    """Selected contrasts with model A and B and the fatal and KA outcomes in one table
+    (read from the crude-vs-adjusted results; nothing is re-estimated)."""
+    rows = []
+    for factor, level, label in KEY_CONTRASTS:
+        for oc in ("fatal", "ka"):
+            res = results[oc]
+            r = res[(res["factor"] == factor) & (res["level"].astype(str) == level)].iloc[0]
+            for m in ("A", "B"):
+                rows.append(
+                    {
+                        "factor": factor,
+                        "level": level,
+                        "label": label,
+                        "outcome": oc,
+                        "model": m,
+                        "adj_rr": r[f"{m}_adj_rr"],
+                        "low": r[f"{m}_adj_rr_low"],
+                        "high": r[f"{m}_adj_rr_high"],
+                        "adj_rd": r[f"{m}_adj_rd"],
+                        "rd_low": r[f"{m}_adj_rd_low"],
+                        "rd_high": r[f"{m}_adj_rd_high"],
+                        "crude_rr": r["crude_rr"],
+                        "n_events": int(r["n_events"]),
+                    }
+                )
+    return pd.DataFrame(rows)
+
+
+def run_additional(results: dict[str, pd.DataFrame] | None = None) -> dict[str, pd.DataFrame]:
+    """Tables added after the red-team review; they never alter the tables of ``run``."""
+    out: dict[str, pd.DataFrame] = {}
+    common = dict(
+        population="CRSS police-reported crashes 2016-2024 with known maximum severity",
+        unit="crash",
+        inputs=["data/processed/crss_crash.parquet"],
+    )
+    out["speeding_type_models"] = pd.concat(
+        [speeding_type_models(oc) for oc in ("fatal", "ka")], ignore_index=True
+    )
+    save_table(
+        out["speeding_type_models"],
+        MODULE,
+        "speeding_type_models",
+        description="Adjusted risk ratios by speeding type under model A and model B for fatal and "
+        "fatal-or-serious (KA) crashes, with 95% and 90% intervals and the symmetric equivalence "
+        "bound implied by the 90% interval",
+        outcome="fatal; ka",
+        method="Model A (published) and model B (A + crash type + vehicles) with the speeding "
+        "indicator replaced by speeding type; standardised margins; linearised CIs (t, 42 df); "
+        "the 90% interval gives two one-sided 5% tests",
+        **common,
+    )
+    out["speeding_type_qba"] = speeding_type_qba(out["speeding_type_models"])
+    save_table(
+        out["speeding_type_qba"],
+        MODULE,
+        "speeding_type_qba",
+        description="Bias analysis of outcome-dependent recording for each speeding type; "
+        "'status' says why a row is blank",
+        outcome="fatal; ka",
+        method="Matrix-method correction (measurement.corrected_rr) of the crude RR of type vs no "
+        "speeding for sensitivities and specificity on the measurement-module grid; the bias "
+        "factor multiplies the model-A adjusted RR",
+        **common,
+    )
+    out["interstate_by_speed_band"] = pd.concat(
+        [interstate_by_speed_band(oc) for oc in ("fatal", "ka")], ignore_index=True
+    )
+    save_table(
+        out["interstate_by_speed_band"],
+        MODULE,
+        "interstate_by_speed_band",
+        description="Interstate vs other roads within posted speed-limit bands, and the ratio of "
+        "the 70+ mph to the 50-65 mph risk ratio",
+        outcome="fatal; ka",
+        method="Model A plus interstate x speed-limit interaction; margins standardised within "
+        "each band (domain of the full design); linearised CIs (t, 42 df)",
+        **common,
+    )
+    if results is not None and all(k in results for k in ("fatal", "ka")):
+        out["key_contrasts_ab"] = key_contrasts_side_by_side(results)
+        save_table(
+            out["key_contrasts_ab"],
+            MODULE,
+            "key_contrasts_ab",
+            description="Teen-driver, rain, wet-surface and interstate contrasts under model A and "
+            "model B for fatal and KA, side by side",
+            outcome="fatal; ka",
+            method="Copied from the fatal and ka crude-vs-adjusted tables (models A and B)",
+            **common,
+        )
+    return out
+
+
 def run(outcomes: Sequence[str] = ("fatal", "ka", "fatal_cc", "ka_cc")) -> dict[str, pd.DataFrame]:
     out = {}
     for oc in outcomes:
@@ -411,4 +762,5 @@ def run(outcomes: Sequence[str] = ("fatal", "ka", "fatal_cc", "ka_cc")) -> dict[
             inputs=["data/processed/crss_crash.parquet"],
         )
         out["fatal_excluding_hit_and_run"] = hr
+    out.update(run_additional(out))
     return out

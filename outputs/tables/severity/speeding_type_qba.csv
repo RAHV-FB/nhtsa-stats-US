@@ -1,0 +1,257 @@
+outcome,speeding_type,se_fatal,se_nonfatal,specificity,crude_rr_observed,crude_rr_corrected,bias_factor,adj_rr_model_A,adj_rr_bias_corrected,status
+fatal,exceeded_limit_or_racing,0.7,0.3,1,10.0315,4.51923,0.450505,5.21631,2.34997,ok
+fatal,exceeded_limit_or_racing,0.7,0.3,0.99,10.0315,,,5.21631,,infeasible: corrected count not positive (exposed non-fatal); recorded exposure share among non-fatal crashes 0.0094 < assumed false-positive rate 0.01
+fatal,exceeded_limit_or_racing,0.7,0.4,1,10.0315,6.03007,0.601116,5.21631,3.1356,ok
+fatal,exceeded_limit_or_racing,0.7,0.4,0.99,10.0315,,,5.21631,,infeasible: corrected count not positive (exposed non-fatal); recorded exposure share among non-fatal crashes 0.0094 < assumed false-positive rate 0.01
+fatal,exceeded_limit_or_racing,0.7,0.5,1,10.0315,7.51918,0.749559,5.21631,3.90993,ok
+fatal,exceeded_limit_or_racing,0.7,0.5,0.99,10.0315,,,5.21631,,infeasible: corrected count not positive (exposed non-fatal); recorded exposure share among non-fatal crashes 0.0094 < assumed false-positive rate 0.01
+fatal,exceeded_limit_or_racing,0.7,0.6,1,10.0315,8.98702,0.895883,5.21631,4.6732,ok
+fatal,exceeded_limit_or_racing,0.7,0.6,0.99,10.0315,,,5.21631,,infeasible: corrected count not positive (exposed non-fatal); recorded exposure share among non-fatal crashes 0.0094 < assumed false-positive rate 0.01
+fatal,exceeded_limit_or_racing,0.7,0.7,1,10.0315,10.434,1.04013,5.21631,5.42565,ok
+fatal,exceeded_limit_or_racing,0.7,0.7,0.99,10.0315,,,5.21631,,infeasible: corrected count not positive (exposed non-fatal); recorded exposure share among non-fatal crashes 0.0094 < assumed false-positive rate 0.01
+fatal,exceeded_limit_or_racing,0.7,0.8,1,10.0315,11.8607,1.18235,5.21631,6.16749,ok
+fatal,exceeded_limit_or_racing,0.7,0.8,0.99,10.0315,,,5.21631,,infeasible: corrected count not positive (exposed non-fatal); recorded exposure share among non-fatal crashes 0.0094 < assumed false-positive rate 0.01
+fatal,exceeded_limit_or_racing,0.7,0.9,1,10.0315,13.2674,1.32258,5.21631,6.89897,ok
+fatal,exceeded_limit_or_racing,0.7,0.9,0.99,10.0315,,,5.21631,,infeasible: corrected count not positive (exposed non-fatal); recorded exposure share among non-fatal crashes 0.0094 < assumed false-positive rate 0.01
+fatal,exceeded_limit_or_racing,0.7,1,1,10.0315,14.6545,1.46086,5.21631,7.62028,ok
+fatal,exceeded_limit_or_racing,0.7,1,0.99,10.0315,,,5.21631,,infeasible: corrected count not positive (exposed non-fatal); recorded exposure share among non-fatal crashes 0.0094 < assumed false-positive rate 0.01
+fatal,exceeded_limit_or_racing,0.8,0.3,1,10.0315,3.89322,0.388101,5.21631,2.02445,ok
+fatal,exceeded_limit_or_racing,0.8,0.3,0.99,10.0315,,,5.21631,,infeasible: corrected count not positive (exposed non-fatal); recorded exposure share among non-fatal crashes 0.0094 < assumed false-positive rate 0.01
+fatal,exceeded_limit_or_racing,0.8,0.4,1,10.0315,5.1994,0.518309,5.21631,2.70366,ok
+fatal,exceeded_limit_or_racing,0.8,0.4,0.99,10.0315,,,5.21631,,infeasible: corrected count not positive (exposed non-fatal); recorded exposure share among non-fatal crashes 0.0094 < assumed false-positive rate 0.01
+fatal,exceeded_limit_or_racing,0.8,0.5,1,10.0315,6.48906,0.646871,5.21631,3.37428,ok
+fatal,exceeded_limit_or_racing,0.8,0.5,0.99,10.0315,,,5.21631,,infeasible: corrected count not positive (exposed non-fatal); recorded exposure share among non-fatal crashes 0.0094 < assumed false-positive rate 0.01
+fatal,exceeded_limit_or_racing,0.8,0.6,1,10.0315,7.76252,0.773817,5.21631,4.03647,ok
+fatal,exceeded_limit_or_racing,0.8,0.6,0.99,10.0315,,,5.21631,,infeasible: corrected count not positive (exposed non-fatal); recorded exposure share among non-fatal crashes 0.0094 < assumed false-positive rate 0.01
+fatal,exceeded_limit_or_racing,0.8,0.7,1,10.0315,9.02007,0.899178,5.21631,4.69039,ok
+fatal,exceeded_limit_or_racing,0.8,0.7,0.99,10.0315,,,5.21631,,infeasible: corrected count not positive (exposed non-fatal); recorded exposure share among non-fatal crashes 0.0094 < assumed false-positive rate 0.01
+fatal,exceeded_limit_or_racing,0.8,0.8,1,10.0315,10.262,1.02298,5.21631,5.33619,ok
+fatal,exceeded_limit_or_racing,0.8,0.8,0.99,10.0315,,,5.21631,,infeasible: corrected count not positive (exposed non-fatal); recorded exposure share among non-fatal crashes 0.0094 < assumed false-positive rate 0.01
+fatal,exceeded_limit_or_racing,0.8,0.9,1,10.0315,11.4887,1.14526,5.21631,5.97404,ok
+fatal,exceeded_limit_or_racing,0.8,0.9,0.99,10.0315,,,5.21631,,infeasible: corrected count not positive (exposed non-fatal); recorded exposure share among non-fatal crashes 0.0094 < assumed false-positive rate 0.01
+fatal,exceeded_limit_or_racing,0.8,1,1,10.0315,12.7003,1.26604,5.21631,6.60406,ok
+fatal,exceeded_limit_or_racing,0.8,1,0.99,10.0315,,,5.21631,,infeasible: corrected count not positive (exposed non-fatal); recorded exposure share among non-fatal crashes 0.0094 < assumed false-positive rate 0.01
+fatal,exceeded_limit_or_racing,0.9,0.3,1,10.0315,3.41979,0.340906,5.21631,1.77827,ok
+fatal,exceeded_limit_or_racing,0.9,0.3,0.99,10.0315,,,5.21631,,infeasible: corrected count not positive (exposed non-fatal); recorded exposure share among non-fatal crashes 0.0094 < assumed false-positive rate 0.01
+fatal,exceeded_limit_or_racing,0.9,0.4,1,10.0315,4.5703,0.455596,5.21631,2.37653,ok
+fatal,exceeded_limit_or_racing,0.9,0.4,0.99,10.0315,,,5.21631,,infeasible: corrected count not positive (exposed non-fatal); recorded exposure share among non-fatal crashes 0.0094 < assumed false-positive rate 0.01
+fatal,exceeded_limit_or_racing,0.9,0.5,1,10.0315,5.70784,0.568993,5.21631,2.96804,ok
+fatal,exceeded_limit_or_racing,0.9,0.5,0.99,10.0315,,,5.21631,,infeasible: corrected count not positive (exposed non-fatal); recorded exposure share among non-fatal crashes 0.0094 < assumed false-positive rate 0.01
+fatal,exceeded_limit_or_racing,0.9,0.6,1,10.0315,6.83261,0.681118,5.21631,3.55292,ok
+fatal,exceeded_limit_or_racing,0.9,0.6,0.99,10.0315,,,5.21631,,infeasible: corrected count not positive (exposed non-fatal); recorded exposure share among non-fatal crashes 0.0094 < assumed false-positive rate 0.01
+fatal,exceeded_limit_or_racing,0.9,0.7,1,10.0315,7.94484,0.791992,5.21631,4.13128,ok
+fatal,exceeded_limit_or_racing,0.9,0.7,0.99,10.0315,,,5.21631,,infeasible: corrected count not positive (exposed non-fatal); recorded exposure share among non-fatal crashes 0.0094 < assumed false-positive rate 0.01
+fatal,exceeded_limit_or_racing,0.9,0.8,1,10.0315,9.04474,0.901637,5.21631,4.70321,ok
+fatal,exceeded_limit_or_racing,0.9,0.8,0.99,10.0315,,,5.21631,,infeasible: corrected count not positive (exposed non-fatal); recorded exposure share among non-fatal crashes 0.0094 < assumed false-positive rate 0.01
+fatal,exceeded_limit_or_racing,0.9,0.9,1,10.0315,10.1325,1.01007,5.21631,5.26885,ok
+fatal,exceeded_limit_or_racing,0.9,0.9,0.99,10.0315,,,5.21631,,infeasible: corrected count not positive (exposed non-fatal); recorded exposure share among non-fatal crashes 0.0094 < assumed false-positive rate 0.01
+fatal,exceeded_limit_or_racing,0.9,1,1,10.0315,11.2083,1.11732,5.21631,5.82827,ok
+fatal,exceeded_limit_or_racing,0.9,1,0.99,10.0315,,,5.21631,,infeasible: corrected count not positive (exposed non-fatal); recorded exposure share among non-fatal crashes 0.0094 < assumed false-positive rate 0.01
+fatal,exceeded_limit_or_racing,1,0.3,1,10.0315,3.04915,0.303958,5.21631,1.58554,ok
+fatal,exceeded_limit_or_racing,1,0.3,0.99,10.0315,,,5.21631,,infeasible: corrected count not positive (exposed non-fatal); recorded exposure share among non-fatal crashes 0.0094 < assumed false-positive rate 0.01
+fatal,exceeded_limit_or_racing,1,0.4,1,10.0315,4.07724,0.406445,5.21631,2.12014,ok
+fatal,exceeded_limit_or_racing,1,0.4,0.99,10.0315,,,5.21631,,infeasible: corrected count not positive (exposed non-fatal); recorded exposure share among non-fatal crashes 0.0094 < assumed false-positive rate 0.01
+fatal,exceeded_limit_or_racing,1,0.5,1,10.0315,5.09487,0.507889,5.21631,2.6493,ok
+fatal,exceeded_limit_or_racing,1,0.5,0.99,10.0315,,,5.21631,,infeasible: corrected count not positive (exposed non-fatal); recorded exposure share among non-fatal crashes 0.0094 < assumed false-positive rate 0.01
+fatal,exceeded_limit_or_racing,1,0.6,1,10.0315,6.10219,0.608305,5.21631,3.1731,ok
+fatal,exceeded_limit_or_racing,1,0.6,0.99,10.0315,,,5.21631,,infeasible: corrected count not positive (exposed non-fatal); recorded exposure share among non-fatal crashes 0.0094 < assumed false-positive rate 0.01
+fatal,exceeded_limit_or_racing,1,0.7,1,10.0315,7.09936,0.707709,5.21631,3.69163,ok
+fatal,exceeded_limit_or_racing,1,0.7,0.99,10.0315,,,5.21631,,infeasible: corrected count not positive (exposed non-fatal); recorded exposure share among non-fatal crashes 0.0094 < assumed false-positive rate 0.01
+fatal,exceeded_limit_or_racing,1,0.8,1,10.0315,8.08653,0.806116,5.21631,4.20495,ok
+fatal,exceeded_limit_or_racing,1,0.8,0.99,10.0315,,,5.21631,,infeasible: corrected count not positive (exposed non-fatal); recorded exposure share among non-fatal crashes 0.0094 < assumed false-positive rate 0.01
+fatal,exceeded_limit_or_racing,1,0.9,1,10.0315,9.06385,0.903542,5.21631,4.71315,ok
+fatal,exceeded_limit_or_racing,1,0.9,0.99,10.0315,,,5.21631,,infeasible: corrected count not positive (exposed non-fatal); recorded exposure share among non-fatal crashes 0.0094 < assumed false-positive rate 0.01
+fatal,exceeded_limit_or_racing,1,1,1,10.0315,10.0315,1,5.21631,5.21631,ok
+fatal,exceeded_limit_or_racing,1,1,0.99,10.0315,,,5.21631,,infeasible: corrected count not positive (exposed non-fatal); recorded exposure share among non-fatal crashes 0.0094 < assumed false-positive rate 0.01
+fatal,too_fast_for_conditions,0.7,0.3,1,1.34002,0.47827,0.356911,1.05779,0.377538,ok
+fatal,too_fast_for_conditions,0.7,0.3,0.99,1.34002,0.493199,0.368052,1.05779,0.389322,ok
+fatal,too_fast_for_conditions,0.7,0.4,1,1.34002,0.699098,0.521706,1.05779,0.551856,ok
+fatal,too_fast_for_conditions,0.7,0.4,0.99,1.34002,0.720929,0.537997,1.05779,0.569089,ok
+fatal,too_fast_for_conditions,0.7,0.5,1,1.34002,0.919507,0.686187,1.05779,0.725843,ok
+fatal,too_fast_for_conditions,0.7,0.5,0.99,1.34002,0.948207,0.707605,1.05779,0.748498,ok
+fatal,too_fast_for_conditions,0.7,0.6,1,1.34002,1.1395,0.850357,1.05779,0.8995,ok
+fatal,too_fast_for_conditions,0.7,0.6,0.99,1.34002,1.17503,0.876876,1.05779,0.927551,ok
+fatal,too_fast_for_conditions,0.7,0.7,1,1.34002,1.35907,1.01422,1.05779,1.07283,ok
+fatal,too_fast_for_conditions,0.7,0.7,0.99,1.34002,1.40141,1.04581,1.05779,1.10625,ok
+fatal,too_fast_for_conditions,0.7,0.8,1,1.34002,1.57823,1.17776,1.05779,1.24583,ok
+fatal,too_fast_for_conditions,0.7,0.8,0.99,1.34002,1.62734,1.21441,1.05779,1.28459,ok
+fatal,too_fast_for_conditions,0.7,0.9,1,1.34002,1.79698,1.341,1.05779,1.4185,ok
+fatal,too_fast_for_conditions,0.7,0.9,0.99,1.34002,1.85282,1.38268,1.05779,1.46259,ok
+fatal,too_fast_for_conditions,0.7,1,1,1.34002,2.01531,1.50393,1.05779,1.59085,ok
+fatal,too_fast_for_conditions,0.7,1,0.99,1.34002,2.07786,1.55061,1.05779,1.64023,ok
+fatal,too_fast_for_conditions,0.8,0.3,1,1.34002,0.409143,0.305325,1.05779,0.32297,ok
+fatal,too_fast_for_conditions,0.8,0.3,0.99,1.34002,0.421912,0.314854,1.05779,0.33305,ok
+fatal,too_fast_for_conditions,0.8,0.4,1,1.34002,0.598117,0.446348,1.05779,0.472143,ok
+fatal,too_fast_for_conditions,0.8,0.4,0.99,1.34002,0.616798,0.460289,1.05779,0.486889,ok
+fatal,too_fast_for_conditions,0.8,0.5,1,1.34002,0.786778,0.587137,1.05779,0.621068,ok
+fatal,too_fast_for_conditions,0.8,0.5,0.99,1.34002,0.811345,0.605471,1.05779,0.640461,ok
+fatal,too_fast_for_conditions,0.8,0.6,1,1.34002,0.975125,0.727692,1.05779,0.769746,ok
+fatal,too_fast_for_conditions,0.8,0.6,0.99,1.34002,1.00555,0.750401,1.05779,0.793767,ok
+fatal,too_fast_for_conditions,0.8,0.7,1,1.34002,1.16316,0.868014,1.05779,0.918177,ok
+fatal,too_fast_for_conditions,0.8,0.7,0.99,1.34002,1.19943,0.89508,1.05779,0.946808,ok
+fatal,too_fast_for_conditions,0.8,0.8,1,1.34002,1.35088,1.0081,1.05779,1.06636,ok
+fatal,too_fast_for_conditions,0.8,0.8,0.99,1.34002,1.39297,1.03951,1.05779,1.09958,ok
+fatal,too_fast_for_conditions,0.8,0.9,1,1.34002,1.53829,1.14796,1.05779,1.2143,ok
+fatal,too_fast_for_conditions,0.8,0.9,0.99,1.34002,1.58617,1.18369,1.05779,1.25209,ok
+fatal,too_fast_for_conditions,0.8,1,1,1.34002,1.7254,1.28759,1.05779,1.362,ok
+fatal,too_fast_for_conditions,0.8,1,0.99,1.34002,1.77904,1.32762,1.05779,1.40434,ok
+fatal,too_fast_for_conditions,0.9,0.3,1,1.34002,0.357481,0.266772,1.05779,0.282189,ok
+fatal,too_fast_for_conditions,0.9,0.3,0.99,1.34002,0.368636,0.275097,1.05779,0.290995,ok
+fatal,too_fast_for_conditions,0.9,0.4,1,1.34002,0.522637,0.39002,1.05779,0.41256,ok
+fatal,too_fast_for_conditions,0.9,0.4,0.99,1.34002,0.538961,0.402202,1.05779,0.425446,ok
+fatal,too_fast_for_conditions,0.9,0.5,1,1.34002,0.687548,0.513087,1.05779,0.542739,ok
+fatal,too_fast_for_conditions,0.9,0.5,0.99,1.34002,0.709023,0.529112,1.05779,0.55969,ok
+fatal,too_fast_for_conditions,0.9,0.6,1,1.34002,0.852217,0.635971,1.05779,0.672725,ok
+fatal,too_fast_for_conditions,0.9,0.6,0.99,1.34002,0.878823,0.655827,1.05779,0.693728,ok
+fatal,too_fast_for_conditions,0.9,0.7,1,1.34002,1.01664,0.758675,1.05779,0.802519,ok
+fatal,too_fast_for_conditions,0.9,0.7,0.99,1.34002,1.04836,0.782346,1.05779,0.827559,ok
+fatal,too_fast_for_conditions,0.9,0.8,1,1.34002,1.18082,0.881197,1.05779,0.932122,ok
+fatal,too_fast_for_conditions,0.9,0.8,0.99,1.34002,1.21764,0.908671,1.05779,0.961184,ok
+fatal,too_fast_for_conditions,0.9,0.9,1,1.34002,1.34477,1.00354,1.05779,1.06153,ok
+fatal,too_fast_for_conditions,0.9,0.9,0.99,1.34002,1.38666,1.0348,1.05779,1.0946,ok
+fatal,too_fast_for_conditions,0.9,1,1,1.34002,1.50846,1.1257,1.05779,1.19076,ok
+fatal,too_fast_for_conditions,0.9,1,0.99,1.34002,1.55542,1.16074,1.05779,1.22782,ok
+fatal,too_fast_for_conditions,1,0.3,1,1.34002,0.317406,0.236866,1.05779,0.250554,ok
+fatal,too_fast_for_conditions,1,0.3,0.99,1.34002,0.327309,0.244256,1.05779,0.258372,ok
+fatal,too_fast_for_conditions,1,0.4,1,1.34002,0.464077,0.34632,1.05779,0.366335,ok
+fatal,too_fast_for_conditions,1,0.4,0.99,1.34002,0.478573,0.357137,1.05779,0.377777,ok
+fatal,too_fast_for_conditions,1,0.5,1,1.34002,0.610554,0.455629,1.05779,0.481961,ok
+fatal,too_fast_for_conditions,1,0.5,0.99,1.34002,0.629627,0.469863,1.05779,0.497016,ok
+fatal,too_fast_for_conditions,1,0.6,1,1.34002,0.756836,0.564793,1.05779,0.597433,ok
+fatal,too_fast_for_conditions,1,0.6,0.99,1.34002,0.780472,0.582432,1.05779,0.616091,ok
+fatal,too_fast_for_conditions,1,0.7,1,1.34002,0.902923,0.673812,1.05779,0.712752,ok
+fatal,too_fast_for_conditions,1,0.7,0.99,1.34002,0.931108,0.694845,1.05779,0.735001,ok
+fatal,too_fast_for_conditions,1,0.8,1,1.34002,1.04882,0.782685,1.05779,0.827918,ok
+fatal,too_fast_for_conditions,1,0.8,0.99,1.34002,1.08154,0.807103,1.05779,0.853746,ok
+fatal,too_fast_for_conditions,1,0.9,1,1.34002,1.19452,0.891415,1.05779,0.942931,ok
+fatal,too_fast_for_conditions,1,0.9,0.99,1.34002,1.23176,0.919205,1.05779,0.972327,ok
+fatal,too_fast_for_conditions,1,1,1,1.34002,1.34002,1,1.05779,1.05779,ok
+fatal,too_fast_for_conditions,1,1,0.99,1.34002,1.38177,1.03115,1.05779,1.09074,ok
+ka,exceeded_limit_or_racing,0.7,0.3,1,5.09452,2.39045,0.46922,3.38992,1.59062,ok
+ka,exceeded_limit_or_racing,0.7,0.3,0.99,5.09452,,,3.38992,,infeasible: corrected count not positive (exposed non-fatal); recorded exposure share among non-fatal crashes 0.0086 < assumed false-positive rate 0.01
+ka,exceeded_limit_or_racing,0.7,0.4,1,5.09452,3.13695,0.615749,3.38992,2.08734,ok
+ka,exceeded_limit_or_racing,0.7,0.4,0.99,5.09452,,,3.38992,,infeasible: corrected count not positive (exposed non-fatal); recorded exposure share among non-fatal crashes 0.0086 < assumed false-positive rate 0.01
+ka,exceeded_limit_or_racing,0.7,0.5,1,5.09452,3.85015,0.755744,3.38992,2.56191,ok
+ka,exceeded_limit_or_racing,0.7,0.5,0.99,5.09452,,,3.38992,,infeasible: corrected count not positive (exposed non-fatal); recorded exposure share among non-fatal crashes 0.0086 < assumed false-positive rate 0.01
+ka,exceeded_limit_or_racing,0.7,0.6,1,5.09452,4.53225,0.889632,3.38992,3.01578,ok
+ka,exceeded_limit_or_racing,0.7,0.6,0.99,5.09452,,,3.38992,,infeasible: corrected count not positive (exposed non-fatal); recorded exposure share among non-fatal crashes 0.0086 < assumed false-positive rate 0.01
+ka,exceeded_limit_or_racing,0.7,0.7,1,5.09452,5.18522,1.0178,3.38992,3.45028,ok
+ka,exceeded_limit_or_racing,0.7,0.7,0.99,5.09452,,,3.38992,,infeasible: corrected count not positive (exposed non-fatal); recorded exposure share among non-fatal crashes 0.0086 < assumed false-positive rate 0.01
+ka,exceeded_limit_or_racing,0.7,0.8,1,5.09452,5.8109,1.14062,3.38992,3.86661,ok
+ka,exceeded_limit_or_racing,0.7,0.8,0.99,5.09452,,,3.38992,,infeasible: corrected count not positive (exposed non-fatal); recorded exposure share among non-fatal crashes 0.0086 < assumed false-positive rate 0.01
+ka,exceeded_limit_or_racing,0.7,0.9,1,5.09452,6.41097,1.2584,3.38992,4.26589,ok
+ka,exceeded_limit_or_racing,0.7,0.9,0.99,5.09452,,,3.38992,,infeasible: corrected count not positive (exposed non-fatal); recorded exposure share among non-fatal crashes 0.0086 < assumed false-positive rate 0.01
+ka,exceeded_limit_or_racing,0.7,1,1,5.09452,6.98695,1.37146,3.38992,4.64916,ok
+ka,exceeded_limit_or_racing,0.7,1,0.99,5.09452,,,3.38992,,infeasible: corrected count not positive (exposed non-fatal); recorded exposure share among non-fatal crashes 0.0086 < assumed false-positive rate 0.01
+ka,exceeded_limit_or_racing,0.8,0.3,1,5.09452,2.09138,0.410516,3.38992,1.39162,ok
+ka,exceeded_limit_or_racing,0.8,0.3,0.99,5.09452,,,3.38992,,infeasible: corrected count not positive (exposed non-fatal); recorded exposure share among non-fatal crashes 0.0086 < assumed false-positive rate 0.01
+ka,exceeded_limit_or_racing,0.8,0.4,1,5.09452,2.75184,0.540156,3.38992,1.83109,ok
+ka,exceeded_limit_or_racing,0.8,0.4,0.99,5.09452,,,3.38992,,infeasible: corrected count not positive (exposed non-fatal); recorded exposure share among non-fatal crashes 0.0086 < assumed false-positive rate 0.01
+ka,exceeded_limit_or_racing,0.8,0.5,1,5.09452,3.38616,0.664666,3.38992,2.25317,ok
+ka,exceeded_limit_or_racing,0.8,0.5,0.99,5.09452,,,3.38992,,infeasible: corrected count not positive (exposed non-fatal); recorded exposure share among non-fatal crashes 0.0086 < assumed false-positive rate 0.01
+ka,exceeded_limit_or_racing,0.8,0.6,1,5.09452,3.99586,0.784345,3.38992,2.65887,ok
+ka,exceeded_limit_or_racing,0.8,0.6,0.99,5.09452,,,3.38992,,infeasible: corrected count not positive (exposed non-fatal); recorded exposure share among non-fatal crashes 0.0086 < assumed false-positive rate 0.01
+ka,exceeded_limit_or_racing,0.8,0.7,1,5.09452,4.58236,0.899468,3.38992,3.04913,ok
+ka,exceeded_limit_or_racing,0.8,0.7,0.99,5.09452,,,3.38992,,infeasible: corrected count not positive (exposed non-fatal); recorded exposure share among non-fatal crashes 0.0086 < assumed false-positive rate 0.01
+ka,exceeded_limit_or_racing,0.8,0.8,1,5.09452,5.14695,1.01029,3.38992,3.42481,ok
+ka,exceeded_limit_or_racing,0.8,0.8,0.99,5.09452,,,3.38992,,infeasible: corrected count not positive (exposed non-fatal); recorded exposure share among non-fatal crashes 0.0086 < assumed false-positive rate 0.01
+ka,exceeded_limit_or_racing,0.8,0.9,1,5.09452,5.69083,1.11705,3.38992,3.78671,ok
+ka,exceeded_limit_or_racing,0.8,0.9,0.99,5.09452,,,3.38992,,infeasible: corrected count not positive (exposed non-fatal); recorded exposure share among non-fatal crashes 0.0086 < assumed false-positive rate 0.01
+ka,exceeded_limit_or_racing,0.8,1,1,5.09452,6.21513,1.21996,3.38992,4.13558,ok
+ka,exceeded_limit_or_racing,0.8,1,0.99,5.09452,,,3.38992,,infeasible: corrected count not positive (exposed non-fatal); recorded exposure share among non-fatal crashes 0.0086 < assumed false-positive rate 0.01
+ka,exceeded_limit_or_racing,0.9,0.3,1,5.09452,1.85903,0.364907,3.38992,1.23701,ok
+ka,exceeded_limit_or_racing,0.9,0.3,0.99,5.09452,,,3.38992,,infeasible: corrected count not positive (exposed non-fatal); recorded exposure share among non-fatal crashes 0.0086 < assumed false-positive rate 0.01
+ka,exceeded_limit_or_racing,0.9,0.4,1,5.09452,2.4513,0.481164,3.38992,1.63111,ok
+ka,exceeded_limit_or_racing,0.9,0.4,0.99,5.09452,,,3.38992,,infeasible: corrected count not positive (exposed non-fatal); recorded exposure share among non-fatal crashes 0.0086 < assumed false-positive rate 0.01
+ka,exceeded_limit_or_racing,0.9,0.5,1,5.09452,3.0225,0.593285,3.38992,2.01119,ok
+ka,exceeded_limit_or_racing,0.9,0.5,0.99,5.09452,,,3.38992,,infeasible: corrected count not positive (exposed non-fatal); recorded exposure share among non-fatal crashes 0.0086 < assumed false-positive rate 0.01
+ka,exceeded_limit_or_racing,0.9,0.6,1,5.09452,3.57375,0.701488,3.38992,2.37799,ok
+ka,exceeded_limit_or_racing,0.9,0.6,0.99,5.09452,,,3.38992,,infeasible: corrected count not positive (exposed non-fatal); recorded exposure share among non-fatal crashes 0.0086 < assumed false-positive rate 0.01
+ka,exceeded_limit_or_racing,0.9,0.7,1,5.09452,4.10606,0.805975,3.38992,2.73219,ok
+ka,exceeded_limit_or_racing,0.9,0.7,0.99,5.09452,,,3.38992,,infeasible: corrected count not positive (exposed non-fatal); recorded exposure share among non-fatal crashes 0.0086 < assumed false-positive rate 0.01
+ka,exceeded_limit_or_racing,0.9,0.8,1,5.09452,4.6204,0.906934,3.38992,3.07444,ok
+ka,exceeded_limit_or_racing,0.9,0.8,0.99,5.09452,,,3.38992,,infeasible: corrected count not positive (exposed non-fatal); recorded exposure share among non-fatal crashes 0.0086 < assumed false-positive rate 0.01
+ka,exceeded_limit_or_racing,0.9,0.9,1,5.09452,5.11766,1.00454,3.38992,3.40532,ok
+ka,exceeded_limit_or_racing,0.9,0.9,0.99,5.09452,,,3.38992,,infeasible: corrected count not positive (exposed non-fatal); recorded exposure share among non-fatal crashes 0.0086 < assumed false-positive rate 0.01
+ka,exceeded_limit_or_racing,0.9,1,1,5.09452,5.59868,1.09896,3.38992,3.72539,ok
+ka,exceeded_limit_or_racing,0.9,1,0.99,5.09452,,,3.38992,,infeasible: corrected count not positive (exposed non-fatal); recorded exposure share among non-fatal crashes 0.0086 < assumed false-positive rate 0.01
+ka,exceeded_limit_or_racing,1,0.3,1,5.09452,1.67326,0.328443,3.38992,1.1134,ok
+ka,exceeded_limit_or_racing,1,0.3,0.99,5.09452,,,3.38992,,infeasible: corrected count not positive (exposed non-fatal); recorded exposure share among non-fatal crashes 0.0086 < assumed false-positive rate 0.01
+ka,exceeded_limit_or_racing,1,0.4,1,5.09452,2.21015,0.433828,3.38992,1.47064,ok
+ka,exceeded_limit_or_racing,1,0.4,0.99,5.09452,,,3.38992,,infeasible: corrected count not positive (exposed non-fatal); recorded exposure share among non-fatal crashes 0.0086 < assumed false-positive rate 0.01
+ka,exceeded_limit_or_racing,1,0.5,1,5.09452,2.72969,0.535809,3.38992,1.81635,ok
+ka,exceeded_limit_or_racing,1,0.5,0.99,5.09452,,,3.38992,,infeasible: corrected count not positive (exposed non-fatal); recorded exposure share among non-fatal crashes 0.0086 < assumed false-positive rate 0.01
+ka,exceeded_limit_or_racing,1,0.6,1,5.09452,3.23272,0.634549,3.38992,2.15107,ok
+ka,exceeded_limit_or_racing,1,0.6,0.99,5.09452,,,3.38992,,infeasible: corrected count not positive (exposed non-fatal); recorded exposure share among non-fatal crashes 0.0086 < assumed false-positive rate 0.01
+ka,exceeded_limit_or_racing,1,0.7,1,5.09452,3.72001,0.730199,3.38992,2.47532,ok
+ka,exceeded_limit_or_racing,1,0.7,0.99,5.09452,,,3.38992,,infeasible: corrected count not positive (exposed non-fatal); recorded exposure share among non-fatal crashes 0.0086 < assumed false-positive rate 0.01
+ka,exceeded_limit_or_racing,1,0.8,1,5.09452,4.1923,0.822903,3.38992,2.78958,ok
+ka,exceeded_limit_or_racing,1,0.8,0.99,5.09452,,,3.38992,,infeasible: corrected count not positive (exposed non-fatal); recorded exposure share among non-fatal crashes 0.0086 < assumed false-positive rate 0.01
+ka,exceeded_limit_or_racing,1,0.9,1,5.09452,4.65025,0.912795,3.38992,3.0943,ok
+ka,exceeded_limit_or_racing,1,0.9,0.99,5.09452,,,3.38992,,infeasible: corrected count not positive (exposed non-fatal); recorded exposure share among non-fatal crashes 0.0086 < assumed false-positive rate 0.01
+ka,exceeded_limit_or_racing,1,1,1,5.09452,5.09452,1,3.38992,3.38992,ok
+ka,exceeded_limit_or_racing,1,1,0.99,5.09452,,,3.38992,,infeasible: corrected count not positive (exposed non-fatal); recorded exposure share among non-fatal crashes 0.0086 < assumed false-positive rate 0.01
+ka,too_fast_for_conditions,0.7,0.3,1,1.29968,0.474934,0.365423,1.18294,0.432275,ok
+ka,too_fast_for_conditions,0.7,0.3,0.99,1.29968,0.488517,0.375875,1.18294,0.444638,ok
+ka,too_fast_for_conditions,0.7,0.4,1,1.29968,0.688676,0.529881,1.18294,0.626819,ok
+ka,too_fast_for_conditions,0.7,0.4,0.99,1.29968,0.708433,0.545082,1.18294,0.644801,ok
+ka,too_fast_for_conditions,0.7,0.5,1,1.29968,0.900065,0.692528,1.18294,0.819221,ok
+ka,too_fast_for_conditions,0.7,0.5,0.99,1.29968,0.925822,0.712346,1.18294,0.842663,ok
+ka,too_fast_for_conditions,0.7,0.6,1,1.29968,1.10914,0.853394,1.18294,1.00952,ok
+ka,too_fast_for_conditions,0.7,0.6,0.99,1.29968,1.14073,0.877698,1.18294,1.03827,ok
+ka,too_fast_for_conditions,0.7,0.7,1,1.29968,1.31594,1.01251,1.18294,1.19774,ok
+ka,too_fast_for_conditions,0.7,0.7,0.99,1.29968,1.35319,1.04117,1.18294,1.23164,ok
+ka,too_fast_for_conditions,0.7,0.8,1,1.29968,1.52049,1.1699,1.18294,1.38392,ok
+ka,too_fast_for_conditions,0.7,0.8,0.99,1.29968,1.56325,1.2028,1.18294,1.42284,ok
+ka,too_fast_for_conditions,0.7,0.9,1,1.29968,1.72285,1.32559,1.18294,1.5681,ok
+ka,too_fast_for_conditions,0.7,0.9,0.99,1.29968,1.77096,1.36261,1.18294,1.61189,ok
+ka,too_fast_for_conditions,0.7,1,1,1.29968,1.92303,1.47962,1.18294,1.7503,ok
+ka,too_fast_for_conditions,0.7,1,0.99,1.29968,1.97634,1.52063,1.18294,1.79882,ok
+ka,too_fast_for_conditions,0.8,0.3,1,1.29968,0.407556,0.313581,1.18294,0.370949,ok
+ka,too_fast_for_conditions,0.8,0.3,0.99,1.29968,0.419198,0.32254,1.18294,0.381546,ok
+ka,too_fast_for_conditions,0.8,0.4,1,1.29968,0.591338,0.454987,1.18294,0.538224,ok
+ka,too_fast_for_conditions,0.8,0.4,0.99,1.29968,0.608314,0.468049,1.18294,0.553674,ok
+ka,too_fast_for_conditions,0.8,0.5,1,1.29968,0.773344,0.595026,1.18294,0.703881,ok
+ka,too_fast_for_conditions,0.8,0.5,0.99,1.29968,0.795524,0.612092,1.18294,0.72407,ok
+ka,too_fast_for_conditions,0.8,0.6,1,1.29968,0.953598,0.733717,1.18294,0.867945,ok
+ka,too_fast_for_conditions,0.8,0.6,0.99,1.29968,0.980858,0.754692,1.18294,0.892757,ok
+ka,too_fast_for_conditions,0.8,0.7,1,1.29968,1.13213,0.871081,1.18294,1.03044,ok
+ka,too_fast_for_conditions,0.8,0.7,0.99,1.29968,1.16434,0.895869,1.18294,1.05976,ok
+ka,too_fast_for_conditions,0.8,0.8,1,1.29968,1.30895,1.00713,1.18294,1.19138,ok
+ka,too_fast_for_conditions,0.8,0.8,0.99,1.29968,1.34601,1.03565,1.18294,1.22511,ok
+ka,too_fast_for_conditions,0.8,0.9,1,1.29968,1.4841,1.1419,1.18294,1.3508,ok
+ka,too_fast_for_conditions,0.8,0.9,0.99,1.29968,1.52588,1.17404,1.18294,1.38882,ok
+ka,too_fast_for_conditions,0.8,1,1,1.29968,1.6576,1.27539,1.18294,1.50871,ok
+ka,too_fast_for_conditions,0.8,1,0.99,1.29968,1.70398,1.31108,1.18294,1.55093,ok
+ka,too_fast_for_conditions,0.9,0.3,1,1.29968,0.35695,0.274644,1.18294,0.324888,ok
+ka,too_fast_for_conditions,0.9,0.3,0.99,1.29968,0.367135,0.282481,1.18294,0.334159,ok
+ka,too_fast_for_conditions,0.9,0.4,1,1.29968,0.518161,0.398683,1.18294,0.471619,ok
+ka,too_fast_for_conditions,0.9,0.4,0.99,1.29968,0.53304,0.410131,1.18294,0.485161,ok
+ka,too_fast_for_conditions,0.9,0.5,1,1.29968,0.677983,0.521654,1.18294,0.617086,ok
+ka,too_fast_for_conditions,0.9,0.5,0.99,1.29968,0.697456,0.536637,1.18294,0.63481,ok
+ka,too_fast_for_conditions,0.9,0.6,1,1.29968,0.836434,0.643569,1.18294,0.761304,ok
+ka,too_fast_for_conditions,0.9,0.6,0.99,1.29968,0.860405,0.662013,1.18294,0.783123,ok
+ka,too_fast_for_conditions,0.9,0.7,1,1.29968,0.993531,0.764442,1.18294,0.904291,ok
+ka,too_fast_for_conditions,0.9,0.7,0.99,1.29968,1.02191,0.786275,1.18294,0.930117,ok
+ka,too_fast_for_conditions,0.9,0.8,1,1.29968,1.14929,0.884287,1.18294,1.04606,ok
+ka,too_fast_for_conditions,0.9,0.8,0.99,1.29968,1.18198,0.909437,1.18294,1.07581,ok
+ka,too_fast_for_conditions,0.9,0.9,1,1.29968,1.30373,1.00312,1.18294,1.18663,ok
+ka,too_fast_for_conditions,0.9,0.9,0.99,1.29968,1.34064,1.03151,1.18294,1.22022,ok
+ka,too_fast_for_conditions,0.9,1,1,1.29968,1.45687,1.12095,1.18294,1.32601,ok
+ka,too_fast_for_conditions,0.9,1,0.99,1.29968,1.49791,1.15252,1.18294,1.36337,ok
+ka,too_fast_for_conditions,1,0.3,1,1.29968,0.31754,0.244322,1.18294,0.289018,ok
+ka,too_fast_for_conditions,1,0.3,0.99,1.29968,0.326591,0.251286,1.18294,0.297256,ok
+ka,too_fast_for_conditions,1,0.4,1,1.29968,0.46113,0.354803,1.18294,0.419711,ok
+ka,too_fast_for_conditions,1,0.4,0.99,1.29968,0.474371,0.36499,1.18294,0.431762,ok
+ka,too_fast_for_conditions,1,0.5,1,1.29968,0.603604,0.464425,1.18294,0.549388,ok
+ka,too_fast_for_conditions,1,0.5,0.99,1.29968,0.620956,0.477776,1.18294,0.565181,ok
+ka,too_fast_for_conditions,1,0.6,1,1.29968,0.744975,0.573198,1.18294,0.67806,ok
+ka,too_fast_for_conditions,1,0.6,0.99,1.29968,0.766363,0.589655,1.18294,0.697527,ok
+ka,too_fast_for_conditions,1,0.7,1,1.29968,0.885256,0.681133,1.18294,0.805741,ok
+ka,too_fast_for_conditions,1,0.7,0.99,1.29968,0.910604,0.700636,1.18294,0.828812,ok
+ka,too_fast_for_conditions,1,0.8,1,1.29968,1.02446,0.788239,1.18294,0.932441,ok
+ka,too_fast_for_conditions,1,0.8,0.99,1.29968,1.05369,0.810732,1.18294,0.959049,ok
+ka,too_fast_for_conditions,1,0.9,1,1.29968,1.1626,0.894524,1.18294,1.05817,ok
+ka,too_fast_for_conditions,1,0.9,0.99,1.29968,1.19565,0.919953,1.18294,1.08825,ok
+ka,too_fast_for_conditions,1,1,1,1.29968,1.29968,1,1.18294,1.18294,ok
+ka,too_fast_for_conditions,1,1,0.99,1.29968,1.33647,1.02831,1.18294,1.21643,ok

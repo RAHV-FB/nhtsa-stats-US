@@ -1,0 +1,32 @@
+{
+ "table": "severity/speeding_type_models.csv",
+ "description": "Adjusted risk ratios by speeding type under model A and model B for fatal and fatal-or-serious (KA) crashes, with 95% and 90% intervals and the symmetric equivalence bound implied by the 90% interval",
+ "population": "CRSS police-reported crashes 2016-2024 with known maximum severity",
+ "unit": "crash",
+ "outcome": "fatal; ka",
+ "method": "Model A (published) and model B (A + crash type + vehicles) with the speeding indicator replaced by speeding type; standardised margins; linearised CIs (t, 42 df); the 90% interval gives two one-sided 5% tests",
+ "inputs": [
+  "data/processed/crss_crash.parquet"
+ ],
+ "rows": 16,
+ "columns": [
+  "outcome",
+  "model",
+  "level",
+  "n",
+  "n_events",
+  "crude_rr",
+  "adj_rr",
+  "adj_rr_low95",
+  "adj_rr_high95",
+  "adj_rr_low90",
+  "adj_rr_high90",
+  "adj_rd",
+  "adj_rd_low95",
+  "adj_rd_high95",
+  "equivalence_bound_pct"
+ ],
+ "module": "nhtsa_stats.analysis.severity",
+ "git_commit": "7ee597e-dirty",
+ "generated_utc": "2026-11-12T12:01:25Z"
+}

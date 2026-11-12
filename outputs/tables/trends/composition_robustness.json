@@ -1,0 +1,43 @@
+{
+ "table": "trends/composition_robustness.csv",
+ "description": "Composition share of the 2016-19 to 2020-24 rise in the fatal share under four covariate specifications (published; without imputed alcohol; without coding-drift variables; without both), covariate sets A and B",
+ "population": "CRSS police-reported crashes 2016-2024 with known maximum severity",
+ "unit": "crash",
+ "outcome": "fatal",
+ "method": "Survey-weighted (pseudo-ML) logistic models, ridge 0.01; predictive margins; Taylor linearisation with coefficient influence, summed within 67 PSUs / 25 strata; t with 42 df; separate period models; cross-period predictive margins",
+ "inputs": [
+  "data/processed/crss_crash.parquet"
+ ],
+ "rows": 64,
+ "columns": [
+  "covariate_set",
+  "specification",
+  "dropped",
+  "analysis",
+  "outcome",
+  "quantity",
+  "label",
+  "units",
+  "estimate",
+  "se",
+  "low",
+  "high",
+  "flag",
+  "n_P0",
+  "events_P0",
+  "n_P1",
+  "events_P1"
+ ],
+ "module": "nhtsa_stats.analysis.trends",
+ "git_commit": "27f5a22-dirty",
+ "generated_utc": "2026-11-12T12:27:49Z",
+ "covariate_sets": {
+  "A": "pre-crash circumstances (PRE_CRASH without year)",
+  "B": "pre-crash circumstances + crash configuration (crash type, vehicles)"
+ },
+ "coding_drift_variables": [
+  "junction",
+  "weather",
+  "surface"
+ ]
+}

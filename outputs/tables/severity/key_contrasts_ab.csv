@@ -1,0 +1,17 @@
+factor,level,label,outcome,model,adj_rr,low,high,adj_rd,rd_low,rd_high,crude_rr,n_events
+young_driver,yes,Driver aged 15-20 involved vs not,fatal,A,0.855662,0.780297,0.938305,-0.000852612,-0.00134642,-0.000358801,0.654975,1377
+young_driver,yes,Driver aged 15-20 involved vs not,fatal,B,0.922743,0.843308,1.00966,-0.000451539,-0.000944616,4.15386e-05,0.654975,1377
+young_driver,yes,Driver aged 15-20 involved vs not,ka,A,0.872604,0.841478,0.904881,-0.00416522,-0.00530458,-0.00302586,0.765373,9567
+young_driver,yes,Driver aged 15-20 involved vs not,ka,B,0.90794,0.880746,0.935974,-0.00299115,-0.00393793,-0.00204437,0.765373,9567
+weather,rain,Rain vs clear weather,fatal,A,1.00217,0.893461,1.12411,1.20778e-05,-0.000626956,0.000651112,0.712602,671
+weather,rain,Rain vs clear weather,fatal,B,0.902105,0.812275,1.00187,-0.000550546,-0.00109501,-6.07691e-06,0.712602,671
+weather,rain,Rain vs clear weather,ka,A,0.887461,0.815452,0.96583,-0.00355367,-0.00599774,-0.00110959,0.742907,4418
+weather,rain,Rain vs clear weather,ka,B,0.836268,0.771539,0.906428,-0.00518445,-0.00741627,-0.00295262,0.742907,4418
+surface,wet,Wet vs dry surface,fatal,A,0.740188,0.664058,0.825046,-0.00159461,-0.00210877,-0.00108044,0.73071,1080
+surface,wet,Wet vs dry surface,fatal,B,0.693974,0.62234,0.773853,-0.00192661,-0.00245256,-0.00140065,0.73071,1080
+surface,wet,Wet vs dry surface,ka,A,0.910798,0.856161,0.968921,-0.00289628,-0.0047764,-0.00101616,0.779214,6875
+surface,wet,Wet vs dry surface,ka,B,0.864664,0.815028,0.917324,-0.00447976,-0.00627023,-0.00268929,0.779214,6875
+interstate,yes,Interstate vs other roads (averaged over speed limits),fatal,A,0.700706,0.595748,0.824156,-0.00182137,-0.00265622,-0.000986518,1.36446,1386
+interstate,yes,Interstate vs other roads (averaged over speed limits),fatal,B,0.823686,0.71503,0.948853,-0.00104525,-0.00179769,-0.00029282,1.36446,1386
+interstate,yes,Interstate vs other roads (averaged over speed limits),ka,A,0.728559,0.674199,0.787302,-0.00898097,-0.0111947,-0.00676719,0.984673,6213
+interstate,yes,Interstate vs other roads (averaged over speed limits),ka,B,0.80107,0.751165,0.85429,-0.00650959,-0.00840188,-0.0046173,0.984673,6213

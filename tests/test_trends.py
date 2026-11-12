@@ -289,3 +289,50 @@ def test_decomposition_flags_unstable_shares_when_change_is_null():
     df, design = _two_periods(n=80000, seed=4, z_share=(0.1, 0.4))
     tab = T.decomposition_table(_decompose(df, design), design)
     assert (tab["flag"] == "").all()
+
+
+def test_composition_robustness_specs_and_published_row(monkeypatch):
+    """The 'published' specification equals a direct decomposition; dropping covariates is the
+    only difference between specifications.  Synthetic data (software test only)."""
+    df, design = _two_periods(n=20000, seed=7, z_share=(0.2, 0.4))
+    df = df.assign(
+        junction=pd.Categorical(["a"] * len(df), categories=["a"]),
+    )
+    monkeypatch.setattr(T, "COVARIATE_SETS", {"B": ["z", "a", "junction"]})
+    monkeypatch.setattr(T, "ROBUSTNESS_SPECS", {"published": (), "no a": ("a",)})
+    monkeypatch.setattr(T, "outcome_frame", lambda d, s, oc: (d, s))
+    monkeypatch.setattr(T, "P0_YEARS", (2018,))
+    monkeypatch.setattr(T, "P1_YEARS", (2021,))
+    out = T.composition_robustness(df, design)
+    assert set(out["specification"]) == {"published", "no a"}
+    assert set(out["quantity"]) == set(T.ROBUSTNESS_QUANTITIES)
+    pub = out[out["specification"] == "published"].set_index("quantity")
+    direct = T.decomposition_table(
+        T.decompose(df, design, ["z", "a", "junction"], "fatal", "x", (2018,), (2021,)), design
+    ).set_index("quantity")
+    for q in T.ROBUSTNESS_QUANTITIES:
+        assert pub.loc[q, "estimate"] == pytest.approx(direct.loc[q, "estimate"])
+        assert pub.loc[q, "low"] == pytest.approx(direct.loc[q, "low"])
+    assert out[out["specification"] == "no a"]["dropped"].eq("a").all()
+    # Z's prevalence rose, so the composition share is positive in both specifications.
+    shares = out[out["quantity"] == "composition_share_of_change_ref_P0"]
+    assert (shares["estimate"] > 0).all()
+
+
+def test_denominator_share_matches_numerator_denominator_and_adds_to_one():
+    df, design = _kabco_frame()
+    ms = T.kabco_marginset(df, design)
+    ds = T.denominator_share(ms)
+    assert set(ds["quantity"]) == set(T.DENOMINATOR_QUANTITIES)
+    assert set(ds["outcome"]) == {"fatal", "fatal_cc"}
+    full = T.numerator_denominator(
+        ms, pd.Series(1.0, index=range(2016, 2025)), tuple(T.DEFINITIONS)
+    )
+    key = ["outcome", "comparison", "quantity"]
+    merged = ds.merge(full, on=key, suffixes=("", "_full"))
+    assert len(merged) == len(ds)
+    assert merged["estimate"].to_numpy() == pytest.approx(merged["estimate_full"].to_numpy())
+    pivot = ds.pivot_table(index=["outcome", "comparison"], columns="quantity", values="estimate")
+    assert (
+        pivot["numerator_share_of_log_rise"] + pivot["denominator_share_of_log_rise"]
+    ).to_numpy() == pytest.approx(1.0)

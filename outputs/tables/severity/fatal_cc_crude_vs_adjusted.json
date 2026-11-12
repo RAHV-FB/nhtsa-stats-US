@@ -62,6 +62,6 @@
   "B_logrr_retained"
  ],
  "module": "nhtsa_stats.analysis.severity",
- "git_commit": "ef704fd",
- "generated_utc": "2026-10-23T02:30:45Z"
+ "git_commit": "7ee597e-dirty",
+ "generated_utc": "2026-11-12T11:54:06Z"
 }

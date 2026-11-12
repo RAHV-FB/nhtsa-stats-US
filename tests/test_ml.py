@@ -64,6 +64,24 @@ def test_registry_assert_no_leakage_called_directly(stage):
         assert h.REGISTRY[src].timing == "pre_crash", f
 
 
+def test_speeding_is_flagged_as_recorded_after_crash(monkeypatch):
+    """The speeding fields stay usable (no model changes) but are labelled honestly: each
+    flagged field needs a documented reason in RECORDED_AFTER_CRASH_ALLOWED, else the gate
+    refuses it."""
+    flagged = {k for k, v in h.REGISTRY.items() if v.recorded_after_crash}
+    assert "speeding" in flagged
+    assert flagged == set(h.RECORDED_AFTER_CRASH_ALLOWED)
+    assert all(h.RECORDED_AFTER_CRASH_ALLOWED[k] for k in flagged)
+    # Every model input that is flagged is documented, so the gate still passes ...
+    assert "speeding" in ml.stage_features("pre_crash")
+    for stage in ml.STAGES:
+        ml.check_features(ml.stage_features(stage), stage)
+    # ... and removing the documentation makes the gate refuse the same inputs.
+    monkeypatch.setattr(h, "RECORDED_AFTER_CRASH_ALLOWED", {})
+    with pytest.raises(ValueError, match="recorded_after_crash"):
+        ml.check_features(ml.stage_features("pre_crash"), "pre_crash")
+
+
 def test_hit_and_run_is_evaluation_only():
     """hit_and_run (post-crash) stratifies the evaluation but is never a model input."""
     assert h.REGISTRY["hit_and_run"].timing == "post_crash"

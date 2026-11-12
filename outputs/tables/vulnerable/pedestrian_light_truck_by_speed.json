@@ -20,6 +20,6 @@
   "high"
  ],
  "module": "nhtsa_stats.analysis.vulnerable",
- "git_commit": "ef704fd",
- "generated_utc": "2026-10-23T03:38:21Z"
+ "git_commit": "27f5a22-dirty",
+ "generated_utc": "2026-11-12T12:24:56Z"
 }

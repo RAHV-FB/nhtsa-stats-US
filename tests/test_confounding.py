@@ -215,3 +215,109 @@ def test_real_data_night_crude_and_adjusted():
     overlap = C.night_light_overlap(df, design)
     night_day = overlap[(overlap["period"] == "night") & (overlap["light"] == "daylight")]
     assert float(night_day["weighted_share_of_period"].iloc[0]) < 0.05
+
+
+# --------------------------------------------------------------------------------------
+# Red-team follow-up tables (speeding over-representation, speeding-type QBA, interstate bands)
+# --------------------------------------------------------------------------------------
+def test_crss_overrepresentation_ratio_ci_and_mixed_ratio():
+    from nhtsa_stats.analysis import speeding as S
+
+    rng = np.random.default_rng(21)
+    n = 9000
+    types = ["no", "exceeded_limit_or_racing", "too_fast_for_conditions", "speeding_unspecified"]
+    st = rng.choice(types, n, p=[0.8, 0.05, 0.1, 0.05])
+    fatal = (rng.random(n) < np.where(st == "exceeded_limit_or_racing", 0.15, 0.02)).astype(float)
+    df = pd.DataFrame({"speeding_type": st, "fatal": fatal})
+    stratum = rng.integers(0, 4, n)
+    design = SurveyDesign.from_arrays(
+        rng.uniform(1, 4, n), stratum, stratum * 10 + rng.integers(0, 4, n)
+    )
+    fars = pd.Series(rng.choice(types, 700, p=[0.6, 0.2, 0.15, 0.05]))
+    out = S.crss_overrepresentation(df, design, fars).set_index("speeding")
+    w = design.weight
+    ex = st == "exceeded_limit_or_racing"
+    share_all = np.average(ex, weights=w)
+    share_fat = np.average(ex[fatal == 1], weights=w[fatal == 1])
+    r = out.loc["exceeded_limit_or_racing"]
+    assert r["crss_only_ratio"] == pytest.approx(share_fat / share_all)
+    assert r["crss_only_ratio_low"] < r["crss_only_ratio"] < r["crss_only_ratio_high"]
+    assert r["mixed_fars_crss_ratio"] == pytest.approx((fars == types[1]).mean() / share_all)
+    assert r["crss_only_over_mixed"] == pytest.approx(
+        r["crss_only_ratio"] / r["mixed_fars_crss_ratio"]
+    )
+    parts = ["exceeded_limit_or_racing", "too_fast_for_conditions", "speeding_unspecified"]
+    assert out.loc["any_speeding", "crss_share_all_crashes"] == pytest.approx(
+        out.loc[parts, "crss_share_all_crashes"].sum()
+    )
+    # Fatal crashes have more exceedance than the CRSS crash population: ratio well above 1.
+    assert r["crss_only_ratio_low"] > 1
+
+
+def test_qba_status_explains_blank_rows_at_specificity_below_one():
+    from nhtsa_stats.analysis import severity as S
+    from nhtsa_stats.analysis.measurement import corrected_rr
+
+    # Exposure recorded in 0.5% of non-fatal crashes: a false-positive rate of 1% exceeds it.
+    a, c = 90.0, 910.0
+    b, d = 500.0, 98500.0
+    assert S.qba_status(a, b, c, d, 0.9, 0.9, 1.0) == "ok"
+    assert np.isfinite(corrected_rr(a, b, c, d, 0.9, 0.9, 1.0))
+    status = S.qba_status(a, b, c, d, 0.9, 0.9, 0.99)
+    assert status.startswith("infeasible") and "false-positive rate" in status
+    assert np.isnan(corrected_rr(a, b, c, d, 0.9, 0.9, 0.99))
+    # A common exposure (8% of non-fatal crashes) stays feasible at specificity 0.99.
+    assert S.qba_status(90.0, 8000.0, 910.0, 91992.0, 0.9, 0.9, 0.99) == "ok"
+
+
+def test_key_contrasts_side_by_side_reads_both_models_and_outcomes():
+    from nhtsa_stats.analysis import severity as S
+
+    def frame(shift):
+        rows = []
+        for f, lv, _ in S.KEY_CONTRASTS:
+            rows.append(
+                {
+                    "factor": f,
+                    "level": lv,
+                    "crude_rr": 1.2 + shift,
+                    "n_events": 50,
+                    **{
+                        f"{m}_adj_rr{suf}": val + shift + (0.1 if m == "B" else 0)
+                        for m in "AB"
+                        for suf, val in (("", 0.9), ("_low", 0.8), ("_high", 1.0))
+                    },
+                    **{
+                        f"{m}_adj_rd{suf}": 0.001 * (1 + shift)
+                        for m in "AB"
+                        for suf in ("", "_low", "_high")
+                    },
+                }
+            )
+        return pd.DataFrame(rows)
+
+    out = S.key_contrasts_side_by_side({"fatal": frame(0.0), "ka": frame(1.0)})
+    assert len(out) == len(S.KEY_CONTRASTS) * 2 * 2
+    teen = out[(out["factor"] == "young_driver") & (out["outcome"] == "ka")].set_index("model")
+    assert teen.loc["A", "adj_rr"] == pytest.approx(1.9)
+    assert teen.loc["B", "adj_rr"] == pytest.approx(2.0)
+
+
+@pytest.mark.processed
+def test_real_data_speeding_type_models_and_interstate_bands():
+    from nhtsa_stats.analysis import severity as S
+
+    m = S.speeding_type_models("fatal")
+    tf = m[(m["level"] == "too_fast_for_conditions")].set_index("model")
+    pub = S.speeding_type_contrasts("fatal").set_index("level").loc["too_fast_for_conditions"]
+    assert tf.loc["A", "adj_rr"] == pytest.approx(pub["adj_rr"], rel=1e-6)
+    assert tf.loc["A", "adj_rr_low95"] == pytest.approx(pub["adj_rr_low"], rel=1e-6)
+    for _, r in m.iterrows():
+        assert r["adj_rr_low95"] < r["adj_rr_low90"] < r["adj_rr"] < r["adj_rr_high90"]
+        assert r["adj_rr_high90"] < r["adj_rr_high95"]
+    ib = S.interstate_by_speed_band("fatal")
+    band = ib[ib["quantity"] == "RR interstate vs not"].set_index("speed_limit_band")
+    assert band.loc["50-65 mph", "estimate"] < band.loc["70+ mph", "estimate"]
+    assert band.loc["50-65 mph", "n_crashes"] == (
+        band.loc["50-55 mph", "n_crashes"] + band.loc["60-65 mph", "n_crashes"]
+    )
