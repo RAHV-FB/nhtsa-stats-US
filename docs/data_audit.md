@@ -34,7 +34,9 @@ domain-by-domain evidence is in the appendices under [`audit/`](audit/):
 
 Machine-readable outputs: `outputs/audit/{archive,table,column}_inventory.csv`,
 `codebook.csv` (every code-label pair with counts), `variable_availability.csv`
-(variable × source-year matrix), `integrity_checks.csv`.
+(variable × source-year matrix), `integrity_checks.csv`. `codebook.csv` and
+`variable_availability.csv` are large, nothing reads them, and they are not tracked in Git;
+`nhtsa inventory` writes them.
 
 ## 2. Volumes
 

@@ -55,7 +55,7 @@ and **predictive** (out-of-sample prediction).*
 | D | How much does restraint use change fatality associations within comparable occupants? | Within the same vehicle, belted occupants' risk is 0.34 (0.33–0.35) times unbelted occupants', unchanged by the driver's speeding or alcohol (same report) |
 | E | Which combinations show interaction? | Super-additive: exceedance × alcohol, behaviour × belt non-use; sub-multiplicative at crash level, multiplicative for single-vehicle drivers; three-way terms not detected; four-way with drugs not estimable (`reports/multifactor_interactions.md`) |
 | F | How much do contributions depend on units, definitions, specifications and missingness? | Strongly: crash vs driver vs passenger vs pedestrian (alcohol RR from 1.2 to 4.7); "any speeding" vs exceedance; with or without configuration; police drugs as a covariate; drug unknowns (§2–§5 below) |
-| G | Can a principal cause of an individual death be identified? | No (`reports/case_comparisons.md` §3) |
+| G | Can a principal cause of an individual death be identified? | No (`docs/limitations.md` §7) |
 | H | How should official statistics be read? | As overlapping counts of deaths *involving* circumstances, recorded with severity-dependent completeness; not additive, not causes (§6 below) |
 
 ---

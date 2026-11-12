@@ -407,7 +407,7 @@ def build_crss(years: Sequence[int] = config.YEARS) -> tuple[pl.DataFrame, pl.Da
         # with *known* severity, so a crash containing a person of unknown severity is coded by
         # the others' injuries ("unknown as no"); its weighted fatal total falls 0.6-12.8% short
         # of FARS by a year-dependent amount, whereas MAXSEV_IM is calibrated to FARS
-        # (docs/audit/crss_survey_design.md).
+        # (CRSS survey design audit note, Git history, commit 7ee597e).
         h.fatal("MAXSEV_IM").alias("fatal"),
         h.killed_or_serious("MAXSEV_IM").alias("ka"),
         h.any_injury("MAXSEV_IM").alias("injury"),

@@ -19,9 +19,10 @@
   "p_rank_1",
   "p_rank_2",
   "p_rank_3",
-  "rank_point"
+  "rank_point",
+  "uncertainty_covered"
  ],
  "module": "nhtsa_stats.analysis.contributions",
- "git_commit": "8fe8986",
- "generated_utc": "2026-10-23T09:32:27Z"
+ "git_commit": "7ee597e-dirty",
+ "generated_utc": "2026-11-12T11:49:25Z"
 }

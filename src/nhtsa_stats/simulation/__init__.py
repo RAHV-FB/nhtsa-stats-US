@@ -1,12 +1,10 @@
-"""Policy simulation tooling (RQ10): evidence ledger, intervention engine and cost model.
+"""Observed deaths by overlapping target segment and the evidence ledger (RQ9, RQ10).
 
-* ``engine``   -- four-layer intervention simulator (A empirical baseline, B mechanisms,
-  C user assumptions, D hypothetical outcomes);
-* ``costs``    -- programme cost model, cost-effectiveness and break-even analysis;
-* ``evidence`` -- evidence ledger linking empirical findings to interventions.
+* ``baseline`` -- FARS deaths and CRSS crashes by overlapping segment (speeding, alcohol, drugs,
+  unrestrained occupants), and a search of the column inventory for enforcement or cost fields;
+* ``evidence`` -- evidence ledger linking measured findings to candidate interventions; the CLI
+  module ``policy`` runs the ledger and then ``baseline.run``.
 
-Nothing in this package estimates the effect of an intervention from the data: the database
-contains no enforcement, camera, testing-programme or cost information.  Every simulated
-quantity is *hypothetical*, conditional on user-supplied assumptions (see
-``docs/policy_assumptions.md``).
+Nothing in this package estimates the effect of an intervention: the database contains no
+enforcement, camera, testing-programme or cost information.
 """

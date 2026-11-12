@@ -240,7 +240,7 @@ BODY_GROUPS: dict[str, list[int]] = {
     "light_truck_other": [40, 41, 42, 45, 48],
     # 49 'unknown light vehicle type': a light vehicle whose type is unknown. Kept apart from
     # the known groups -- its use rises from 0.7% to ~3.7% of light-vehicle occupants in CRSS
-    # from 2018 (docs/audit/vehicle_roadway.md).
+    # from 2018 (vehicle and roadway audit note, Git history, commit 7ee597e).
     "light_unknown_type": [49],
     "bus": [50, 51, 52, 55, 58, 59],
     "medium_heavy_truck": [60, 61, 62, 63, 64, 66, 67, 71, 72, 78],
@@ -421,7 +421,7 @@ def restraint_in_belted_seat(
     (SEAT_POS 11-49) or in an unrecorded seat (98/99: the occupant is inside the vehicle, so
     the recorded belt use still applies); everyone else (motorcycles 80-89, other 90-97,
     cargo/exterior/trailing positions 50-56, unknown body) is ``not_applicable``.  See
-    docs/audit/person_injury_restraint.md §4.6.
+    the person, injury and restraint audit note §4.6 (Git history, commit 7ee597e).
     """
     eligible = pl.col(body_col).is_between(1, 79) & (
         pl.col(seat_col).is_between(11, 49) | pl.col(seat_col).is_in([98, 99])
@@ -482,6 +482,12 @@ class VarInfo:
     timing: str  # pre_crash | crash_circumstance | post_crash | outcome | design | id
     level: str  # crash | vehicle | driver | person
     note: str = ""
+    # True when the field is a police judgement entered after the crash (it describes the
+    # pre-crash state of the vehicle but is *recorded* afterwards, so it can carry information
+    # about the outcome).  The ``timing`` label stays "pre_crash" (the field describes the
+    # pre-crash state), and ``assert_no_leakage`` admits such a field only if it is listed in
+    # ``RECORDED_AFTER_CRASH_ALLOWED`` with the reason.
+    recorded_after_crash: bool = False
 
 
 REGISTRY: dict[str, VarInfo] = {
@@ -530,9 +536,17 @@ REGISTRY: dict[str, VarInfo] = {
     "interstate": VarInfo("pre_crash", "crash"),
     "junction": VarInfo("pre_crash", "crash"),
     "work_zone": VarInfo("pre_crash", "crash"),
-    "speeding": VarInfo("pre_crash", "crash", "police judgement recorded after the crash"),
+    "speeding": VarInfo(
+        "pre_crash",
+        "crash",
+        "police judgement recorded after the crash",
+        recorded_after_crash=True,
+    ),
     "speeding_type": VarInfo(
-        "pre_crash", "crash", "exceeded limit/racing vs too fast for conditions vs unspecified"
+        "pre_crash",
+        "crash",
+        "exceeded limit/racing vs too fast for conditions vs unspecified",
+        recorded_after_crash=True,
     ),
     "alcohol": VarInfo("pre_crash", "crash", "police-reported; ascertainment varies with severity"),
     "alcohol_im": VarInfo(
@@ -565,7 +579,12 @@ REGISTRY: dict[str, VarInfo] = {
     "str_speed_limit": VarInfo(
         "pre_crash", "person", "posted limit of the striking vehicle's road"
     ),
-    "str_speeding": VarInfo("pre_crash", "person", "striking vehicle speeding-related (police)"),
+    "str_speeding": VarInfo(
+        "pre_crash",
+        "person",
+        "striking vehicle speeding-related (police)",
+        recorded_after_crash=True,
+    ),
     "striking": VarInfo("pre_crash", "person", "body type of the striking vehicle"),
     "location": VarInfo("pre_crash", "person", "non-motorist's location at the crash"),
     "sex": VarInfo("pre_crash", "person"),
@@ -575,12 +594,27 @@ REGISTRY: dict[str, VarInfo] = {
     "helmet": VarInfo("pre_crash", "person"),
     "body": VarInfo("pre_crash", "vehicle"),
     "veh_age_band": VarInfo("pre_crash", "vehicle"),
-    "veh_speeding": VarInfo("pre_crash", "vehicle"),
+    "veh_speeding": VarInfo("pre_crash", "vehicle", recorded_after_crash=True),
     "veh_alcohol": VarInfo("pre_crash", "vehicle"),
     "other_vehicle_heavy": VarInfo("crash_circumstance", "vehicle"),
 }
 
 MODEL_ALLOWED_TIMINGS = {"pre_crash", "crash_circumstance"}
+
+# Fields that describe the pre-crash state but are recorded by the police after the crash
+# (``VarInfo.recorded_after_crash``), with the reason a model may still use them.  A flagged
+# field missing from this mapping is rejected by ``assert_no_leakage``.  Admitting them
+# changes no model: it records that the speeding indicators are police judgements, not
+# measurements, and that a model using them predicts "given the police recorded speeding".
+RECORDED_AFTER_CRASH_ALLOWED: dict[str, str] = {
+    "speeding": "SPEEDREL is the only speed information in the archives; the project's "
+    "associations are explicitly conditional on the police judgement (docs/limitations.md); "
+    "a model using it predicts severity given that the police recorded speeding",
+    "speeding_type": "same SPEEDREL field, split by type; used only in the speeding-type "
+    "sensitivity analyses",
+    "str_speeding": "same SPEEDREL field, striking vehicle (non-motorist analyses)",
+    "veh_speeding": "same SPEEDREL field, vehicle level (person analyses)",
+}
 
 
 def assert_no_leakage(
@@ -600,5 +634,7 @@ def assert_no_leakage(
         info = REGISTRY.get(f)
         if info is None or info.timing not in allowed:
             bad.append((f, None if info is None else info.timing))
+        elif info.recorded_after_crash and f not in RECORDED_AFTER_CRASH_ALLOWED:
+            bad.append((f, "recorded_after_crash (no documented reason)"))
     if bad:
         raise ValueError(f"features not permitted in a severity model: {bad}")

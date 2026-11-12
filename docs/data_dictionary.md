@@ -4,15 +4,15 @@ Three layers of documentation, from raw to analytic:
 
 | Layer | Where | Content |
 |---|---|---|
-| Raw value codes | `outputs/audit/codebook.csv` (108k rows) | every code → label pair embedded in the CSVs, per source / year / table / variable, with counts |
-| Raw columns | `outputs/audit/column_inventory.csv`, `outputs/audit/variable_availability.csv` | every column per table-year: type, missingness, distinct values, range; presence matrix by source-year |
+| Raw value codes | `outputs/audit/codebook.csv` (108k rows; written by `nhtsa inventory`, not tracked in Git) | every code → label pair embedded in the CSVs, per source / year / table / variable, with counts |
+| Raw columns | `outputs/audit/column_inventory.csv`, `outputs/audit/variable_availability.csv` (the latter written by `nhtsa inventory`, not tracked in Git) | every column per table-year: type, missingness, distinct values, range; presence matrix by source-year |
 | Raw tables | this document §1–2 and [`generated/inventory_tables.md`](generated/inventory_tables.md) | purpose, unit, verified key, availability, row counts |
 | Harmonised variables | [`variable_harmonization.md`](variable_harmonization.md), [`generated/harmonised_variables.md`](generated/harmonised_variables.md) | definitions, code mappings, breaks, timing class |
 | Analytic datasets | [`generated/processed_datasets.md`](generated/processed_datasets.md) | every column of the four processed files with type, missingness and values |
 
 The archives include no manuals. Code meanings are taken from embedded labels; unlabelled
 CRSS 2016–2018 and auxiliary files are interpreted only where verified (see
-`variable_harmonization.md` §1 and `docs/audit/auxiliary_derived.md`).
+`variable_harmonization.md` §1 and the auxiliary derived-variables audit note, Git history, commit 7ee597e).
 
 ## 1. Raw tables (FARS and CRSS share the structure)
 

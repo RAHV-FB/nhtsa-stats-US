@@ -7,6 +7,7 @@
  "method": "2x2 tables; Woolf CIs ignore clustering",
  "inputs": [
   "data/processed/fars_driver.parquet",
+  "data/processed/fars_crash.parquet",
   "data/processed/crss_crash.parquet"
  ],
  "rows": 4,
@@ -25,6 +26,6 @@
   "odds_ratio_high"
  ],
  "module": "nhtsa_stats.analysis.drugs",
- "git_commit": "8fe8986",
- "generated_utc": "2026-10-23T09:19:26Z"
+ "git_commit": "7ee597e-dirty",
+ "generated_utc": "2026-11-12T11:50:25Z"
 }

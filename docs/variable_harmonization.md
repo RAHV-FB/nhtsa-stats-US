@@ -5,12 +5,13 @@ The executable definitions are in `src/nhtsa_stats/processing/harmonize.py` (cod
 and `processing/features.py` (aggregation to crash/vehicle/person level); a generated
 catalogue of every mapping, with its docstring, is in
 [`docs/generated/harmonised_variables.md`](generated/harmonised_variables.md). The evidence
-behind each decision is in the domain audit appendices under [`docs/audit/`](audit/).
+behind each decision was recorded in per-topic audit notes, now preserved in Git history at
+commit 7ee597e; the consolidated audit is `docs/audit_2026-11.md`.
 
 ## 1. Principles
 
 1. **Meanings come from the archives.** Value labels embedded in the CSVs (`<VAR>NAME`
-   columns, harvested to `outputs/audit/codebook.csv`) define codes. Where labels are absent —
+   columns, harvested to `outputs/audit/codebook.csv`, written by `nhtsa inventory`, not tracked in Git) define codes. Where labels are absent —
    CRSS 2016–2018 and all auxiliary tables — meanings are established by (a) identical code
    sets with labelled years, (b) distributional similarity, and (c) cross-tabulation against
    labelled fields. Codes that cannot be verified are marked UNVERIFIED in the appendices and
@@ -18,7 +19,7 @@ behind each decision is in the domain audit appendices under [`docs/audit/`](aud
 2. **CRSS 2016–2018 labels**: use the *same-year FARS* labels (the two systems share element
    definitions), and CRSS 2019+ labels only for variables without a 2016/2017/2019 break. For
    every analytic variable the 2016–2018 code set is a subset of the labelled code set
-   (`docs/audit/person_injury_restraint.md` §6.2, `crash_environment.md` §5).
+   (person, injury and restraint audit note §6.2 and crash environment audit note §5; Git history, commit 7ee597e).
 3. **Unknown is never "no".** Not reported / unknown / not applicable codes map to an explicit
    `unknown` (or `not_applicable`) category, or to null in tri-state indicators.
 4. **Breaks are handled where they occur, not averaged away**: by grouping codes so that the

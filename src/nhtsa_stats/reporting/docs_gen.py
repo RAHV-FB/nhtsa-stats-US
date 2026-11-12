@@ -138,7 +138,7 @@ def processed_dictionary() -> str:
         "# Generated dictionary of the analytic datasets",
         "",
         "_Generated from `data/processed/*.parquet` by `nhtsa_stats.reporting.docs_gen`. Upper-case columns are raw "
-        "NHTSA fields carried through unchanged (meanings: `outputs/audit/codebook.csv`); lower-case columns are "
+        "NHTSA fields carried through unchanged (meanings: `outputs/audit/codebook.csv`, written by `nhtsa inventory`); lower-case columns are "
         "harmonised (definitions: `docs/generated/harmonised_variables.md`). Do not edit by hand._",
         "",
     ]

@@ -22,7 +22,7 @@ Datasets written to ``data/processed`` (rebuilt by ``nhtsa features``):
 Unknown codes stay unknown (tri-state 1 / 0 / null, or an explicit ``unknown`` level); a
 vehicle with no driver record keeps its row with null driver fields.
 
-Drug toxicology (FARS) follows the audit recipe in ``docs/audit/alcohol_drugs.md`` §4.3-4.4 and
+Drug toxicology (FARS) follows the alcohol and drugs audit recipe (Git history, commit 7ee597e) and
 §8: the 3-digit result scheme applies to 2016-2021 and the 4-digit scheme from 2022 (verified:
 no code of the other scheme occurs in either period); the 2018+ ``drugs`` table is
 deduplicated; caffeine, nicotine, cotinine, non-psychoactive substances (9000-9994), anabolic

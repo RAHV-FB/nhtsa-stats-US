@@ -1,0 +1,29 @@
+{
+ "table": "contributions/fars_overlap_treatments.csv",
+ "description": "Share of deaths involving any of speeding, alcohol, drugs and no restraint, and mean factor count, under five treatments of undetermined drug status (floor, ceiling, drug factor determinate, fully determinate crashes, no drugs)",
+ "population": "FARS deaths 2016-2024",
+ "unit": "person killed",
+ "outcome": "",
+ "method": "Census counts; alcohol as the mean over 10 imputation implicates; drug status per crash (any driver positive / all determinate negative / undetermined)",
+ "inputs": [
+  "data/processed/crss_crash.parquet",
+  "data/processed/fars_driver.parquet",
+  "data/processed/fars_person.parquet"
+ ],
+ "rows": 5,
+ "columns": [
+  "treatment",
+  "drug_status_handling",
+  "drugs_in_factor_set",
+  "deaths_n",
+  "share_of_all_deaths_in_row",
+  "share_deaths_undetermined_drug_status",
+  "share_with_any_factor",
+  "mean_factors_per_death",
+  "mean_factors_per_death_with_any",
+  "note"
+ ],
+ "module": "nhtsa_stats.analysis.contributions",
+ "git_commit": "7ee597e-dirty",
+ "generated_utc": "2026-11-12T11:50:18Z"
+}

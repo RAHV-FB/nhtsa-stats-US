@@ -1,0 +1,29 @@
+{
+ "table": "measurement/alcohol_testing_share.csv",
+ "description": "Share of killed and surviving FARS drivers alcohol-tested and in the police-vs-BAC sample (selection into measurement)",
+ "population": "",
+ "unit": "",
+ "outcome": "",
+ "method": "See module docstring",
+ "inputs": [
+  "data/processed/*.parquet",
+  "data/interim/FARS/drugs"
+ ],
+ "rows": 3,
+ "columns": [
+  "driver_status",
+  "n_drivers",
+  "n_alcohol_tested",
+  "share_alcohol_tested",
+  "n_with_bac_result",
+  "share_with_bac_result",
+  "share_police_alcohol_known",
+  "n_in_sensitivity_sample",
+  "share_in_sensitivity_sample",
+  "bac08_prevalence_in_sample",
+  "note"
+ ],
+ "module": "nhtsa_stats.analysis.measurement",
+ "git_commit": "7ee597e-dirty",
+ "generated_utc": "2026-11-12T11:40:07Z"
+}

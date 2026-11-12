@@ -38,8 +38,8 @@ answered and are treated as findings, not as gaps to be filled with outside numb
 
 Every reported number is labelled as one of: **observed** (FARS count), **estimated**
 (CRSS design-based estimate), **adjusted association** (model-based contrast),
-**model-predicted** (conditional on a crash), **hypothetical** (simulation output under
-user assumptions). Nothing in this project is labelled *causally identified* except where a
+**model-predicted** (conditional on a crash), **hypothetical** (model-based projection under
+stated assumptions). Nothing in this project is labelled *causally identified* except where a
 design argument is given (RQ6), and even there with explicit caveats.
 
 ## 3. Cross-cutting design decisions (from the audit)
@@ -144,7 +144,7 @@ Priority reflects scientific value × evidential strength × policy relevance ×
 | Element | Specification |
 |---|---|
 | Question | Which driver groups are over-involved as the culpable party in two-vehicle crashes, relative to their presence as non-culpable drivers? |
-| Method | CRSS two-vehicle crashes (no hit-and-run vehicle) with exactly one culpable driver; relative involvement ratio = share among culpable ÷ share among non-culpable, weighted, with design-based CIs. *Deviation (v1.2):* culpability is action-based (speeding, critical pre-crash event, driver-error codes), not violation-based as first planned, because charges are laid after the crash and almost never against the dead (`docs/audit/driver_behaviour_factors.md` §16); the charge-based version is a sensitivity analysis |
+| Method | CRSS two-vehicle crashes (no hit-and-run vehicle) with exactly one culpable driver; relative involvement ratio = share among culpable ÷ share among non-culpable, weighted, with design-based CIs. *Deviation (v1.2):* culpability is action-based (speeding, critical pre-crash event, driver-error codes), not violation-based as first planned, because charges are laid after the crash and almost never against the dead (driver behaviour audit note §16, Git history, commit 7ee597e); the charge-based version is a sensitivity analysis |
 | Assumptions | Non-culpable drivers are a representative sample of drivers on the road at the same place/time; culpability is coded without bias by group |
 | Justified | Relative (not absolute) crash-involvement propensities under QIE assumptions |
 | Not justified | Crash rates per trip/mile; effects of enforcement |
@@ -170,11 +170,14 @@ Priority reflects scientific value × evidential strength × policy relevance ×
 | Justified | Upper-bound style "severity-pathway" burden under no unmeasured confounding |
 | Not justified | Lives saved by an intervention |
 
-### RQ10 — Policy simulator and economics (tooling, not inference)
+### RQ10 — Observed segment baseline (removed: policy simulator and economics)
 
-Layered engine (A empirical baseline → B mechanism → C user assumptions → D outcomes)
-with break-even and threshold analysis. No costs or effect sizes are supplied by the
-project; all are user inputs with sensitivity sweeps. See `docs/policy_assumptions.md`.
+This question originally planned a layered simulator (empirical baseline → mechanism → user
+assumptions → outcomes) with cost and break-even tools. It was removed: with no enforcement,
+camera, testing or cost data in the archives, every simulated outcome followed from invented
+inputs. What remains is empirical: FARS deaths and CRSS crashes by overlapping segment and the
+field inventory showing that no intervention or cost field exists
+(`nhtsa_stats.simulation.baseline`, `outputs/tables/simulation/`).
 
 ## 5. Conceptual dependency diagram
 
@@ -202,14 +205,14 @@ Behaviours are recorded by police *after* the crash, and recording depends on se
 |---|---|---|---|
 | 1 | Archive inventory and validation | 36/36 archives checksum-verified; inventory CSVs | done |
 | 2 | Relational integrity | 0 structural failures across 18 source-years | done (841/841 checks pass) |
-| 3 | Variable audit and harmonisation | Every analytic variable mapped with evidence; breaks documented | done (docs/audit/*) |
+| 3 | Variable audit and harmonisation | Every analytic variable mapped with evidence; breaks documented | done (per-topic audit notes, Git history, commit 7ee597e) |
 | 4 | Analytic datasets | One row per unit; row counts reconcile with raw; leakage registry | done |
 | 5 | Descriptive baseline | FARS/CRSS annual series; frequency-vs-severity table with CIs and suppression | done |
 | 6 | RQ1, RQ3, RQ4, RQ5 | Converged models, CIs, sensitivity analyses written to outputs/tables | done |
 | 7 | RQ2 | Pre-specified pairs, additive+multiplicative measures, Holm-adjusted | done |
 | 8 | RQ6, RQ7 | Within-vehicle and QIE estimates with assumption statements | done |
 | 9 | RQ8 | Temporal validation report with calibration; leakage test passes | done (`docs/model_validation.md`) |
-| 10 | RQ9, RQ10 | Evidence ledger; simulator and cost tools with tests | done |
+| 10 | RQ9, RQ10 | Evidence ledger; observed segment baseline with tests (simulator and cost tools later removed) | done |
 | 11 | Interface and reports | App runs headless; every reported number traces to an output table | done |
 | 12 | Independent audit and rebuild | Clean rebuild from raw; tests pass; audit issues fixed | done (two audit rounds; see §7) |
 
@@ -223,7 +226,7 @@ Behaviours are recorded by police *after* the crash, and recording depends on se
   increase.
 * v1.2 — CRSS outcomes switched from the unimputed `MAX_SEV` / `INJ_SEV` to NHTSA's imputed
   `MAXSEV_IM` / `INJSEV_IM` (sensitivity: strict complete case). The survey-design audit
-  (`docs/audit/crss_survey_design.md`) showed that `MAX_SEV` is the maximum over persons with
+  (CRSS survey design audit note, Git history, commit 7ee597e) showed that `MAX_SEV` is the maximum over persons with
   *known* severity, so crashes containing a person of unknown severity were coded from the
   others' injuries (an "unknown as no" error), and that the weighted `MAX_SEV` fatal total
   falls 0.6–12.8% short of the FARS count by a year-dependent amount. The imputed total
@@ -255,11 +258,11 @@ Behaviours are recorded by police *after* the crash, and recording depends on se
   hygiene). Changes: complete-case sensitivity added for the KA outcome; limit exceedance added
   to the bias-analysis grid; driver-age over-representation computed among FARS crashes with a
   known driver age; QIE sample excludes crashes of unknown hit-and-run status; evidence-ledger
-  segments aligned with the simulator's; report wording corrected where a claim went beyond its
+  segments aligned with the segment baseline's; report wording corrected where a claim went beyond its
   table.
 * v2.0 — Phase 2 opened (`docs/research_plan_phase2.md`): driver-level datasets and linkage,
   speeding/alcohol lattices, factorial analyses at crash/driver/occupant level, drug measurement
-  module, restraint by driver behaviour, contribution metrics and rankings, Stage-D assessment,
-  case explorer. Phase-1 modules and outputs are unchanged; `confounding.py` gained a
+  module, restraint by driver behaviour, contribution metrics and rankings, Stage-D assessment
+  (a single-case explorer was later removed). Phase-1 modules and outputs are unchanged; `confounding.py` gained a
   `speeding_type` block and an optional orderings argument (backward compatible), and the policy
   ledger gained a Phase-2 evidence column and a combined-enforcement row.

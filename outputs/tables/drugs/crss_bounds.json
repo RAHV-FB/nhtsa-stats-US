@@ -7,6 +7,7 @@
  "method": "Weighted 2x2 with unknown crashes allocated by scenario",
  "inputs": [
   "data/processed/fars_driver.parquet",
+  "data/processed/fars_crash.parquet",
   "data/processed/crss_crash.parquet"
  ],
  "rows": 81,
@@ -22,6 +23,6 @@
   "rr_complete_case"
  ],
  "module": "nhtsa_stats.analysis.drugs",
- "git_commit": "8fe8986",
- "generated_utc": "2026-10-23T09:19:39Z"
+ "git_commit": "7ee597e-dirty",
+ "generated_utc": "2026-11-12T11:50:36Z"
 }

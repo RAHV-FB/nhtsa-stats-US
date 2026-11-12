@@ -262,6 +262,151 @@ def police_vs_bac() -> pd.DataFrame:
     return pd.DataFrame(rows)
 
 
+# --------------------------------------------------------------------------------------
+# Selection into measurement: who is tested, and does police sensitivity depend on it?
+# --------------------------------------------------------------------------------------
+def _wilson(k: int, n: int, z: float = 1.959964) -> tuple[float, float]:
+    if n <= 0:
+        return np.nan, np.nan
+    p = k / n
+    den = 1 + z**2 / n
+    mid = (p + z**2 / (2 * n)) / den
+    half = z * np.sqrt(p * (1 - p) / n + z**2 / (4 * n**2)) / den
+    return float(mid - half), float(mid + half)
+
+
+def _driver_status(per: pd.DataFrame) -> pd.DataFrame:
+    drv = per[per["ptype"] == "driver"].copy()
+    drv["driver_status"] = np.where(
+        drv["killed"] == 1, "killed", np.where(drv["killed"] == 0, "survived", "unknown")
+    )
+    return drv
+
+
+def alcohol_testing_share(drv: pd.DataFrame) -> pd.DataFrame:
+    """Share of each driver group that was alcohol-tested and the share that enters the
+    police-versus-BAC contrast (measured BAC *and* a known police alcohol field)."""
+    rows = []
+    groups = [(s, drv[drv["driver_status"] == s]) for s in ("killed", "survived")]
+    groups.append(("all (killed + survived)", drv[drv["driver_status"] != "unknown"]))
+    for status, g in groups:
+        in_sample = g["bac_measured"].notna() & g["pr_alcohol"].notna()
+        bac08 = (g.loc[in_sample, "bac_measured"] >= 0.08).astype(int)
+        rows.append(
+            {
+                "driver_status": status,
+                "n_drivers": len(g),
+                "n_alcohol_tested": int((g["alc_tested"] == 1).sum()),
+                "share_alcohol_tested": float((g["alc_tested"] == 1).mean()),
+                "n_with_bac_result": int(g["bac_measured"].notna().sum()),
+                "share_with_bac_result": float(g["bac_measured"].notna().mean()),
+                "share_police_alcohol_known": float(g["pr_alcohol"].notna().mean()),
+                "n_in_sensitivity_sample": int(in_sample.sum()),
+                "share_in_sensitivity_sample": float(in_sample.mean()),
+                "bac08_prevalence_in_sample": float(bac08.mean()),
+                "note": "tested = FARS alcohol test given (ALC_STATUS); sample = BAC result and "
+                "police alcohol field both known (the police_vs_bac rows)",
+            }
+        )
+    return pd.DataFrame(rows)
+
+
+def _sens_row(g: pd.DataFrame, scheme: str, group: str, status: str, rate_lo, rate_hi) -> dict:
+    """Police-versus-BAC>=.08 accuracy among the tested drivers of ``g`` with both fields known."""
+    s = g[g["bac_measured"].notna() & g["pr_alcohol"].notna()]
+    bac = (s["bac_measured"] >= 0.08).to_numpy()
+    pol = (s["pr_alcohol"] == 1).to_numpy()
+    tp, fn = int((pol & bac).sum()), int((~pol & bac).sum())
+    fp, tn = int((pol & ~bac).sum()), int((~pol & ~bac).sum())
+    lo, hi = _wilson(tp, tp + fn)
+    return {
+        "scheme": scheme,
+        "group": group,
+        "driver_status": status,
+        "group_survivor_test_rate_min": rate_lo,
+        "group_survivor_test_rate_max": rate_hi,
+        "n_drivers": len(g),
+        "share_alcohol_tested": float((g["alc_tested"] == 1).mean()) if len(g) else np.nan,
+        "n_in_sample": len(s),
+        "bac08_prevalence": (tp + fn) / max(len(s), 1),
+        "police_sensitivity_vs_bac08": tp / max(tp + fn, 1),
+        "sensitivity_low": lo,
+        "sensitivity_high": hi,
+        "police_specificity_vs_bac08": tn / max(tn + fp, 1),
+        "ppv": tp / max(tp + fp, 1),
+        "tp": tp,
+        "fn": fn,
+        "fp": fp,
+        "tn": tn,
+    }
+
+
+CUMULATIVE_RATES = (0.0, 0.2, 0.3, 0.4, 0.5)
+
+
+def police_vs_bac_selection(drv: pd.DataFrame) -> pd.DataFrame:
+    """Does police sensitivity against measured BAC depend on how widely drivers are tested?
+
+    Surviving drivers are tested mostly on suspicion, so the 98% sensitivity among tested
+    survivors may reflect that selection.  The place-and-year survivor alcohol-test rate
+    (state x year, survivors) is used as the measure of how widely survivors are tested.  The
+    contrast is shown (i) by terciles of that rate, (ii) cumulatively as the places included
+    broaden (survivor test rate >= x) and (iii) by state terciles of the pooled-years rate.
+    Killed drivers are shown in the same places for comparison.  Wilson CIs treat drivers as
+    independent (crash clustering ignored).  Descriptive; not a corrected sensitivity."""
+    d = drv[drv["driver_status"].isin(["killed", "survived"])].copy()
+    surv = d[d["driver_status"] == "survived"]
+    sy = surv.groupby(["STATE", "YEAR"])["alc_tested"].apply(lambda s: (s == 1).mean())
+    d["sy_rate"] = pd.MultiIndex.from_frame(d[["STATE", "YEAR"]]).map(sy)
+    st = surv.groupby("STATE")["alc_tested"].apply(lambda s: (s == 1).mean())
+    d["st_rate"] = d["STATE"].map(st)
+    d = d[d["sy_rate"].notna()]
+    rows = []
+    allrows = d
+    for status in ("survived", "killed"):
+        rows.append(
+            _sens_row(
+                allrows[allrows["driver_status"] == status], "all", "all", status, np.nan, np.nan
+            )
+        )
+    for scheme, col in (
+        ("state-year survivor test-rate tercile", "sy_rate"),
+        ("state survivor test-rate tercile (pooled years)", "st_rate"),
+    ):
+        # terciles over survivor *drivers* so that each group holds a third of surviving drivers
+        ranks = d.loc[d["driver_status"] == "survived", col]
+        cuts = np.quantile(ranks, [1 / 3, 2 / 3])
+        lab = np.select([d[col] <= cuts[0], d[col] <= cuts[1]], ["low", "middle"], "high")
+        for g_name in ("low", "middle", "high"):
+            m = lab == g_name
+            lo, hi = float(d.loc[m, col].min()), float(d.loc[m, col].max())
+            for status in ("survived", "killed"):
+                rows.append(
+                    _sens_row(
+                        d[m & (d["driver_status"] == status).to_numpy()],
+                        scheme,
+                        g_name,
+                        status,
+                        lo,
+                        hi,
+                    )
+                )
+    for thr in CUMULATIVE_RATES:
+        m = d["sy_rate"] >= thr
+        for status in ("survived", "killed"):
+            rows.append(
+                _sens_row(
+                    d[m & (d["driver_status"] == status)],
+                    "cumulative: state-year survivor test rate >=",
+                    f"{thr:.0%}",
+                    status,
+                    float(d.loc[m, "sy_rate"].min()),
+                    float(d.loc[m, "sy_rate"].max()),
+                )
+            )
+    return pd.DataFrame(rows)
+
+
 def restraint_reporting() -> pd.DataFrame:
     # Stratified by recorded person severity (INJ_SEV; 9 = unknown), see observed_severity().
     df, design = data.crss_person(outcome=None)
@@ -401,12 +546,15 @@ def alcohol_coding_sensitivity() -> pd.DataFrame:
 
 
 def run() -> dict[str, pd.DataFrame]:
+    drivers = _driver_status(data.fars_person())
     out = {
         "unknown_by_severity": unknown_by_severity(),
         "unknown_by_year": unknown_by_year(),
         "fars_crss_fatal_composition": fars_crss_fatal_composition(),
         "fars_testing": fars_testing(),
         "police_vs_bac": police_vs_bac(),
+        "alcohol_testing_share": alcohol_testing_share(drivers),
+        "police_vs_bac_selection": police_vs_bac_selection(drivers),
         "restraint_reporting": restraint_reporting(),
         "qba_grid": qba_grid(),
         "alcohol_coding_sensitivity": alcohol_coding_sensitivity(),
@@ -417,6 +565,8 @@ def run() -> dict[str, pd.DataFrame]:
         "fars_crss_fatal_composition": "Attribute shares among fatal crashes: CRSS (weighted, 95% CI) vs FARS (census)",
         "fars_testing": "Alcohol and drug test rates among FARS drivers by survival status, year and state",
         "police_vs_bac": "Police-reported alcohol vs measured BAC>=0.08 among tested FARS drivers",
+        "alcohol_testing_share": "Share of killed and surviving FARS drivers alcohol-tested and in the police-vs-BAC sample (selection into measurement)",
+        "police_vs_bac_selection": "Police-reported alcohol vs measured BAC>=0.08 by how widely surviving drivers are tested (state-year survivor test-rate terciles, cumulative thresholds, state terciles), killed drivers alongside",
         "restraint_reporting": "Restraint reporting among CRSS light-vehicle occupants aged 13+ by KABCO",
         "qba_grid": "Quantitative bias analysis: crude fatal RR corrected for outcome-dependent exposure sensitivity",
         "alcohol_coding_sensitivity": "Adjusted fatal RR for alcohol under imputed / complete-case / unknown-as-no codings, by period",

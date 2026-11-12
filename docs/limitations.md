@@ -10,10 +10,10 @@ policy questions require data that do not exist in this repository.
 |---|---|---|
 | Probability of a crash per trip, mile, hour or driver | No exposure data (travel, licensing, vehicle-miles) in either system | Relative involvement by quasi-induced exposure (RQ7) under explicit assumptions; severity *given* a crash |
 | P(fatal \| crash) from FARS | FARS contains only fatal crashes | Severity models use CRSS; FARS is used for counts and composition |
-| Effect of speed cameras, sobriety checkpoints, roadside drug testing, belt enforcement, campaigns | No camera locations, enforcement intensity, checks performed, citations, campaign exposure or costs anywhere in the archives (checked: `outputs/audit/column_inventory.csv` contains no such fields) | Evidence ledger + simulator with user-supplied mechanism and effect parameters; break-even and threshold analysis |
-| Lives saved by any intervention | Requires the above | Conditional, labelled-hypothetical projections only |
+| Effect of speed cameras, sobriety checkpoints, roadside drug testing, belt enforcement, campaigns | No camera locations, enforcement intensity, checks performed, citations, campaign exposure or costs anywhere in the archives (checked: `outputs/audit/column_inventory.csv` contains no such fields) | Evidence ledger restating measured associations; observed deaths by overlapping segment; no effect is estimated |
+| Lives saved by any intervention | Requires the above | None reported; deaths in each segment are counts, not preventable fractions |
 | Causal effect of speeding or alcohol on severity | Observational data; behaviours recorded by police after the crash; unmeasured confounding (travel speed, vehicle mass, occupant frailty beyond age) | Adjusted associations, sensitivity and bias analysis; the within-vehicle belt analysis is the closest design to a causal estimate and has its own caveats |
-| Costs and monetary values | No cost data in the repository | Cost model requires user inputs; no defaults |
+| Costs and monetary values | No cost data in the repository | None |
 
 ## 2. Measurement
 
@@ -137,9 +137,9 @@ policy questions require data that do not exist in this repository.
 ## 7. Phase 2 additions
 
 * **No individual attribution.** No analysis identifies the cause of a particular death or the
-  share of a death "due to" each factor. Shapley allocations in `cases/` and `contributions/` are
-  allocations of model quantities; they change with the scale (risk difference vs log risk
-  ratio), the reference case and the factor set, and are reported precisely to show this.
+  share of a death "due to" each factor. Shapley allocations in `contributions/` and
+  `speeding/shapley` are allocations of model quantities; they depend on the factor set and on
+  the order in which factors are added (the range over orderings is reported).
 * **Drugs.** CRSS has only police-reported drug involvement (50–70% unknown after 2019) and the
   police co-record drugs with alcohol several times more often than toxicology finds them
   together. No drug severity association, attributable fraction or ranking is reported as a

@@ -14,9 +14,8 @@ For every intervention the ledger records, with provenance:
 9. the assumptions a numeric projection would require;
 10. a verdict on whether a defensible numeric policy-effect estimate is possible.
 
-The ledger is the bridge between empirical findings and the simulator: it fixes which
-numbers in Layer A of the simulator are observed / estimated / adjusted associations, and which
-inputs must come from the user.
+The ledger restates measured results (with their provenance) and records what the data cannot
+identify; it estimates no intervention effect.
 """
 
 from __future__ import annotations
@@ -29,6 +28,7 @@ import pandas as pd
 from nhtsa_stats.analysis import data
 from nhtsa_stats.processing import harmonize as h
 from nhtsa_stats.reporting.io import load_table, save_json, save_table
+from nhtsa_stats.simulation import baseline
 
 log = logging.getLogger(__name__)
 MODULE = "policy"
@@ -74,11 +74,9 @@ def segment_deaths() -> dict[str, dict]:
     per = data.fars_person(WINDOW)
     killed = per[per["killed"] == 1].copy()
     k = len(WINDOW)
-    from nhtsa_stats.simulation import engine  # segment definitions shared with the simulator
-
     seg_crash = {
         "speeding": crash["speeding"] == 1,
-        "speeding_exceeded_limit": crash["speeding_type"] == engine.EXCEEDED,
+        "speeding_exceeded_limit": crash["speeding_type"] == baseline.EXCEEDED,
         "alcohol_bac08": None,  # expected value over implicates, handled below
         "drugs_police_reported": crash["drugs"] == 1,
         "night_weekend": (crash["night"] == 1) & (crash["weekend"] == 1),
@@ -106,8 +104,8 @@ def segment_deaths() -> dict[str, dict]:
             "kind": "observed (FARS census)",
         }
     # The population of the within-vehicle belt estimate (LPV occupants aged 13+, front or
-    # second row), as in the simulator's unrestrained segment.
-    lpv = killed[engine.belt_eligible_mask(killed)]
+    # second row), as in the baseline's unrestrained segment.
+    lpv = killed[baseline.belt_eligible_mask(killed)]
     unb = lpv[lpv["restraint"] == "none"]
     out["unrestrained_lpv_occupants"] = {
         "deaths_per_year": len(unb) / k,
@@ -585,7 +583,5 @@ def run() -> dict:
     )
     save_json(seg, MODULE, "segment_deaths")
     out = {"evidence_ledger": ledger, "segment_deaths": seg}
-    from nhtsa_stats.simulation import engine
-
-    out["engine"] = engine.run()
+    out["baseline"] = baseline.run()
     return out

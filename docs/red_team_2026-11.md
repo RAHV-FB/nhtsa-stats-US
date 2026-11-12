@@ -31,7 +31,7 @@ through the templates (CLAUDE.md). The reviewers' scripts show how to compute it
   * verdicts are REFUTED, WEAKENED, SURVIVES or NOT TESTABLE.
 
   No reviewer saw another reviewer's work or any hypothesis from the coordinator. The briefs are
-  in `docs/red_team/`.
+  preserved in Git history at commit 7ee597e.
 * **Verification.** A damaging claim was not taken on trust. Fifteen independent verifiers
   re-checked them in three ways: they re-ran the attacker's scripts, they checked what the
   published text actually says, and they tried to refute the attacker's inference. The
@@ -101,8 +101,8 @@ X2 rated it as bordering on material.
 
 ## 3. Issues, most consequential first
 
-Numbers come from the reviewers' scripts (`scripts/audit/red_team/<ID>/`) or from committed
-tables. Each issue carries the label from §1.
+Numbers come from the reviewers' scripts (preserved in Git history at commit 7ee597e) or from
+committed tables. Each issue carries the label from §1.
 
 ### Material
 
@@ -417,19 +417,7 @@ first, because every number in `reports/` comes from `outputs/tables/`.
 
 ## 7. Reproducing the review
 
-* **Protocol.**
-  * `docs/red_team/BRIEFING.md`: the rules every reviewer followed.
-  * `docs/red_team/FINDINGS_REGISTER.md`: the targets.
-  * `docs/red_team/VERIFY_BRIEF.md`: the verifiers' protocol.
-* **Results.** Reviewer reports are in `docs/red_team/reports/<ID>.md`, including `COVERAGE.md`.
-  Verifier verdicts are in `docs/red_team/verify/<ID>.md`.
-* **Scripts.** They are in `scripts/audit/red_team/<ID>/`, numbered in run order; verifiers'
-  scripts start with `v`. Run them from the repository root after `nhtsa build`:
-
-  ```bash
-  .venv/bin/python scripts/audit/red_team/<ID>/<script>.py
-  ```
-
-  They are single-threaded and print their results. Some take several minutes. Some also write
-  intermediate CSVs to the review session's scratch directory, so create that directory or edit
-  the path before re-running.
+The briefing, the findings register, the verifiers' protocol, the per-reviewer reports and
+verifier verdicts, and the numbered scripts of every reviewer and verifier are preserved in Git
+history at commit 7ee597e (under `docs/red_team/` and `scripts/audit/red_team/<ID>/`); they were
+removed from the working tree. The consolidated results are this document.

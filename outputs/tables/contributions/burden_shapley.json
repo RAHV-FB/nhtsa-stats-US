@@ -21,7 +21,7 @@
   "fars_deaths_per_year"
  ],
  "module": "nhtsa_stats.analysis.contributions",
- "git_commit": "8fe8986",
- "generated_utc": "2026-10-23T09:32:19Z",
+ "git_commit": "7ee597e-dirty",
+ "generated_utc": "2026-11-12T11:49:13Z",
  "fars_deaths_per_year_2022_2024": 41000.0
 }

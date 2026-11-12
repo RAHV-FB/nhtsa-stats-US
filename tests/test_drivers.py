@@ -204,7 +204,7 @@ def test_person_links_resolve_to_driver_rows():
 @pytest.mark.processed
 @needs_data
 def test_fars_drug_test_rates_match_audit():
-    """Killed-driver drug-test rates reproduce docs/audit/alcohol_drugs.md §5.1."""
+    """Killed-driver drug-test rates reproduce the alcohol and drugs audit note §5.1 (Git history, commit 7ee597e)."""
     fd = pl.read_parquet(
         config.PROCESSED_DIR / "fars_driver.parquet",
         columns=["YEAR", "drv_killed", "drv_drug_test_status"],

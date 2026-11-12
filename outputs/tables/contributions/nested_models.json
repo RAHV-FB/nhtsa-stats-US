@@ -30,6 +30,6 @@
   "log_or_minus_log_rr"
  ],
  "module": "nhtsa_stats.analysis.contributions",
- "git_commit": "8fe8986",
- "generated_utc": "2026-10-23T09:28:53Z"
+ "git_commit": "7ee597e-dirty",
+ "generated_utc": "2026-11-12T11:44:23Z"
 }

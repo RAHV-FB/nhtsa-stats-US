@@ -33,6 +33,6 @@
   "rank_fars_deaths_in_crashes_with_factor"
  ],
  "module": "nhtsa_stats.analysis.contributions",
- "git_commit": "8fe8986",
- "generated_utc": "2026-10-23T09:32:27Z"
+ "git_commit": "7ee597e-dirty",
+ "generated_utc": "2026-11-12T11:49:25Z"
 }

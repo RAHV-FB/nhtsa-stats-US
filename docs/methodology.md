@@ -218,13 +218,17 @@ See `docs/model_validation.md`: temporal split (train 2016–2021, validate 2022
 weighted and unweighted metrics, calibration, PSU-cluster bootstrap CIs, and confirmatory
 checks of any machine-learning pattern with the transparent survey models above.
 
-## 10. Policy simulation and costs
+## 10. Interventions: observed segment baseline and evidence ledger
 
-See `docs/policy_assumptions.md`. The simulator separates (A) empirical baseline quantities
-from this database, (B) intervention mechanisms, (C) user-supplied assumptions and (D)
-outcomes, and labels every output *hypothetical*. No effect sizes or prices are supplied by
-the project, except that belt effectiveness defaults to the project's own FARS within-vehicle
-estimate (treated as causal by assumption, and labelled so) when the user gives none.
+The project estimates no intervention effect and projects no outcome of a hypothetical
+programme: the archives contain no enforcement, camera, testing-programme or cost fields
+(`simulation/inventory_enforcement_cost_fields`). `nhtsa analyze policy` writes (i) the evidence
+ledger, which restates measured results per candidate intervention
+(`outputs/tables/policy/`), and (ii) the observed baseline (`nhtsa_stats.simulation.baseline`,
+`outputs/tables/simulation/`): FARS deaths and CRSS crashes by overlapping segment (speeding,
+exceeding the limit, alcohol, drugs, unrestrained light-vehicle occupants), the pairwise overlap
+between segments, and the field inventory. Segment counts are lower bounds (unknown status is
+not counted) and are not preventable fractions.
 
 ## 11. Reproducibility
 
@@ -237,7 +241,7 @@ Random seeds are fixed (`config.RANDOM_SEED`).
 ## 12. Phase 2: factor attribution, confounding and combinations
 
 Plan and estimands: `docs/research_plan_phase2.md`. Modules (each `nhtsa analyze <name>`):
-`speeding`, `drugs`, `multifactor`, `restraint_behaviour`, `contributions`, `stages`, `cases`.
+`speeding`, `drugs`, `multifactor`, `restraint_behaviour`, `contributions`, `stages`.
 
 ### 12.1 Observation levels and linkage (`processing/drivers.py`)
 
@@ -270,7 +274,7 @@ the rest of the model is visible. Stratum-specific RRs use model-A blocks minus 
 define the stratum; heterogeneity between two strata is the ratio of their RRs with a CI from
 the joint PSU-level linearisation.
 
-### 12.3 Factorial margins (`analysis/factorial.py`, `analysis/multifactor.py`, `analysis/cases.py`)
+### 12.3 Factorial margins (`analysis/factorial.py`, `analysis/multifactor.py`)
 
 For k binary factors, a survey logistic model with all main effects (factor levels other than
 exposed/reference, e.g. unknown, keep their own coefficients), a product term for every
@@ -281,12 +285,7 @@ linearised. Contrasts: single-factor RR/RD within every combination of the other
 three- and four-way additive contrasts Σ(−1)^(k−|s|)p_s and their log-scale (multiplicative)
 analogues; excess of the joint RD over the sum of single RDs. A combination whose *recorded*
 cell has fewer than 30 sample units or 10 events is withheld together with every contrast using
-it. Holm adjustment across the registered family, per scale. The case explorer's model is saturated
-in the case factors (main effects and products for every subset of factors), so it is calibrated
-within every factor cell by construction; it withholds model risks, contrasts and allocations
-whenever any required combination is unsupported. (A first version with pairwise products only
-was mis-calibrated in two large cells — observed/predicted 0.59 and 1.74 — which a calibration
-test caught; higher-order interactions among the case factors are therefore material.)
+it. Holm adjustment across the registered family, per scale.
 
 Nested models (§12.4) add police-reported drugs as a separate step after the other behaviours
 and the driver/vehicle mix, because the police co-record drugs with alcohol; burden and rank

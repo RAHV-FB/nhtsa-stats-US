@@ -1,0 +1,31 @@
+{
+ "table": "drugs/crss_bounds_nondifferential.csv",
+ "description": "Crude fatal RR of police-reported drug involvement when unknown crashes are allocated non-differentially (same rule for fatal and non-fatal), with the published grid extremes for comparison",
+ "population": "CRSS police-reported crashes with known severity",
+ "unit": "crash",
+ "outcome": "fatal",
+ "method": "Weighted 2x2 with unknown crashes allocated by scenario; point estimates",
+ "inputs": [
+  "data/processed/fars_driver.parquet",
+  "data/processed/fars_crash.parquet",
+  "data/processed/crss_crash.parquet"
+ ],
+ "rows": 48,
+ "columns": [
+  "period",
+  "share_unknown",
+  "rr_complete_case",
+  "known_drug_prevalence_fatal",
+  "known_drug_prevalence_nonfatal",
+  "row_type",
+  "allocation",
+  "parameter",
+  "parameter_value",
+  "rr",
+  "rr_min",
+  "rr_max"
+ ],
+ "module": "nhtsa_stats.analysis.drugs",
+ "git_commit": "7ee597e-dirty",
+ "generated_utc": "2026-11-12T11:50:38Z"
+}

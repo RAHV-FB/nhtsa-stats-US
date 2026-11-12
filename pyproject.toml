@@ -20,7 +20,7 @@ dependencies = [
 app = ["streamlit>=1.60", "altair>=5"]
 
 [dependency-groups]
-dev = ["pytest>=8", "ruff>=0.6", "mypy>=1.11", "pytest-cov>=5"]
+dev = ["pytest>=8", "ruff>=0.6", "pytest-cov>=5"]
 
 [project.scripts]
 nhtsa = "nhtsa_stats.cli:main"
@@ -35,9 +35,7 @@ packages = ["src/nhtsa_stats"]
 [tool.ruff]
 line-length = 100
 target-version = "py311"
-src = ["src", "tests", "app", "scripts"]
-# One-off domain-audit check scripts (see scripts/audit/README.md) are kept as run, not linted.
-extend-exclude = ["scripts/audit"]
+src = ["src", "tests", "app"]
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "B", "UP", "SIM", "NPY", "PD002", "RUF"]

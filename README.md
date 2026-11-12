@@ -13,12 +13,11 @@ police-reported crashes) for 2016–2024 — to study:
 * who dies given involvement (person-level and within-vehicle matched designs), and which
   driver groups are over-involved in crashes (quasi-induced exposure);
 * what can — and cannot — be inferred about interventions such as speed cameras or roadside
-  alcohol/drug testing, through an evidence ledger and a transparent, assumption-driven
-  policy simulator with cost-effectiveness and break-even tools.
+  alcohol/drug testing, through an evidence ledger and the observed deaths by overlapping
+  segment (speeding, alcohol, drugs, unrestrained occupants).
 
 No external data are used. Every empirical number traces to the raw archives through code in
-`src/nhtsa_stats` and an output table with a provenance sidecar. Hypothetical policy outputs
-are always labelled as such.
+`src/nhtsa_stats` and an output table with a provenance sidecar.
 
 > **Start here:** `reports/road_deaths.md` (where the deaths are: behaviours, victims, driver
 > records, vehicles, places, states; the basis of the public website) · `reports/findings.md`
@@ -29,7 +28,7 @@ are always labelled as such.
 > **Phase 2** — how overlapping factors (speeding, alcohol, drugs, restraint) combine and which
 > associations survive adjustment and bias analysis: `reports/factor_contributions.md`,
 > `reports/speeding_confounding.md`, `reports/alcohol_drugs_restraints.md`,
-> `reports/multifactor_interactions.md`, `reports/case_comparisons.md`; plan in
+> `reports/multifactor_interactions.md`; plan in
 > `docs/research_plan_phase2.md`.
 
 ## Quick start
@@ -56,11 +55,11 @@ numerical libraries can change the final digits). Individual steps:
 | Command | What it does | Output |
 |---|---|---|
 | `nhtsa ingest` | Validate archives (LFS pointer check, CRC, SHA-256 vs committed pointer) and convert changed ones to typed Parquet (incremental) | `data/interim/` (git-ignored) |
-| `nhtsa inventory` | Tables, columns, embedded codebook, availability matrix | `outputs/audit/*.csv` |
+| `nhtsa inventory` | Tables, columns, embedded codebook, availability matrix | `outputs/audit/*.csv` (the codebook and availability matrix are git-ignored) |
 | `nhtsa validate` | 841 relational-integrity checks; exits non-zero on structural failure | `outputs/audit/integrity_checks.csv` |
 | `nhtsa features` | Harmonised analytic datasets | `data/processed/` (git-ignored) |
 | `nhtsa analyze [module …]` | Run analyses (`nhtsa list` shows modules) | `outputs/tables/<module>/`, `outputs/figures/` |
-| `nhtsa analyze speeding drugs multifactor restraint_behaviour contributions stages cases` | Phase-2 modules (add about 75 minutes on 4 cores; the speeding lattices take most of it) | `outputs/tables/<module>/` |
+| `nhtsa analyze speeding drugs multifactor restraint_behaviour contributions stages` | Phase-2 modules (add about 75 minutes on 4 cores; the speeding lattices take most of it) | `outputs/tables/<module>/` |
 
 Changing one analysis only requires `nhtsa analyze <module>`; the cache and datasets are
 reused.
@@ -75,10 +74,10 @@ reused.
 | Use | Observed counts and composition of fatal crashes; within-vehicle designs | Denominators, severity rates and models (design-based: 25 strata, 67 PSUs) |
 
 The archives contain no PDF manuals; variable meanings come from the value labels embedded
-in the CSVs (harvested into `outputs/audit/codebook.csv`) and, where labels are absent (CRSS
+in the CSVs (harvested into `outputs/audit/codebook.csv` by `nhtsa inventory`) and, where labels are absent (CRSS
 2016–2018, all auxiliary files), from verified cross-tabulation against labelled fields. See
 `docs/data_audit.md`, `docs/data_dictionary.md`, `docs/variable_harmonization.md` and the
-domain appendices in `docs/audit/`.
+consolidated audit in `docs/audit_2026-11.md`.
 
 ## Repository layout
 
@@ -91,19 +90,18 @@ src/nhtsa_stats/
                           driver-level files and person-to-driver links (Phase 2)
   analysis/               survey inference core and the research modules
   models/                 severity-prediction pipeline (temporal validation)
-  simulation/             evidence ledger, intervention simulator, cost model
+  simulation/             evidence ledger, observed deaths by overlapping segment
   reporting/              provenance-stamped outputs, generated documentation
 app/                      Streamlit research interface
 docs/                     plan, audit, dictionary, harmonisation, methodology, limitations,
-                          model validation, policy assumptions (+ docs/audit/, docs/generated/)
-reports/                  main findings (findings.md, findings.json), seven topic reports,
+                          model validation, consolidated audit records (+ docs/generated/)
+reports/                  main findings (findings.md, findings.json), topic reports,
                           templates/
 outputs/                  generated tables/figures (small, committed) and audit inventory
 tests/                    unit tests (synthetic fixtures) and data tests (real cache)
 website/                  static public site: templates/index.html (rendered to index.html by
                           `nhtsa analyze site`), assets/, data/ (CSV downloads synced from
                           outputs/tables/), tools/sync_public_data.py, tests/
-scripts/                  policy_worked_examples.py; audit/ one-off domain-audit scripts
 ```
 
 ## Findings
@@ -136,9 +134,8 @@ the app). In brief — all conditional on a police-reported crash, and associati
    reported non-fatal crashes.
 9. **Measurement.** Police-recorded behaviours are recorded more completely in severe crashes;
    drug and distraction fields cannot support severity or trend analysis.
-10. **Interventions.** The data identify no intervention effect; the policy tools show where
-    deaths concentrate and what an intervention would have to achieve, under stated
-    assumptions (`reports/policy_analysis.md`).
+10. **Interventions.** The data identify no intervention effect; the policy report shows where
+    deaths concentrate and how the target segments overlap (`reports/policy_analysis.md`).
 
 ## Phase 2 findings: overlapping factors
 
@@ -172,19 +169,17 @@ caveats in the Phase-2 reports (every number there is rendered from `outputs/tab
    alcohol ranks first on deaths involved and attributed burden; predictive importance depends
    on the measure. The
    hypothesised ranking drugs > alcohol > belts > speeding is not supported.
-7. **No individual attribution.** The case explorer shows that "shares" of a modelled risk
-   change with scale and order and often require combinations that do not exist in the data.
+7. **No individual attribution.** "Shares" of a modelled risk or attributable fraction change
+   with the factor set and the order of addition (`docs/limitations.md` §7).
 
-New interface pages: *Factor contributions*, *Multiple-factor explorer*, *Case comparison*.
+New interface pages: *Factor contributions*, *Multiple-factor explorer*.
 
 ## What this project cannot tell you
 
 The databases contain no exposure (trips, miles), enforcement, camera, testing-programme or
 cost data. Therefore they cannot estimate crash rates per mile or trip, the effect of any
-enforcement programme, or lives saved by an intervention. The simulator makes the required
-assumptions explicit, computes conditional projections and break-even thresholds, and never
-presents them as measured effects. Details: `docs/limitations.md`,
-`docs/policy_assumptions.md`.
+enforcement programme, or lives saved by an intervention. The policy report states what the
+data do show (deaths by overlapping segment) and nothing more. Details: `docs/limitations.md`.
 
 ## Public research website
 

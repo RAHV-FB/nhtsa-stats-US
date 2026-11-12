@@ -37,11 +37,14 @@ from dataclasses import dataclass
 import numpy as np
 import pandas as pd
 import polars as pl
+from scipy import stats
 
 from nhtsa_stats import config
+from nhtsa_stats.analysis import confounding as cf
 from nhtsa_stats.analysis import data, factorial, specs
+from nhtsa_stats.analysis import speeding as sp
 from nhtsa_stats.analysis.factorial import Factor
-from nhtsa_stats.analysis.survey import SurveyDesign
+from nhtsa_stats.analysis.survey import MarginSet, SurveyDesign
 from nhtsa_stats.processing.harmonize import LPV_BODY_GROUPS
 from nhtsa_stats.reporting.io import save_table
 
@@ -560,49 +563,181 @@ def _other_vehicle_behaviour(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
+def _victim_record(
+    v: VictimSpec, df: pd.DataFrame, design: SurveyDesign, covariates: Sequence[str]
+) -> dict:
+    """One row of the victims table: the factorial speeding x alcohol model of ``v`` fitted with
+    the given covariates."""
+    mask = v.select(df)
+    sub, sd = df.loc[mask].reset_index(drop=True), design.subset(mask)
+    s_col, a_col = v.behaviour_cols
+    factors = [
+        Factor("speeding", s_col, ("yes",), ("no",)),
+        Factor("alcohol", a_col, ("yes",), ("no",)),
+    ]
+    covs = [c for c in covariates if c not in (s_col, a_col)]
+    res = factorial.fit_factorial(sub, sd, factors, covs, v.outcome)
+    mt = factorial.margins_table(res).set_index("key")
+    it = factorial.interaction_table(res).iloc[0]
+    rec = {
+        "victim": v.name,
+        "population": v.description,
+        "n": len(sub),
+        "n_events": res.n_events,
+        "risk_neither": mt.loc["00", "adj_risk"],
+        "risk_neither_low": mt.loc["00", "adj_risk_low"],
+        "risk_neither_high": mt.loc["00", "adj_risk_high"],
+    }
+    for key, lab in (("10", "speeding_only"), ("01", "alcohol_only"), ("11", "both")):
+        rec[f"risk_{lab}"] = mt.loc[key, "adj_risk"]
+        for c in ("rr_vs_none", "rd_vs_none"):
+            rec[f"{c.split('_')[0]}_{lab}"] = mt.loc[key, c]
+            rec[f"{c.split('_')[0]}_{lab}_low"] = mt.loc[key, f"{c}_low"]
+            rec[f"{c.split('_')[0]}_{lab}_high"] = mt.loc[key, f"{c}_high"]
+        rec[f"n_{lab}"] = int(mt.loc[key, "n"])
+        rec[f"events_{lab}"] = int(mt.loc[key, "n_events"])
+    rec.update(
+        additive_contrast=it["additive_contrast"],
+        additive_contrast_low=it["additive_contrast_low"],
+        additive_contrast_high=it["additive_contrast_high"],
+        multiplicative_ratio=it["multiplicative_ratio"],
+        multiplicative_ratio_low=it["multiplicative_ratio_low"],
+        multiplicative_ratio_high=it["multiplicative_ratio_high"],
+        flag=it["flag"],
+    )
+    return rec
+
+
 def victims_table(frames: dict) -> pd.DataFrame:
     rows = []
     for v in VICTIMS:
         df, design = frames[v.frame]
-        mask = v.select(df)
-        sub, sd = df.loc[mask].reset_index(drop=True), design.subset(mask)
-        s_col, a_col = v.behaviour_cols
-        factors = [
-            Factor("speeding", s_col, ("yes",), ("no",)),
-            Factor("alcohol", a_col, ("yes",), ("no",)),
-        ]
-        covs = [c for c in v.covariates if c not in (s_col, a_col)]
-        res = factorial.fit_factorial(sub, sd, factors, covs, v.outcome)
-        mt = factorial.margins_table(res).set_index("key")
-        it = factorial.interaction_table(res).iloc[0]
-        rec = {
-            "victim": v.name,
-            "population": v.description,
-            "n": len(sub),
-            "n_events": res.n_events,
-            "risk_neither": mt.loc["00", "adj_risk"],
-            "risk_neither_low": mt.loc["00", "adj_risk_low"],
-            "risk_neither_high": mt.loc["00", "adj_risk_high"],
-        }
-        for key, lab in (("10", "speeding_only"), ("01", "alcohol_only"), ("11", "both")):
-            rec[f"risk_{lab}"] = mt.loc[key, "adj_risk"]
-            for c in ("rr_vs_none", "rd_vs_none"):
-                rec[f"{c.split('_')[0]}_{lab}"] = mt.loc[key, c]
-                rec[f"{c.split('_')[0]}_{lab}_low"] = mt.loc[key, f"{c}_low"]
-                rec[f"{c.split('_')[0]}_{lab}_high"] = mt.loc[key, f"{c}_high"]
-            rec[f"n_{lab}"] = int(mt.loc[key, "n"])
-            rec[f"events_{lab}"] = int(mt.loc[key, "n_events"])
-        rec.update(
-            additive_contrast=it["additive_contrast"],
-            additive_contrast_low=it["additive_contrast_low"],
-            additive_contrast_high=it["additive_contrast_high"],
-            multiplicative_ratio=it["multiplicative_ratio"],
-            multiplicative_ratio_low=it["multiplicative_ratio_low"],
-            multiplicative_ratio_high=it["multiplicative_ratio_high"],
-            flag=it["flag"],
-        )
-        rows.append(rec)
+        rows.append(_victim_record(v, df, design, v.covariates))
         log.info("victims: %s done", v.name)
+    return pd.DataFrame(rows)
+
+
+# Covariates that exist and mean the same for every person-level unit (driver, passenger,
+# other-vehicle occupant, pedestrian): the crash environment and the victim's own age band and
+# sex.  Excluded because they are not defined for every unit or change meaning between units:
+# the victim's belt use (none for pedestrians), vehicle body (the victim's vehicle, or the
+# striking vehicle for pedestrians), seat role, the other driver's behaviour, and the driver /
+# vehicle mix of the crash (a crash-level quantity).
+COMMON_COVARIATES = [*ENV, "age_band", "sex"]
+COMMON_CONFIG_COVARIATES = [*COMMON_COVARIATES, "crash_type", "n_vehicles"]
+
+
+def victims_common_spec_table(frames: dict) -> pd.DataFrame:
+    """Speeding and alcohol of the responsible driver against the four person-level victims
+    under ONE adjustment specification for all units, next to the unit-specific specification
+    of ``victims``.  The crash-level row is omitted (no victim covariates exist for a crash).
+
+    Specifications:
+    * ``unit-specific (published)`` -- the covariates of ``victims``, which differ by unit
+      (belt use, body type, role, other driver's behaviour...);
+    * ``common`` -- crash environment + victim age band + victim sex, identical for all units;
+    * ``common + crash configuration`` -- the above plus crash type and number of vehicles
+      (a possible mediator of both behaviours).
+    Same populations, outcomes and estimator as ``victims``; only the covariates differ."""
+    rows = []
+    specs_ = [
+        ("unit-specific (published)", None),
+        ("common: environment + victim age band + sex", COMMON_COVARIATES),
+        ("common + crash configuration", COMMON_CONFIG_COVARIATES),
+    ]
+    for v in VICTIMS[1:]:
+        df, design = frames[v.frame]
+        if "age_band" not in df:
+            df = df.assign(age_band=df["age"])  # driver frame carries the band as ``age``
+        for label, covs in specs_:
+            use = v.covariates if covs is None else covs
+            rec = _victim_record(v, df, design, use)
+            rows.append(
+                {
+                    "specification": label,
+                    "covariates": ",".join(c for c in use if c not in v.behaviour_cols),
+                    **rec,
+                }
+            )
+            log.info("victims common: %s / %s done", v.name, label)
+    return pd.DataFrame(rows)
+
+
+# --------------------------------------------------------------------------------------
+# Speeding within alcohol strata, with and without crash configuration
+# --------------------------------------------------------------------------------------
+def speeding_alcohol_strata_configuration(
+    outcomes: Sequence[str] = ("fatal", "ka"),
+) -> pd.DataFrame:
+    """Adjusted RR of speeding exposures within strata of imputed alcohol, with and without
+    crash configuration (crash type, number of vehicles) in the adjustment set.
+
+    The ``speeding/strata`` rows (6.5 without alcohol vs 3.3 with alcohol for exceedance) use
+    the environment blocks only.  This table refits the same stratified models with the
+    configuration block added; the first specification reproduces the published rows
+    (an internal check).  Crash configuration may be a mediator of speeding (speeding is
+    more common in single-vehicle crashes), so neither specification is the 'true' one."""
+    df, design = sp.load_frame()
+    cd = cf.cluster_design(design)
+    t = cd.tcrit()
+    masks = sp.strata_definitions(df)["alcohol_imputed"][0]
+    rows = []
+    for outcome in outcomes:
+        for ex_name in ("exceeded", "speeding_any"):
+            ex = sp.EXPOSURES[ex_name]
+            for spec_label, add_cfg in (
+                ("published strata specification (no crash configuration)", False),
+                ("+ crash configuration", True),
+            ):
+                blocks = [b for b in ex.blocks if b not in ("configuration", "alcohol")]
+                if add_cfg:
+                    blocks.append("configuration")
+                fits, recs = {}, []
+                for label, mask in masks.items():
+                    sub, sd = df.loc[mask].reset_index(drop=True), design.subset(mask)
+                    for c in sub.columns:
+                        if isinstance(sub[c].dtype, pd.CategoricalDtype):
+                            sub[c] = sub[c].cat.remove_unused_categories()
+                    exposed = sub[ex.column].astype(str) == ex.exposed
+                    f = cf.fit_subset(sub, sd, ex, blocks, outcome)
+                    fits[label] = f
+                    ms = MarginSet({"lr": f.log_rr}, {"lr": f.t_log_rr}, cd)
+                    lr, se = cf.linear_contrast(ms, {"lr": 1.0})
+                    recs.append(
+                        {
+                            "exposure": ex_name,
+                            "outcome": outcome,
+                            "specification": spec_label,
+                            "stratum": f"alcohol: {label}",
+                            "n_crashes": int(mask.sum()),
+                            "n_exposed": int(exposed.sum()),
+                            "n_exposed_events": int(sub.loc[exposed, outcome].sum()),
+                            "adj_rate_exposed": f.m_exposed,
+                            "adj_rate_reference": f.m_reference,
+                            "rr": float(np.exp(lr)),
+                            "rr_low": float(np.exp(lr - t * se)),
+                            "rr_high": float(np.exp(lr + t * se)),
+                            "rd": f.m_exposed - f.m_reference,
+                            "blocks": cf.subset_key(blocks),
+                            "ratio_alcohol_to_no_alcohol": np.nan,
+                            "ratio_low": np.nan,
+                            "ratio_high": np.nan,
+                            "ratio_p": np.nan,
+                        }
+                    )
+                fa_, fb = fits["no alcohol"], fits["alcohol"]
+                ms = MarginSet(
+                    {"a": fa_.log_rr, "b": fb.log_rr}, {"a": fa_.t_log_rr, "b": fb.t_log_rr}, cd
+                )
+                dd, se = cf.linear_contrast(ms, {"b": 1.0, "a": -1.0})
+                recs[-1].update(
+                    ratio_alcohol_to_no_alcohol=float(np.exp(dd)),
+                    ratio_low=float(np.exp(dd - t * se)),
+                    ratio_high=float(np.exp(dd + t * se)),
+                    ratio_p=float(2 * stats.t.sf(abs(dd / se), cd.df)),
+                )
+                rows.extend(recs)
+                log.info("strata+config %s/%s/%s done", outcome, ex_name, spec_label)
     return pd.DataFrame(rows)
 
 
@@ -730,4 +865,30 @@ def run() -> dict[str, pd.DataFrame]:
         inputs=INPUT,
     )
     out["victims"] = vic
+    vc = victims_common_spec_table(frames)
+    save_table(
+        vc,
+        MODULE,
+        "victims_common_spec",
+        description="Responsible driver's speeding and alcohol against driver, passenger, other-vehicle occupant and pedestrian victims under the unit-specific specification and under one common adjustment specification (environment, victim age band, sex; and with crash configuration)",
+        population=pop,
+        unit="per row",
+        outcome="death of the person in each row",
+        method=method,
+        inputs=INPUT,
+    )
+    out["victims_common_spec"] = vc
+    sc = speeding_alcohol_strata_configuration()
+    save_table(
+        sc,
+        MODULE,
+        "speeding_alcohol_strata_configuration",
+        description="Adjusted RR of limit exceedance (and any speeding) within strata of imputed alcohol with and without crash configuration in the adjustment set; the first specification reproduces speeding/strata",
+        population="CRSS police-reported crashes 2016-2024 with known imputed severity",
+        unit="crash",
+        outcome="fatal; fatal or serious (KA)",
+        method="Model-A-type survey logistic fits within alcohol strata (speeding.stratified_table specification), optionally plus crash type and number of vehicles; standardised RR; Taylor linearisation (42 df); ratio of the two strata RRs by joint linearisation",
+        inputs=INPUT,
+    )
+    out["speeding_alcohol_strata_configuration"] = sc
     return out

@@ -21,6 +21,6 @@
   "STATE"
  ],
  "module": "nhtsa_stats.analysis.measurement",
- "git_commit": "ef704fd",
- "generated_utc": "2026-10-23T02:34:17Z"
+ "git_commit": "7ee597e-dirty",
+ "generated_utc": "2026-11-12T11:40:07Z"
 }

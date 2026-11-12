@@ -2,7 +2,7 @@
 docs/research_plan_phase2.md §5.2.)
 
 Phase 1 declared drug fields unusable on the strength of audit scripts
-(``docs/audit/alcohol_drugs.md``).  This module turns that verdict into reproducible tables and
+(the alcohol and drugs audit note, Git history, commit 7ee597e).  This module turns that verdict into reproducible tables and
 tests whether any restricted analysis is defensible.
 
 Data
@@ -51,7 +51,11 @@ from nhtsa_stats.reporting.io import save_table
 log = logging.getLogger(__name__)
 MODULE = "drugs"
 FARS_POP = "FARS drivers (PER_TYP 1) of in-transport vehicles in fatal crashes, 2016-2024"
-INPUT = ["data/processed/fars_driver.parquet", "data/processed/crss_crash.parquet"]
+INPUT = [
+    "data/processed/fars_driver.parquet",
+    "data/processed/fars_crash.parquet",
+    "data/processed/crss_crash.parquet",
+]
 PERIODS = {
     "2016-2021 (3-digit codes)": range(2016, 2022),
     "2022-2024 (4-digit codes)": range(2022, 2025),
@@ -276,6 +280,70 @@ def co_occurrence(df: pd.DataFrame) -> pd.DataFrame:
                 "odds_ratio_high": hi,
             }
         )
+    return pd.DataFrame(rows)
+
+
+def _prevalence_ratio(a: float, b: float, c: float, d: float) -> tuple[float, float, float]:
+    """Ratio of P(drug | alcohol) to P(drug | no alcohol) with a log-scale Wald CI (drivers
+    treated as independent)."""
+    if min(a, c) <= 0 or a + b <= 0 or c + d <= 0:
+        return np.nan, np.nan, np.nan
+    lr = np.log((a / (a + b)) / (c / (c + d)))
+    se = np.sqrt(1 / a - 1 / (a + b) + 1 / c - 1 / (c + d))
+    return float(np.exp(lr)), float(np.exp(lr - 1.96 * se)), float(np.exp(lr + 1.96 * se))
+
+
+SAME_DRIVER_MEASURES = (
+    ("toxicology: BAC >= .08 and any psychoactive drug", "drv_bac08_measured", "drv_drug_any"),
+    ("police report: alcohol and drugs both recorded", "drv_pr_alcohol", "drv_pr_drugs"),
+    ("cross: police alcohol and toxicology drug", "drv_pr_alcohol", "drv_drug_any"),
+    ("cross: toxicology BAC >= .08 and police drugs", "drv_bac08_measured", "drv_pr_drugs"),
+)
+
+
+def same_driver_cooccurrence(df: pd.DataFrame) -> pd.DataFrame:
+    """Alcohol-drug co-occurrence by toxicology and by police report on the SAME drivers.
+
+    ``co_occurrence`` compares the two sources on different driver sets (toxicology: tested for
+    both with a determinate drug result; police: both police fields known).  Here every row
+    uses the drivers for whom *all four* are available -- a drug test with a determinate
+    result, a measured BAC, and known police alcohol and drug fields -- so the two odds ratios
+    differ only by source.  Woolf / log-scale Wald CIs ignore crash clustering.  The set is
+    selected (tested and police-recorded drivers); it supports a comparison of sources, not
+    population prevalence."""
+    rows = []
+    for surv in ("killed", "survived"):
+        g = df[
+            (df["survival"] == surv)
+            & (df["drug_tested"] == 1)
+            & df["drv_drug_any"].notna()
+            & df["drv_bac08_measured"].notna()
+            & df["drv_pr_alcohol"].notna()
+            & df["drv_pr_drugs"].notna()
+        ]
+        for measure, acol, dcol in SAME_DRIVER_MEASURES:
+            x, z = g[acol] == 1, g[dcol] == 1
+            a, b, c, d = (x & z).sum(), (x & ~z).sum(), (~x & z).sum(), (~x & ~z).sum()
+            o, lo, hi = _or2x2(a, b, c, d)
+            pr, plo, phi = _prevalence_ratio(a, b, c, d)
+            rows.append(
+                {
+                    "driver_set": "same drivers: drug-tested (determinate), BAC measured, "
+                    "police alcohol and drugs known",
+                    "measure": measure,
+                    "survival": surv,
+                    "n": len(g),
+                    "share_alcohol": x.mean(),
+                    "share_drug": z.mean(),
+                    "share_both": (x & z).mean(),
+                    "odds_ratio": o,
+                    "odds_ratio_low": lo,
+                    "odds_ratio_high": hi,
+                    "prevalence_ratio_drug_by_alcohol": pr,
+                    "prevalence_ratio_low": plo,
+                    "prevalence_ratio_high": phi,
+                }
+            )
     return pd.DataFrame(rows)
 
 
@@ -518,6 +586,178 @@ def crss_adjusted() -> pd.DataFrame:
     return pd.DataFrame(rows)
 
 
+E_GRID = (0.0, 0.05, 0.1, 0.2, 0.3, 0.5, 1.0)
+
+
+def _rr_alloc(a, b, c, d, uf, un, ef, en) -> float:
+    A, B = a + ef * uf, b + en * un
+    C, D = c + (1 - ef) * uf, d + (1 - en) * un
+    return float((A / (A + B)) / (C / (C + D)))
+
+
+def crss_bounds_nondifferential() -> pd.DataFrame:
+    """Crude fatal RR of police-reported drug involvement when unknown crashes are allocated
+    NON-differentially, i.e. the same way whether the crash was fatal or not.
+
+    ``crss_bounds`` spans a grid in which unknown-positive prevalence may differ between fatal
+    and non-fatal crashes by up to a factor of 3 in either direction (k_fatal, k_nonfatal);
+    its extremes are the off-diagonal corners.  Two non-differential families are added:
+
+    * ``proportional``: unknown prevalence = k x the known prevalence of the same outcome
+      group, k_fatal = k_nonfatal = k (the diagonal of the published grid);
+    * ``equal absolute prevalence``: the same share e of unknown crashes is drug-positive in
+      fatal and non-fatal crashes.
+
+    Range rows give the minimum and maximum over each family and, for comparison, over the
+    full published grid and its two ``all unknown negative / positive`` limits.  Crude weighted
+    RR, point estimates only (no sampling interval)."""
+    df, design = data.crss_crash(outcome="fatal")
+    w = design.weight
+    y = df["fatal"].to_numpy(float)
+    x = df["drugs"].to_numpy(float)
+    full = crss_bounds()
+    rows = []
+    for period, years in (
+        ("2016-2018", range(2016, 2019)),
+        ("2019-2024", range(2019, 2025)),
+        ("2016-2024", range(2016, 2025)),
+    ):
+        s = df["YEAR"].isin(list(years)).to_numpy()
+        known, unk = s & ~np.isnan(x), s & np.isnan(x)
+        a = w[known & (x == 1) & (y == 1)].sum()
+        b = w[known & (x == 1) & (y == 0)].sum()
+        c = w[known & (x == 0) & (y == 1)].sum()
+        d = w[known & (x == 0) & (y == 0)].sum()
+        uf, un = w[unk & (y == 1)].sum(), w[unk & (y == 0)].sum()
+        pf, pn = a / (a + c), b / (b + d)
+        base = {
+            "period": period,
+            "share_unknown": (uf + un) / (a + b + c + d + uf + un),
+            "rr_complete_case": (a / (a + b)) / (c / (c + d)),
+            "known_drug_prevalence_fatal": pf,
+            "known_drug_prevalence_nonfatal": pn,
+        }
+        fam: dict[str, list[tuple[float, float]]] = {"proportional": [], "absolute": []}
+        for k in K_GRID:
+            rr = _rr_alloc(a, b, c, d, uf, un, min(1.0, k * pf), min(1.0, k * pn))
+            fam["proportional"].append((k, rr))
+            rows.append(
+                {
+                    **base,
+                    "row_type": "scenario",
+                    "allocation": "non-differential, proportional (k_fatal = k_nonfatal = k)",
+                    "parameter": "k",
+                    "parameter_value": k,
+                    "rr": rr,
+                }
+            )
+        for e in E_GRID:
+            rr = _rr_alloc(a, b, c, d, uf, un, e, e)
+            fam["absolute"].append((e, rr))
+            rows.append(
+                {
+                    **base,
+                    "row_type": "scenario",
+                    "allocation": "non-differential, equal absolute prevalence e in fatal and non-fatal unknowns",
+                    "parameter": "e",
+                    "parameter_value": e,
+                    "rr": rr,
+                }
+            )
+        pub = full[full["period"] == period]
+        grid = pub[pub["scenario"] == "k scenario"]["rr"]
+        ranges = [
+            (
+                "non-differential, proportional (k_fatal = k_nonfatal = k)",
+                [r for _, r in fam["proportional"]],
+            ),
+            ("non-differential, equal absolute prevalence e", [r for _, r in fam["absolute"]]),
+            ("published grid (k_fatal, k_nonfatal in 0-3, any combination)", list(grid)),
+            (
+                "published limits: all unknown negative / all unknown positive",
+                list(pub[pub["scenario"] != "k scenario"]["rr"]),
+            ),
+        ]
+        for lab, vals in ranges:
+            rows.append(
+                {
+                    **base,
+                    "row_type": "range",
+                    "allocation": lab,
+                    "rr_min": float(np.min(vals)),
+                    "rr_max": float(np.max(vals)),
+                }
+            )
+    return pd.DataFrame(rows)
+
+
+def drug_definition_reconciliation() -> pd.DataFrame:
+    """Deaths and crashes counted as drug-positive under the two definitions in use.
+
+    A. the crash-level police field (``fars_crash.drugs`` = 1);
+    B. any driver of the crash drug-positive on toxicology (``fars_driver.drv_drug_any`` = 1),
+       the definition behind the factor counts in ``contributions``.
+    Cross-tabulated by the crash's toxicology status (positive / all drivers negative /
+    undetermined = no positive driver and at least one driver without a determinate result)
+    and the police field (yes / no / not reported).  B counts about 1.9 times as many deaths as
+    A because police do not record, or record as unknown, drugs that toxicology detects, and
+    because B includes drivers who were tested but not suspected."""
+    d = pl.read_parquet(
+        config.PROCESSED_DIR / "fars_driver.parquet", columns=["YEAR", "case_id", "drv_drug_any"]
+    )
+    c = pl.read_parquet(
+        config.PROCESSED_DIR / "fars_crash.parquet", columns=["YEAR", "case_id", "FATALS", "drugs"]
+    )
+    g = d.group_by(["YEAR", "case_id"]).agg(
+        (pl.col("drv_drug_any") == 1).any().alias("pos"),
+        pl.col("drv_drug_any").null_count().alias("nn"),
+    )
+    j = c.join(g, on=["YEAR", "case_id"], how="left").to_pandas()
+    tox = np.select(
+        [j["pos"].isna(), j["pos"].fillna(False).astype(bool), j["nn"].fillna(1) == 0],
+        ["no driver record", "positive (any driver)", "all drivers determinate negative"],
+        "undetermined (no positive driver; some driver untested/indeterminate)",
+    )
+    pol = j["drugs"].map({1: "yes", 0: "no"}).fillna("not reported / unknown")
+    j["tox"], j["pol"] = tox, pol
+    total_deaths = float(j["FATALS"].sum())
+    rows = []
+
+    def add(row, definition, tox_lab, pol_lab, m):
+        rows.append(
+            {
+                "row_type": row,
+                "definition": definition,
+                "tox_any_driver": tox_lab,
+                "police_crash_field": pol_lab,
+                "deaths": float(j.loc[m, "FATALS"].sum()),
+                "crashes": int(m.sum()),
+                "share_of_all_deaths": float(j.loc[m, "FATALS"].sum()) / total_deaths,
+            }
+        )
+
+    allm = np.ones(len(j), bool)
+    add("all", "all fatal crashes", "all", "all", allm)
+    pol_yes = (j["pol"] == "yes").to_numpy()
+    tox_pos = (j["tox"] == "positive (any driver)").to_numpy()
+    add("definition", "A: police crash-level drugs field = yes", "any", "yes", pol_yes)
+    add("definition", "B: any driver drug-positive on toxicology", "positive", "any", tox_pos)
+    add("overlap", "A and B", "positive", "yes", pol_yes & tox_pos)
+    add("overlap", "A not B", "not positive", "yes", pol_yes & ~tox_pos)
+    add("overlap", "B not A", "positive", "no / not reported", ~pol_yes & tox_pos)
+    for t in sorted(set(tox)):
+        for p_ in ("yes", "no", "not reported / unknown"):
+            m = ((j["tox"] == t) & (j["pol"] == p_)).to_numpy()
+            if m.any():
+                add("cross-tab", "toxicology status x police field", t, p_, m)
+    out = pd.DataFrame(rows)
+    a_deaths = out.loc[out["definition"].str.startswith("A:"), "deaths"].iloc[0]
+    a_crashes = out.loc[out["definition"].str.startswith("A:"), "crashes"].iloc[0]
+    out["deaths_ratio_to_A"] = out["deaths"] / a_deaths
+    out["crashes_ratio_to_A"] = out["crashes"] / a_crashes
+    return out
+
+
 # --------------------------------------------------------------------------------------
 def _save(tab, name, description, method, population=FARS_POP, unit="driver", outcome=""):
     save_table(
@@ -573,6 +813,13 @@ def run() -> dict[str, pd.DataFrame]:
         "Alcohol and drug co-occurrence among tested drivers and in police reports",
         "2x2 tables; Woolf CIs ignore clustering",
     )
+    out["same_driver_cooccurrence"] = same_driver_cooccurrence(df)
+    _save(
+        out["same_driver_cooccurrence"],
+        "same_driver_cooccurrence",
+        "Alcohol-drug co-occurrence by toxicology and by police report on the same drivers (drug-tested, BAC measured, police alcohol and drugs known)",
+        "2x2 tables on one driver set; Woolf OR CIs and log-Wald prevalence-ratio CIs ignore crash clustering",
+    )
     out["police_validity"] = police_validity(df)
     _save(
         out["police_validity"],
@@ -597,6 +844,25 @@ def run() -> dict[str, pd.DataFrame]:
         population="CRSS police-reported crashes with known severity",
         unit="crash",
         outcome="fatal",
+    )
+    out["crss_bounds_nondifferential"] = crss_bounds_nondifferential()
+    _save(
+        out["crss_bounds_nondifferential"],
+        "crss_bounds_nondifferential",
+        "Crude fatal RR of police-reported drug involvement when unknown crashes are allocated non-differentially (same rule for fatal and non-fatal), with the published grid extremes for comparison",
+        "Weighted 2x2 with unknown crashes allocated by scenario; point estimates",
+        population="CRSS police-reported crashes with known severity",
+        unit="crash",
+        outcome="fatal",
+    )
+    out["drug_definition_reconciliation"] = drug_definition_reconciliation()
+    _save(
+        out["drug_definition_reconciliation"],
+        "drug_definition_reconciliation",
+        "Drug-positive deaths and crashes under the crash-level police field and under any-driver toxicology, with their cross-tabulation",
+        "Census counts of FARS fatal crashes 2016-2024; deaths = FATALS",
+        population="FARS fatal crashes 2016-2024",
+        unit="crash",
     )
     out["crss_adjusted"] = crss_adjusted()
     _save(

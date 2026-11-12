@@ -139,7 +139,7 @@ def test_crss_crash_reconciles_with_raw_accident():
 
 @pytest.mark.processed
 def test_crss_imputed_fatal_total_matches_fars():
-    """CRSS weights are calibrated to FARS through MAXSEV_IM (docs/audit/crss_survey_design.md)."""
+    """CRSS weights are calibrated to FARS through MAXSEV_IM (CRSS survey design audit note, Git history, commit 7ee597e)."""
     crss = pl.read_parquet(
         config.PROCESSED_DIR / "crss_crash.parquet", columns=["YEAR", "WEIGHT", "fatal"]
     )

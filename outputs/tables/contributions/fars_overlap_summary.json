@@ -1,6 +1,6 @@
 {
  "table": "contributions/fars_overlap_summary.csv",
- "description": "Deaths counted under each factor, the sum of factor counts and the union",
+ "description": "Deaths counted under each factor, the sum of factor counts and the union; the drug count is crash-level (any driver positive) and deaths in fully determinate crashes are reported alongside",
  "population": "FARS deaths 2016-2024",
  "unit": "person killed",
  "outcome": "",
@@ -18,9 +18,13 @@
   "deaths_with_no_other_listed_factor",
   "share_also_involving_another_factor",
   "overcount_ratio_sum_over_union",
-  "deaths_undetermined_drug_status"
+  "deaths_undetermined_drug_status",
+  "deaths_in_fully_determinate_crashes",
+  "share_deaths_in_fully_determinate_crashes",
+  "deaths_drug_positive_in_fully_determinate_crashes",
+  "note"
  ],
  "module": "nhtsa_stats.analysis.contributions",
- "git_commit": "8fe8986",
- "generated_utc": "2026-10-23T09:32:19Z"
+ "git_commit": "7ee597e-dirty",
+ "generated_utc": "2026-11-12T11:49:14Z"
 }

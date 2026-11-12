@@ -232,7 +232,7 @@ occupants of vehicles with BODY_TYP 1-79 (light vehicles, buses, trucks) seated 
 (SEAT_POS 11-49) or in an unrecorded seat (98/99: the occupant is inside the vehicle, so
 the recorded belt use still applies); everyone else (motorcycles 80-89, other 90-97,
 cargo/exterior/trailing positions 50-56, unknown body) is ``not_applicable``.  See
-docs/audit/person_injury_restraint.md §4.6.
+the person, injury and restraint audit note §4.6 (Git history, commit 7ee597e).
 
 ### `helmet_use(rest_col: 'str' = 'REST_USE', helm_col: 'str' = 'HELM_USE', year: 'str' = 'YEAR', body_col: 'str' = 'BODY_TYP') -> 'pl.Expr'`
 

@@ -1,0 +1,28 @@
+{
+ "table": "drugs/drug_definition_reconciliation.csv",
+ "description": "Drug-positive deaths and crashes under the crash-level police field and under any-driver toxicology, with their cross-tabulation",
+ "population": "FARS fatal crashes 2016-2024",
+ "unit": "crash",
+ "outcome": "",
+ "method": "Census counts of FARS fatal crashes 2016-2024; deaths = FATALS",
+ "inputs": [
+  "data/processed/fars_driver.parquet",
+  "data/processed/fars_crash.parquet",
+  "data/processed/crss_crash.parquet"
+ ],
+ "rows": 15,
+ "columns": [
+  "row_type",
+  "definition",
+  "tox_any_driver",
+  "police_crash_field",
+  "deaths",
+  "crashes",
+  "share_of_all_deaths",
+  "deaths_ratio_to_A",
+  "crashes_ratio_to_A"
+ ],
+ "module": "nhtsa_stats.analysis.drugs",
+ "git_commit": "7ee597e-dirty",
+ "generated_utc": "2026-11-12T11:50:39Z"
+}

@@ -7,6 +7,7 @@
  "method": "Unweighted shares",
  "inputs": [
   "data/processed/fars_driver.parquet",
+  "data/processed/fars_crash.parquet",
   "data/processed/crss_crash.parquet"
  ],
  "rows": 6,
@@ -19,6 +20,6 @@
   "bac08_among_bac_tested"
  ],
  "module": "nhtsa_stats.analysis.drugs",
- "git_commit": "8fe8986",
- "generated_utc": "2026-10-23T09:19:25Z"
+ "git_commit": "7ee597e-dirty",
+ "generated_utc": "2026-11-12T11:50:24Z"
 }

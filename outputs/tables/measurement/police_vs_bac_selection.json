@@ -1,0 +1,36 @@
+{
+ "table": "measurement/police_vs_bac_selection.csv",
+ "description": "Police-reported alcohol vs measured BAC>=0.08 by how widely surviving drivers are tested (state-year survivor test-rate terciles, cumulative thresholds, state terciles), killed drivers alongside",
+ "population": "",
+ "unit": "",
+ "outcome": "",
+ "method": "See module docstring",
+ "inputs": [
+  "data/processed/*.parquet",
+  "data/interim/FARS/drugs"
+ ],
+ "rows": 24,
+ "columns": [
+  "scheme",
+  "group",
+  "driver_status",
+  "group_survivor_test_rate_min",
+  "group_survivor_test_rate_max",
+  "n_drivers",
+  "share_alcohol_tested",
+  "n_in_sample",
+  "bac08_prevalence",
+  "police_sensitivity_vs_bac08",
+  "sensitivity_low",
+  "sensitivity_high",
+  "police_specificity_vs_bac08",
+  "ppv",
+  "tp",
+  "fn",
+  "fp",
+  "tn"
+ ],
+ "module": "nhtsa_stats.analysis.measurement",
+ "git_commit": "7ee597e-dirty",
+ "generated_utc": "2026-11-12T11:40:07Z"
+}
