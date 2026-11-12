@@ -1,0 +1,22 @@
+{
+ "table": "matched/helmet_pair_coverage.csv",
+ "description": "Coverage of the helmet pair design: share of unhelmeted motorcyclist deaths on single-rider, two-occupant and larger motorcycles and in the operator / passenger pairs, and the number of discordant pairs",
+ "population": "FARS 2016-2024 motorcycle operators and passengers (any helmet code for occupancy; deaths with helmet coded none)",
+ "unit": "person within vehicle (matched set = vehicle)",
+ "outcome": "killed (died within 30 days)",
+ "method": "Counts and shares from FARS person records (motorcycle operators and passengers)",
+ "inputs": [
+  "data/processed/fars_person.parquet"
+ ],
+ "rows": 11,
+ "columns": [
+  "metric",
+  "count",
+  "denominator",
+  "share",
+  "note"
+ ],
+ "module": "nhtsa_stats.analysis.matched",
+ "git_commit": "7ee597e-dirty",
+ "generated_utc": "2026-11-12T11:57:21Z"
+}

@@ -1,0 +1,30 @@
+{
+ "table": "matched/helmet_misreporting_matched_pair.csv",
+ "description": "Matched-pair OR (unhelmeted vs helmeted, two-rider motorcycles with one death) under two-sided misreporting of helmet use with closed-form tipping fractions; n10 + n01 is the number of informative (helmet- and outcome-discordant) pairs",
+ "population": "FARS 2016-2024 motorcycles with exactly 2 riders with known helmet use and exactly one death",
+ "unit": "person within vehicle (matched set = vehicle)",
+ "outcome": "killed (died within 30 days)",
+ "method": "As belt_misreporting_two_sided_matched_pair, applied to motorcycle riders",
+ "inputs": [
+  "data/processed/fars_person.parquet"
+ ],
+ "rows": 12,
+ "columns": [
+  "analysis",
+  "survivor_misreport_f",
+  "death_misreport_g",
+  "n10_exposed_died_unexposed_survived",
+  "n01_unexposed_died_exposed_survived",
+  "n00_both_unexposed",
+  "n11_both_exposed",
+  "or_exposed_vs_unexposed",
+  "or_low",
+  "or_high",
+  "n_informative_vehicles",
+  "tipping_f_given_g",
+  "tipping_g_given_f"
+ ],
+ "module": "nhtsa_stats.analysis.matched",
+ "git_commit": "7ee597e-dirty",
+ "generated_utc": "2026-11-12T11:57:21Z"
+}

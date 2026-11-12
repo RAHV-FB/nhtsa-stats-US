@@ -1,0 +1,27 @@
+{
+ "table": "restraint_behaviour/belt_rr_by_configuration.csv",
+ "description": "Within-vehicle belt risk ratio of death (driver / right-front pairs) in each crash-configuration layer, all drivers",
+ "population": "FARS 2016-2024 light passenger vehicles with one eligible driver and one right-front passenger (Phase-1 eligibility)",
+ "unit": "vehicle (pair)",
+ "outcome": "death",
+ "method": "Evans double-pair comparison, crash-cluster percentile bootstrap (1000 replicates)",
+ "inputs": [
+  "data/processed/fars_person.parquet",
+  "data/processed/fars_driver.parquet"
+ ],
+ "rows": 16,
+ "columns": [
+  "adjustment",
+  "layer",
+  "n_pairs",
+  "n_pairs_with_death",
+  "rr_belted_vs_unbelted",
+  "rr_low",
+  "rr_high",
+  "se_log_bootstrap",
+  "min_death_count"
+ ],
+ "module": "nhtsa_stats.analysis.restraint_behaviour",
+ "git_commit": "3771f1b-dirty",
+ "generated_utc": "2026-11-12T12:06:33Z"
+}

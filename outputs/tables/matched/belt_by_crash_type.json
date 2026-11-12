@@ -1,0 +1,61 @@
+{
+ "table": "matched/belt_by_crash_type.csv",
+ "description": "Belt effect within crash configuration: Evans DPC risk ratio (crash-cluster bootstrap CI), matched-pair OR (two-occupant vehicles, one death), within-vehicle conditional logit OR (main model) and the survivor-misreporting fraction that brings each estimate to no effect (tipping point), by harmonised crash type and by vehicle rollover.  The crash-type strata partition the eligible vehicles; the rollover strata exclude vehicles with unknown rollover; the two partitions overlap each other",
+ "population": "FARS 2016-2024 occupants (driver/passenger) of in-transport light passenger vehicles, seat front-left/front-other/second row, age 13+, belted or unbelted, known outcome",
+ "unit": "person within vehicle (matched set = vehicle)",
+ "outcome": "killed (died within 30 days)",
+ "method": "Same estimators as the pooled analysis, applied to the vehicles of each stratum (2000 bootstrap replicates over crashes); tipping_point_f = f at which the RR/OR reaches 1 under the one-sided scenario (a fraction f of belted survivors truly unbelted); rows 'pooled' are a check on the pooled estimate (CI differs by bootstrap seed).  Associations given a fatal crash in the vehicle",
+ "inputs": [
+  "data/processed/fars_person.parquet"
+ ],
+ "rows": 10,
+ "columns": [
+  "partition",
+  "stratum",
+  "n_persons",
+  "dpc_n_pairs",
+  "dpc_n_pairs_with_death",
+  "dpc_min_death_count",
+  "dpc_rr",
+  "dpc_low",
+  "dpc_high",
+  "dpc_reduction",
+  "dpc_reduction_low",
+  "dpc_reduction_high",
+  "dpc_se_log_bootstrap",
+  "dpc_rr_misreport_f10",
+  "dpc_tipping_point_f",
+  "dpc_flag",
+  "mp_n_vehicles",
+  "mp_n10_unbelted_died",
+  "mp_n01_belted_died",
+  "mp_n00_both_belted",
+  "mp_or_unbelted_vs_belted",
+  "mp_or_low",
+  "mp_or_high",
+  "mp_or_misreport_f10",
+  "mp_tipping_point_f",
+  "clogit_or",
+  "clogit_low",
+  "clogit_high",
+  "clogit_n_sets",
+  "clogit_belt_discordant_sets",
+  "clogit_converged"
+ ],
+ "module": "nhtsa_stats.analysis.matched",
+ "git_commit": "7ee597e-dirty",
+ "generated_utc": "2026-11-12T11:56:56Z",
+ "heterogeneity_cochran_q": {
+  "crash type": {
+   "q": 259.17608939092526,
+   "df": 6,
+   "p": 4.4815637343693395e-53
+  },
+  "vehicle rollover": {
+   "q": 235.24614621129442,
+   "df": 1,
+   "p": 4.278586339178025e-53
+  }
+ },
+ "vehicles_with_unknown_rollover_among_eligible": 0
+}

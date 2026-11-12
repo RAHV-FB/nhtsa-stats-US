@@ -223,3 +223,158 @@ def test_pooled_totals_on_real_cache():
     assert s["pedestrians"] == 60876 and s["cyclists"] == 8706
     assert s["pv_occupants"] == 215277 and s["motorcyclists"] == 51254
     assert s["alcohol_impaired"] == pytest.approx(105821.1, abs=0.1)
+
+
+def _drivers(rows: list[dict]) -> pl.DataFrame:
+    base = {
+        "YEAR": 2020,
+        "ST_CASE": 1,
+        "VEH_NO": 1,
+        "PER_NO": 1,
+        "L_STATUS": 6,
+        "PREV_DWI": 0,
+        "PREV_SPD": 0,
+        "PREV_ACC": 0,
+        "PREV_SUS1": 0,
+        "PREV_SUS2": 0,
+        "PREV_SUS3": 0,
+        "spveh": 2,
+    }
+    return pl.DataFrame([{**base, **r} for r in rows])
+
+
+def _with_p(value: int | None) -> dict:
+    return {f"P{m}": value for m in D.IMPLICATES}
+
+
+def _measured_inputs():
+    """Three drivers: measured .10, imputed .09 (in 4 of 10 implicates >= .08 only), measured .05."""
+    imputed = {f"P{m}": 9 if m <= 4 else 2 for m in D.IMPLICATES}
+    drivers = _drivers(
+        [
+            {"ST_CASE": 1, **_with_p(10), "PREV_DWI": 1},
+            {"ST_CASE": 2, **imputed},
+            {"ST_CASE": 3, **_with_p(5)},
+            {"ST_CASE": 4, **_with_p(0)},
+        ]
+    )
+    alc = pl.DataFrame(
+        {
+            "YEAR": [2020] * 4,
+            "ST_CASE": [1, 2, 3, 4],
+            "VEH_NO": [1] * 4,
+            "PER_NO": [1] * 4,
+            "ALC_RES": [100, 995, 50, 0],  # 995 = not reported: BAC imputed
+        }
+    )
+    return D.add_measured_bac(drivers, alc)
+
+
+def test_add_measured_bac_flags():
+    d = _measured_inputs().sort("ST_CASE")
+    assert d["bac_measured"].to_list() == [True, False, True, True]
+    assert d["m_bac08"].to_list() == [True, False, False, False]
+
+
+def test_driver_bac_imputed_share_and_measured_records():
+    d = _measured_inputs()
+    t = (
+        D.driver_bac_imputed_share_table(d)
+        .filter(pl.col("period") == "2016-2024")
+        .row(0, named=True)
+    )
+    assert t["n_measured"] == pytest.approx(1.0)  # driver 1
+    assert t["n_imputed"] == pytest.approx(0.4)  # driver 2 is >= .08 in 4 of 10 implicates
+    assert t["n_bac_08_plus"] == pytest.approx(1.4)
+    assert t["share_imputed"] == pytest.approx(
+        sum((1 / 2 if m <= 4 else 0.0) for m in D.IMPLICATES) / 10
+    )
+    assert t["mi_se"] > 0
+    rec = D.driver_records_measured_table(d)
+    dwi = rec.filter(pl.col("indicator") == "prior_dwi")
+
+    def share(g: str) -> float:
+        return dwi.filter(pl.col("group") == g)["share"].item()
+
+    assert share("bac_08_plus_measured_only") == pytest.approx(1.0)  # the one measured driver
+    assert share("bac_08_plus_imputed_only") == pytest.approx(0.0)
+    assert dwi.filter(pl.col("group") == "bac_08_plus_measured_only")["n_group"].item() == 1
+
+
+def test_victim_roles_bac_basis_splits_passengers_from_outsiders():
+    all_a = {f"alc_{m}": True for m in D.IMPLICATES}
+    risk_a = {f"risk_alc_{m}": True for m in D.IMPLICATES}
+    meas = {"crash_m_alc": True}
+    rows = [
+        {**all_a, **risk_a, **meas, "ptype": 1},
+        {**all_a, **risk_a, **meas, "ptype": 2},
+        {**all_a, **meas, "ptype": 1},  # other vehicle's driver
+        {**all_a, **meas, "ptype": 3},
+        {**all_a, "ptype": 5},  # impaired only by imputation: not in the measured group
+    ]
+    base = {"crash_m_alc": False, "risk_m_alc": False}
+    frame = _frame(
+        [{**base, **r, **({"risk_m_alc": True} if "risk_alc_1" in r else {})} for r in rows]
+    )
+    t = D.victim_roles_bac_basis_table(frame)
+
+    def get(b, r):
+        return t.filter((pl.col("basis") == b) & (pl.col("role") == r))
+
+    assert get("all_bac_measured_and_imputed", "total")["deaths"].item() == 5
+    assert get("all_bac_measured_and_imputed", "outside_risk_vehicle")["deaths"].item() == 3
+    assert get("measured_bac_only", "total")["deaths"].item() == 4
+    assert get("measured_bac_only", "risk_passenger")["deaths"].item() == 1
+    assert get("measured_bac_only", "outside_risk_vehicle")["deaths"].item() == 2
+    assert get("measured_bac_only", "not_risk_driver")["share_of_group"].item() == pytest.approx(
+        3 / 4
+    )
+    assert (
+        get("measured_bac_only", "outside_risk_vehicle")["estimate_type"]
+        .item()
+        .startswith("observed")
+    )
+    assert get("all_bac_measured_and_imputed", "total")["estimate_type"].item() == D.ESTIMATED
+
+
+def test_potential_lives_context_counts():
+    rows = [
+        {"unbelted": True, "pv": True, "n_occ": 1},
+        {"unbelted": True, "pv": True, "n_occ": 1},
+        {"unbelted": True, "pv": True, "n_occ": 3},
+        {"belted": True, "pv": True, "n_occ": 2},
+        {"restraint_unknown": True, "pv": True, "n_occ": 1},
+        {"unhelmeted": True, "mc": True, "n_occ": 1},
+        {"helmet_unknown": True, "mc": True, "n_occ": 2},
+    ]
+    base = {
+        "unbelted": False,
+        "belted": False,
+        "restraint_unknown": False,
+        "unhelmeted": False,
+        "helmet_unknown": False,
+        "pv": False,
+        "mc": False,
+    }
+    d = pl.DataFrame([{**base, **r} for r in rows])
+    t = D.potential_lives_context_table(d)
+    get = lambda m: t.filter(pl.col("metric") == m).row(0, named=True)  # noqa: E731
+    assert get("unbelted_deaths")["deaths"] == 3
+    assert get("unknown_belt_use_deaths")["deaths"] == 1
+    assert get("unknown_belt_use_deaths")["share"] == pytest.approx(1 / 5)
+    assert get("unbelted_deaths_single_occupant_vehicle")["share"] == pytest.approx(2 / 3)
+    assert get("unbelted_deaths_two_plus_occupant_vehicle")["deaths"] == 1
+    assert get("unknown_helmet_use_deaths")["share"] == pytest.approx(1 / 2)
+
+
+def test_read_effectiveness_raises_when_matched_tables_missing(tmp_path, monkeypatch):
+    monkeypatch.setattr(D.config, "TABLES_DIR", tmp_path)
+    with pytest.raises(D.MatchedInputsError, match="nhtsa analyze matched"):
+        D.read_effectiveness()
+    (tmp_path / "matched").mkdir()
+    pl.DataFrame({"estimand": ["x"], "estimate": [0.5], "low": [0.4], "high": [0.6]}).write_csv(
+        tmp_path / "matched" / "belt_effect.csv"
+    )
+    pl.DataFrame({"analysis": ["a"]}).write_csv(tmp_path / "matched" / "double_pair_comparison.csv")
+    with pytest.raises(D.MatchedInputsError, match="belt_effect"):
+        D.read_effectiveness()

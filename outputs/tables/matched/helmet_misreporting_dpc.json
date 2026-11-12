@@ -1,0 +1,37 @@
+{
+ "table": "matched/helmet_misreporting_dpc.csv",
+ "description": "Evans DPC helmet risk ratio (helmeted vs unhelmeted, operator / passenger pairs) under misreporting of helmet use: a fraction f of helmeted-coded survivors truly unhelmeted crossed with a fraction g of unhelmeted-coded deaths truly helmeted, with tipping fractions",
+ "population": "FARS 2016-2024 motorcycles with one operator and one passenger, helmet coded helmet/none for both, known outcome",
+ "unit": "person within vehicle (matched set = vehicle)",
+ "outcome": "killed (died within 30 days)",
+ "method": "As belt_misreporting_two_sided_dpc, applied to the motorcycle pairs",
+ "inputs": [
+  "data/processed/fars_person.parquet"
+ ],
+ "rows": 12,
+ "columns": [
+  "analysis",
+  "attribute_x1",
+  "survivor_misreport_f",
+  "death_misreport_g",
+  "rr_x1_vs_x0",
+  "rr_low",
+  "rr_high",
+  "reduction_1_minus_rr",
+  "reduction_low",
+  "reduction_high",
+  "rr_low_vehicle_boot",
+  "rr_high_vehicle_boot",
+  "se_log_bootstrap",
+  "boot_degenerate_share",
+  "n_pairs",
+  "n_pairs_with_death",
+  "min_death_count",
+  "tipping_f_given_g",
+  "tipping_g_given_f",
+  "flag"
+ ],
+ "module": "nhtsa_stats.analysis.matched",
+ "git_commit": "7ee597e-dirty",
+ "generated_utc": "2026-11-12T11:57:21Z"
+}

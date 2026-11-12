@@ -430,3 +430,258 @@ def test_belt_effect_table_uses_crash_cluster_ci(rng):
     ):
         assert "fatality_risk_reduction_belt_given_fatal_crash" + sfx in b.index
     assert "within_vehicle_or_killed_unbelted_vs_belted" in b.index
+
+
+# --------------------------------------------------------------------------------------
+# Two-sided misreporting, strata, helmet coverage
+# --------------------------------------------------------------------------------------
+def test_reclassify_two_sided_moves_unbelted_deaths_and_reduces_to_one_sided():
+    c = np.arange(1, 17, dtype=float).reshape(2, 2, 2, 2)
+    np.testing.assert_allclose(
+        matched.reclassify_two_sided(c, 0.1, 0.0), matched.reclassify(c, 0.1)
+    )
+    np.testing.assert_array_equal(matched.reclassify_two_sided(c, 0.0, 0.0), c)
+    r = matched.reclassify_two_sided(c, 0.0, 0.2)
+    assert r.sum() == pytest.approx(c.sum())
+    dd0, dp0 = matched.death_counts(c)
+    dd1, dp1 = matched.death_counts(r)
+    # unbelted-coded driver deaths shrink by (1 - g); total driver deaths are unchanged
+    assert dd1[0].sum() == pytest.approx(0.8 * dd0[0].sum())
+    assert dd1.sum() == pytest.approx(dd0.sum())
+    assert dp1.sum() == pytest.approx(dp0.sum())
+    # survivors are not touched by the death error
+    assert r[:, 0, :, 0].sum() == pytest.approx(c[:, 0, :, 0].sum())
+    with pytest.raises(ValueError):
+        matched.reclassify_two_sided(c, 0.0, 1.0)
+
+
+def test_reverse_death_error_attenuates_and_tipping_points_cross_one():
+    c = expected_cells(
+        {(1, 1): 50000, (1, 0): 4000, (0, 1): 4000, (0, 0): 6000},
+        np.array([0.1, 0.4, 0.8]),
+        1.0,
+        1.0,
+        {1: 0.4, 0: 1.0},
+    )
+    est = [
+        float(np.exp(matched.dpc_combined(matched.reclassify_two_sided(c, 0.0, g))))
+        for g in (0, 0.05, 0.1)
+    ]
+    assert est[0] == pytest.approx(0.4)
+    assert est[0] < est[1] < est[2] < 1
+    g_star = matched.dpc_tipping_two_sided(c, 0.0, 0.0, vary="g")
+    assert 0 < g_star < 0.95
+    assert matched.dpc_combined(matched.reclassify_two_sided(c, 0.0, g_star)) == pytest.approx(
+        0.0, abs=1e-5
+    )
+    # with a death error the survivor error needed to null the effect is smaller
+    f0 = matched.dpc_tipping_two_sided(c, vary="f")
+    f1 = matched.dpc_tipping_two_sided(c, g=0.05, vary="f")
+    assert f1 < f0
+    assert f0 == pytest.approx(matched.dpc_tipping_point(c), abs=1e-5)
+
+
+def test_dpc_two_sided_grid_reproduces_one_sided_point_estimates(rng):
+    c = expected_cells(
+        {(1, 1): 3000, (1, 0): 600, (0, 1): 600, (0, 0): 900},
+        np.array([0.2, 0.6]),
+        1.0,
+        1.2,
+        {1: 0.5, 0: 1.0},
+    )
+    pairs = _pairs_from_cells(np.round(c))
+    tab = matched.dpc_two_sided(
+        pairs, "t", "belted", rng, n_boot=100, fractions=(0.0, 0.1), death_fractions=(0.0, 0.05)
+    )
+    assert len(tab) == 4
+    base = matched.dpc_analysis(pairs, "t", "belted", rng, n_boot=50, fractions=(0.0, 0.1))
+    comb = base[base["component"].str.startswith("combined")].set_index("misreport_fraction")
+    for f in (0.0, 0.1):
+        r = tab[(tab["survivor_misreport_f"] == f) & (tab["death_misreport_g"] == 0)].iloc[0]
+        assert r["rr_x1_vs_x0"] == pytest.approx(comb.loc[f, "rr_x1_vs_x0"])
+        assert r["rr_low"] < r["rr_x1_vs_x0"] < r["rr_high"]
+    worst = tab[(tab["survivor_misreport_f"] == 0.1) & (tab["death_misreport_g"] == 0.05)].iloc[0]
+    assert worst["rr_x1_vs_x0"] > tab["rr_x1_vs_x0"].min()
+    assert tab["tipping_f_given_g"].iloc[0] > tab["tipping_f_given_g"].iloc[-1]
+
+
+def test_matched_pair_two_sided_closed_form_and_tipping():
+    counts = {"n10": 300.0, "n01": 100.0, "n00": 500.0, "n11": 80.0}
+    r0 = matched.matched_pair_or_two_sided(counts, 0.0, 0.0)
+    one = matched.matched_pair_or(_pair_sets(300, 100, 500, 80), 0.0)
+    assert r0["or_exposed_vs_unexposed"] == pytest.approx(one["or_unbelted_vs_belted"])
+    assert r0["or_low"] == pytest.approx(one["or_low"]) and r0["or_high"] == pytest.approx(
+        one["or_high"]
+    )
+    assert r0["tipping_f_given_g"] == pytest.approx(one["tipping_point_f"])
+    # f only reproduces the one-sided scenario
+    r1 = matched.matched_pair_or_two_sided(counts, 0.1, 0.0)
+    assert r1["or_exposed_vs_unexposed"] == pytest.approx(
+        matched.matched_pair_or(_pair_sets(300, 100, 500, 80), 0.1)["or_unbelted_vs_belted"]
+    )
+    # both errors: expected counts and the tipping points reach OR = 1 exactly
+    r2 = matched.matched_pair_or_two_sided(counts, 0.05, 0.1)
+    a = 300 * 0.95 * 0.9
+    b = 100 + 0.05 * 500 + 0.1 * 80 + 0.05 * 0.1 * 300
+    assert r2["or_exposed_vs_unexposed"] == pytest.approx(a / b)
+    f_star = r2["tipping_f_given_g"]
+    assert matched.matched_pair_or_two_sided(counts, f_star, 0.1)[
+        "or_exposed_vs_unexposed"
+    ] == pytest.approx(1.0)
+    g_star = r2["tipping_g_given_f"]
+    assert matched.matched_pair_or_two_sided(counts, 0.05, g_star)[
+        "or_exposed_vs_unexposed"
+    ] == pytest.approx(1.0)
+    tab = matched.matched_pair_two_sided_table(
+        _pair_sets(300, 100, 500, 80), "x", (0.0, 0.1), (0.0, 0.05)
+    )
+    assert len(tab) == 4 and set(tab["analysis"]) == {"x"}
+
+
+def _rollover_frame() -> pd.DataFrame:
+    rows = []
+    vid = 0
+    for ctype, roll in (
+        ("mv_angle", 0),
+        ("sv_rollover_first", 1),
+        ("sv_off_roadway", 0),
+        ("pedestrian", 0),
+        ("mv_angle", np.nan),
+    ):
+        for _ in range(3):
+            for ptype, seat in (("driver", 11), ("passenger", 13)):
+                rows.append((vid, vid, ctype, roll, ptype, seat))
+            vid += 1
+    return pd.DataFrame(
+        rows, columns=["vehicle_id", "crash_id", "crash_type", "veh_rollover", "ptype", "SEAT_POS"]
+    )
+
+
+def test_configuration_strata_masks():
+    elig = _rollover_frame()
+    strata = {(p, n): m for p, n, m in matched.configuration_strata(elig)}
+    assert strata[("crash type", "multi-vehicle, angle")].sum() == 12
+    assert strata[("crash type", "single vehicle, rollover first")].sum() == 6
+    assert strata[("crash type", "single vehicle, no rollover first")].sum() == 6
+    assert strata[("crash type", "other (multi-vehicle other, non-motorist)")].sum() == 6
+    ct = [m for (p, _), m in strata.items() if p == "crash type"]
+    assert sum(m.astype(int) for m in ct).max() == 1  # crash-type strata are disjoint
+    roll = strata[("vehicle rollover", "vehicle rolled over (any crash type)")]
+    no_roll = strata[("vehicle rollover", "vehicle did not roll over")]
+    assert roll.sum() == 6 and no_roll.sum() == 18  # the unknown-rollover vehicles are in neither
+    assert not (roll & no_roll).any()
+
+
+def test_belt_by_stratum_runs_on_synthetic_vehicles(rng):
+    """Two crash types with different true belt effects: each stratum recovers its own RR."""
+    rows = []
+    vid = 0
+    for ctype, risk in (("mv_angle", 0.5), ("sv_rollover_first", 0.2)):
+        c = expected_cells(
+            {(1, 1): 2500, (1, 0): 500, (0, 1): 500, (0, 0): 800},
+            np.array([0.2, 0.6]),
+            1.0,
+            1.0,
+            {1: risk, 0: 1.0},
+        )
+        pairs = _pairs_from_cells(np.round(c))
+        for _, r in pairs.iterrows():
+            for ptype, seat, x, k in (
+                ("driver", 11, r.x_d, r.k_d),
+                ("passenger", 13, r.x_p, r.k_p),
+            ):
+                rows.append(
+                    (
+                        vid,
+                        vid // 2,
+                        ctype,
+                        0,
+                        ptype,
+                        seat,
+                        50 if (vid // (1 if ptype == "driver" else 2)) % 2 else 30,
+                        "male" if vid % 3 else "female",
+                        int(k),
+                        1 - int(x),
+                        "front_left" if seat == 11 else "front_other",
+                        int(x),
+                    )
+                )
+            vid += 1
+    elig = pd.DataFrame(
+        rows,
+        columns=[
+            "vehicle_id",
+            "crash_id",
+            "crash_type",
+            "veh_rollover",
+            "ptype",
+            "SEAT_POS",
+            "age",
+            "sex",
+            "killed",
+            "unbelted",
+            "seat",
+            "belted",
+        ],
+    )
+    elig["PER_NO"] = np.where(elig["ptype"] == "driver", 1, 2)
+    elig["age"] = rng.choice([20, 30, 50, 70], size=len(elig))  # independent of seat and belt
+    elig["sex"] = rng.choice(["male", "female"], size=len(elig))
+    strata = [(p, n, m) for p, n, m in matched.configuration_strata(elig) if p == "crash type"]
+    tab = matched.belt_by_stratum(elig, strata, rng, n_boot=60)
+    a = tab.set_index("stratum")
+    assert a.loc["multi-vehicle, angle", "dpc_rr"] == pytest.approx(0.5, rel=0.1)
+    assert a.loc["single vehicle, rollover first", "dpc_rr"] == pytest.approx(0.2, rel=0.1)
+    a = a.dropna(subset=["dpc_rr"])  # strata without any vehicle have no estimate
+    assert len(a) == 2
+    assert (a["dpc_low"] < a["dpc_rr"]).all() and (a["dpc_rr"] < a["dpc_high"]).all()
+    assert (a["mp_tipping_point_f"] > 0).all()
+    assert a.loc["multi-vehicle, angle", "mp_n10_unbelted_died"] > 0
+    assert a["clogit_or"].notna().sum() >= 1
+    het = matched.heterogeneity_p(tab.assign(partition="crash type"), "crash type")
+    assert het["df"] == 1
+    assert het["p"] < 0.05
+
+
+def test_helmet_coverage_counts_two_occupant_share():
+    def mc(vid, ptype, helmet, killed):
+        return {
+            "vehicle_id": vid,
+            "crash_id": vid,
+            "ptype": ptype,
+            "body": "motorcycle",
+            "helmet": helmet,
+            "killed": killed,
+        }
+
+    rows = [
+        mc(1, "driver", "none", 1),  # single rider, unhelmeted death
+        mc(2, "driver", "none", 1),  # two riders, informative pair
+        mc(2, "passenger", "helmet", 0),
+        mc(3, "driver", "none", 1),  # two riders, passenger helmet unknown: not in the pair design
+        mc(3, "passenger", "unknown", 0),
+        mc(4, "driver", "none", 1),  # two riders, both unhelmeted and both dead
+        mc(4, "passenger", "none", 1),
+        mc(5, "driver", "helmet", 0),  # three occupants (not a pair)
+        mc(5, "passenger", "none", 1),
+        mc(5, "passenger", "helmet", 0),
+        {
+            "vehicle_id": 6,
+            "crash_id": 6,
+            "ptype": "driver",
+            "body": "car",
+            "helmet": "none",
+            "killed": 1,
+        },
+    ]
+    t = matched.helmet_coverage(pd.DataFrame(rows)).set_index("metric")
+    assert t.loc["unhelmeted_motorcyclist_deaths", "count"] == 6
+    assert t.loc["unhelmeted_deaths_single_rider_motorcycle", "count"] == 1
+    assert t.loc["unhelmeted_deaths_two_occupant_motorcycle", "count"] == 4
+    assert t.loc["unhelmeted_deaths_two_occupant_motorcycle", "share"] == pytest.approx(4 / 6)
+    assert t.loc["unhelmeted_deaths_three_plus_occupant_motorcycle", "count"] == 1
+    assert t.loc["unhelmeted_deaths_in_pair_design", "count"] == 3
+    assert t.loc["unhelmeted_deaths_in_informative_pairs", "count"] == 1
+    assert t.loc["pairs_operator_passenger", "count"] == 2
+    assert t.loc["pairs_discordant_helmet_and_outcome", "count"] == 1
+    assert t.loc["pairs_discordant_helmet_use", "count"] == 1

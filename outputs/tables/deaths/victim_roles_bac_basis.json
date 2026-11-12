@@ -1,0 +1,31 @@
+{
+ "table": "deaths/victim_roles_bac_basis.csv",
+ "description": "Who was killed in drunk-driving crashes (a driver with BAC >= .08), with the drunk driver's own passengers separated from people outside that vehicle, for measured BAC only and for measured plus imputed BAC",
+ "population": "FARS fatal crashes 2016-2024 (census)",
+ "unit": "person killed",
+ "outcome": "death (INJ_SEV 4)",
+ "method": "Measured BAC = a test result in FARS person.ALC_RES (0-939 thousandths); NHTSA's implicates fill untested drivers.  'measured only' counts a driver as BAC >= .08 only with a measured result >= .08 (observed counts, no imputation SE); 'all' / 'imputed' use the 10 implicates (mean, MI SE sqrt(1.1 * between-implicate variance))",
+ "inputs": [
+  "FARS person (INJ_SEV, PER_TYP, AGE, SEX, LOCATION, STR_VEH)",
+  "FARS per_aux",
+  "FARS vehicle (L_STATUS, PREV_*, MOD_YEAR, VSPD_LIM)",
+  "FARS veh_aux",
+  "FARS accident (LGT_COND)",
+  "FARS acc_aux",
+  "FARS midrvacc",
+  "FARS miper"
+ ],
+ "rows": 16,
+ "columns": [
+  "basis",
+  "group",
+  "role",
+  "deaths",
+  "share_of_group",
+  "mi_se",
+  "estimate_type"
+ ],
+ "module": "nhtsa_stats.analysis.deaths",
+ "git_commit": "3771f1b-dirty",
+ "generated_utc": "2026-11-12T12:07:01Z"
+}

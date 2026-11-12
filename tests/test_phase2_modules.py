@@ -377,6 +377,118 @@ def test_dpc_by_stratum_heterogeneity_arithmetic(monkeypatch):
     assert out[out["split"] == "all"]["heterogeneity_p"].isna().all()
 
 
+def test_pool_log_ratios_inverse_variance_and_heterogeneity():
+    d = np.log(np.array([1.2, 1.2, 1.2]))
+    se = np.array([0.1, 0.1, 0.1])
+    out = restraint_behaviour.pool_log_ratios(d, se)
+    assert out["ratio"] == pytest.approx(1.2)
+    assert out["q_heterogeneity_p"] == pytest.approx(1.0)
+    s = 0.1 / np.sqrt(3)
+    assert out["low"] == pytest.approx(1.2 * np.exp(-1.959964 * s), rel=1e-5)
+    # unequal precision: the precise layer dominates the pooled estimate
+    out2 = restraint_behaviour.pool_log_ratios(np.log(np.array([1.0, 2.0])), np.array([0.01, 1.0]))
+    assert out2["ratio"] == pytest.approx(1.0, abs=0.01)
+    assert 0 <= out2["p"] <= 1
+
+
+def _config_frame(n: int = 16) -> pd.DataFrame:
+    rng = np.random.default_rng(0)
+    return pd.DataFrame(
+        {
+            "ptype": ["driver", "passenger"] * (n // 2),
+            "SEAT_POS": [matched.SEAT_POS_DRIVER, matched.SEAT_POS_RIGHT_FRONT] * (n // 2),
+            "own_speeding_type": rng.choice(["no", "exceeded_limit_or_racing"], n),
+            "drv_p_p08": rng.choice([0.0, 0.9], n),
+            "n_vehicles": rng.choice(["1", "2"], n),
+            "veh_rollover": rng.choice([0.0, 1.0, np.nan], n),
+            "crash_type": rng.choice(["mv_angle", "sv_rollover_first", "sv_off_roadway"], n),
+        }
+    )
+
+
+def test_configuration_layers_and_behaviour_masks():
+    elig = _config_frame()
+    lay = restraint_behaviour.configuration_layers(elig)
+    assert set(lay) == {
+        "single vs multi-vehicle crash",
+        "rollover vs no rollover",
+        "single/multi-vehicle x rollover",
+        "crash type",
+    }
+    sm = lay["single vs multi-vehicle crash"]
+    assert (sm["single vehicle"] ^ sm["multi-vehicle"]).all()
+    rl = lay["rollover vs no rollover"]
+    unknown = elig["veh_rollover"].isna().to_numpy()
+    assert not (rl["rollover"] | rl["no rollover"])[unknown].any()  # unknown rollover in neither
+    assert not (rl["rollover"] & rl["no rollover"]).any()
+    cross = lay["single/multi-vehicle x rollover"]
+    assert sum(m.astype(int) for m in cross.values()).max() == 1
+    beh = restraint_behaviour.behaviour_masks(elig)
+    spd, ref = beh["driver speeding (any) vs not speeding"]
+    assert not (spd & ref).any()
+
+
+def test_config_contrasts_pools_layer_log_ratios(monkeypatch):
+    """Stub the DPC: a behaviour effect that is constant within layers (ratio 1.5) but whose
+    marginal ratio is confounded by layer composition must pool to 1.5 within layers."""
+    elig = _config_frame(40)
+    elig["n_vehicles"] = ["1", "1", "2", "2"] * 10
+    elig["own_speeding_type"] = ["exceeded_limit_or_racing", "no"] * 20
+    layer_rr = {True: 0.2, False: 0.4}  # belt RR in single-vehicle vs multi-vehicle crashes
+
+    def fake_belt_rr(el, mask, label, rng, n_boot):
+        sub = el.loc[mask]
+        single = (sub["n_vehicles"] == "1").mean()
+        beh = label.endswith("behaviour") or "behaviour" in label
+        rr = (layer_rr[True] if single > 0.5 else layer_rr[False]) * (1.5 if beh else 1.0)
+        return {
+            "n_pairs": len(sub),
+            "n_pairs_with_death": len(sub),
+            "rr": rr,
+            "rr_low": rr / 1.2,
+            "rr_high": rr * 1.2,
+            "se_log": 0.05,
+            "min_death_count": 100.0,
+        }
+
+    monkeypatch.setattr(restraint_behaviour, "belt_rr", fake_belt_rr)
+    contrasts, by_layer = restraint_behaviour.config_contrasts(elig, np.random.default_rng(0), 1)
+    c = contrasts[contrasts["contrast"] == "driver speeding (any) vs not speeding"]
+    pooled = c[
+        (c["adjustment"] == "single vs multi-vehicle crash") & (c["layer"].str.startswith("pooled"))
+    ]
+    assert pooled["ratio_of_rrs"].item() == pytest.approx(1.5)
+    assert pooled["n_layers_pooled"].item() == 2
+    unstrat = c[c["adjustment"].str.startswith("none")]
+    assert len(unstrat) == 1 and unstrat["ratio_low"].item() < unstrat["ratio_of_rrs"].item()
+    assert {"adjustment", "layer", "rr_belted_vs_unbelted"} <= set(by_layer.columns)
+
+
+def test_config_contrasts_drops_thin_layers_from_the_pool(monkeypatch):
+    elig = _config_frame(40)
+
+    def fake_belt_rr(el, mask, label, rng, n_boot):
+        thin = "rollover" in label and "no rollover" not in label
+        return {
+            "n_pairs": 10,
+            "n_pairs_with_death": 5,
+            "rr": 0.3,
+            "rr_low": 0.2,
+            "rr_high": 0.4,
+            "se_log": 0.1,
+            "min_death_count": 5.0 if thin else 100.0,
+        }
+
+    monkeypatch.setattr(restraint_behaviour, "belt_rr", fake_belt_rr)
+    contrasts, _ = restraint_behaviour.config_contrasts(elig, np.random.default_rng(0), 1)
+    r = contrasts[
+        (contrasts["adjustment"] == "rollover vs no rollover")
+        & (contrasts["contrast"] == "driver speeding (any) vs not speeding")
+    ].set_index("layer")
+    assert not r.loc["rollover", "used_in_pooled"] and r.loc["no rollover", "used_in_pooled"]
+    assert r.loc["pooled within layers", "n_layers_pooled"] == 1
+
+
 def test_nested_sequence_is_nested_and_uses_one_factor():
     names = list(restraint_behaviour.NESTED)
     sets = [set(restraint_behaviour.NESTED[n]) for n in names]
@@ -612,3 +724,34 @@ def test_run_analyses_assembly_and_holm_only_for_registered(monkeypatch):
         inter_df.loc[reg, "additive_contrast_p_holm"] >= inter_df.loc[reg, "additive_contrast_p"]
     ).all()
     assert inter_df.loc[reg, "multiplicative_ratio_p_holm"].notna().all()
+
+
+def test_add_configuration_replaces_existing_columns_and_takes_vehicle_max(tmp_path, monkeypatch):
+    import polars as pl
+
+    from nhtsa_stats import config
+
+    per = pl.DataFrame(
+        {
+            "YEAR": [2020, 2020, 2020],
+            "case_id": [1, 1, 2],
+            "VEH_NO": [1, 1, 1],
+            "veh_rollover": [0, 1, None],
+            "crash_type": ["mv_angle", "mv_angle", "sv_rollover_first"],
+        }
+    )
+    per.write_parquet(tmp_path / "fars_person.parquet")
+    monkeypatch.setattr(config, "PROCESSED_DIR", tmp_path)
+    elig = pd.DataFrame(
+        {
+            "YEAR": [2020, 2020, 2020],
+            "case_id": [1, 1, 2],
+            "VEH_NO": [1, 1, 1],
+            "veh_rollover": [0.0, 1.0, np.nan],  # already present: must not produce _x/_y columns
+            "crash_type": ["x", "x", "x"],
+        }
+    )
+    out = restraint_behaviour.add_configuration(elig)
+    assert out["veh_rollover"].tolist()[:2] == [1.0, 1.0]  # vehicle-level max over occupants
+    assert np.isnan(out["veh_rollover"].iloc[2])
+    assert out["crash_type"].tolist() == ["mv_angle", "mv_angle", "sv_rollover_first"]

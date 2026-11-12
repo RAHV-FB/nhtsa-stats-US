@@ -32,6 +32,6 @@
   "tipping_point_f"
  ],
  "module": "nhtsa_stats.analysis.matched",
- "git_commit": "ef704fd",
- "generated_utc": "2026-10-23T03:37:29Z"
+ "git_commit": "7ee597e-dirty",
+ "generated_utc": "2026-11-12T11:50:19Z"
 }

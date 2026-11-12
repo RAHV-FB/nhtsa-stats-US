@@ -1,0 +1,27 @@
+{
+ "table": "deaths/driver_bac_imputed_share.csv",
+ "description": "Share of drivers with BAC >= .08 whose BAC is imputed rather than measured",
+ "population": "FARS fatal crashes 2016-2024 (census)",
+ "unit": "driver in a fatal crash",
+ "outcome": "death (INJ_SEV 4)",
+ "method": "Measured BAC = a test result in FARS person.ALC_RES (0-939 thousandths); NHTSA's implicates fill untested drivers.  'measured only' counts a driver as BAC >= .08 only with a measured result >= .08 (observed counts, no imputation SE); 'all' / 'imputed' use the 10 implicates (mean, MI SE sqrt(1.1 * between-implicate variance))",
+ "inputs": [
+  "FARS person (PER_TYP)",
+  "FARS vehicle (L_STATUS, PREV_*)",
+  "FARS veh_aux (A_SPVEH)",
+  "FARS miper"
+ ],
+ "rows": 10,
+ "columns": [
+  "period",
+  "n_bac_08_plus",
+  "n_measured",
+  "n_imputed",
+  "share_imputed",
+  "mi_se",
+  "estimate_type"
+ ],
+ "module": "nhtsa_stats.analysis.deaths",
+ "git_commit": "3771f1b-dirty",
+ "generated_utc": "2026-11-12T12:07:01Z"
+}

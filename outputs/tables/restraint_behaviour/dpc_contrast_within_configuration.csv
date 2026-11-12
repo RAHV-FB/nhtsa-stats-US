@@ -1,0 +1,64 @@
+contrast,adjustment,layer,rr_reference,rr_behaviour,n_pairs_reference,n_pairs_behaviour,ratio_of_rrs,ratio_low,ratio_high,p,q_heterogeneity_p,used_in_pooled,n_layers_pooled
+driver speeding (any) vs not speeding,none (unstratified),all vehicles,0.339624,0.341703,71376,16457,1.00612,0.929092,1.08954,0.880632,,True,1
+driver speeding (any) vs not speeding,single vs multi-vehicle crash,single vehicle,0.233016,0.315457,18283,10569,1.3538,1.20879,1.5162,1.60092e-07,,True,
+driver speeding (any) vs not speeding,single vs multi-vehicle crash,multi-vehicle,0.433645,0.427253,53093,5888,0.98526,0.868018,1.11834,0.818303,,True,
+driver speeding (any) vs not speeding,single vs multi-vehicle crash,pooled within layers,,,71376,16457,1.17553,1.08034,1.27912,0.00017449,0.000247815,True,2
+driver speeding (any) vs not speeding,rollover vs no rollover,rollover,0.221006,0.241619,10769,6603,1.09327,0.953011,1.25417,0.203035,,True,
+driver speeding (any) vs not speeding,rollover vs no rollover,no rollover,0.419297,0.463398,60607,9854,1.10518,1.00202,1.21896,0.0454578,,True,
+driver speeding (any) vs not speeding,rollover vs no rollover,pooled within layers,,,71376,16457,1.10115,1.01673,1.19257,0.0178977,0.899812,True,2
+driver speeding (any) vs not speeding,single/multi-vehicle x rollover,"single vehicle, rollover",0.175883,0.237345,6286,5676,1.34945,1.14171,1.59498,0.000441659,,True,
+driver speeding (any) vs not speeding,single/multi-vehicle x rollover,"single vehicle, no rollover",0.330452,0.448982,11997,4893,1.35869,1.15696,1.59558,0.000185465,,True,
+driver speeding (any) vs not speeding,single/multi-vehicle x rollover,"multi-vehicle, rollover",0.345611,0.271401,4483,927,,,,,,False,
+driver speeding (any) vs not speeding,single/multi-vehicle x rollover,"multi-vehicle, no rollover",0.456005,0.489835,48610,4961,1.07419,0.934289,1.23503,0.314774,,True,
+driver speeding (any) vs not speeding,single/multi-vehicle x rollover,pooled within layers,,,66893,15530,1.23207,1.127,1.34694,4.45449e-06,0.0434566,True,3
+driver speeding (any) vs not speeding,crash type,sv_rollover_first,0.140563,0.174608,2542,1834,1.2422,0.916452,1.68373,0.162193,,True,
+driver speeding (any) vs not speeding,crash type,sv_off_roadway,0.27275,0.352957,8116,8067,1.29407,1.14075,1.468,6.15935e-05,,True,
+driver speeding (any) vs not speeding,crash type,sv_on_roadway,0.226631,0.429161,881,252,,,,,,False,
+driver speeding (any) vs not speeding,crash type,mv_angle,0.477792,0.502884,23064,2355,1.05252,0.866584,1.27835,0.605774,,True,
+driver speeding (any) vs not speeding,crash type,mv_head_on,0.430608,0.58616,12698,1019,,,,,,False,
+driver speeding (any) vs not speeding,crash type,mv_rear_end,0.38673,0.249485,8381,1237,,,,,,False,
+driver speeding (any) vs not speeding,crash type,mv_sideswipe,0.311035,0.420936,3673,554,,,,,,False,
+driver speeding (any) vs not speeding,crash type,mv_other,0.300754,0.373193,3135,551,,,,,,False,
+driver speeding (any) vs not speeding,crash type,pooled within layers,,,33722,12256,1.21992,1.10391,1.34811,9.65293e-05,0.215493,True,3
+driver exceeded limit / racing vs not speeding,none (unstratified),all vehicles,0.339624,0.360181,71376,6969,1.06053,0.956946,1.17532,0.262406,,True,1
+driver exceeded limit / racing vs not speeding,single vs multi-vehicle crash,single vehicle,0.233016,0.33731,18283,4439,1.44759,1.2605,1.66244,1.61513e-07,,True,
+driver exceeded limit / racing vs not speeding,single vs multi-vehicle crash,multi-vehicle,0.433645,0.438353,53093,2530,1.01086,0.848462,1.20433,0.903809,,True,
+driver exceeded limit / racing vs not speeding,single vs multi-vehicle crash,pooled within layers,,,71376,6969,1.26094,1.13121,1.40556,2.84645e-05,0.00161439,True,2
+driver exceeded limit / racing vs not speeding,rollover vs no rollover,rollover,0.221006,0.267166,10769,2856,1.20886,1.01859,1.43468,0.0299424,,True,
+driver exceeded limit / racing vs not speeding,rollover vs no rollover,no rollover,0.419297,0.483838,60607,4113,1.15393,1.01084,1.31727,0.0340377,,True,
+driver exceeded limit / racing vs not speeding,rollover vs no rollover,pooled within layers,,,71376,6969,1.17418,1.05742,1.30383,0.00265868,0.673657,True,2
+driver exceeded limit / racing vs not speeding,single/multi-vehicle x rollover,"single vehicle, rollover",0.175883,0.262292,6286,2393,1.49128,1.21832,1.82541,0.000106854,,True,
+driver exceeded limit / racing vs not speeding,single/multi-vehicle x rollover,"single vehicle, no rollover",0.330452,0.469825,11997,2046,1.42176,1.17001,1.72769,0.000401481,,True,
+driver exceeded limit / racing vs not speeding,single/multi-vehicle x rollover,"multi-vehicle, rollover",0.345611,0.293604,4483,463,,,,,,False,
+driver exceeded limit / racing vs not speeding,single/multi-vehicle x rollover,"multi-vehicle, no rollover",0.456005,0.511307,48610,2067,1.12127,0.923339,1.36164,0.248042,,True,
+driver exceeded limit / racing vs not speeding,single/multi-vehicle x rollover,pooled within layers,,,66893,6506,1.33055,1.18751,1.49082,8.58563e-07,0.0978131,True,3
+driver exceeded limit / racing vs not speeding,crash type,sv_rollover_first,0.140563,0.210009,2542,707,,,,,,False,
+driver exceeded limit / racing vs not speeding,crash type,sv_off_roadway,0.27275,0.368979,8116,3488,1.35281,1.16077,1.57663,0.000109512,,True,
+driver exceeded limit / racing vs not speeding,crash type,sv_on_roadway,0.226631,0.31625,881,100,,,,,,False,
+driver exceeded limit / racing vs not speeding,crash type,mv_angle,0.477792,0.423835,23064,1181,,,,,,False,
+driver exceeded limit / racing vs not speeding,crash type,mv_head_on,0.430608,0.640693,12698,459,,,,,,False,
+driver exceeded limit / racing vs not speeding,crash type,mv_rear_end,0.38673,0.325567,8381,357,,,,,,False,
+driver exceeded limit / racing vs not speeding,crash type,mv_sideswipe,0.311035,0.358494,3673,280,,,,,,False,
+driver exceeded limit / racing vs not speeding,crash type,mv_other,0.300754,0.462443,3135,195,,,,,,False,
+driver exceeded limit / racing vs not speeding,crash type,pooled within layers,,,8116,3488,1.35281,1.16077,1.57663,0.000109512,,True,1
+driver BAC >= .08 (MI) vs BAC < .08,none (unstratified),all vehicles,0.354198,0.318241,77920,12320,0.898485,0.827501,0.975558,0.0107932,,True,1
+driver BAC >= .08 (MI) vs BAC < .08,single vs multi-vehicle crash,single vehicle,0.269885,0.275215,21851,8101,1.01975,0.908943,1.14406,0.738961,,True,
+driver BAC >= .08 (MI) vs BAC < .08,single vs multi-vehicle crash,multi-vehicle,0.436391,0.459292,56069,4219,1.05248,0.923013,1.20011,0.44501,,True,
+driver BAC >= .08 (MI) vs BAC < .08,single vs multi-vehicle crash,pooled within layers,,,77920,12320,1.03384,0.948162,1.12726,0.450855,0.722752,True,2
+driver BAC >= .08 (MI) vs BAC < .08,rollover vs no rollover,rollover,0.230787,0.236275,13092,4911,1.02378,0.887604,1.18085,0.746893,,True,
+driver BAC >= .08 (MI) vs BAC < .08,rollover vs no rollover,no rollover,0.443526,0.410542,64828,7409,0.925631,0.833871,1.02749,0.146811,,True,
+driver BAC >= .08 (MI) vs BAC < .08,rollover vs no rollover,pooled within layers,,,77920,12320,0.958721,0.881248,1.04301,0.326818,0.263978,True,2
+driver BAC >= .08 (MI) vs BAC < .08,single/multi-vehicle x rollover,"single vehicle, rollover",0.199449,0.219997,8181,4277,1.10302,0.93446,1.30199,0.246516,,True,
+driver BAC >= .08 (MI) vs BAC < .08,single/multi-vehicle x rollover,"single vehicle, no rollover",0.391624,0.362102,13670,3824,0.924614,0.790991,1.08081,0.325024,,True,
+driver BAC >= .08 (MI) vs BAC < .08,single/multi-vehicle x rollover,"multi-vehicle, rollover",0.322853,0.388074,4911,634,,,,,,False,
+driver BAC >= .08 (MI) vs BAC < .08,single/multi-vehicle x rollover,"multi-vehicle, no rollover",0.466809,0.483637,51158,3585,1.03605,0.894276,1.2003,0.637136,,True,
+driver BAC >= .08 (MI) vs BAC < .08,single/multi-vehicle x rollover,pooled within layers,,,73009,11686,1.01618,0.928764,1.11183,0.726527,0.299431,True,3
+driver BAC >= .08 (MI) vs BAC < .08,crash type,sv_rollover_first,0.151569,0.170764,3239,1322,1.12664,0.825623,1.5374,0.452159,,True,
+driver BAC >= .08 (MI) vs BAC < .08,crash type,sv_off_roadway,0.32117,0.300431,10791,6132,0.935429,0.825428,1.06009,0.295658,,True,
+driver BAC >= .08 (MI) vs BAC < .08,crash type,sv_on_roadway,0.220537,0.356812,949,217,,,,,,False,
+driver BAC >= .08 (MI) vs BAC < .08,crash type,mv_angle,0.487217,0.529709,24356,1616,1.08721,0.886382,1.33355,0.422266,,True,
+driver BAC >= .08 (MI) vs BAC < .08,crash type,mv_head_on,0.455571,0.465198,12950,1193,1.02113,0.816044,1.27777,0.854931,,True,
+driver BAC >= .08 (MI) vs BAC < .08,crash type,mv_rear_end,0.344982,0.36225,9055,694,,,,,,False,
+driver BAC >= .08 (MI) vs BAC < .08,crash type,mv_sideswipe,0.327819,0.425905,4065,272,,,,,,False,
+driver BAC >= .08 (MI) vs BAC < .08,crash type,mv_other,0.312569,0.37333,3416,331,,,,,,False,
+driver BAC >= .08 (MI) vs BAC < .08,crash type,pooled within layers,,,51336,10263,0.994847,0.907395,1.09073,0.912375,0.507896,True,4

@@ -46,6 +46,6 @@
   "invalid_licence_driver_share"
  ],
  "module": "nhtsa_stats.analysis.deaths",
- "git_commit": "c353485",
- "generated_utc": "2026-11-05T15:13:28Z"
+ "git_commit": "3771f1b-dirty",
+ "generated_utc": "2026-11-12T12:07:01Z"
 }

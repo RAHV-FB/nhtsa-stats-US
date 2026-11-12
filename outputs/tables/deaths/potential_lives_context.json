@@ -1,0 +1,29 @@
+{
+ "table": "deaths/potential_lives_context.csv",
+ "description": "Deaths the potential-lives figure leaves out (unknown belt / helmet use) and the share of unbelted deaths in single-occupant vehicles, where no pair comparison exists",
+ "population": "FARS fatal crashes 2016-2024 (census)",
+ "unit": "person killed",
+ "outcome": "death (INJ_SEV 4)",
+ "method": "Census counts; occupancy = drivers and passengers (A_PTYPE 1/2) recorded in the person's vehicle in FARS person/per_aux, whether or not they were killed",
+ "inputs": [
+  "FARS person (INJ_SEV, PER_TYP, AGE, SEX, LOCATION, STR_VEH)",
+  "FARS per_aux",
+  "FARS vehicle (L_STATUS, PREV_*, MOD_YEAR, VSPD_LIM)",
+  "FARS veh_aux",
+  "FARS accident (LGT_COND)",
+  "FARS acc_aux",
+  "FARS midrvacc",
+  "FARS miper"
+ ],
+ "rows": 11,
+ "columns": [
+  "metric",
+  "deaths",
+  "denominator",
+  "share",
+  "note"
+ ],
+ "module": "nhtsa_stats.analysis.deaths",
+ "git_commit": "3771f1b-dirty",
+ "generated_utc": "2026-11-12T12:07:01Z"
+}
