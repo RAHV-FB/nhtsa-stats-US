@@ -29,7 +29,7 @@ Intervals cover sampling error only, not recording error or model choice, unless
    21%
    of belted survivors misrecorded. In an exploratory follow-up, belts are somewhat *less* protective within crash
    configuration when the driver was speeding (ratio of belt risk ratios 1.10 to 1.24 across four layering
-   schemes), and the alcohol contrast is null (`reports/alcohol_drugs_restraints.md`).
+   schemes), and the alcohol contrast shows no detectable difference (p = 0.68; `reports/alcohol_drugs_restraints.md`).
    For motorcycle helmets (operator and passenger of the same motorcycle) the reduction is
    31% (20–40%)
    but it is imprecise and fragile: it vanishes at about
@@ -84,9 +84,9 @@ Intervals cover sampling error only, not recording error or model choice, unless
    support a small association; they do not support "no excess". In an exploratory follow-up added
    after the red-team review, the pooled model-A risk ratios of finding 4 average over very different
    crash configurations: they are much larger in multi-vehicle than in single-vehicle crashes for
-   exceeding the limit, alcohol, motorcycles and large trucks, but not for "too fast for conditions"
-   (`severity/fatal_effect_modification`).
-8. **Some combinations amplify each other**, notably pedestrian crashes in unlit darkness. For
+   exceeding the limit, alcohol, motorcycles and large trucks, while for "too fast for conditions" there is no detectable difference
+   (p = 0.85; `severity/fatal_effect_modification`).
+8. **Some combinations amplify each other**, notably pedestrian crashes in unlit darkness (super-multiplicative, so also a large additive excess). For
    others that are often assumed to (speeding in darkness, young drivers late at night), no
    interaction is detected for the fatal outcome, although speeding in unlit darkness shows an
    additive excess for fatal-or-serious crashes.
@@ -132,21 +132,21 @@ crashes*.
 
 | Characteristic | Share of all crashes | Share of fatal crashes | Over-representation (95% CI) | Crude fatal rate |
 |---|---|---|---|---|
-| Pedestrian crash | 1.2% | 18.6% | ×15.6 (13.2–18.5) | 8.3% |
-| Driver exceeded the limit / racing | 0.85% | 10.9% | ×12.8 | 5.0% |
-| Motorcycle involved | 1.6% | 15.5% | ×9.5 | 5.0% |
+| Pedestrian crash | 1.2% | 18.6% | ×15.6 (13.2–18.5) | 8.2% |
+| Driver exceeded the limit / racing | 0.85% | 10.9% | ×12.8 | 4.9% |
+| Motorcycle involved | 1.6% | 15.5% | ×9.5 | 4.9% |
 | Single vehicle, rollover first | 1.4% | 6.7% | ×4.9 | 2.7% |
 | Head-on collision | 2.6% | 10.6% | ×4.1 | 2.2% |
-| Dark, unlit | 10.3% | 27.2% | ×2.6 | 1.53% |
-| 00:00–05:59 | 7.9% | 19.9% | ×2.5 | 1.54% |
-| Speed limit 50–55 mph | 13.4% | 29.4% | ×2.2 | 1.22% |
+| Dark, unlit | 10.3% | 27.2% | ×2.6 | 1.52% |
+| 00:00–05:59 | 7.9% | 19.9% | ×2.5 | 1.53% |
+| Speed limit 50–55 mph | 13.4% | 29.4% | ×2.2 | 1.21% |
 | Speed limit 70+ mph | 4.6% | 8.5% | ×1.9 | 1.10% |
 | "Too fast for conditions" | 7.9% | 11.7% | ×1.5 | 0.66% |
 | Driver aged 65+ involved | 17.6% | 20.8% | ×1.2 | 0.64% |
 | Wet surface | 13.6% | 11.5% | ×0.85 | 0.46% |
-| Rain | 9.2% | 7.1% | ×0.77 | 0.43% |
+| Rain | 9.2% | 7.1% | ×0.77 | 0.42% |
 | Intersection | 43.4% | 25.2% | ×0.58 | 0.34% |
-| Driver aged 15–20 involved | 19.9% | 12.9% | ×0.65 | 0.41% |
+| Driver aged 15–20 involved | 19.9% | 12.9% | ×0.65 | 0.40% |
 | Rear-end collision | 30.2% | 6.9% | ×0.23 | 0.14% |
 
 *Mixed systems.* Each ratio above divides a FARS share by a CRSS share, so it mixes two recording
@@ -468,9 +468,10 @@ mass and front-end geometry are not separately observed. Exposure to being struc
 measured, so these ratios describe severity *given* a pedestrian crash.
 
 **The pooled ratios average over very different crash configurations (exploratory follow-up added
-after the red-team review).** `severity/fatal_effect_modification` refits model A within
-single-vehicle and within multi-vehicle crashes (and within crash types) and tests whether the
-adjusted fatal risk ratio is the same. It is not: the relative association is larger in
+after the red-team review).** `severity/fatal_effect_modification` fits model A once with an
+exposure-by-stratum interaction (stratum: single- or multi-vehicle crashes, or crash type) and
+tests whether the adjusted fatal risk ratio is the same across strata; the other covariate effects
+are shared across strata. It is not: the relative association is larger in
 multi-vehicle crashes, where the baseline fatal risk is low (adjusted risk ratios, 95% interval):
 
 | Circumstance | Single-vehicle | Multi-vehicle | Ratio of ratios (multi / single) | Homogeneity p |
@@ -482,9 +483,12 @@ multi-vehicle crashes, where the baseline fatal risk is low (adjusted risk ratio
 | Too fast for conditions | 1.0 (0.9–1.2) | 1.1 (0.8–1.4) | 1.03 (0.75–1.42) | 0.85 |
 
 The pooled model-A ratios quoted above (exceeded limit 5.22, alcohol 4.24, motorcycle 8.6, large truck or bus 1.91) are therefore averages over
-very different crash configurations and describe neither group well; "too fast for conditions" does
-not differ between single- and multi-vehicle crashes (it varies somewhat by crash type, homogeneity
-p 0.03). A ratio is a relative measure: part of the larger multi-vehicle ratios reflects a lower
+very different crash configurations and describe neither group well. For "too fast for conditions"
+there is no detectable difference between single- and multi-vehicle crashes (homogeneity p =
+0.85),
+but finer crash types do differ (homogeneity p =
+0.03);
+a non-significant homogeneity test is not evidence of equal ratios. A ratio is a relative measure: part of the larger multi-vehicle ratios reflects a lower
 baseline risk in multi-vehicle crashes, so these ratios do not rank the absolute harm. This is an
 exploratory, post-hoc analysis (it was added after the red-team review and is outside the registered
 family), and an association conditional on a police-reported crash, not an effect. Strata with
@@ -503,7 +507,8 @@ the attributable fractions built on them, less reliable than the relative contra
 ## 6. Finding 5 — Which combinations amplify risk
 
 See `reports/interactions.md`. In brief: among the 13 registered pairs, pedestrian crashes in
-unlit darkness are the clearest case of amplification on both scales, and motorcycle crashes
+unlit darkness are the clearest case of a super-multiplicative combination (ratio of risk ratios
+1.62 (1.39–1.88)), which therefore also carries a large additive excess, and motorcycle crashes
 involving alcohol carry a large *additive* excess (deaths) although on the ratio scale the
 combination is sub-multiplicative (ratio of risk ratios
 0.63 (0.51–0.79)). Pedestrian crashes on 50+ mph roads show
@@ -655,7 +660,7 @@ road, weather.
   The unstratified null reflects crash composition: speeding drivers are more often in single-vehicle
   crashes, where belts look more protective. For a driver at BAC .08 or more the within-configuration
   ratio is 1.02 (0.93–1.11),
-  no difference (`restraint_behaviour/dpc_contrast_within_configuration`). The layers are pooled as if
+  no detectable difference (p = 0.68; `restraint_behaviour/dpc_contrast_within_configuration`). The layers are pooled as if
   independent and the follow-up is not multiplicity-adjusted.
 * **Frailty.** Within the same vehicle, belted occupants aged 65+ died more often than belted
   occupants aged 25–44 of the same sex
@@ -835,16 +840,17 @@ any other cause.
   26% in 2024, whose toxicology records are
   incomplete in these archives.
   Survivors are tested mainly on suspicion.
-* **Imputed BAC leans on the outcome.** Among FARS drivers who were not tested, an imputed BAC of
-  .08 or more is associated with the driver being killed with an adjusted odds ratio of
-  3.85 (3.61–4.10), against 1.14 (1.10–1.18) for a measured BAC of .08 or more among tested drivers (adjusted for age band, sex, vehicle type, crash type, time of day and year;
-  `measurement/imputed_bac_injury`). The much stronger association for imputed values is what one
-  expects if NHTSA's imputation model uses injury severity as a predictor, so FARS figures built on
-  imputed BAC (drunk-driving death counts, the share of victims who were not the drunk driver,
-  FARS-scaled attributable deaths) lean on a model that uses the outcome, and the measured-BAC
-  figures are the more conservative basis. With police alcohol, light, area and weekend also in the
-  model the imputed odds ratio is 3.82 (3.46–4.23)
-  and the measured one 2.54 (2.42–2.65). This is a diagnostic, not a causal estimate, and the tested group is itself selected.
+* **Imputed BAC: a diagnostic consistent with the imputation using injury severity.** Among FARS
+  drivers who were not tested, an imputed BAC of .08 or more is associated with the driver being
+  killed with an adjusted odds ratio of 3.85 (3.61–4.10), against 1.14 (1.10–1.18) for a measured BAC of .08 or more
+  among tested drivers (adjusted for age band, sex, vehicle type, crash type, time of day and year;
+  `measurement/imputed_bac_injury`). A much stronger association for imputed values is consistent
+  with NHTSA's imputation model using injury severity as a predictor, but it does not show that.
+  The comparison has limits. The tested drivers are themselves selected on the outcome (145,403 of 205,972 were killed, against 77,453 of 280,395 of the imputed group), so the two groups are not like for like, and adding police-reported alcohol, light, area and weekend moves the tested odds ratio from 1.14 to 2.54 (imputed: 3.85 to 3.82), so the gap depends on the covariates chosen. With police alcohol, light, area and weekend also in the model the odds ratios are
+  3.82 (3.46–4.23) (imputed) and 2.54 (2.42–2.65) (measured). FARS figures built on imputed BAC (drunk-driving death
+  counts, the share of victims who were not the drunk driver, FARS-scaled attributable deaths) may
+  therefore depend on a model that uses the outcome; the measured-BAC figures avoid that dependence
+  but describe tested drivers only. This is a diagnostic, not a causal estimate.
 * **Police reports miss alcohol in killed drivers.** Among tested FARS drivers with a known
   police report, the report identifies BAC ≥ 0.08 in
   87% of killed

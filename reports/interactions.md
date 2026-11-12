@@ -62,7 +62,7 @@ Figure: `outputs/figures/summary/interactions.png`.
 
 ### What the pattern shows
 
-**Pedestrian crashes in unlit darkness show amplification on both scales.**
+**Pedestrian crashes in unlit darkness are super-multiplicative, and so also carry a large additive excess.**
 The standardised risk that a crash is fatal when it is a pedestrian crash in unlit darkness is
 179 (150–209) per 1,000, against
 5.0 (4.3–5.7) for a
@@ -70,9 +70,11 @@ non-pedestrian crash in daylight. The pedestrian risk ratio is
 16.9 (13.6–21.0) in daylight and
 27.3 (22.3–33.4) in unlit darkness:
 a ratio of risk ratios of 1.62 (1.39–1.88)
-(Holm p 1.8e-06). The
-additive excess is 94 (70–117) fatal
-crashes per 1,000 (Holm p 6.7e-09).
+(Holm p 1.8e-06), that is,
+the two risks combine by more than multiplying. Because an additive excess is expected whenever two
+risks multiply, the additive excess of 94 (70–117) fatal
+crashes per 1,000 (Holm p 6.7e-09)
+follows from it and is not separate evidence.
 
 **Motorcycle crashes involving alcohol: a large additive excess.** The ratio of risk ratios is
 0.63 (0.51–0.79), but the additive

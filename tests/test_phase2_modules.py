@@ -744,6 +744,7 @@ def _stub_factorial(monkeypatch, p_values):
 
     class Res:
         n_events = 7
+        n_rows = 100  # rows with a known outcome (the fitted domain)
         meta = None  # set in __init__ (avoids a shared mutable class attribute)
         suppressed = None
 

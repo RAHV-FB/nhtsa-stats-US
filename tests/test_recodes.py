@@ -24,6 +24,19 @@ def test_killed_or_serious_keeps_injured_severity_unknown_null():
     assert _apply(h.killed_or_serious("S"), S=[4, 3, 2, 5, 6, 8, 9]) == [1, 1, 0, None, 0, 0, None]
 
 
+def test_person_killed_is_missing_for_died_prior_to_crash():
+    # INJ_SEV 6 is neither a crash death nor a survivor: missing, not 0.
+    assert _apply(h.person_fatal("S"), S=[4, 3, 0, 5, 6, 9]) == [1, 0, 0, 0, None, None]
+    assert _apply(h.person_killed_or_serious("S"), S=[4, 3, 2, 5, 6, 9]) == [
+        1,
+        1,
+        0,
+        None,
+        None,
+        None,
+    ]
+
+
 def test_distraction_looked_but_did_not_see_is_not_distracted():
     out = _apply(h.distraction_flag("c"), c=[0, 1, 5, 93, 16, 96, 99, None])
     assert out == [0, 0, 1, 1, None, None, None, None]

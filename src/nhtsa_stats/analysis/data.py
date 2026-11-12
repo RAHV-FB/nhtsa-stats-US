@@ -37,9 +37,13 @@ def crss_crash(
 ) -> tuple[pd.DataFrame, SurveyDesign]:
     """CRSS crash file as pandas plus its survey design.
 
-    Rows with an unknown ``outcome`` (MAXSEV_IM 5/6/8 for 'fatal') are dropped *after* the
-    design object is built from the full sample (so domain variance uses every PSU) -- the
-    returned design is already subset to the returned rows.
+    Rows with an unknown ``outcome`` are dropped *after* the design object is built from the
+    full sample (so domain variance uses every PSU) -- the returned design is already subset to
+    the returned rows.  ``fatal`` is 0 (known) for MAXSEV_IM 5, 6 and 8 (no crash death is
+    possible) and unknown only for 9; ``ka`` is also unknown for 5 (injured, severity unknown:
+    a serious injury is possible), so ``ka`` has more missing rows than ``fatal``.  A frame
+    loaded for one outcome can therefore still hold missing values of another; fit those
+    outcomes as a domain of the design (``confounding.known_outcome_domain``).
     """
     df = _read("crss_crash").to_pandas()
     if years is not None:

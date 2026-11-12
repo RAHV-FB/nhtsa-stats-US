@@ -156,10 +156,12 @@ the choice, not a range that contains the truth.
 The imputed basis has a further problem. Among untested drivers, an imputed BAC of .08 or more is
 associated with the driver being killed with an adjusted odds ratio of 3.85 (3.61–4.10), against
 1.14 (1.10–1.18) for a measured BAC of .08 or more among tested drivers
-(`measurement/imputed_bac_injury`). That is what one would expect if NHTSA's imputation model uses
-injury severity, so figures built on imputed BAC lean on a model that uses the outcome, and the
-measured-BAC figures are the more conservative basis. The comparison is a diagnostic, not a causal
-estimate.
+(`measurement/imputed_bac_injury`). That is consistent with NHTSA's imputation model using injury
+severity, but it does not show it: the tested drivers are themselves selected on the outcome
+(145,403 of 205,972 were killed, against 77,453 of 280,395 of the imputed group), and adding police-reported alcohol, light,
+area and weekend moves the tested odds ratio to 2.54 (2.42–2.65). Figures built on imputed BAC may therefore
+depend on a model that uses the outcome, and the measured-BAC figures avoid that dependence but
+describe tested drivers only. The comparison is a diagnostic, not a causal estimate.
 
 | BAC basis | Role | Deaths | Share |
 |---|---|---|---|

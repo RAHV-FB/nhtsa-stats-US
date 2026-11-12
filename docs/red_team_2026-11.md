@@ -4,7 +4,9 @@ The owner asked for independent subagents to attack the project's road-safety re
 looked for data leakage, biases, missing uncertainty, broken model assumptions, misused
 significance and irreproducible numbers, and a separate subagent tried to disprove each major
 published finding. This record says how that was done, what held up, what did not, and which
-corrections are recommended.
+corrections are recommended. It is a dated record: numbers quoted from the project's tables are as
+they stood at the review and may differ slightly after a later re-run; the named tables are
+authoritative.
 
 The review itself changed no analysis code, output table, report, website page or documented
 limitation. Every recommended correction is listed in §5, with its status after a later pass that
@@ -307,8 +309,8 @@ committed tables. Each issue carries the label from §1.
 * **Directions.** No direction reversed under any attack:
   * exceeding the limit is strongly associated with a fatal crash;
   * alcohol explains only a minority of that association;
-  * pedestrians in unlit darkness amplify on both scales (ratio of RRs 1.62–1.85 across six
-    definitions);
+  * pedestrians in unlit darkness are super-multiplicative (ratio of RRs above 1 across six
+    definitions), so also carry an additive excess;
   * belted front-seat occupants die less often than unbelted ones in the same vehicle, in every
     stratum;
   * teen and 75+ drivers are over-involved as the culpable party;
@@ -387,19 +389,25 @@ committed tables, text in the reports, website and `docs/limitations.md`, and th
   partly reflects state record completeness.
 * *Imputed BAC and injury* (`measurement/imputed_bac_injury`): the reviewer's odds ratio of 1.62 was
   **not reproduced**. The project's specification (age band, sex, vehicle type, crash type, time of
-  day, year) gives about 3.8 for imputed BAC of .08 or more among untested drivers, against about
-  1.1 for measured BAC among tested drivers. The direction the reviewer suspected (the imputation
-  uses injury) is supported; the size differs because the specifications differ. A diagnostic, not a
+  day, year) gives a much larger odds ratio for imputed BAC of .08 or more among untested drivers
+  than for measured BAC among tested drivers (values in the table). That is consistent with the
+  imputation using injury, which is the direction the reviewer suspected, but the tested comparison
+  group is itself selected on the outcome and the gap depends on the covariates, so it does not
+  show it; the size differs from the reviewer's because the specifications differ. A diagnostic, not a
   causal estimate.
 * *Calibration* (`severity/fatal_calibration`): the suspected miscalibration of model A is
   confirmed. It is calibrated overall and over-predicts in the middle deciles (observed/predicted
   about 0.74 to 0.80).
-* *Code hash per module*: done; every sidecar carries `source_sha256` and `package_sha256`, and
-  `nhtsa status` lists stale tables.
+* *Code hash per module*: done; after the full re-run every table sidecar carries `code_sha256` (the producing
+  module plus the package modules it imports, taken when the module is loaded) and `inputs_sha256`;
+  dictionary JSON outputs carry a `_provenance` entry; `nhtsa status` lists stale, unhashed and
+  input-changed tables, and `tests/test_provenance.py` fails on any committed sidecar without a
+  current `code_sha256`. Sidecars written before the re-run carried only `source_sha256` and
+  `package_sha256`.
 * *Crash-type interaction comparison for `model_validation.md` §8*: partly answered by
   `severity/fatal_effect_modification` (adjusted fatal risk ratios differ sharply between single-
-  and multi-vehicle crashes for exceeding the limit, alcohol, motorcycles and large trucks, not for
-  "too fast for conditions"); the boosting-versus-interacted-logistic AUROC comparison was not done.
+  and multi-vehicle crashes for exceeding the limit, alcohol, motorcycles and large trucks, with no
+  detectable difference for "too fast for conditions"); the boosting-versus-interacted-logistic AUROC comparison was not done.
 * *Attacker-only claims in §6*: P03, P04 and W06 were confirmed on recomputation, and G01 was
   applied.
 

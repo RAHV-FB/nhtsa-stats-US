@@ -4,6 +4,8 @@ diagnostic.  Synthetic data with a known truth; no data cache needed."""
 
 from __future__ import annotations
 
+import itertools
+
 import numpy as np
 import pandas as pd
 import pytest
@@ -39,7 +41,21 @@ def test_weighted_deciles_hold_equal_weight():
     assert set(dec) == set(range(1, 11))
     share = np.array([w[dec == g].sum() for g in range(1, 11)]) / w.sum()
     assert np.allclose(share, 0.1, atol=0.01)
-    assert p[dec == 1].max() <= p[dec == 2].min()  # ordered by predicted risk
+    # ordered by predicted risk, every boundary strict
+    assert all(p[dec == g].max() < p[dec == g + 1].min() for g in range(1, 10))
+
+
+def test_weighted_deciles_keep_tied_predictions_together():
+    rng = np.random.default_rng(5)
+    p = np.round(rng.random(3000), 1)  # eleven distinct values: heavy ties
+    w = rng.integers(1, 20, 3000).astype(float)
+    dec = severity.weighted_deciles(p, w)
+    for v in np.unique(p):
+        assert len(np.unique(dec[p == v])) == 1
+    groups = np.unique(dec)
+    assert all(p[dec == g].max() < p[dec == h].min() for g, h in itertools.pairwise(groups))
+    # everything tied: one group, nothing split
+    assert len(np.unique(severity.weighted_deciles(np.full(50, 0.2), np.ones(50)))) == 1
 
 
 def _calib_data(scale: float, n: int = 40000, seed: int = 1):
@@ -61,10 +77,27 @@ def test_calibration_covers_one_when_calibrated_and_flags_miscalibration():
     assert (c["observed_low"] <= c["observed"]).all() and (
         c["observed"] <= c["observed_high"]
     ).all()
+    dec = severity.weighted_deciles(p, design.weight)
+    deciles = c.iloc[:10]
+    # deciles partition the sample and reproduce the overall totals ...
+    assert deciles["n_crashes"].sum() == allrow["n_crashes"] == len(p)
+    assert deciles["n_events"].sum() == allrow["n_events"] == int(y.sum())
+    w = design.weight
+    for g in range(1, 11):
+        m = dec == g
+        assert c.loc[g - 1, "n_crashes"] == m.sum()
+        assert c.loc[g - 1, "predicted"] == pytest.approx(np.average(p[m], weights=w[m]))
+        assert c.loc[g - 1, "observed"] == pytest.approx(np.average(y[m], weights=w[m]))
+    # ... so weight-averaging the decile means gives the overall weighted observed / predicted
+    dw = np.array([w[dec == g].sum() for g in range(1, 11)])
+    assert np.average(deciles["observed"], weights=dw) == pytest.approx(allrow["observed"])
+    assert np.average(deciles["predicted"], weights=dw) == pytest.approx(allrow["predicted"])
+    assert allrow["ratio_observed_to_predicted"] == pytest.approx((w * y).sum() / (w * p).sum())
+    # predicted risk is strictly ordered across deciles (ties are never split)
+    assert (np.diff(deciles["predicted_min"]) > 0).all()
     assert (
-        c["predicted"].is_monotonic_increasing is False
-        or c["predicted"].iloc[0] < c["predicted"].iloc[9]
-    )
+        deciles["predicted_max"].to_numpy()[:-1] < deciles["predicted_min"].to_numpy()[1:]
+    ).all()
     p2, y2, d2 = _calib_data(1.3)
     c2 = severity.calibration_by_decile(p2, y2, d2).iloc[-1]
     assert c2["ratio_observed_to_predicted"] == pytest.approx(1.3, abs=0.15)

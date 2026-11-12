@@ -60,15 +60,15 @@ census counts and shares), **estimated** (CRSS design-based), **adjusted associa
    0.34 (0.32–0.36)
    when the driver was not speeding and
    0.34 (0.32–0.36)
-   when the driver was speeding: overall, no difference. But speeding drivers' crashes are
+   when the driver was speeding: overall, no detectable difference (p = 0.88). But speeding drivers' crashes are
    concentrated in single-vehicle crashes, where belts protect more, and within crash
    configuration belts are *somewhat less* protective with a speeding driver (exploratory
    follow-up; ratio of risk ratios 1.10 to 1.24 across four layering schemes, 1.24 (1.13–1.35) with single/multi-vehicle
    and rollover crossed).
    For a driver at BAC ≥ .08 the overall within-vehicle ratio is slightly lower
    (0.32 (0.30–0.34)),
-   but within crash configuration the contrast is null
-   (0.99 (0.91–1.09)).
+   but within crash configuration there is no detectable contrast (p = 0.90;
+   0.99 (0.91–1.09)).
    Belt protection also differs by *kind of impact* (single- vs multi-vehicle crash, rollover
    or not). Across crashes, by contrast, the unbelted risk ratio in CRSS falls from
    46 to
@@ -321,15 +321,18 @@ unbelted):
 | time | day | 61,345 | 0.35 (0.33–0.37) | — | — |
 | time | night | 28,702 | 0.33 (0.31–0.35) | 0.93 (0.86–1.00) | 0.055 |
 
-Overall, the within-vehicle belt risk ratio is the same whether or not the driver was
-speeding (and similar with exceedance), and slightly lower with a driver at BAC ≥ .08
+Overall, there is no detectable difference in the within-vehicle belt risk ratio whether or not the
+driver was speeding (p = 0.88; exceeding the limit, p = 0.26), and it is slightly lower with a driver at BAC ≥ .08
 (p 0.01).
 The BAC ≥ .08 splits use NHTSA-imputed BAC (MI) for untested drivers. Among untested
 drivers an imputed BAC of .08 or more is associated with being killed with an adjusted odds ratio of
 3.85 (3.61–4.10), against 1.14 (1.10–1.18) for a measured BAC among tested drivers
-(`measurement/imputed_bac_injury`), which is what one would expect if the imputation model uses
-injury; BAC-based splits therefore lean on a model that uses the outcome, and measured-BAC results
-are the more conservative basis. This is a diagnostic, not a causal estimate.
+(`measurement/imputed_bac_injury`), which is consistent with the imputation model using injury
+severity but does not show it: the tested drivers are themselves selected on the outcome
+(145,403 of 205,972 were killed, against 77,453 of 280,395 of the imputed group), and with police-reported alcohol, light, area
+and weekend added the tested odds ratio is 2.54 (2.42–2.65). BAC-based splits therefore may depend on a model
+that uses the outcome, and measured-BAC results avoid that dependence but describe tested drivers
+only. This is a diagnostic, not a causal estimate.
 
 That overall comparison does not hold crash configuration fixed, and the configuration differs
 between the groups. Within crash configuration the picture changes
@@ -348,7 +351,7 @@ behaviour to that without it, pooled across layers, >1 means belts protect less)
 So the earlier unstratified conclusion that the belt effect does not vary with the driver's speeding
 does not hold within crash configuration: across the four layering schemes belts are somewhat less
 protective when the driver was speeding (ratio of RRs 1.10 to 1.24; the crash-type scheme pools only 3 of
-its 8 crash types), while the BAC contrast is null. This is an exploratory follow-up, not
+its 8 crash types), while the BAC contrast shows no detectable difference (p = 0.68). This is an exploratory follow-up, not
 multiplicity-adjusted, and the layers are pooled as if independent. Belt protection also differs by the *kind of impact*.
 By crash type (FARS, within-vehicle double-pair comparison, `matched/belt_by_crash_type`):
 
@@ -399,7 +402,7 @@ energy and, possibly, survivor over-reporting of belt use inflate across-crash c
 
 *Competing explanations.* (i) "Belt non-use only marks drunk or speeding drivers" — the
 within-vehicle comparison holds the driver and crash fixed, and the overall belt risk ratio
-is similar with and without a speeding or drinking driver; within crash configuration the
+shows no detectable difference with and without a speeding or drinking driver (§6); within crash configuration the
 speeding contrast (exploratory) is modest and in the direction of *less* protection, which is not what a pure
 marker would produce. (ii) "Survivors over-report belt use" — not testable from the data
 directly, but quantifiable. Phase 1 showed that the within-vehicle reduction would fall from

@@ -14,6 +14,7 @@ Outputs (outputs/tables/descriptive):
   and the over-representation ratio ``share_fatal_fars / share_all_crashes``.  A ratio near 1
   means a factor is common in fatal crashes *because it is common in crashes*; a ratio well
   above 1 means fatal crashes are disproportionately concentrated in it.
+* ``crss_design`` -- CRSS design facts (strata, PSUs, design df, years) for citation.
 * ``fars_composition_by_year`` -- yearly shares of key characteristics among FARS fatal crashes
   and deaths.
 
@@ -220,12 +221,33 @@ def fars_composition_by_year() -> pd.DataFrame:
     return pd.DataFrame(rows)
 
 
+def crss_design() -> pd.DataFrame:
+    """CRSS design facts of the crash file (all years), one row: strata, variance PSUs, df."""
+    df, design = data.crss_crash(outcome=None)
+    years = sorted(int(y) for y in df["YEAR"].unique())
+    return pd.DataFrame(
+        [
+            {
+                "n_crashes": int(design.n),
+                "n_strata": int(design.n_strata),
+                "n_psu": int(design.n_clusters),
+                "design_df": int(design.df),
+                "first_year": years[0],
+                "last_year": years[-1],
+                "n_years": len(years),
+                "years": ", ".join(map(str, years)),
+            }
+        ]
+    )
+
+
 def run() -> dict[str, pd.DataFrame]:
     out = {
         "fars_annual": fars_annual(),
         "crss_annual": crss_annual(),
         "frequency_vs_severity": frequency_vs_severity(),
         "fars_composition_by_year": fars_composition_by_year(),
+        "crss_design": crss_design(),
     }
     meta = {
         "fars_annual": (
@@ -254,6 +276,13 @@ def run() -> dict[str, pd.DataFrame]:
             "crash / person",
             "fatal",
         ),
+        "crss_design": (
+            "CRSS design summary: crashes, variance strata, variance PSUs, design degrees of "
+            "freedom (PSUs minus strata) and the years covered",
+            "CRSS (national probability sample)",
+            "crash",
+            "none (design facts)",
+        ),
     }
     for name, df in out.items():
         desc, pop, unit, oc = meta[name]
@@ -265,7 +294,7 @@ def run() -> dict[str, pd.DataFrame]:
             population=pop,
             unit=unit,
             outcome=oc,
-            method="Design-based (CRSS: Taylor linearisation, 25 strata/67 PSUs) or census counts (FARS)",
+            method="Design-based (CRSS: Taylor linearisation; strata and PSUs in crss_design) or census counts (FARS)",
             inputs=[
                 "data/processed/crss_crash.parquet",
                 "data/processed/fars_crash.parquet",

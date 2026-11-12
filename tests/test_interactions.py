@@ -239,3 +239,25 @@ def test_linked_variables_move_with_the_exposure():
     ref = it._level_weights(df, w, ped, 0)
     assert set(ref) == {("mv_angle", "2"), ("mv_angle", "3+"), ("sv_on_roadway", "1")}
     assert sum(ref.values()) == pytest.approx(1.0)
+
+
+@pytest.mark.parametrize("col", ["ic_p", "ratio_of_rr_p", "product_p"])
+@pytest.mark.parametrize("bad_value", [np.nan, np.inf])
+def test_nonfinite_prespecified_p_raises_even_without_failed_flag(col, bad_value):
+    res = pd.DataFrame(
+        {
+            "pair": ["p1", "p2", "x1"],
+            "prespecified": [True, True, False],
+            "flag": ["", "low_support", ""],
+            "ic_p": [0.01, 0.04, 0.5],
+            "ratio_of_rr_p": [0.01, 0.04, 0.5],
+            "product_p": [0.01, 0.04, 0.5],
+        }
+    )
+    res.loc[1, col] = bad_value
+    with pytest.raises(RuntimeError, match=f"p2.*|{col}"):
+        it._holm_family(res.copy())
+    # An exploratory pair with a missing p is left alone and does not raise.
+    res = res.assign(**{col: [0.01, 0.04, bad_value]})
+    out = it._holm_family(res)
+    assert np.isnan(out.loc[2, f"{col}_holm"])

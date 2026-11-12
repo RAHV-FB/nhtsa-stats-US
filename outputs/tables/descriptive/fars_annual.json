@@ -4,7 +4,7 @@
  "population": "FARS census of fatal crashes",
  "unit": "crash / person",
  "outcome": "count",
- "method": "Design-based (CRSS: Taylor linearisation, 25 strata/67 PSUs) or census counts (FARS)",
+ "method": "Design-based (CRSS: Taylor linearisation; strata and PSUs in crss_design) or census counts (FARS)",
  "inputs": [
   "data/processed/crss_crash.parquet",
   "data/processed/fars_crash.parquet",
@@ -23,6 +23,14 @@
   "deaths_pedestrian"
  ],
  "module": "nhtsa_stats.analysis.descriptive",
- "git_commit": "ef704fd",
- "generated_utc": "2026-10-23T02:24:40Z"
+ "git_commit": "665bc2b-dirty",
+ "source_sha256": "95039bdc8ba05bee29f6b4e4290e20633e775885d009cf7fefa5ab142305b9f8",
+ "code_sha256": "43d7faeec528baa99fa8966f638c07326865aabc8146d87dfa0ae400283849e7",
+ "inputs_sha256": {
+  "data/processed/crss_crash.parquet": "364251caddea6a8af2ddb2148c228829cbb74b00c24b414a2f1d3fb55409cf3b",
+  "data/processed/fars_crash.parquet": "2f5dac6dd3e55979e1bf1dbb0ece034e3332873c110ea0d9e4a2b4e07f00f13c",
+  "data/processed/fars_person.parquet": "51cb6f8811a432cf314c2eed8d47a37827e85fd906d04722b62dbe5b26693533"
+ },
+ "package_sha256": "dafbad5c0e26e64d51a7d326703937d1e7aedeb8cf604267822d0fd190ce5ac5",
+ "generated_utc": "2026-11-12T20:59:11Z"
 }

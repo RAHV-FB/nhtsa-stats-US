@@ -5,7 +5,9 @@ models in `src/nhtsa_stats/models/severity_ml.py` (module `ml`). Every number be
 the interface examples of §10, which are calls to the saved interface bundle) is read
 from an output table in `outputs/tables/ml/` (named in brackets) and was produced by
 `nhtsa_stats.models.severity_ml.run()`; figures are in `outputs/figures/ml/` and fitted
-models in `outputs/models/ml/` (git-ignored).
+models in `outputs/models/ml/` (git-ignored). This file is typed, not templated: its numbers are a
+snapshot copied from those tables at the last full run, the tables are authoritative, and the file
+must be re-checked against them after any re-run of the `ml` module.
 
 **What these models are for.** Conditional risk stratification of *police-reported crashes*:
 given the circumstances recorded for a crash, how likely is it that the crash is fatal (K;
@@ -390,7 +392,10 @@ contains; the screen points to crash-type-specific effects (§7), two of which w
   above that the gain over the logistic models "does not come from the RQ2 interactions" is partly
   answered by `severity/fatal_effect_modification` (added after the red-team review): the crash-type
   interactions it tests are large and statistically clear for exceeding the limit, alcohol,
-  motorcycles and large trucks, and absent for "too fast for conditions". That table estimates
+  motorcycles and large trucks. For "too fast for conditions" there is no detectable difference
+  between single- and multi-vehicle crashes (homogeneity p well above 0.05) but finer crash types do
+  differ (p about 0.03); both p-values are in the table, and a non-significant test is not evidence
+  that the ratios are equal. That table estimates
   effect modification within the survey model; it is not a prediction comparison. The head-to-head
   comparison of boosting against a logistic model that includes the crash-type interactions (AUROC
   and the other proper scoring rules, with paired intervals) **was not done**, so it remains

@@ -582,7 +582,7 @@ def _victim_record(
     rec = {
         "victim": v.name,
         "population": v.description,
-        "n": len(sub),
+        "n": res.n_rows,
         "n_events": res.n_events,
         "risk_neither": mt.loc["00", "adj_risk"],
         "risk_neither_low": mt.loc["00", "adj_risk_low"],
@@ -698,7 +698,8 @@ def speeding_alcohol_strata_configuration(
                     for c in sub.columns:
                         if isinstance(sub[c].dtype, pd.CategoricalDtype):
                             sub[c] = sub[c].cat.remove_unused_categories()
-                    exposed = sub[ex.column].astype(str) == ex.exposed
+                    known = sub[outcome].notna()
+                    exposed = (sub[ex.column].astype(str) == ex.exposed) & known
                     f = cf.fit_subset(sub, sd, ex, blocks, outcome)
                     fits[label] = f
                     ms = MarginSet({"lr": f.log_rr}, {"lr": f.t_log_rr}, cd)
@@ -709,7 +710,7 @@ def speeding_alcohol_strata_configuration(
                             "outcome": outcome,
                             "specification": spec_label,
                             "stratum": f"alcohol: {label}",
-                            "n_crashes": int(mask.sum()),
+                            "n_crashes": int(known.sum()),
                             "n_exposed": int(exposed.sum()),
                             "n_exposed_events": int(sub.loc[exposed, outcome].sum()),
                             "adj_rate_exposed": f.m_exposed,
@@ -767,7 +768,7 @@ def run_analyses(frames: dict) -> dict[str, pd.DataFrame]:
                 "outcome": a.outcome_label,
                 "factors": "; ".join(f"{f.name}: {f.label}" for f in a.factors),
                 "covariates": ",".join(a.covariates),
-                "n": len(sub),
+                "n": res.n_rows,
                 "n_events": res.n_events,
                 "share_of_frame": float(mask.mean()),
                 "n_params": res.meta["n_params"],

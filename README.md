@@ -4,8 +4,9 @@
 
 A reproducible Python research system built on the 36 NHTSA archives in `data/raw/`: **FARS**
 (census of fatal crashes) and **CRSS** (national probability sample of police-reported crashes).
-No other data are used. Every number in `reports/`, on the website and in this README is read from an output table
-in `outputs/tables/`, each with a provenance sidecar. This README is generated from
+No other data are used. Every estimate, count and share in `reports/`, on the website and in this README is read from an output table
+in `outputs/tables/`, each with a provenance sidecar. The few facts typed into the text are not results: the
+number of archives, the tally of the review record and the run time. This README is generated from
 `reports/templates/README.md` by `nhtsa analyze report`; edit the template, not this file.
 
 ## What the data answer, and what they cannot
@@ -47,7 +48,7 @@ Numbers are quoted as the named tables give them. Full text, intervals and cavea
   speeding driver. The ratio of belt risk ratios is 1.10 to 1.24 across four ways of layering crashes
   (lower confidence limits 1.02 or above): 1.24 (1.13–1.35) with single/multi-vehicle and rollover
   crossed (3 of 4 layers pooled), the largest of the four; the crash-type scheme pools only 3 of its 8
-  crash types. Pooling crashes first gives 1.01 (0.93–1.09). The alcohol contrast is null, 1.02 (0.93–1.11) (`restraint_behaviour/dpc_contrast_within_configuration`). The earlier unstratified
+  crash types. Pooling crashes first gives 1.01 (0.93–1.09). The alcohol contrast shows no detectable difference (p = 0.68), 1.02 (0.93–1.11) (`restraint_behaviour/dpc_contrast_within_configuration`). The earlier unstratified
   conclusion that the belt effect does not vary with driver speeding does not hold within crash
   configuration.
 * Motorcycle helmets: 30.7% (20.6–39.9%) fewer deaths among riders and passengers of the same
@@ -74,7 +75,7 @@ Numbers are quoted as the named tables give them. Full text, intervals and cavea
   `severity/key_contrasts_ab` (models A and B).
 * Exploratory follow-up added after the red-team review: the pooled model-A risk ratios above average over very different
   crash configurations, and the relative association is larger in multi-vehicle crashes, where the baseline fatal risk is low.
-  Adjusted fatal risk ratios in single-vehicle against multi-vehicle crashes: exceeding the limit 3.3 against 10.1; alcohol 3.1 against 6.4; motorcycle 4.3 against 16.6; large truck or bus 1.5 against 2.7 (homogeneity p ≤ 2.9e-05 for each). "Too fast for conditions" does not differ, 1.05 against 1.08 (p 0.85)
+  Adjusted fatal risk ratios in single-vehicle against multi-vehicle crashes: exceeding the limit 3.3 against 10.1; alcohol 3.1 against 6.4; motorcycle 4.3 against 16.6; large truck or bus 1.5 against 2.7 (homogeneity p ≤ 2.9e-05 for each). "Too fast for conditions" shows no detectable difference, 1.05 against 1.08 (p = 0.85)
   (`severity/fatal_effect_modification`). Associations conditional on a police-reported crash, not causal effects.
 
 **3. Measurement.**

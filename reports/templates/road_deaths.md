@@ -140,10 +140,12 @@ the choice, not a range that contains the truth.
 The imputed basis has a further problem. Among untested drivers, an imputed BAC of .08 or more is
 associated with the driver being killed with an adjusted odds ratio of {{measurement/imputed_bac_injury|covariate_set=primary;group=imputed|adj_or|ci:2@adj_or}}, against
 {{measurement/imputed_bac_injury|covariate_set=primary;group=tested|adj_or|ci:2@adj_or}} for a measured BAC of .08 or more among tested drivers
-(`measurement/imputed_bac_injury`). That is what one would expect if NHTSA's imputation model uses
-injury severity, so figures built on imputed BAC lean on a model that uses the outcome, and the
-measured-BAC figures are the more conservative basis. The comparison is a diagnostic, not a causal
-estimate.
+(`measurement/imputed_bac_injury`). That is consistent with NHTSA's imputation model using injury
+severity, but it does not show it: the tested drivers are themselves selected on the outcome
+({{measurement/imputed_bac_injury|covariate_set=primary;group=tested|n_killed|,.0f}} of {{measurement/imputed_bac_injury|covariate_set=primary;group=tested|n_drivers|,.0f}} were killed, against {{measurement/imputed_bac_injury|covariate_set=primary;group=imputed|n_killed|,.0f}} of {{measurement/imputed_bac_injury|covariate_set=primary;group=imputed|n_drivers|,.0f}} of the imputed group), and adding police-reported alcohol, light,
+area and weekend moves the tested odds ratio to {{measurement/imputed_bac_injury|covariate_set=plus police alcohol, light, area, weekend;group=tested|adj_or|ci:2@adj_or}}. Figures built on imputed BAC may therefore
+depend on a model that uses the outcome, and the measured-BAC figures avoid that dependence but
+describe tested drivers only. The comparison is a diagnostic, not a causal estimate.
 
 {{mdtable:deaths/victim_roles_bac_basis|group=alcohol_impaired|basis:BAC basis:;role:Role:;deaths:Deaths:,.0f;share_of_group:Share:pct:1}}
 

@@ -8,7 +8,8 @@
     nhtsa analyze [MODULE ...]   run analysis modules (default: all, in dependency order)
     nhtsa all         build + analyze
     nhtsa list        list analysis modules
-    nhtsa status      list tables whose producing module changed since they were written
+    nhtsa status      list tables whose code or input data changed since they were written,
+                      and tables without a code hash
 
 Each analysis module exposes ``run()`` and writes its own tables/figures, so a single module
 can be re-run without rebuilding anything else.
@@ -21,6 +22,7 @@ import importlib
 import logging
 import sys
 import time
+from typing import NamedTuple
 
 # Analysis modules in dependency order (later modules may read earlier outputs).
 ANALYSES: dict[str, str] = {
@@ -98,11 +100,16 @@ def cmd_analyze(args: argparse.Namespace) -> None:
     unknown = [n for n in args.modules if n not in ANALYSES]
     if unknown:
         raise SystemExit(f"unknown module(s): {unknown}; see `nhtsa list`")
+    from nhtsa_stats.reporting.io import snapshot_code_sha256
+
     # Always in dependency order, whatever order the modules were named in.
     names = [n for n in ANALYSES if not args.modules or n in args.modules]
     for name in names:
         t0 = time.time()
         mod = importlib.import_module(ANALYSES[name])
+        # Digest of the code as loaded, before run(): edits during a long run cannot make
+        # the tables written by this run look fresh.
+        snapshot_code_sha256(ANALYSES[name])
         log.info("running %s", name)
         mod.run()
         log.info("%s finished in %.0fs", name, time.time() - t0)
@@ -119,15 +126,24 @@ def cmd_list(_: argparse.Namespace) -> None:
         print(f"{k:14} {v}")
 
 
-def stale_tables() -> tuple[list[str], list[str], int]:
-    """(stale, unhashed, n_checked) from the JSON sidecars under ``outputs/tables``."""
+class TableStatus(NamedTuple):
+    stale: list[str]  # code (module or an imported helper) changed since the table was written
+    unhashed: list[str]  # sidecar has no code_sha256
+    inputs_changed: list[str]  # a local input file differs from the recorded inputs_sha256
+    n_checked: int
+
+
+def stale_tables() -> TableStatus:
+    """Compare table sidecars (and ``_provenance`` of JSON outputs) under ``outputs/tables``
+    with the current code and, where the data exist locally, the current input files."""
     import json
 
     from nhtsa_stats import config
-    from nhtsa_stats.reporting.io import module_source_sha256
+    from nhtsa_stats.reporting.io import current_code_sha256, input_sha256
 
     stale: list[str] = []
     unhashed: list[str] = []
+    changed: list[str] = []
     n = 0
     current: dict[str, str | None] = {}
     for side in sorted(config.TABLES_DIR.rglob("*.json")):
@@ -135,29 +151,46 @@ def stale_tables() -> tuple[list[str], list[str], int]:
             meta = json.loads(side.read_text())
         except (OSError, ValueError):
             continue
-        if not isinstance(meta, dict) or "module" not in meta or "table" not in meta:
-            continue  # not a table sidecar
+        if not isinstance(meta, dict):
+            continue
+        if "module" in meta and "table" in meta:
+            rel, prov = meta["table"], meta
+        elif isinstance(meta.get("_provenance"), dict):
+            rel, prov = side.relative_to(config.TABLES_DIR).as_posix(), meta["_provenance"]
+        else:
+            continue  # neither a table sidecar nor a provenance-carrying JSON output
         n += 1
-        rel = meta["table"]
-        recorded = meta.get("source_sha256")
+        recorded = prov.get("code_sha256")
         if not recorded:
             unhashed.append(rel)
             continue
-        mod = meta["module"]
+        mod = prov["module"]
         if mod not in current:
-            current[mod] = module_source_sha256(mod)
+            current[mod] = current_code_sha256(mod)
         if current[mod] != recorded:
             stale.append(rel)
-    return stale, unhashed, n
+        for spec, digest in (prov.get("inputs_sha256") or {}).items():
+            now = input_sha256(spec)
+            if now is not None and now != digest:
+                changed.append(rel)
+                break
+    return TableStatus(stale, unhashed, changed, n)
 
 
 def cmd_status(_: argparse.Namespace) -> None:
-    stale, unhashed, n = stale_tables()
-    print(f"{n} table sidecars: {len(stale)} stale, {len(unhashed)} without source_sha256")
-    for t in stale:
-        print(f"stale     {t}")
-    for t in unhashed:
-        print(f"no-hash   {t}")
+    st = stale_tables()
+    print(
+        f"{st.n_checked} table sidecars / provenance-carrying JSON outputs: {len(st.stale)} stale "
+        f"(code changed), {len(st.unhashed)} without code_sha256, "
+        f"{len(st.inputs_changed)} with changed input data"
+    )
+    for label, items in (
+        ("stale", st.stale),
+        ("no-hash", st.unhashed),
+        ("inputs-changed", st.inputs_changed),
+    ):
+        for t in items:
+            print(f"{label:14} {t}")
 
 
 def main(argv: list[str] | None = None) -> None:

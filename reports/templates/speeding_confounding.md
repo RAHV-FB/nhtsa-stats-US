@@ -269,7 +269,7 @@ within multi-vehicle crashes). For exceeding the limit the ratio is {{severity/f
 {{severity/fatal_effect_modification|modifier=single vs multi-vehicle;exposure=exceeded_limit;stratum=multi-vehicle|rr_ratio_to_first_stratum|.1f}}, homogeneity p {{severity/fatal_effect_modification|modifier=single vs multi-vehicle;exposure=exceeded_limit;stratum=single-vehicle|p_homogeneity_rr|.1e}}), against a pooled
 {{severity/fatal_effect_modification|modifier=single vs multi-vehicle;exposure=exceeded_limit;stratum=single-vehicle|pooled_model_a_rr|.2f}}. For "too fast for conditions" the ratios are
 {{severity/fatal_effect_modification|modifier=single vs multi-vehicle;exposure=too_fast_for_conditions;stratum=single-vehicle|adj_rr|ci:2}} and {{severity/fatal_effect_modification|modifier=single vs multi-vehicle;exposure=too_fast_for_conditions;stratum=multi-vehicle|adj_rr|ci:2}} (homogeneity p {{severity/fatal_effect_modification|modifier=single vs multi-vehicle;exposure=too_fast_for_conditions;stratum=single-vehicle|p_homogeneity_rr|.2f}}), so the
-weak association does not depend on the configuration split. The relative association of exceeding
+weak association shows no detectable dependence on the configuration split. The relative association of exceeding
 the limit is larger in multi-vehicle crashes, where the baseline fatal risk is low, so the pooled
 ratio describes neither configuration well. An association conditional on a police-reported crash,
 not an effect; the split by crash type is in the same table.

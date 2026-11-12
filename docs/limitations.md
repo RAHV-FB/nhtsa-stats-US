@@ -21,14 +21,15 @@ policy questions require data that do not exist in this repository.
   Toxicology testing of killed drivers and speeding as recorded by FARS are more complete in severe
   crashes, but the police-recorded alcohol, drug and distraction fields in CRSS are *more* often
   unknown in fatal crashes than in less severe ones (`measurement/unknown_by_severity`: alcohol
-  47.4% unknown in fatal crashes against 25.1–28.7% at lower severities, drugs 53.0% against
-  38.8–42.1%, distraction 62.5% against 41.5–48.0%, speeding 5.5% against 2.9–3.8%). Whether
+  unknown in about half of fatal crashes against about a quarter at lower severities; drugs,
+  distraction and speeding show the same direction). Whether
   sensitivity is higher in fatal crashes, as the bias analyses assume, is not tested by these data.
   Evidence from this project:
-  CRSS records speeding in 20% of *fatal* crashes versus 27% in FARS for the same population
-  (FARS analysts use more sources); alcohol tests are given to 59–74% of killed drivers but
-  21–28% of surviving drivers; the drug-test rate is 55–63% vs 15–20% (2018–2024; the lowest
-  values are 2024, whose toxicology records are incomplete in these archives). A quantitative bias
+  CRSS records speeding in fewer *fatal* crashes than FARS does for the same population (FARS
+  analysts use more sources; `measurement/`); alcohol tests are given to most killed drivers but
+  to about a quarter of surviving drivers, and drug tests show a similar gap
+  (`measurement/fars_testing`; the lowest values are 2024, whose toxicology records are
+  incomplete in these archives). A quantitative bias
   analysis shows the speeding–severity association is fragile to plausible differential
   recording, while the alcohol association is robust (see `reports/findings.md`).
 * **Coding breaks.** CRSS police-reported alcohol (2019), drug involvement (2019–2020),
@@ -39,39 +40,39 @@ policy questions require data that do not exist in this repository.
   versions, explicit unknown levels or exclusion from trend claims.
 * **Imputed severity.** CRSS severity outcomes use NHTSA's single imputation (`MAXSEV_IM`,
   `INJSEV_IM`), whose weighted fatal total reproduces the FARS count; the unimputed field
-  treats crashes containing a person of unknown severity as non-fatal and falls up to 12.8%
-  short in some years. The imputation rests on few crashes: 4–31 sampled crashes a year are
-  imputed fatal, but they carry large weights and make up 0.6–12.2% of the weighted fatal
-  total (most in 2017 and 2019–2020). Their imputation variance is not included in the
+  treats crashes containing a person of unknown severity as non-fatal and falls
+  short by up to about 13% in some years. The imputation rests on few crashes: only a few dozen sampled crashes a year are
+  imputed fatal, but they carry large weights and make up from under 1% to about 12% of the
+  weighted fatal total depending on the year (largest in 2017 and 2019–2020). Their imputation variance is not included in the
   design-based standard errors, so year-specific fatal and KA shares are somewhat more
   uncertain than their intervals suggest. Trend statements are therefore also checked
   against a strict complete-case outcome.
 * **Unknown values as proxies for post-crash events.** Several "unknown" levels are
   concentrated in hit-and-run crashes, so they partly encode a driver leaving the scene, which
-  happens after the crash. 92% of CRSS crashes with a driver of unreported age are hit-and-run
+  happens after the crash. Nearly all CRSS crashes with a driver of unreported age are hit-and-run
   (`docs/variable_harmonization.md`), so CRSS driver-age flags use NHTSA's imputed age. Among
   crashes with other unknown levels, the weighted hit-and-run shares in 2016–2021 are
-  (`ml/hit_and_run_proxy`): missing vehicle age 97%, motorcycle involvement 95%, heavy-vehicle
-  involvement 91%, time of day 71%, speeding 68%. The other unknown levels are kept as
+  high (`ml/hit_and_run_proxy`: about 70% to over 90% for missing vehicle age, motorcycle and
+  heavy-vehicle involvement, time of day and speeding). The other unknown levels are kept as
   their own categories (never merged with "no") and are not interpreted; dropping them from the
-  prediction models changes test discrimination by 0.002 AUROC (`docs/model_validation.md`).
-* **Distraction and drug involvement** are unknown or not reported for 42–74% of drivers in
-  recent years and their unknown share changed sharply; they are not used as exposures in the
+  prediction models changes test discrimination only negligibly (`docs/model_validation.md`).
+* **Distraction and drug involvement** are unknown or not reported for a large share of drivers
+  (roughly half, `measurement/unknown_by_severity`) in recent years and their unknown share changed sharply; they are not used as exposures in the
   Phase-1 severity and prediction models. Phase-2 analyses that include police-reported drugs
   report them only as coding sensitivities (`drugs/crss_bounds`, `drugs/crss_adjusted`: how far
   the estimate moves with the allocation of unknowns) or within the selected complete-case subset
   of drivers with known drug status (the four-factor model in `multifactor/`); the reports state
   that neither is a drug effect. Drug *presence* in a toxicology result is not impairment.
 * **Restraint use** among surviving occupants is largely self-reported to police; reported
-  belt use among uninjured CRSS occupants (98.7%) is implausibly high, so person-level belt
+  belt use among uninjured CRSS occupants (about 99%) is implausibly high, so person-level belt
   associations in CRSS are likely inflated. The FARS within-vehicle analysis is less affected
   but survivor misreporting is still possible (sensitivity analysis provided).
 * **Police-reported speeding** combines exceeding the limit and "too fast for conditions";
   travel speed is unknown for most vehicles, so speed itself cannot be modelled.
 * **CRSS urbanicity** describes the sampling area (PSU), not the road; FARS rural/urban
   describes the road. They are different concepts and are never compared directly.
-* **FARS 2024** shows a jump in alcohol-test status "unknown" among killed drivers (26%
-  vs 12–15% in 2020–2023), consistent with pending toxicology; 2024 alcohol figures are less
+* **FARS 2024** shows a jump in alcohol-test status "unknown" among killed drivers (about
+  double the 2020–2023 level; `measurement/fars_testing`), consistent with pending toxicology; 2024 alcohol figures are less
   complete.
 
 ## 3. Design and inference
@@ -82,8 +83,8 @@ policy questions require data that do not exist in this repository.
 * Pooling nine years uses the same PSUs; year effects are included in models, but changes in
   reporting practice across years are only partly captured.
 * The primary CRSS outcome is NHTSA's imputed maximum severity (`MAXSEV_IM`); only crashes
-  it codes as unknown or died-prior (~0.4%) are excluded. The sensitivity analysis is the
-  strict complete case (`fatal_cc`, `ka_cc`), which drops about 8% of crashes, and which ones
+  it codes as unknown or died-prior (a fraction of 1%) are excluded. The sensitivity analysis is the
+  strict complete case (`fatal_cc`, `ka_cc`), which drops under 10% of crashes, and which ones
   depends on the outcome: a crash drops out only when someone's severity is unknown and nobody
   died. It is a bound on the definition, not a better estimate. Where the two definitions
   disagree (the 2023–24 excess in RQ5, crude night and weekend RRs in RQ4), both are reported.
@@ -91,9 +92,8 @@ policy questions require data that do not exist in this repository.
   fraction; their imputation models are not documented in the archives. For alcohol there is
   indirect evidence that the imputation uses severity, directly or through correlated
   circumstances: among crashes whose police-reported alcohol is unknown, the imputed "yes"
-  is 6.7 times (2016–18) and 4.2 times (2019–21) as common in fatal as in non-fatal crashes,
-  about as steep as the gradient among police-reported records (6.4 and 5.5;
-  `ml/alcohol_imputation_check`). Adjusted associations with imputed alcohol may therefore be
+  is several times as common in fatal as in non-fatal crashes, about as steep as the gradient
+  among police-reported records (`ml/alcohol_imputation_check`). Adjusted associations with imputed alcohol may therefore be
   overstated; the police-reported coding, analysed by coding period, is the check. Imputed
   driver age may behave the same way; this was not tested.
 * Multiple testing: interaction analyses are pre-specified and adjusted (Holm, BH);
@@ -149,7 +149,7 @@ policy questions require data that do not exist in this repository.
   to show this. A Shapley value averages over all orders of adding factors, so it does not depend
   on one order; `speeding/shapley` additionally reports the range of each block's share over
   single orderings.
-* **Drugs.** CRSS has only police-reported drug involvement (50–70% unknown after 2019) and the
+* **Drugs.** CRSS has only police-reported drug involvement (more than half unknown after 2019) and the
   police co-record drugs with alcohol several times more often than toxicology finds them
   together. No drug severity association, attributable fraction or ranking is reported as a
   finding (the drug risk ratios in `drugs/` are bounds and coding sensitivities, and those in
@@ -197,40 +197,43 @@ policy questions require data that do not exist in this repository.
 ## 9. Additions from the November 2026 red-team review
 
 These limitations were identified by `docs/red_team_2026-11.md` and added without removing any
-earlier item. Numbers are quoted as the named tables give them.
+earlier item. Where a number is given it is approximate; the named table has the value.
 
 * **The four-factor union depends on undetermined drug status.** Drug status is undetermined for
-  63.0% of deaths (`contributions/fars_overlap_treatments`). Scoring undetermined as drug-negative
-  gives a union of 64.8% of deaths with at least one factor and a mean of 1.09 factors per death
-  (a floor); scoring it positive gives 95.4% and 1.72 (a ceiling); restricting to deaths whose drug
-  factor is determinate gives 87.5%; the three measured factors without drugs give 57.7%. The
-  published 65% and "about 70% also involve another factor" are floors.
+  a large share of deaths (`contributions/fars_overlap_treatments`). Scoring undetermined as
+  drug-negative gives a lower union of deaths with at least one factor (a floor); scoring it
+  positive gives a much higher one (a ceiling); restricting to deaths whose drug factor is
+  determinate and the three measured factors without drugs give the other values in that table.
+  The published union and the share of deaths that also involve another factor are floors.
 * **Belt and helmet misreporting scenarios were one-sided and pooled.** The original scenarios
   moved only belted-coded survivors, and the pooled belt estimate averages different crash types.
   `matched/belt_misreporting_two_sided_dpc` and `matched/helmet_misreporting_dpc` add the reverse
   error (unbelted or unhelmeted-coded deaths who were protected) with tipping points, and
-  `matched/belt_by_crash_type` gives the belt estimate by crash type (51% in multi-vehicle angle
-  crashes to 84% in single-vehicle rollovers). The true misreporting rates are not identifiable.
-  The helmet estimate rests on pairs that differ in helmet use and covers 15.7% of unhelmeted
+  `matched/belt_by_crash_type` gives the belt estimate by crash type (from about half in multi-vehicle angle
+  crashes to more than 80% in single-vehicle rollovers). The true misreporting rates are not identifiable.
+  The helmet estimate rests on pairs that differ in helmet use and covers a minority of unhelmeted
   motorcyclist deaths (`matched/helmet_pair_coverage`); applying it to all unhelmeted deaths assumes
   riders with a passenger represent solo riders.
 * **FARS imputed BAC may use injury.** NHTSA's imputation model is undocumented. A reviewer found
   that among untested FARS drivers the imputed BAC is higher for killed drivers; the committed
-  table `measurement/imputed_bac_injury` now reproduces this under the project's specification:
-  among untested drivers an imputed BAC of .08 or more has an adjusted odds ratio for the driver
-  being killed of about 3.8, against about 1.1 for a measured BAC of .08 or more among tested
-  drivers (adjusted for age band, sex, vehicle type, crash type, time of day and year). This is a
-  diagnostic, not a causal estimate; it is what one would expect if the imputation uses injury, so
-  FARS figures built on imputed BAC lean on a model that uses the outcome and the measured-BAC
-  figures are the more conservative basis. Figures that use imputed BAC (drunk-driving deaths, victim roles, prior-DWI
+  table `measurement/imputed_bac_injury` shows the same under the project's specification:
+  among untested drivers an imputed BAC of .08 or more has a much larger adjusted odds ratio for
+  the driver being killed than a measured BAC of .08 or more has among tested drivers (adjusted for
+  age band, sex, vehicle type, crash type, time of day and year; values in the table). This is a
+  diagnostic, not a causal estimate. It is consistent with the imputation using injury severity but
+  does not show it: the tested comparison group is itself selected on the outcome (most tested
+  drivers were killed; most imputed-group drivers were not; counts in the table), and adding
+  police-reported alcohol, light, area and weekend moves the tested odds ratio substantially, so the
+  gap depends on the covariates chosen. FARS figures built on imputed BAC may therefore depend on a
+  model that uses the outcome; the measured-BAC figures avoid that but describe tested drivers only. Figures that use imputed BAC (drunk-driving deaths, victim roles, prior-DWI
   shares) are therefore shown with measured-BAC-only counterparts where available
-  (`deaths/victim_roles_bac_basis`, `deaths/driver_records_measured_bac`; 40.8% of drivers at .08 or
+  (`deaths/victim_roles_bac_basis`, `deaths/driver_records_measured_bac`; a large share of drivers at .08 or
   more have an imputed BAC, `deaths/driver_bac_imputed_share`).
 * **CRSS weights are benchmarked to FARS.** The weighted CRSS fatal total reproduces the FARS count
   each year, so agreement between the two systems on fatal totals is partly by construction and not
   independent corroboration.
 * **The CRSS pedestrian speed limit is missing in an outcome-dependent way.** It is unknown for
-  29.6% of non-fatal struck pedestrians (95% CI 20.9–40.1) and 10.8% of fatal ones (6.9–16.4)
+  a much larger share of non-fatal than of fatal struck pedestrians
   (`vulnerable/speed_limit_missingness`). Crude shares who died by posted limit depend on how
   unknown limits are handled; the adjusted ratios keep unknown as its own level.
 * **Driver-record completeness varies by state.** Prior-conviction fields come from state driver
@@ -247,11 +250,11 @@ earlier item. Numbers are quoted as the named tables give them.
 ## 10. Additions after the red-team review (follow-up, November 2026)
 
 These items were added after the review and the follow-up analyses it prompted; none replaces an
-earlier limitation. Numbers are quoted as the named tables give them.
+earlier limitation. Where a number is given it is approximate; the named table has the value.
 
 * **Degrees of freedom for small domains.** CRSS intervals use the design degrees of freedom (42),
-  which is standard practice. Rural-only contrasts rest on far fewer primary sampling units (21
-  PSUs in 9 strata, about 12 degrees of freedom), so their intervals may be up to about 8% too
+  which is standard practice. Rural-only contrasts rest on far fewer primary sampling units (a small
+  number of PSUs, about 12 degrees of freedom in the rural domain), so their intervals may be several percent too
   narrow. The same applies, less severely, to other small domains.
 * **Interaction margins treat level-mixture weights as fixed.** The standardised margins for
   interactions average predictions over the observed mix of factor levels and do not carry the
@@ -259,27 +262,28 @@ earlier limitation. Numbers are quoted as the named tables give them.
 * **The pooled model-A risk ratios average over very different crash configurations.**
   `severity/fatal_effect_modification` (exploratory, added after the review) shows that the
   adjusted fatal risk ratios for exceeding the limit, alcohol, motorcycles and large trucks differ
-  sharply between single-vehicle and multi-vehicle crashes (homogeneity p < 0.001 for each), with
-  the larger ratios in multi-vehicle crashes, where the baseline fatal risk is low; "too fast for
-  conditions" does not differ. A pooled ratio therefore describes neither configuration well, and
+  sharply between single-vehicle and multi-vehicle crashes (homogeneity p very small for each), with
+  the larger ratios in multi-vehicle crashes, where the baseline fatal risk is low; for "too fast for
+  conditions" there is no detectable difference between single- and multi-vehicle crashes (p in the
+  same table), although finer crash types do differ. A pooled ratio therefore describes neither configuration well, and
   the table is an association conditional on a police-reported crash, not an effect.
 * **Model A is calibrated overall but not within the risk distribution.**
-  `severity/fatal_calibration` shows observed/predicted fatal shares of about 0.74 to 0.80 in the
+  `severity/fatal_calibration` shows observed/predicted fatal shares clearly below 1 (about three-quarters) in the
   middle deciles of predicted risk (over-prediction) with overall calibration. The check is
   in-sample and its intervals omit model-fit variability. Absolute risks, risk differences and the
   attributable fractions built on them are therefore less reliable than the relative contrasts.
 * **Imputed BAC and injury.** See the revised "FARS imputed BAC may use injury" item above and
-  `measurement/imputed_bac_injury`: BAC-based figures in FARS depend on a model that appears to use
-  the outcome.
+  `measurement/imputed_bac_injury`: BAC-based figures in FARS may depend on a model that uses the
+  outcome (the diagnostic is consistent with that, not proof, and its comparison group is selected).
 * **EMS intervals are known for only part of crashes.** The share of fatal crashes with a recorded
   EMS arrival time is about half or less in every year (`stages/ems_availability`), and intervals that are
   negative or longer than 12 hours are set to missing, so timing summaries describe the crashes with
   a plausible interval and may not represent all fatal crashes.
 * **Prior-DWI shares vary widely by state.** Among drivers at .08 or more the state shares range
-  from about 2% to 20% (`deaths/prior_dwi_state_range`, `deaths/prior_dwi_by_state`); this reflects
+  from a few percent to about a fifth (`deaths/prior_dwi_state_range`, `deaths/prior_dwi_by_state`); this reflects
   state record completeness as well as behaviour and is not a ranking of states.
 * **Large-truck victim roles describe who was in the crash, not fault.** The share not the truck
-  driver is about 55% in single-truck crashes and about 96% in crashes between a truck and a
+  driver is about half in single-truck crashes and nearly all in crashes between a truck and a
   passenger vehicle (`deaths/large_truck_crash_types`).
 * **The rise in invalid-licence crashes is robust to the definition.** It appears with and without
   counting expired or cancelled licences as invalid (`deaths/licence_trend`), but licence status is

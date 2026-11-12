@@ -27,7 +27,7 @@ Weights `WEIGHT`; variance strata `PSUSTRAT` (25); variance PSUs `PSU_VAR` (67),
 strata, with identical IDs and stratum membership in every year 2016–2024 and at least two
 PSUs per stratum (no lonely PSUs). Pooled multi-year analyses use these 67 clusters, which also
 captures the correlation of a PSU's crashes across years. Design degrees of freedom
-d = 67 − 25 = 42; confidence intervals use the t distribution with d df.
+d = 67 − 25 = 42 (the design counts are tabulated in `descriptive/crss_design`); confidence intervals use the t distribution with d df.
 
 The with-replacement (ultimate-cluster) approximation is used: for a vector of weighted
 linearised contributions z_k,
@@ -145,12 +145,12 @@ recorded circumstances; negative: reverses).
 * CRSS severity outcomes use NHTSA's imputed severity (`MAXSEV_IM` for crashes, `INJSEV_IM`
   for persons). The unimputed `MAX_SEV` is the maximum over persons whose severity is known,
   so a crash containing a person of unknown severity would be classed by the others' injuries
-  — "unknown" silently treated as "not fatal". Its weighted fatal total falls 0.6–12.8% short
-  of the FARS count, by an amount that varies by year, whereas the imputed total reproduces
-  FARS within 0.9% in every year (the weights are calibrated to FARS through it; tested in
+  — "unknown" silently treated as "not fatal". Its weighted fatal total falls short
+  of the FARS count by an amount that varies by year (up to about 13%), whereas the imputed total reproduces
+  FARS within about 1% in every year (the weights are calibrated to FARS through it; tested in
   `tests/test_features.py`). The imputation fills only unknown codes. Crashes whose imputed
-  maximum is still undeterminable (codes 5, 6, 8; 0.4%) are excluded. A strict complete-case
-  outcome (`fatal_cc`, `ka_cc`: negative only when no person's severity is unknown; ~8% of
+  maximum is still undeterminable (codes 5, 6, 8; a fraction of 1%) are excluded. A strict complete-case
+  outcome (`fatal_cc`, `ka_cc`: negative only when no person's severity is unknown; under 10% of
   crashes undetermined) is the sensitivity analysis; it changes levels and trends, so both
   are reported where trends are concerned.
 * Alcohol: imputed `ALCHL_IM` is used for adjustment because the police-reported field has a
@@ -397,14 +397,18 @@ These record what changed in the pipeline; numbers are in the tables named, not 
   each stratum is standardised over its own persons (a stratum domain in the linearisation), because
   setting the crash type for everyone while the number of vehicles and partner vehicle stay observed
   would average over impossible crashes.
-* **Effect modification and calibration** (`analysis/severity.py`): model A is refitted within
-  single-vehicle and multi-vehicle crashes and within crash types (`severity/fatal_effect_modification`;
+* **Effect modification and calibration** (`analysis/severity.py`): model A is fitted once with an
+  exposure-by-stratum interaction, the stratum being single- or multi-vehicle crashes or crash type
+  (`severity/fatal_effect_modification`; the other covariate effects are shared across strata;
   exploratory, with a homogeneity test and a minimum of 20 events in the exposed and reference
   cells), and its calibration by weighted decile of predicted risk is tabulated
   (`severity/fatal_calibration`; in-sample, so predictions are treated as fixed).
 * **Imputed-BAC diagnostic** (`analysis/measurement.py`): `measurement/imputed_bac_injury` compares
   the adjusted association of imputed BAC of .08 or more with being killed, among untested drivers,
-  with that of measured BAC among tested drivers. It is a diagnostic, not a causal estimate.
+  with that of measured BAC among tested drivers, with and without police-reported alcohol, light,
+  area and weekend. It is a diagnostic, not a causal estimate: a larger imputed-BAC association is
+  consistent with the imputation using injury severity, but the tested group is itself selected on
+  the outcome, so the comparison cannot show it.
 * **Shared unrestrained-share definition.** The share of unrestrained occupants among passenger-
   vehicle occupant deaths with known restraint use (belted, child restraint counted as restrained,
   or none; unknown and not applicable leave the denominator) is defined once
@@ -412,9 +416,13 @@ These record what changed in the pipeline; numbers are in the tables named, not 
   and the trend module.
 * **EMS intervals** (`analysis/stages.py`): crash-to-arrival intervals that are negative or longer
   than 12 hours are set to missing, and the timing tables add a "driver BAC unknown" row.
-* **Sidecar source hashes.** Every table's JSON sidecar records the SHA-256 of the producing
-  module's source (`source_sha256`) and of the package (`package_sha256`). `nhtsa status` lists the
-  tables whose producing module has changed since they were written, and those without a hash, so a
-  stale table is visible before it is quoted.
+* **Sidecar code and input hashes.** Every table's JSON sidecar records `code_sha256`, one SHA-256
+  over the producing module's source and every `nhtsa_stats` module it imports transitively (so a
+  change to a shared helper makes dependent tables stale), taken when the module is loaded for a
+  run, before `run()`, so edits during a long run cannot mark old results fresh. It also records
+  `inputs_sha256` (SHA-256 of each local `data/` input), plus the older `source_sha256` and
+  `package_sha256`. JSON outputs that are dictionaries carry a `_provenance` entry (module,
+  `code_sha256`, git commit, time). `nhtsa status` lists stale tables, tables without a
+  `code_sha256`, and, when the data exist locally, tables whose input data changed.
 * **README.** `README.md` is rendered from `reports/templates/README.md` by `nhtsa analyze report`
   like the reports, and `tests/test_reports_in_sync.py` fails if it is stale.

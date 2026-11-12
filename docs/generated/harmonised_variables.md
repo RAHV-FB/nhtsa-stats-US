@@ -99,6 +99,15 @@ unknown (INJ_SEV 9) is handled by ``fatal_cc`` in ``features.build_crss``, not h
 
 5 (injured, severity unknown) stays null: that person may have had a serious (A) injury.
 
+### `person_fatal(col: 'str' = 'INJ_SEV') -> 'pl.Expr'`
+
+Person-level ``killed``: 1 = K; 0 = O/C/B/A and 5; null = 6 (died prior to the crash:
+neither a crash death nor a survivor), 9 (unknown).  Crash-level ``fatal`` keeps 6 as 0.
+
+### `person_killed_or_serious(col: 'str' = 'INJ_SEV') -> 'pl.Expr'`
+
+Person-level K or A: 1 = K/A; 0 = O/C/B; null = 5, 6 (died prior to the crash), 9.
+
 ### `any_injury(col: 'str' = 'INJ_SEV') -> 'pl.Expr'`
 
 1 = K/A/B/C or injured-severity-unknown (5); 0 = O; null = 6, 8, 9.

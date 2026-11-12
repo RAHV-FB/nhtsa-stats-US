@@ -22,6 +22,12 @@
   "chosen"
  ],
  "module": "nhtsa_stats.models.severity_ml",
- "git_commit": "ef704fd",
- "generated_utc": "2026-10-23T03:40:45Z"
+ "git_commit": "665bc2b-dirty",
+ "source_sha256": "d8e8980fca5e70f3f012ed6f804951fd1694722c1d86afa0c5d44dc54eb2926b",
+ "code_sha256": "407c73e5d6ca85e6a9b75d870932e8670f2299cede723dfa9708c7ec225586da",
+ "inputs_sha256": {
+  "data/processed/crss_crash.parquet": "364251caddea6a8af2ddb2148c228829cbb74b00c24b414a2f1d3fb55409cf3b"
+ },
+ "package_sha256": "970ef1ee89125faf6c0461f3fcbf413dd1f08e15b17392b027aef50aba88a9b1",
+ "generated_utc": "2026-11-12T21:42:24Z"
 }

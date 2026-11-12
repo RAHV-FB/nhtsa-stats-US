@@ -36,7 +36,7 @@ happen in a different mix of places.
 Thirteen pairs were registered in advance (`docs/research_plan.md`, RQ2; operational
 definitions in its change log). The rationale for each is recorded in the output table.
 p-values are Holm-adjusted across these 13 pairs, separately for each scale. Confidence
-intervals are design-based (Taylor linearisation, 42 df).
+intervals are design-based (Taylor linearisation, {{descriptive/crss_design||design_df|.0f}} df).
 
 ## Results: registered pairs, fatal outcome
 
@@ -46,7 +46,7 @@ Figure: `outputs/figures/summary/interactions.png`.
 
 ### What the pattern shows
 
-**Pedestrian crashes in unlit darkness show amplification on both scales.**
+**Pedestrian crashes in unlit darkness are super-multiplicative, and so also carry a large additive excess.**
 The standardised risk that a crash is fatal when it is a pedestrian crash in unlit darkness is
 {{interactions/pairs_fatal|pair=pedestrian x dark_unlit|adj_p11|cix1000:0}} per 1,000, against
 {{interactions/pairs_fatal|pair=pedestrian x dark_unlit|adj_p00|cix1000:1}} for a
@@ -54,9 +54,11 @@ non-pedestrian crash in daylight. The pedestrian risk ratio is
 {{interactions/pairs_fatal|pair=pedestrian x dark_unlit|rr_A_given_B0|ci:1}} in daylight and
 {{interactions/pairs_fatal|pair=pedestrian x dark_unlit|rr_A_given_B1|ci:1}} in unlit darkness:
 a ratio of risk ratios of {{interactions/pairs_fatal|pair=pedestrian x dark_unlit|ratio_of_rr|ci:2}}
-(Holm p {{interactions/pairs_fatal|pair=pedestrian x dark_unlit|ratio_of_rr_p_holm|.2g}}). The
-additive excess is {{interactions/pairs_fatal|pair=pedestrian x dark_unlit|ic|cix1000:0}} fatal
-crashes per 1,000 (Holm p {{interactions/pairs_fatal|pair=pedestrian x dark_unlit|ic_p_holm|.2g}}).
+(Holm p {{interactions/pairs_fatal|pair=pedestrian x dark_unlit|ratio_of_rr_p_holm|.2g}}), that is,
+the two risks combine by more than multiplying. Because an additive excess is expected whenever two
+risks multiply, the additive excess of {{interactions/pairs_fatal|pair=pedestrian x dark_unlit|ic|cix1000:0}} fatal
+crashes per 1,000 (Holm p {{interactions/pairs_fatal|pair=pedestrian x dark_unlit|ic_p_holm|.2g}})
+follows from it and is not separate evidence.
 
 **Motorcycle crashes involving alcohol: a large additive excess.** The ratio of risk ratios is
 {{interactions/pairs_fatal|pair=motorcycle x alcohol|ratio_of_rr|ci:2}}, but the additive

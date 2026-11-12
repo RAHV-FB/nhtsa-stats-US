@@ -27,7 +27,7 @@ Intervals cover sampling error only, not recording error or model choice, unless
    {{matched/belt_misreporting_two_sided_dpc|analysis=belt_driver_rf;survivor_misreport_f=0;death_misreport_g=0|tipping_f_given_g|pct:0}}
    of belted survivors misrecorded. In an exploratory follow-up, belts are somewhat *less* protective within crash
    configuration when the driver was speeding (ratio of belt risk ratios {{restraint_behaviour/dpc_contrast_within_configuration|contrast=driver speeding (any) vs not speeding;layer=pooled within layers|min(ratio_of_rrs)|.2f}} to {{restraint_behaviour/dpc_contrast_within_configuration|contrast=driver speeding (any) vs not speeding;layer=pooled within layers|max(ratio_of_rrs)|.2f}} across four layering
-   schemes), and the alcohol contrast is null (`reports/alcohol_drugs_restraints.md`).
+   schemes), and the alcohol contrast shows no detectable difference (p = {{restraint_behaviour/dpc_contrast_within_configuration|contrast=driver BAC >= .08 (MI) vs BAC < .08;adjustment=single/multi-vehicle x rollover;layer=pooled within layers|p|.2f}}; `reports/alcohol_drugs_restraints.md`).
    For motorcycle helmets (operator and passenger of the same motorcycle) the reduction is
    {{matched/double_pair_comparison|analysis=motorcycle_helmet;misreport_fraction=0;component=combined (inverse-variance weighted)|reduction_1_minus_rr|cipct:0@reduction}}
    but it is imprecise and fragile: it vanishes at about
@@ -82,9 +82,9 @@ Intervals cover sampling error only, not recording error or model choice, unless
    support a small association; they do not support "no excess". In an exploratory follow-up added
    after the red-team review, the pooled model-A risk ratios of finding 4 average over very different
    crash configurations: they are much larger in multi-vehicle than in single-vehicle crashes for
-   exceeding the limit, alcohol, motorcycles and large trucks, but not for "too fast for conditions"
-   (`severity/fatal_effect_modification`).
-8. **Some combinations amplify each other**, notably pedestrian crashes in unlit darkness. For
+   exceeding the limit, alcohol, motorcycles and large trucks, while for "too fast for conditions" there is no detectable difference
+   (p = {{severity/fatal_effect_modification|modifier=single vs multi-vehicle;exposure=too_fast_for_conditions;stratum=single-vehicle|p_homogeneity_rr|.2f}}; `severity/fatal_effect_modification`).
+8. **Some combinations amplify each other**, notably pedestrian crashes in unlit darkness (super-multiplicative, so also a large additive excess). For
    others that are often assumed to (speeding in darkness, young drivers late at night), no
    interaction is detected for the fatal outcome, although speeding in unlit darkness shows an
    additive excess for fatal-or-serious crashes.
@@ -111,7 +111,7 @@ of police-reported crashes of every severity
 sampled crashes per year, representing
 {{descriptive/crss_annual||min(crashes)|,.0f}}–{{descriptive/crss_annual||max(crashes)|,.0f}}
 crashes). Severity rates and models use CRSS with design-based
-inference: 25 strata, 67 PSUs, 42 degrees of freedom. Counts of deaths use FARS. Rows from the
+inference: {{descriptive/crss_design||n_strata|.0f}} strata, {{descriptive/crss_design||n_psu|.0f}} PSUs, {{descriptive/crss_design||design_df|.0f}} degrees of freedom. Counts of deaths use FARS. Rows from the
 two systems are never pooled. Methods: `docs/methodology.md`. Variable definitions and coding
 breaks: `docs/variable_harmonization.md`.
 
@@ -443,9 +443,10 @@ mass and front-end geometry are not separately observed. Exposure to being struc
 measured, so these ratios describe severity *given* a pedestrian crash.
 
 **The pooled ratios average over very different crash configurations (exploratory follow-up added
-after the red-team review).** `severity/fatal_effect_modification` refits model A within
-single-vehicle and within multi-vehicle crashes (and within crash types) and tests whether the
-adjusted fatal risk ratio is the same. It is not: the relative association is larger in
+after the red-team review).** `severity/fatal_effect_modification` fits model A once with an
+exposure-by-stratum interaction (stratum: single- or multi-vehicle crashes, or crash type) and
+tests whether the adjusted fatal risk ratio is the same across strata; the other covariate effects
+are shared across strata. It is not: the relative association is larger in
 multi-vehicle crashes, where the baseline fatal risk is low (adjusted risk ratios, 95% interval):
 
 | Circumstance | Single-vehicle | Multi-vehicle | Ratio of ratios (multi / single) | Homogeneity p |
@@ -457,9 +458,12 @@ multi-vehicle crashes, where the baseline fatal risk is low (adjusted risk ratio
 | Too fast for conditions | {{severity/fatal_effect_modification|modifier=single vs multi-vehicle;exposure=too_fast_for_conditions;stratum=single-vehicle|adj_rr|ci:1}} | {{severity/fatal_effect_modification|modifier=single vs multi-vehicle;exposure=too_fast_for_conditions;stratum=multi-vehicle|adj_rr|ci:1}} | {{severity/fatal_effect_modification|modifier=single vs multi-vehicle;exposure=too_fast_for_conditions;stratum=multi-vehicle|rr_ratio_to_first_stratum|ci:2@rr_ratio}} | {{severity/fatal_effect_modification|modifier=single vs multi-vehicle;exposure=too_fast_for_conditions;stratum=single-vehicle|p_homogeneity_rr|.2g}} |
 
 The pooled model-A ratios quoted above (exceeded limit {{severity/fatal_effect_modification|modifier=single vs multi-vehicle;exposure=exceeded_limit;stratum=single-vehicle|pooled_model_a_rr|.2f}}, alcohol {{severity/fatal_effect_modification|modifier=single vs multi-vehicle;exposure=alcohol;stratum=single-vehicle|pooled_model_a_rr|.2f}}, motorcycle {{severity/fatal_effect_modification|modifier=single vs multi-vehicle;exposure=motorcycle;stratum=single-vehicle|pooled_model_a_rr|.1f}}, large truck or bus {{severity/fatal_effect_modification|modifier=single vs multi-vehicle;exposure=large_truck;stratum=single-vehicle|pooled_model_a_rr|.2f}}) are therefore averages over
-very different crash configurations and describe neither group well; "too fast for conditions" does
-not differ between single- and multi-vehicle crashes (it varies somewhat by crash type, homogeneity
-p {{severity/fatal_effect_modification|modifier=crash type;exposure=too_fast_for_conditions;stratum=mv_rear_end|p_homogeneity_rr|.2f}}). A ratio is a relative measure: part of the larger multi-vehicle ratios reflects a lower
+very different crash configurations and describe neither group well. For "too fast for conditions"
+there is no detectable difference between single- and multi-vehicle crashes (homogeneity p =
+{{severity/fatal_effect_modification|modifier=single vs multi-vehicle;exposure=too_fast_for_conditions;stratum=single-vehicle|p_homogeneity_rr|.2f}}),
+but finer crash types do differ (homogeneity p =
+{{severity/fatal_effect_modification|modifier=crash type;exposure=too_fast_for_conditions;stratum=mv_rear_end|p_homogeneity_rr|.2f}});
+a non-significant homogeneity test is not evidence of equal ratios. A ratio is a relative measure: part of the larger multi-vehicle ratios reflects a lower
 baseline risk in multi-vehicle crashes, so these ratios do not rank the absolute harm. This is an
 exploratory, post-hoc analysis (it was added after the red-team review and is outside the registered
 family), and an association conditional on a police-reported crash, not an effect. Strata with
@@ -478,7 +482,8 @@ the attributable fractions built on them, less reliable than the relative contra
 ## 6. Finding 5 — Which combinations amplify risk
 
 See `reports/interactions.md`. In brief: among the 13 registered pairs, pedestrian crashes in
-unlit darkness are the clearest case of amplification on both scales, and motorcycle crashes
+unlit darkness are the clearest case of a super-multiplicative combination (ratio of risk ratios
+{{interactions/pairs_fatal|pair=pedestrian x dark_unlit|ratio_of_rr|ci:2}}), which therefore also carries a large additive excess, and motorcycle crashes
 involving alcohol carry a large *additive* excess (deaths) although on the ratio scale the
 combination is sub-multiplicative (ratio of risk ratios
 {{interactions/pairs_fatal|pair=motorcycle x alcohol|ratio_of_rr|ci:2}}). Pedestrian crashes on 50+ mph roads show
@@ -608,7 +613,7 @@ road, weather.
   The unstratified null reflects crash composition: speeding drivers are more often in single-vehicle
   crashes, where belts look more protective. For a driver at BAC .08 or more the within-configuration
   ratio is {{restraint_behaviour/dpc_contrast_within_configuration|contrast=driver BAC >= .08 (MI) vs BAC < .08;adjustment=single/multi-vehicle x rollover;layer=pooled within layers|ratio_of_rrs|ci:2@ratio}},
-  no difference (`restraint_behaviour/dpc_contrast_within_configuration`). The layers are pooled as if
+  no detectable difference (p = {{restraint_behaviour/dpc_contrast_within_configuration|contrast=driver BAC >= .08 (MI) vs BAC < .08;adjustment=single/multi-vehicle x rollover;layer=pooled within layers|p|.2f}}; `restraint_behaviour/dpc_contrast_within_configuration`). The layers are pooled as if
   independent and the follow-up is not multiplicity-adjusted.
 * **Frailty.** Within the same vehicle, belted occupants aged 65+ died more often than belted
   occupants aged 25–44 of the same sex
@@ -779,16 +784,17 @@ any other cause.
   {{measurement/fars_testing|level=national;YEAR=2024;status=killed|pct_alcohol_test_status_unknown|.0f}}% in 2024, whose toxicology records are
   incomplete in these archives.
   Survivors are tested mainly on suspicion.
-* **Imputed BAC leans on the outcome.** Among FARS drivers who were not tested, an imputed BAC of
-  .08 or more is associated with the driver being killed with an adjusted odds ratio of
-  {{measurement/imputed_bac_injury|covariate_set=primary;group=imputed|adj_or|ci:2@adj_or}}, against {{measurement/imputed_bac_injury|covariate_set=primary;group=tested|adj_or|ci:2@adj_or}} for a measured BAC of .08 or more among tested drivers (adjusted for age band, sex, vehicle type, crash type, time of day and year;
-  `measurement/imputed_bac_injury`). The much stronger association for imputed values is what one
-  expects if NHTSA's imputation model uses injury severity as a predictor, so FARS figures built on
-  imputed BAC (drunk-driving death counts, the share of victims who were not the drunk driver,
-  FARS-scaled attributable deaths) lean on a model that uses the outcome, and the measured-BAC
-  figures are the more conservative basis. With police alcohol, light, area and weekend also in the
-  model the imputed odds ratio is {{measurement/imputed_bac_injury|covariate_set=plus police alcohol, light, area, weekend;group=imputed|adj_or|ci:2@adj_or}}
-  and the measured one {{measurement/imputed_bac_injury|covariate_set=plus police alcohol, light, area, weekend;group=tested|adj_or|ci:2@adj_or}}. This is a diagnostic, not a causal estimate, and the tested group is itself selected.
+* **Imputed BAC: a diagnostic consistent with the imputation using injury severity.** Among FARS
+  drivers who were not tested, an imputed BAC of .08 or more is associated with the driver being
+  killed with an adjusted odds ratio of {{measurement/imputed_bac_injury|covariate_set=primary;group=imputed|adj_or|ci:2@adj_or}}, against {{measurement/imputed_bac_injury|covariate_set=primary;group=tested|adj_or|ci:2@adj_or}} for a measured BAC of .08 or more
+  among tested drivers (adjusted for age band, sex, vehicle type, crash type, time of day and year;
+  `measurement/imputed_bac_injury`). A much stronger association for imputed values is consistent
+  with NHTSA's imputation model using injury severity as a predictor, but it does not show that.
+  The comparison has limits. The tested drivers are themselves selected on the outcome ({{measurement/imputed_bac_injury|covariate_set=primary;group=tested|n_killed|,.0f}} of {{measurement/imputed_bac_injury|covariate_set=primary;group=tested|n_drivers|,.0f}} were killed, against {{measurement/imputed_bac_injury|covariate_set=primary;group=imputed|n_killed|,.0f}} of {{measurement/imputed_bac_injury|covariate_set=primary;group=imputed|n_drivers|,.0f}} of the imputed group), so the two groups are not like for like, and adding police-reported alcohol, light, area and weekend moves the tested odds ratio from {{measurement/imputed_bac_injury|covariate_set=primary;group=tested|adj_or|.2f}} to {{measurement/imputed_bac_injury|covariate_set=plus police alcohol, light, area, weekend;group=tested|adj_or|.2f}} (imputed: {{measurement/imputed_bac_injury|covariate_set=primary;group=imputed|adj_or|.2f}} to {{measurement/imputed_bac_injury|covariate_set=plus police alcohol, light, area, weekend;group=imputed|adj_or|.2f}}), so the gap depends on the covariates chosen. With police alcohol, light, area and weekend also in the model the odds ratios are
+  {{measurement/imputed_bac_injury|covariate_set=plus police alcohol, light, area, weekend;group=imputed|adj_or|ci:2@adj_or}} (imputed) and {{measurement/imputed_bac_injury|covariate_set=plus police alcohol, light, area, weekend;group=tested|adj_or|ci:2@adj_or}} (measured). FARS figures built on imputed BAC (drunk-driving death
+  counts, the share of victims who were not the drunk driver, FARS-scaled attributable deaths) may
+  therefore depend on a model that uses the outcome; the measured-BAC figures avoid that dependence
+  but describe tested drivers only. This is a diagnostic, not a causal estimate.
 * **Police reports miss alcohol in killed drivers.** Among tested FARS drivers with a known
   police report, the report identifies BAC ≥ 0.08 in
   {{measurement/police_vs_bac|driver_status=killed|police_sensitivity_vs_bac08|pct:0}} of killed

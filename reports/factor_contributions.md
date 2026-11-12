@@ -58,7 +58,7 @@ and **predictive** (out-of-sample prediction).*
 | A | How much of the speeding–fatality association is explained statistically by alcohol and other recorded factors? | For exceeding the limit, alcohol accounts for 9% of the crude log-RR on average over orderings (4%–16%); all recorded circumstances together leave 69% (`reports/speeding_confounding.md`) |
 | B | Does exceeding the limit remain independently associated with fatal severity? | Yes: adjusted RR 4.9 (4.1–5.8); 6.5 (5.5–7.8) without alcohol; robust to moderate recording bias (same report) |
 | C | Can alcohol and drugs be separated reliably? | Only in a narrow, selected population (tested drivers in fatal crashes, four high-testing states); not in general (`reports/alcohol_drugs_restraints.md`) |
-| D | How much does restraint use change fatality associations within comparable occupants? | Within the same vehicle, belted occupants' risk is 0.34 (0.33–0.35) times unbelted occupants'. Overall it is similar with and without a speeding driver, but within crash configuration belts are somewhat less protective with a speeding driver (exploratory follow-up; ratio of RRs 1.10 to 1.24 across four layering schemes, 1.24 (1.13–1.35) with single/multi-vehicle and rollover crossed); the BAC contrast is null within configuration (0.99 (0.91–1.09)) (same report) |
+| D | How much does restraint use change fatality associations within comparable occupants? | Within the same vehicle, belted occupants' risk is 0.34 (0.33–0.35) times unbelted occupants'. Overall there is no detectable difference with and without a speeding driver, but within crash configuration belts are somewhat less protective with a speeding driver (exploratory follow-up; ratio of RRs 1.10 to 1.24 across four layering schemes, 1.24 (1.13–1.35) with single/multi-vehicle and rollover crossed); the BAC contrast shows no detectable difference within configuration (0.99 (0.91–1.09)) (same report) |
 | E | Which combinations show interaction? | Super-additive: exceedance × alcohol, behaviour × belt non-use; sub-multiplicative at crash level, multiplicative for single-vehicle drivers; three-way terms not detected; four-way with drugs not estimable (`reports/multifactor_interactions.md`) |
 | F | How much do contributions depend on units, definitions, specifications and missingness? | Strongly: crash vs driver vs passenger vs pedestrian (alcohol RR from 1.2 to 4.7); "any speeding" vs exceedance; with or without configuration; police drugs as a covariate; drug unknowns (§2–§5 below) |
 | G | Can a principal cause of an individual death be identified? | No (`docs/limitations.md` §7) |
@@ -404,7 +404,7 @@ campaign data.*
 * **Seat-belt enforcement.** Belt protection given a fatal crash is about two-thirds
   (66% lower risk
   of death). Within crash configuration (exploratory) it is somewhat smaller with a speeding driver and
-  not different with a drinking driver (`reports/alcohol_drugs_restraints.md` §6). Belts and impaired-driving or speed measures therefore act on different stages; an
+  no detectable difference with a drinking driver (`reports/alcohol_drugs_restraints.md` §6). Belts and impaired-driving or speed measures therefore act on different stages; an
   unbelted occupant of a drunk or speeding driver carries a much larger *excess* risk than either
   factor alone implies (super-additivity, `reports/multifactor_interactions.md` §4), so
   combinations matter for targeting even though the ratio-scale effects are sub-multiplicative.

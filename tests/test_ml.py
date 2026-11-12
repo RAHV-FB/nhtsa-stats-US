@@ -782,3 +782,53 @@ def test_real_data_smoke():
         assert ml.predict_crash_fatal_risk({"light": "purple"})["status"] == "refused"
         impossible = {"crash_type": "sv_rollover_first", "n_vehicles": "3+"}
         assert ml.predict_crash_fatal_risk(impossible)["status"] == "refused"
+
+
+def _eval_frame(n: int = 4000, seed: int = 9) -> pd.DataFrame:
+    df = _synthetic_crashes(n, seed)
+    rng = np.random.default_rng(seed)
+    df["YEAR"] = rng.choice([2023, 2024], n)
+    df["crash_family"] = [
+        "pedestrian_cyclist"
+        if t in ("pedestrian", "cyclist")
+        else ("single_vehicle" if str(t).startswith("sv_") else "multi_vehicle")
+        for t in df["crash_type"]
+    ]
+    # ``ka`` is unknown for ~10% of the crashes (MAXSEV_IM 5) where ``fatal`` is known (0).
+    df["ka"] = np.where(df["fatal"] == 1, 1.0, (rng.random(n) < 0.1).astype(float))
+    df.loc[(df["fatal"] == 0) & (rng.random(n) < 0.1), "ka"] = np.nan
+    return df
+
+
+def test_evaluate_and_thresholds_mask_unknown_outcome_rows():
+    df = _eval_frame()
+    rng = np.random.default_rng(0)
+    p = {
+        (oc, "pre_crash", "logit_main"): np.clip(rng.beta(1, 15, len(df)), 1e-4, 0.9)
+        for oc in ("fatal", "ka")
+    }
+    metrics, _, _, _, mult = ml.evaluate(df, p, 30, np.random.default_rng(1))
+    allw = metrics[(metrics.domain == "all") & (metrics.weighting == "weighted")]
+    n = allw[allw.metric == "auroc"].set_index("outcome")["n"]
+    known = df["ka"].notna()
+    assert n["fatal"] == len(df) and n["ka"] == int(known.sum()) < len(df)
+    # Point metrics of ka equal those computed on the known rows alone.
+    sub = df[known].reset_index(drop=True)
+    m_sub, *_ = ml.evaluate(
+        sub,
+        {("ka", "pre_crash", "logit_main"): p["ka", "pre_crash", "logit_main"][known.to_numpy()]},
+        30,
+        np.random.default_rng(1),
+    )
+    a = metrics[
+        (metrics.outcome == "ka") & (metrics.domain == "all") & (metrics.weighting == "weighted")
+    ]
+    b = m_sub[(m_sub.domain == "all") & (m_sub.weighting == "weighted")]
+    np.testing.assert_allclose(
+        a.set_index("metric")["estimate"].loc[b["metric"]].to_numpy(), b["estimate"].to_numpy()
+    )
+    thr = ml.threshold_tables(df, df, p, p, mult)
+    t = thr[thr.outcome == "ka"]
+    assert (t[["n_tp", "n_fp", "n_fn", "n_tn"]].sum(axis=1) == int(known.sum())).all()
+    t = thr[thr.outcome == "fatal"]
+    assert (t[["n_tp", "n_fp", "n_fn", "n_tn"]].sum(axis=1) == len(df)).all()

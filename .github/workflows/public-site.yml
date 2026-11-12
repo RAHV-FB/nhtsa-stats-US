@@ -62,7 +62,7 @@ jobs:
       - name: Stage the site (without tests/ and tools/)
         run: |
           mkdir -p _site
-          rsync -a --exclude tests --exclude tools website/ _site/
+          rsync -a --exclude /tests --exclude /tools website/ _site/
       - uses: actions/upload-pages-artifact@v4
         with:
           path: _site

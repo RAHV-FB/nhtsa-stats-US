@@ -551,11 +551,15 @@ def run_pairs(
     return _holm_family(res)
 
 
+P_COLUMNS = ("ic_p", "ratio_of_rr_p", "product_p")
+
+
 def _holm_family(res: pd.DataFrame) -> pd.DataFrame:
     """Holm / Benjamini-Hochberg adjustment over the pre-specified pairs only.
 
-    A pre-specified pair that failed (or produced no finite p-value) would silently shrink
-    the multiplicity family and make the remaining adjusted p-values too small, so it raises
+    A pre-specified pair that failed, or has a missing / non-finite p-value in any of
+    ``P_COLUMNS`` (``_adjust_p`` drops non-finite values), would silently shrink the
+    multiplicity family and make the remaining adjusted p-values too small, so it raises
     instead.  Exploratory pairs are left unadjusted.
     """
     pre = res["prespecified"].astype(bool)
@@ -564,8 +568,14 @@ def _holm_family(res: pd.DataFrame) -> pd.DataFrame:
         raise RuntimeError(
             f"pre-specified pair(s) failed, so the Holm/BH family would be incomplete: {bad}"
         )
-    for col in ("ic_p", "ratio_of_rr_p", "product_p"):
+    for col in P_COLUMNS:
         if col in res:
+            nonfinite = res.loc[pre & ~np.isfinite(res[col].to_numpy(dtype=float)), "pair"]
+            if len(nonfinite):
+                raise RuntimeError(
+                    f"pre-specified pair(s) with a non-finite {col}, so the Holm/BH family "
+                    f"would silently shrink: {nonfinite.tolist()}"
+                )
             # Multiplicity adjustment within the pre-specified family only.
             res[f"{col}_holm"] = np.nan
             res[f"{col}_bh"] = np.nan

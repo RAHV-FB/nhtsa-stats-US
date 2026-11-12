@@ -978,12 +978,24 @@ def effect_modification(outcome: str = "fatal") -> pd.DataFrame:
 
 
 def weighted_deciles(p: np.ndarray, weight: np.ndarray, k: int = 10) -> np.ndarray:
-    """Decile (1..k) of ``p`` such that each holds 1/k of the total weight (ties kept together)."""
+    """Group (1..k) of ``p`` holding about 1/k of the total weight each; tied values share a group.
+
+    Rows are ordered by ``p`` and a run of identical predictions is placed, as a whole, in the
+    group containing the midpoint of its cumulative weight, so no value straddles a boundary
+    (group ranges of ``p`` never overlap).  A large tie can therefore make a group heavier
+    than 1/k, and a group can be empty (it then does not appear in the result)."""
+    p = np.asarray(p, dtype=float)
+    weight = np.asarray(weight, dtype=float)
     order = np.argsort(p, kind="stable")
-    cum = np.cumsum(weight[order]) / weight.sum()
-    dec_sorted = np.minimum((np.ceil(cum * k - 1e-12)).astype(int), k)
+    ps, cum = p[order], np.cumsum(weight[order]) / weight.sum()
+    start = np.r_[True, ps[1:] != ps[:-1]]
+    run = np.cumsum(start) - 1
+    run_end = cum[np.r_[np.flatnonzero(start)[1:] - 1, len(ps) - 1]]
+    run_start = np.r_[0.0, run_end[:-1]]
+    mid = ((run_start + run_end) / 2)[run]
+    dec_sorted = np.clip(np.floor(mid * k).astype(int) + 1, 1, k)
     dec = np.empty(len(p), dtype=int)
-    dec[order] = np.maximum(dec_sorted, 1)
+    dec[order] = dec_sorted
     return dec
 
 
@@ -1001,6 +1013,8 @@ def calibration_by_decile(
     rows = []
     for g in [*range(1, k + 1), 0]:  # 0 = all crashes
         dom = np.ones(len(p), bool) if g == 0 else dec == g
+        if not dom.any():  # a large tie of predictions can leave a decile empty
+            continue
         obs = svy_mean(design, y, dom)
         pred = svy_mean(design, p, dom)
         dif = svy_mean(design, y - p, dom)

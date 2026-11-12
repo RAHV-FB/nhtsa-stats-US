@@ -291,6 +291,21 @@ def category_levels(df: pd.DataFrame, var: str) -> list:
     return out
 
 
+def known_outcome_domain(
+    df: pd.DataFrame, design: SurveyDesign, outcome: str
+) -> tuple[pd.DataFrame, SurveyDesign, np.ndarray]:
+    """Rows whose ``outcome`` is known, as a domain of the full design.
+
+    ``design.subset`` keeps the whole stratum/PSU structure (domain estimation), so variances
+    are not understated by dropping PSUs.  Returns ``(df, design, known)``; when every outcome
+    is known the inputs are returned unchanged.
+    """
+    known = df[outcome].notna().to_numpy()
+    if known.all():
+        return df, design, known
+    return df.loc[known].reset_index(drop=True), design.subset(known), known
+
+
 def collapse_cells(
     df: pd.DataFrame, design: SurveyDesign, columns: Sequence[str], outcome: str
 ) -> tuple[pd.DataFrame, SurveyDesign]:
@@ -383,9 +398,7 @@ def fit_subset(
     """Exposure + covariate blocks -> standardised exposed / reference margins.
 
     Fitted on the crashes whose ``outcome`` is known (a domain of the full design)."""
-    known = df[outcome].notna().to_numpy()
-    if not known.all():
-        df, design = df.loc[known].reset_index(drop=True), design.subset(known)
+    df, design, _ = known_outcome_domain(df, design, outcome)
     blocks = frozenset(blocks)
     covs = [exposure.column, *exposure.variables(sorted(blocks, key=exposure.blocks.index))]
     cells, cdesign = collapse_cells(df, design, covs, outcome)

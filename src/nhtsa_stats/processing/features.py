@@ -163,8 +163,8 @@ def person_level(source: str, years: Sequence[int]) -> pl.DataFrame:
         h.person_type().alias("ptype"),
         h.age_years().alias("age"),
         h.sex().alias("sex"),
-        h.fatal("INJ_SEV").alias("killed"),
-        h.killed_or_serious("INJ_SEV").alias("killed_or_serious"),
+        h.person_fatal("INJ_SEV").alias("killed"),
+        h.person_killed_or_serious("INJ_SEV").alias("killed_or_serious"),
         h.any_injury("INJ_SEV").alias("injured"),
         h.kabco("INJ_SEV").alias("kabco"),
         h.seat_row().alias("seat"),
@@ -202,8 +202,8 @@ def person_level(source: str, years: Sequence[int]) -> pl.DataFrame:
             pl.col("killed").alias("killed_cc"),
             pl.col("killed_or_serious").alias("killed_or_serious_cc"),
         ).with_columns(
-            h.fatal("INJSEV_IM").alias("killed"),
-            h.killed_or_serious("INJSEV_IM").alias("killed_or_serious"),
+            h.person_fatal("INJSEV_IM").alias("killed"),
+            h.person_killed_or_serious("INJSEV_IM").alias("killed_or_serious"),
             h.any_injury("INJSEV_IM").alias("injured"),
             h.kabco("INJSEV_IM").alias("kabco"),
         )

@@ -369,7 +369,7 @@ within multi-vehicle crashes). For exceeding the limit the ratio is 3.35 (2.82�
 3.0, homogeneity p 4.2e-12), against a pooled
 5.22. For "too fast for conditions" the ratios are
 1.05 (0.89–1.24) and 1.08 (0.81–1.44) (homogeneity p 0.85), so the
-weak association does not depend on the configuration split. The relative association of exceeding
+weak association shows no detectable dependence on the configuration split. The relative association of exceeding
 the limit is larger in multi-vehicle crashes, where the baseline fatal risk is low, so the pooled
 ratio describes neither configuration well. An association conditional on a police-reported crash,
 not an effect; the split by crash type is in the same table.

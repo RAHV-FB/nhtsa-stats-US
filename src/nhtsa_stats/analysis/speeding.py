@@ -153,6 +153,7 @@ def odds_ratio(
     df: pd.DataFrame, design: SurveyDesign, exposure: cf.Exposure, blocks, outcome: str
 ) -> tuple[float, float, float]:
     """Conditional odds ratio of the exposure from the same specification as a lattice fit."""
+    df, design, _ = cf.known_outcome_domain(df, design, outcome)
     blocks = frozenset(blocks)
     covs = [exposure.column, *exposure.variables(sorted(blocks, key=exposure.blocks.index))]
     cells, cdesign = cf.collapse_cells(df, design, covs, outcome)
@@ -331,7 +332,8 @@ def stratified_table(df: pd.DataFrame, design: SurveyDesign, outcome: str) -> pd
                     if isinstance(sub[c].dtype, pd.CategoricalDtype):
                         sub[c] = sub[c].cat.remove_unused_categories()
                 blocks = [b for b in ex.blocks if b != "configuration" and b not in drop]
-                exposed = sub[ex.column].astype(str) == ex.exposed
+                known = sub[outcome].notna()
+                exposed = (sub[ex.column].astype(str) == ex.exposed) & known
                 if exposed.sum() < config.MIN_CELL_N or sub.loc[exposed, outcome].sum() < 10:
                     continue
                 f = cf.fit_subset(sub, sd, ex, blocks, outcome)
@@ -344,7 +346,7 @@ def stratified_table(df: pd.DataFrame, design: SurveyDesign, outcome: str) -> pd
                         "outcome": outcome,
                         "split": split,
                         "stratum": label,
-                        "n_crashes": int(mask.sum()),
+                        "n_crashes": int(known.sum()),
                         "n_exposed": int(exposed.sum()),
                         "n_exposed_events": int(sub.loc[exposed, outcome].sum()),
                         "adj_rate_exposed": f.m_exposed,

@@ -49,7 +49,7 @@ import pandas as pd
 from scipy import stats
 
 from nhtsa_stats import config
-from nhtsa_stats.analysis.confounding import collapse_cells
+from nhtsa_stats.analysis.confounding import collapse_cells, known_outcome_domain
 from nhtsa_stats.analysis.survey import (
     Estimate,
     MarginSet,
@@ -206,6 +206,10 @@ def fit_factorial(
     """
     factors = list(factors)
     k = len(factors)
+    # Fit on the rows whose outcome is known: a domain of the full design (PSUs are kept).
+    df, design, known = known_outcome_domain(df, design, outcome)
+    if standardise is not None:
+        standardise = np.asarray(standardise, bool)[known]
     cols = list(dict.fromkeys([*(f.column for f in factors), *covariates]))
     work = df[[*cols, outcome]].copy()
     for c in cols:

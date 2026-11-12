@@ -73,6 +73,17 @@ def killed_or_serious(col: str = "INJ_SEV") -> pl.Expr:
     return binary(col, yes=[3, 4], no=[0, 1, 2, 6, 8])
 
 
+def person_fatal(col: str = "INJ_SEV") -> pl.Expr:
+    """Person-level ``killed``: 1 = K; 0 = O/C/B/A and 5; null = 6 (died prior to the crash:
+    neither a crash death nor a survivor), 9 (unknown).  Crash-level ``fatal`` keeps 6 as 0."""
+    return binary(col, yes=[4], no=[0, 1, 2, 3, 5])
+
+
+def person_killed_or_serious(col: str = "INJ_SEV") -> pl.Expr:
+    """Person-level K or A: 1 = K/A; 0 = O/C/B; null = 5, 6 (died prior to the crash), 9."""
+    return binary(col, yes=[3, 4], no=[0, 1, 2])
+
+
 def any_injury(col: str = "INJ_SEV") -> pl.Expr:
     """1 = K/A/B/C or injured-severity-unknown (5); 0 = O; null = 6, 8, 9."""
     return binary(col, yes=[1, 2, 3, 4, 5], no=[0])

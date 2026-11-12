@@ -19,6 +19,12 @@
   "declared_levels"
  ],
  "module": "nhtsa_stats.models.severity_ml",
- "git_commit": "ef704fd",
- "generated_utc": "2026-10-23T03:38:22Z"
+ "git_commit": "665bc2b-dirty",
+ "source_sha256": "d14a19f31a29f5c4a24caee8cc2be9e5bc9f323cc31d76fce38ee16cabd4e4e6",
+ "code_sha256": "1bf425ae4c26fcf22c77a7f714ba79cb771d58833f16f5aef72c37e68da23b29",
+ "inputs_sha256": {
+  "data/processed/crss_crash.parquet": "364251caddea6a8af2ddb2148c228829cbb74b00c24b414a2f1d3fb55409cf3b"
+ },
+ "package_sha256": "65860adecab2ba9a806171b2e36f208b502e6758aa004fc7c2bcf8f7395fe23b",
+ "generated_utc": "2026-11-12T21:44:45Z"
 }

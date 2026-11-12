@@ -38,7 +38,7 @@ from sklearn.metrics import roc_auc_score
 
 from nhtsa_stats import config
 from nhtsa_stats.analysis import multifactor
-from nhtsa_stats.analysis.confounding import collapse_cells
+from nhtsa_stats.analysis.confounding import collapse_cells, known_outcome_domain
 from nhtsa_stats.analysis.survey import MarginSet, ModelSpec, SurveyDesign, SurveyLogit
 from nhtsa_stats.reporting.io import save_table
 
@@ -118,6 +118,7 @@ def fit_cells(
     df: pd.DataFrame, design: SurveyDesign, covs: Sequence[str], outcome: str
 ) -> tuple[SurveyLogit, pd.DataFrame, SurveyDesign]:
     covs = list(dict.fromkeys(covs))
+    df, design, _ = known_outcome_domain(df, design, outcome)
     work = df[[*covs, outcome]].copy()
     for c in covs:
         work[c] = np.asarray(work[c], dtype=object)

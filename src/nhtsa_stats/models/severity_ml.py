@@ -889,8 +889,9 @@ def evaluate(
     w_full = test["WEIGHT"].to_numpy()
     for (outcome, stage, model), p in preds.items():
         y = test[outcome].to_numpy()
+        known = np.isfinite(y)  # domain estimation: unknown-outcome rows keep their PSU
         for dname, var, value in DOMAINS:
-            d = _domain_mask(test, var, value)
+            d = _domain_mask(test, var, value) & known
             for weighting in ("weighted", "unweighted"):
                 if weighting == "unweighted" and dname not in UNWEIGHTED_DOMAINS:
                     continue
@@ -1077,6 +1078,8 @@ def threshold_tables(
         outcome, stage, model = key
         pv = preds_valid[key]
         yv, wv = valid[outcome].to_numpy(), valid["WEIGHT"].to_numpy()
+        kv = np.isfinite(yv)
+        pv, yv, wv = pv[kv], yv[kv], wv[kv]  # 2022 crashes with a known outcome
         o = np.argsort(-pv, kind="stable")
         cum_recall = np.cumsum((wv * yv)[o]) / (wv * yv).sum()
         thresholds = {
@@ -2689,8 +2692,17 @@ def run(n_boot: int = N_BOOT, interpret: bool = True) -> dict[str, Any]:
     tuning_parts, selection, sel_info = [], {}, {}
     preds_valid, preds_test = {}, {}
     splits: dict[str, dict[str, pd.DataFrame]] = {}
+    fatal_known = df["fatal"].notna().to_numpy()
+    eval_valid = df[df["YEAR"].isin(config.VALID_YEARS).to_numpy() & fatal_known].reset_index(
+        drop=True
+    )
+    eval_test = df[df["YEAR"].isin(config.TEST_YEARS).to_numpy() & fatal_known].reset_index(
+        drop=True
+    )
     for outcome in OUTCOMES:
         known = df[outcome].notna().to_numpy()
+        # Every outcome's known rows must lie inside the fatal-known evaluation frames.
+        assert not (known & ~fatal_known).any(), f"{outcome} known where fatal is unknown"
         split = {
             "train": df[df["YEAR"].isin(config.TRAIN_YEARS).to_numpy() & known],
             "valid": df[df["YEAR"].isin(config.VALID_YEARS).to_numpy() & known],
@@ -2706,8 +2718,11 @@ def run(n_boot: int = N_BOOT, interpret: bool = True) -> dict[str, Any]:
             sel_info[f"{outcome}|{stage}"] = {"selected": name, **info}
             for mname, m in models.items():
                 fitted[(outcome, stage, mname)] = m
-                preds_valid[(outcome, stage, mname)] = m.predict(split["valid"])
-                preds_test[(outcome, stage, mname)] = m.predict(split["test"])
+                # Predictions for every outcome are made on the fatal-known evaluation frames
+                # (``ka`` is also unknown for MAXSEV_IM 5, so its known rows are a subset);
+                # the metrics mask each outcome's unknown rows (a domain of the same design).
+                preds_valid[(outcome, stage, mname)] = m.predict(eval_valid)
+                preds_test[(outcome, stage, mname)] = m.predict(eval_test)
                 unseen = m.pre.unseen(split["test"])
                 if unseen:
                     log.warning(
@@ -2727,9 +2742,11 @@ def run(n_boot: int = N_BOOT, interpret: bool = True) -> dict[str, Any]:
     )
     save_json(sel_info, MODULE, "selection")
 
-    # Test evaluation (one test frame: both outcomes are known on the same crashes).
-    test = splits["fatal"]["test"]
-    assert splits["ka"]["test"]["case_id"].equals(test["case_id"])
+    # Test evaluation on one frame (the fatal-known test crashes, one PSU structure for the
+    # bootstrap); an outcome's unknown rows (``ka`` for MAXSEV_IM 5) are masked in each metric.
+    test = eval_test
+    assert test["case_id"].equals(splits["fatal"]["test"]["case_id"])
+    assert splits["ka"]["test"]["case_id"].isin(test["case_id"]).all()
     metrics, diffs, curves, tiers, mult = evaluate(test, preds_test, n_boot, rng)
     method = (
         f"Weighted (WEIGHT) and unweighted metrics; 95% percentile CIs from {n_boot} Rao-Wu "
@@ -2760,7 +2777,7 @@ def run(n_boot: int = N_BOOT, interpret: bool = True) -> dict[str, Any]:
         method="Tiers from the 20 equal-weight reliability groups of each model's test "
         "predictions; " + method,
     )
-    valid = splits["fatal"]["valid"]
+    valid = eval_valid
     thr = threshold_tables(valid, test, preds_valid, preds_test, mult)
     _save(
         thr,

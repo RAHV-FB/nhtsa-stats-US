@@ -329,3 +329,59 @@ def test_real_data_speeding_type_models_and_interstate_bands():
     assert band.loc["50-65 mph", "n_crashes"] == (
         band.loc["50-55 mph", "n_crashes"] + band.loc["60-65 mph", "n_crashes"]
     )
+
+
+# --------------------------------------------------------------------------------------
+# Outcomes that are missing for some rows (e.g. CRSS ``ka`` where MAXSEV_IM is 5)
+# --------------------------------------------------------------------------------------
+def _with_missing_outcome(seed: int = 21):
+    df, design = _synthetic(n=20000, seed=seed)
+    rng = np.random.default_rng(seed)
+    df["ka"] = df["fatal"].where(rng.random(len(df)) > 0.1)  # ~10% unknown
+    for c in ("night_period", "alcohol_im", "region", "YEAR"):
+        df[c] = pd.Categorical(df[c], categories=C.declared_levels(c))
+    return df, design
+
+
+def test_known_outcome_domain_keeps_the_full_design():
+    df, design = _with_missing_outcome()
+    sub, sd, known = C.known_outcome_domain(df, design, "ka")
+    assert known.sum() == len(sub) == sd.n < len(df)
+    assert sd.n_clusters == design.n_clusters and sd.df == design.df  # PSUs kept
+    same, same_d, all_known = C.known_outcome_domain(df, design, "fatal")
+    assert same is df and same_d is design and all_known.all()
+
+
+def test_odds_ratio_and_fit_subset_use_the_known_outcome_domain():
+    from nhtsa_stats.analysis import speeding as S
+
+    df, design = _with_missing_outcome()
+    blocks = ["alcohol", "calendar_region"]
+    sub, sd, _ = C.known_outcome_domain(df, design, "ka")
+    expected = S.odds_ratio(sub, sd, TOY, blocks, "ka")
+    got = S.odds_ratio(df, design, TOY, blocks, "ka")  # used to raise ValueError
+    np.testing.assert_allclose(got, expected)
+    assert all(np.isfinite(got)) and got[1] < got[0] < got[2]
+    f_all = C.fit_subset(df, design, TOY, blocks, "ka")
+    f_sub = C.fit_subset(sub, sd, TOY, blocks, "ka")
+    assert f_all.m_exposed == pytest.approx(f_sub.m_exposed)
+    # A fully known outcome is unaffected.
+    assert np.isfinite(S.odds_ratio(df, design, TOY, blocks, "fatal")).all()
+
+
+def test_row_level_logit_still_rejects_missing_outcome():
+    df, design = _with_missing_outcome()
+    spec = ModelSpec(categorical={"night_period": ["day", "night"]})
+    with pytest.raises(ValueError, match="without missing"):
+        SurveyLogit(spec).fit(df, df["ka"].to_numpy(), design)
+
+
+def test_contributions_fit_cells_handles_missing_outcome():
+    from nhtsa_stats.analysis import contributions as K
+
+    df, design = _with_missing_outcome()
+    m, cells, cd = K.fit_cells(df, design, ["alcohol_im", "region"], "ka")
+    assert m.converged_ and cd.n_clusters == design.n_clusters
+    assert cells["ka"].notna().all()
+    # Total weight of the cells is the weight of the rows with a known outcome.
+    assert cd.weight.sum() == pytest.approx(design.weight[df["ka"].notna().to_numpy()].sum())
