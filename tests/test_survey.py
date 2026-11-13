@@ -6,6 +6,7 @@ import numpy as np
 import pandas as pd
 import pytest
 import statsmodels.api as sm
+from scipy import stats
 
 from nhtsa_stats.analysis.survey import (
     MarginSet,
@@ -115,10 +116,25 @@ def test_interaction_contrast_arithmetic(rng):
     sc = {f"p{i}{j}": (lambda d, i=i, j=j: d.assign(a=i, b=j)) for i in (0, 1) for j in (0, 1)}
     ms = m.margins(df, sc)
     out = interaction_contrasts(ms, "p11", "p10", "p01", "p00")
-    v = ms.values
-    assert out["ic"].estimate == pytest.approx(v["p11"] - v["p10"] - v["p01"] + v["p00"])
-    assert out["reri"].estimate == pytest.approx(
-        v["p11"] / v["p00"] - v["p10"] / v["p00"] - v["p01"] / v["p00"] + 1
+    v, z = ms.values, ms.influence
+    p11, p10, p01, p00 = (v[k] for k in ("p11", "p10", "p01", "p00"))
+    # Point estimates, by hand.
+    assert out["ic"].estimate == pytest.approx(p11 - p10 - p01 + p00)
+    assert out["reri"].estimate == pytest.approx((p11 - p10 - p01 + p00) / p00)
+    assert out["log_ratio_of_rr"].estimate == pytest.approx(np.log(p11 * p00 / (p10 * p01)))
+
+    # Delta-method SEs with hand-derived gradients over the four margins.
+    def se(grad: dict[str, float]) -> float:
+        lin = sum(g * z[k] for k, g in grad.items())
+        return float(np.sqrt(design.vcov_total(lin)[0, 0]))
+
+    num = p11 - p10 - p01
+    assert out["ic"].se == pytest.approx(se({"p11": 1, "p10": -1, "p01": -1, "p00": 1}), rel=1e-4)
+    assert out["reri"].se == pytest.approx(
+        se({"p11": 1 / p00, "p10": -1 / p00, "p01": -1 / p00, "p00": -num / p00**2}), rel=1e-4
+    )
+    assert out["log_ratio_of_rr"].se == pytest.approx(
+        se({"p11": 1 / p11, "p10": -1 / p10, "p01": -1 / p01, "p00": 1 / p00}), rel=1e-4
     )
     assert out["ic"].se > 0
 
@@ -129,8 +145,45 @@ def test_wald_test_and_coef_table(rng):
     m = SurveyLogit(spec).fit(df, y, SurveyDesign.from_arrays(w, strata, clus))
     tab = m.coef_table()
     assert list(tab["term"]) == ["Intercept", "a[1]", "b[1]", "a[1]:b[1]"]
+    dfree = m.design_.df
+    # One term: W = (b / se)^2, F = (d - q + 1) / (d q) W on (q, d - q + 1) df.
     res = m.wald_test(["a[1]:b[1]"])
-    assert 0 <= res["p"] <= 1
+    row = tab.set_index("term").loc["a[1]:b[1]"]
+    w1 = (row["coef"] / row["se"]) ** 2
+    assert res["wald_chi2"] == pytest.approx(w1, rel=1e-8)
+    assert res["F"] == pytest.approx(w1 * dfree / dfree)  # q = 1
+    assert res["p"] == pytest.approx(stats.f.sf(w1, 1, dfree), rel=1e-8)
+    # Two terms: W = b' V^-1 b with the 2x2 sub-covariance inverted by hand.
+    res2 = m.wald_test(["a[1]", "b[1]"])
+    b2 = m.coef_[[1, 2]]
+    v2 = m.vcov_[np.ix_([1, 2], [1, 2])]
+    inv = np.array([[v2[1, 1], -v2[0, 1]], [-v2[1, 0], v2[0, 0]]]) / np.linalg.det(v2)
+    w2 = float(b2 @ inv @ b2)
+    f2 = (dfree - 1) / (dfree * 2) * w2
+    assert res2["wald_chi2"] == pytest.approx(w2, rel=1e-8)
+    assert res2["F"] == pytest.approx(f2, rel=1e-8)
+    assert res2["p"] == pytest.approx(stats.f.sf(f2, 2, dfree - 1), rel=1e-8)
+
+
+def test_vcov_total_multi_stratum_matches_direct_formula(rng):
+    # Three strata with 2, 3 and 5 clusters and unequal cluster sizes.
+    n_by_stratum = {0: 2, 1: 3, 2: 5}
+    stratum, cluster = [], []
+    for h, g in n_by_stratum.items():
+        for c in range(g):
+            size = int(rng.integers(3, 9))
+            stratum += [h] * size
+            cluster += [100 * h + c] * size
+    stratum, cluster = np.array(stratum), np.array(cluster)
+    design = SurveyDesign.from_arrays(np.ones(len(stratum)), stratum, cluster)
+    z = rng.normal(size=len(stratum))
+    # V = sum_h n_h / (n_h - 1) * sum_c (t_hc - mean_h)^2 with t_hc the cluster totals of z.
+    expected = 0.0
+    for h, g in n_by_stratum.items():
+        t = np.array([z[cluster == 100 * h + c].sum() for c in range(g)])
+        expected += g / (g - 1) * ((t - t.mean()) ** 2).sum()
+    assert design.vcov_total(z)[0, 0] == pytest.approx(expected, rel=1e-12)
+    assert design.df == sum(n_by_stratum.values()) - len(n_by_stratum)
 
 
 def test_modelspec_rejects_undeclared_levels():

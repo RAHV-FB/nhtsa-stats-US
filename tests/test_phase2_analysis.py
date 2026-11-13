@@ -1,15 +1,16 @@
 """Phase-2 analysis helpers: E-values, attributable-fraction Shapley allocation, overlap
-arithmetic, case explorer arithmetic and the stratified bias analysis (synthetic inputs)."""
+arithmetic and the stratified bias analysis (synthetic inputs)."""
 
 from __future__ import annotations
 
 import itertools
+import re
 
 import numpy as np
 import pandas as pd
 import pytest
 
-from nhtsa_stats.analysis import cases, contributions, speeding, stages
+from nhtsa_stats.analysis import contributions, speeding, stages
 from nhtsa_stats.analysis.survey import SurveyDesign
 
 
@@ -100,25 +101,6 @@ def test_overlap_summary_arithmetic():
     assert pw.loc["speeding & alcohol", "observed_over_expected"] == pytest.approx(1.0)
 
 
-def test_case_risk_function_and_shapley():
-    factors = {"x": ("cx", ["0", "1"]), "y": ("cy", ["0", "1"])}
-    vals = {}
-    risks = {("0", "0"): 0.01, ("1", "0"): 0.03, ("0", "1"): 0.02, ("1", "1"): 0.08}
-    for (a, b), r in risks.items():
-        vals[cases.scenario_key({"x": a, "y": b})] = r
-    case = {"x": "1", "y": "1"}
-    ref = {"x": "0", "y": "0"}
-    risk = cases._risk_function(vals, case, ref)
-    assert risk(()) == 0.01 and risk(("x",)) == 0.03 and risk(("x", "y")) == 0.08
-    phi = cases._shapley(["x", "y"], lambda s: risk(s) - risk(()))
-    assert sum(phi.values()) == pytest.approx(0.07)
-    assert phi["x"] == pytest.approx(0.5 * ((0.03 - 0.01) + (0.08 - 0.02)))
-    # Log scale allocates differently: the allocation is not unique across scales.
-    phl = cases._shapley(["x", "y"], lambda s: float(np.log(risk(s) / risk(()))))
-    assert phi["x"] / 0.07 != pytest.approx(phl["x"] / np.log(8))
-    assert len(cases.grid(factors)) == 4
-
-
 def test_stratified_qba_identity_at_perfect_recording():
     rng = np.random.default_rng(0)
     n = 4000
@@ -178,7 +160,6 @@ def _t(module: str, name: str) -> pd.DataFrame:
         ),
         ("contributions", "nested_models", "rr", "rr_low", "rr_high"),
         ("contributions", "burden_shapley", "estimate", "estimate_low", "estimate_high"),
-        ("cases", "scenarios", "model_risk", "model_risk_low", "model_risk_high"),
         (
             "restraint_behaviour",
             "dpc_by_driver_behaviour",
@@ -224,45 +205,16 @@ def test_shapley_tables_are_efficient():
             "estimate",
         ].iloc[0]
         shap = g.loc[[q for q in g.index if q.startswith("Shapley[")], "estimate"].sum()
-        assert shap == pytest.approx(joint, rel=1e-6), ps
+        # Tables are written to 6 significant digits (save_table's "%.6g"), so a sum of
+        # rounded components can differ from the rounded joint value by a few units in the
+        # sixth digit; a real efficiency failure would be orders of magnitude larger.
+        assert shap == pytest.approx(joint, rel=2e-5), ps
 
 
-def test_case_model_calibrated_in_large_cells():
-    s = _t("cases", "scenarios")
-    big = s[(s["crss_n"] >= 5000) & s["predicted_in_cell"].notna()]
-    assert len(big) >= 5
-    ratio = big["observed_rate"] / big["predicted_in_cell"]
-    assert ratio.between(0.75, 1.33).all(), big[["scenario", "observed_rate", "predicted_in_cell"]]
-
-
-def test_unsupported_cases_have_no_model_estimate():
-    s = _t("cases", "scenarios")
-    bad = s[s["status"] != "supported"]
-    assert bad["model_risk"].isna().all() and bad["rr_vs_reference"].isna().all()
-    c = _t("cases", "scenario_contrasts")
-    assert c.loc[~c["allocation_supported"], "shapley_share_risk_difference"].isna().all()
-
-
-def test_readme_phase2_numbers_match_tables():
-    readme = (Path(config.PROJECT_ROOT) / "README.md").read_text()
-    km = _t("speeding", "key_models").set_index(["exposure", "outcome", "model"])
-    st = _t("speeding", "strata").set_index(["exposure", "outcome", "stratum"])
-    sh = _t("speeding", "shapley").set_index(["exposure", "outcome", "variant", "block"])
-    ov = _t("contributions", "fars_overlap_summary").set_index("factor")
-    checks = {
-        f"of {km.loc[('exceeded', 'fatal', 'crude'), 'rr']:.1f}": True,
-        f"about {100 * sh.loc[('exceeded', 'fatal', 'all_blocks', 'alcohol'), 'shapley_share_of_crude']:.0f}% of its log": True,
-        f"{100 * sh.loc[('exceeded', 'fatal', 'all_blocks', 'retained_after_all_blocks'), 'shapley_share_of_crude']:.0f}% remains": True,
-        f"risk ratio is\n   {st.loc[('exceeded', 'fatal', 'no alcohol'), 'rr']:.1f}": True,
-        f"sum to {100 * ov.loc['sum of the four factor counts', 'share_of_all_deaths']:.0f}% of all deaths": True,
-        f"while {100 * ov.loc['deaths involving at least one factor (union)', 'share_of_all_deaths']:.0f}% of deaths": True,
-    }
-    missing = [k for k in checks if k not in readme]
-    assert not missing, missing
-
-
-def test_case_model_does_not_adjust_for_covariates_collinear_with_case_factors():
-    """'Other driver' flags are 'no_other_vehicle' exactly when the crash is single-vehicle (a
-    case factor), so adjusting for them would make the single-vehicle contrast impossible."""
-    assert not {"other_speeding", "other_alcohol_im"} & set(cases.COVARIATES)
-    assert {"tod", "light"}.isdisjoint(cases.COVARIATES)  # night is a case factor
+def test_readme_is_generated_from_tables():
+    """README numbers are placeholders in reports/templates/README.md; the in-sync test
+    (tests/test_reports_in_sync.py) guarantees the committed README is a fresh render, so only
+    check that no hand-typed estimate with a confidence interval is left in the template."""
+    template = (Path(config.PROJECT_ROOT) / "reports" / "templates" / "README.md").read_text()
+    stripped = re.sub(r"\{\{.*?\}\}", "", template, flags=re.DOTALL)
+    assert not re.search(r"\d\.\d+ \(\d", stripped), "hand-typed estimate with an interval"

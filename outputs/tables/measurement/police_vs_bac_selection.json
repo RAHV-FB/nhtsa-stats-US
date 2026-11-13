@@ -1,0 +1,49 @@
+{
+ "table": "measurement/police_vs_bac_selection.csv",
+ "description": "Police-reported alcohol vs measured BAC>=0.08 by how widely surviving drivers are tested (state-year survivor test-rate terciles, cumulative thresholds, state terciles), killed drivers alongside",
+ "population": "FARS drivers with a measured BAC result and a known police alcohol field, in state-years with a survivor test rate; survivors and killed shown separately",
+ "unit": "driver",
+ "outcome": "police sensitivity / specificity / PPV against measured BAC >= 0.08 by how widely surviving drivers are tested",
+ "method": "Unweighted 2x2 accuracy within state-year and state survivor test-rate terciles and cumulative thresholds; Wilson 95% CI for sensitivity (crash clustering ignored); descriptive, not a corrected sensitivity",
+ "inputs": [
+  "data/processed/crss_crash.parquet",
+  "data/processed/crss_person.parquet",
+  "data/processed/fars_crash.parquet",
+  "data/processed/fars_person.parquet",
+  "data/interim/FARS/drugs"
+ ],
+ "rows": 24,
+ "columns": [
+  "scheme",
+  "group",
+  "driver_status",
+  "group_survivor_test_rate_min",
+  "group_survivor_test_rate_max",
+  "n_drivers",
+  "share_alcohol_tested",
+  "n_in_sample",
+  "bac08_prevalence",
+  "police_sensitivity_vs_bac08",
+  "sensitivity_low",
+  "sensitivity_high",
+  "police_specificity_vs_bac08",
+  "ppv",
+  "tp",
+  "fn",
+  "fp",
+  "tn"
+ ],
+ "module": "nhtsa_stats.analysis.measurement",
+ "git_commit": "af9ce88",
+ "source_sha256": "776adad0aa3abe8fe09719b2fc731f1beeeef97059a97b006cc3be3b361decc6",
+ "code_sha256": "10e1f146a1007abcfe246d05cdad2115b7f6c42ebaa985dc3de296aadd5f3e70",
+ "inputs_sha256": {
+  "data/processed/crss_crash.parquet": "1a31897f37cce3be223cc5abfb823582b68b9f7096a8c38980e9346f3450c6e3",
+  "data/processed/crss_person.parquet": "145d300272256d566371ce07d81005f71959a9eeab5e00e3066d85abaca91fa8",
+  "data/processed/fars_crash.parquet": "30f4314e8984ce2ba3cd764b561628edf36950705c1fc3bdd16769a417846ddf",
+  "data/processed/fars_person.parquet": "97b40b82c1b47f76bf99a8e05ebaa84e14c4b1ea2ecea3e86be6de4c2189bfa2",
+  "data/interim/FARS/drugs": "1465e225b8dba4c5d27993cb876acde51b0b70aac9b5c4c5347350a6665ca721"
+ },
+ "package_sha256": "fbdac1b588be76a011931549cc2f2013fc1b6405f88cee1ba0e10db719e3ed6b",
+ "generated_utc": "2026-11-13T00:36:37Z"
+}

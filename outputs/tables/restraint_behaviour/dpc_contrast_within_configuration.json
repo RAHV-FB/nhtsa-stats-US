@@ -1,0 +1,39 @@
+{
+ "table": "restraint_behaviour/dpc_contrast_within_configuration.csv",
+ "description": "Ratio of within-vehicle belt risk ratios, driver behaviour vs reference (speeding vs not, exceeded limit vs not, BAC >= .08 vs below), unstratified and within crash configuration (single/multi-vehicle, rollover, both crossed, harmonised crash type) with inverse-variance pooled estimates across layers",
+ "population": "FARS 2016-2024 light passenger vehicles with one eligible driver and one right-front passenger (Phase-1 eligibility); vehicles with unknown rollover are excluded from rollover layers",
+ "unit": "vehicle (pair)",
+ "outcome": "death",
+ "method": "Evans double-pair comparison per behaviour arm and layer (crash-cluster percentile bootstrap, 1000 replicates, fixed seed independent of the other tables); log ratio of arm RRs with SE from a joint crash-cluster bootstrap of both arms (the arms share crashes, so they are not treated as independent; separate seed offset +2), 95% Wald CI and z-test; pooled = inverse-variance weighted mean of layer log ratios, Cochran Q p for between-layer heterogeneity; layers with a DPC death count below 30 in either arm are listed but not pooled",
+ "inputs": [
+  "data/processed/fars_person.parquet",
+  "data/processed/fars_driver.parquet"
+ ],
+ "rows": 63,
+ "columns": [
+  "contrast",
+  "adjustment",
+  "layer",
+  "rr_reference",
+  "rr_behaviour",
+  "n_pairs_reference",
+  "n_pairs_behaviour",
+  "ratio_of_rrs",
+  "ratio_low",
+  "ratio_high",
+  "p",
+  "q_heterogeneity_p",
+  "used_in_pooled",
+  "n_layers_pooled"
+ ],
+ "module": "nhtsa_stats.analysis.restraint_behaviour",
+ "git_commit": "af9ce88",
+ "source_sha256": "f71c979096aaf72d0e66f842bfb7d38c9af59e41afa81ab677b24174b2bf0e45",
+ "code_sha256": "cd14c77e3aa224168b1b7095911e9b73931a748a7f69e9ef4364a26392fb617b",
+ "inputs_sha256": {
+  "data/processed/fars_person.parquet": "97b40b82c1b47f76bf99a8e05ebaa84e14c4b1ea2ecea3e86be6de4c2189bfa2",
+  "data/processed/fars_driver.parquet": "b5ff665422d482118e6f775179b59d8ca90b90501f8ea1d09fa79baa66107d04"
+ },
+ "package_sha256": "fbdac1b588be76a011931549cc2f2013fc1b6405f88cee1ba0e10db719e3ed6b",
+ "generated_utc": "2026-11-13T02:14:14Z"
+}

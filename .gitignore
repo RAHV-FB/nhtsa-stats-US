@@ -4,7 +4,6 @@ __pycache__/
 .venv/
 .pytest_cache/
 .ruff_cache/
-.mypy_cache/
 .coverage
 htmlcov/
 *.egg-info/
@@ -22,3 +21,7 @@ outputs/cache/
 
 # Run logs
 outputs/logs/
+
+# Large inventories written by `nhtsa inventory`; nothing reads them (regenerate when needed)
+outputs/audit/codebook.csv
+outputs/audit/variable_availability.csv

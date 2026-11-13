@@ -1,0 +1,41 @@
+{
+ "table": "severity/fatal_calibration.csv",
+ "description": "Model A calibration: weighted observed vs mean predicted fatal share by weighted decile of predicted fatal risk, with design-based confidence intervals",
+ "population": "CRSS police-reported crashes 2016-2024 with known maximum severity",
+ "unit": "crash",
+ "outcome": "fatal",
+ "method": "Model A (published specification) fitted values; deciles hold 1/10 of the total weight; observed and predicted shares are weighted means (logit CIs); difference and ratio linearised; predictions treated as fixed (in-sample), so CIs omit model-fit variability",
+ "inputs": [
+  "data/processed/crss_crash.parquet"
+ ],
+ "rows": 11,
+ "columns": [
+  "outcome",
+  "decile",
+  "n_crashes",
+  "n_events",
+  "predicted_min",
+  "predicted_max",
+  "observed",
+  "observed_low",
+  "observed_high",
+  "predicted",
+  "predicted_low",
+  "predicted_high",
+  "difference",
+  "difference_low",
+  "difference_high",
+  "ratio_observed_to_predicted",
+  "ratio_low",
+  "ratio_high"
+ ],
+ "module": "nhtsa_stats.analysis.severity",
+ "git_commit": "af9ce88",
+ "source_sha256": "95fcc4ff73f94baa5a973e84d9fed0f7290196f6f528ce5324ed6f10df8d8c58",
+ "code_sha256": "10e1f146a1007abcfe246d05cdad2115b7f6c42ebaa985dc3de296aadd5f3e70",
+ "inputs_sha256": {
+  "data/processed/crss_crash.parquet": "1a31897f37cce3be223cc5abfb823582b68b9f7096a8c38980e9346f3450c6e3"
+ },
+ "package_sha256": "fbdac1b588be76a011931549cc2f2013fc1b6405f88cee1ba0e10db719e3ed6b",
+ "generated_utc": "2026-11-13T00:35:46Z"
+}

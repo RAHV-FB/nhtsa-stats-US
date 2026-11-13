@@ -107,8 +107,8 @@ def test_check_features_blocks_post_crash_and_design_vars():
 def test_holm_matches_hand_computation():
     p = np.array([0.01, 0.04, 0.03, np.nan])
     out = person.holm(p)
-    # sorted 0.01, 0.03, 0.04 -> 3*0.01, max(0.03, 2*0.03), max(0.06, 1*0.04)
-    np.testing.assert_allclose(out[:3], [0.03, 0.06, 0.06])
+    # fixed family of 4 (the NaN test counts, p = 1): 4*0.01, 3*0.03, max(0.09, 2*0.04)
+    np.testing.assert_allclose(out[:3], [0.04, 0.09, 0.09])
     assert np.isnan(out[3])
 
 
@@ -328,3 +328,28 @@ def test_interaction_populations(tmp_path, monkeypatch, rng):
     sub = person.interaction_population(lpv, specs_by_name["age_x_sex"])
     assert set(sub.df["sex"]) <= {"male", "female"}
     assert sub.levels["sex"] == ["male", "female"]
+
+
+def test_interaction_table_stratum_domain_standardises_within_each_stratum(rng):
+    df, design = _synthetic_people(rng)
+    spec = ModelSpec(categorical=SPEC_LEVELS, interactions=[("restraint", "age_band")])
+    model = person.LeanSurveyLogit(spec).fit(df, df["y"].to_numpy(), design)
+    levels = SPEC_LEVELS["age_band"]
+    pooled = person.interaction_table(
+        model, df, "y", "restraint", "belted", "none", "age_band", levels
+    )
+    strat = person.interaction_table(
+        model, df, "y", "restraint", "belted", "none", "age_band", levels, stratum_domain=True
+    )
+    for _, r in strat.iterrows():
+        dom = (df["age_band"] == r["b_level"]).to_numpy()
+        m, _ = model.margin_influence(
+            df, lambda d, lv=r["b_level"]: d.assign(restraint="none", age_band=lv), dom
+        )
+        assert r["risk_a_exposed"] == pytest.approx(m, rel=1e-10)
+    # The pooled version averages over everyone, so it differs.
+    assert not np.allclose(strat["risk_a_exposed"], pooled["risk_a_exposed"])
+    # Interaction identities still hold for the stratum-domain margins.
+    ref = strat.iloc[0]
+    for _, r in strat.iloc[1:].iterrows():
+        assert r["ratio_of_rr"] == pytest.approx(r["rr"] / ref["rr"], rel=1e-5)

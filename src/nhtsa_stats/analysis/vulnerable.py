@@ -31,7 +31,13 @@ import polars as pl
 
 from nhtsa_stats import config
 from nhtsa_stats.analysis import severity, specs
-from nhtsa_stats.analysis.survey import ModelSpec, SurveyDesign, SurveyLogit, interaction_contrasts
+from nhtsa_stats.analysis.survey import (
+    ModelSpec,
+    SurveyDesign,
+    SurveyLogit,
+    interaction_contrasts,
+    logit_ci,
+)
 from nhtsa_stats.ingestion.cache import load_table
 from nhtsa_stats.processing import harmonize as h
 from nhtsa_stats.reporting.io import save_table
@@ -116,10 +122,10 @@ def build(source: str = "CRSS", years: Sequence[int] = config.YEARS) -> pl.DataF
         .alias("victim"),
         _striking(pl.col("body").fill_null("unknown")).alias("striking"),
         _location().alias("location"),
-        h.fatal(sev).alias("killed"),
-        h.killed_or_serious(sev).alias("killed_or_serious"),
-        h.fatal("INJ_SEV").alias("killed_cc"),
-        h.killed_or_serious("INJ_SEV").alias("killed_or_serious_cc"),
+        h.person_fatal(sev).alias("killed"),
+        h.person_killed_or_serious(sev).alias("killed_or_serious"),
+        h.person_fatal("INJ_SEV").alias("killed_cc"),
+        h.person_killed_or_serious("INJ_SEV").alias("killed_or_serious_cc"),
         h.age_years().alias("age"),
         h.sex().alias("sex"),
         pl.col("str_speed_limit").fill_null(h.UNKNOWN),
@@ -319,6 +325,122 @@ def body_by_speed(victim: str = "pedestrian", outcome: str = "killed") -> pd.Dat
     return pd.DataFrame(rows)
 
 
+def _domain_mean_influence(
+    design: SurveyDesign, y: np.ndarray, domain: np.ndarray
+) -> tuple[float, np.ndarray]:
+    """Weighted domain mean and its per-row linearised contribution."""
+    w = design.weight * np.asarray(domain, dtype=float)
+    big_w = w.sum()
+    m = float(w @ y / big_w)
+    return m, w * (y - m) / big_w
+
+
+def speed_limit_missingness(victim: str = "pedestrian", outcome: str = "killed") -> pd.DataFrame:
+    """Share of struck non-motorists whose striking vehicle's speed limit is unknown, by outcome.
+
+    The posted limit is missing for many non-fatal cases and for few fatal ones, so the missing
+    category is outcome-dependent: absolute fatal shares by speed limit are inflated when the
+    unknown category is dropped, while the adjusted RRs (unknown kept as a level) are not
+    affected.  Rows: weighted share unknown among fatal and among non-fatal persons, their
+    difference and ratio (joint linearisation; t, 42 df), and the raw counts.
+    """
+    df, design = load(victim, outcome)
+    unknown = (df["str_speed_limit"] == "unknown").to_numpy(float)
+    y = df[outcome].to_numpy()
+    groups = {"outcome=1": y == 1, "outcome=0": y == 0, "all": np.ones(len(df), dtype=bool)}
+    vals = {k: _domain_mean_influence(design, unknown, d) for k, d in groups.items()}
+    rows = []
+    for k, d in groups.items():
+        m, z = vals[k]
+        se = float(np.sqrt(design.vcov_total(z)[0, 0]))
+        lo, hi = logit_ci(m, se, design.df)
+        rows.append(
+            {
+                "victim": victim,
+                "outcome": outcome,
+                "group": {"outcome=1": "fatal / outcome", "outcome=0": "not", "all": "all"}[k],
+                "quantity": "share with unknown speed limit",
+                "n_persons": int(d.sum()),
+                "n_unknown": int((unknown[d]).sum()),
+                "estimate": m,
+                "low": lo,
+                "high": hi,
+            }
+        )
+    (m1, z1), (m0, z0) = vals["outcome=1"], vals["outcome=0"]
+    t = design.tcrit()
+    se_d = float(np.sqrt(design.vcov_total(z1 - z0)[0, 0]))
+    rows.append(
+        {
+            "victim": victim,
+            "outcome": outcome,
+            "group": "outcome minus not",
+            "quantity": "difference in share unknown",
+            "estimate": m1 - m0,
+            "low": m1 - m0 - t * se_d,
+            "high": m1 - m0 + t * se_d,
+        }
+    )
+    se_r = float(np.sqrt(design.vcov_total(z1 / m1 - z0 / m0)[0, 0]))
+    rows.append(
+        {
+            "victim": victim,
+            "outcome": outcome,
+            "group": "outcome over not",
+            "quantity": "ratio of shares unknown",
+            "estimate": m1 / m0,
+            "low": m1 / m0 * float(np.exp(-t * se_r)),
+            "high": m1 / m0 * float(np.exp(t * se_r)),
+        }
+    )
+    return pd.DataFrame(rows)
+
+
+SPEED_SPECS: dict[str, tuple[str, ...]] = {
+    "full (published)": (),
+    "without location": ("location",),
+    "without light": ("light",),
+    "without time of day": ("tod",),
+    "without location, light and time of day": ("location", "light", "tod"),
+}
+
+
+def speed_limit_adjustment(victim: str = "pedestrian", outcome: str = "killed") -> pd.DataFrame:
+    """Speed-limit risk ratios (vs <= 25 mph) as the location, light and time-of-day adjustment
+    is removed.  Location, light and time of day describe where and when the person was struck
+    and are correlated with the speed limit, so they may mediate or confound the contrast; the
+    table reports the sensitivity, not which specification is right."""
+    df, design = load(victim, outcome)
+    rows = []
+    for name, drop in SPEED_SPECS.items():
+        covs = [c for c in COVARIATES if c not in drop]
+        model = SurveyLogit(_spec(df, covs), ridge=severity.RIDGE).fit(
+            df, df[outcome].to_numpy(), design
+        )
+        levels = severity.observed_levels(df, "str_speed_limit", LEVELS["str_speed_limit"])
+        res = severity.factor_contrasts(model, df, "str_speed_limit", levels)
+        n = df.groupby("str_speed_limit").agg(n=(outcome, "size"), events=(outcome, "sum"))
+        for _, r in res.iterrows():
+            rows.append(
+                {
+                    "victim": victim,
+                    "outcome": outcome,
+                    "specification": name,
+                    "dropped": ",".join(drop),
+                    "level": r["level"],
+                    "n": int(n["n"].get(r["level"], 0)),
+                    "n_events": int(n["events"].get(r["level"], 0)),
+                    "adj_rr": r["adj_rr"],
+                    "adj_rr_low": r["adj_rr_low"],
+                    "adj_rr_high": r["adj_rr_high"],
+                    "adj_rd": r["adj_rd"],
+                    "adj_rd_low": r["adj_rd_low"],
+                    "adj_rd_high": r["adj_rd_high"],
+                }
+            )
+    return pd.DataFrame(rows)
+
+
 def fars_striking_mix() -> pd.DataFrame:
     df = (
         build("FARS")
@@ -361,6 +483,36 @@ def run() -> dict[str, pd.DataFrame]:
         "pedestrian_light_truck_by_speed",
         description="SUV/pickup vs car pedestrian fatality risk by speed environment (interaction)",
         outcome="killed",
+        **common,
+    )
+    out["speed_limit_missingness"] = pd.concat(
+        [speed_limit_missingness(v, "killed") for v in ("pedestrian", "cyclist")],
+        ignore_index=True,
+    )
+    save_table(
+        out["speed_limit_missingness"],
+        MODULE,
+        "speed_limit_missingness",
+        description="Share of struck pedestrians / cyclists whose striking vehicle's speed limit is "
+        "unknown, by killed vs not killed",
+        outcome="killed",
+        **{
+            **common,
+            "method": "Weighted domain shares (logit CIs); difference and ratio with joint "
+            "Taylor linearisation (25 strata / 67 PSUs, t 42 df)",
+        },
+    )
+    out["speed_limit_adjustment"] = pd.concat(
+        [speed_limit_adjustment("pedestrian", oc) for oc in ("killed", "killed_or_serious")],
+        ignore_index=True,
+    )
+    save_table(
+        out["speed_limit_adjustment"],
+        MODULE,
+        "pedestrian_speed_limit_adjustment",
+        description="Pedestrian speed-limit risk ratios (vs <=25 mph) with and without adjustment "
+        "for location, light and time of day",
+        outcome="killed; killed_or_serious",
         **common,
     )
     out["fars_mix"] = fars_striking_mix()

@@ -4,7 +4,7 @@
  "population": "CRSS police-reported crashes 2016-2024 with a determinable NHTSA-imputed maximum severity (MAXSEV_IM 0-4)",
  "unit": "crash",
  "outcome": "ka",
- "method": "Survey-weighted logistic models (exposure + every subset of covariate blocks; ridge 0.01 on mean-1 weights; exact cell compression); standardised predictive margins over all crashes; risk ratio = margin(all exposed) / margin(all reference); Taylor-linearised influence summed within 67 PSUs / 25 strata, t with 42 df; shares and Shapley values by the delta method across models",
+ "method": "Survey-weighted logistic models (exposure + every subset of covariate blocks; ridge 0.01 on mean-1 weights; exact cell compression); standardised predictive margins over the crashes where the outcome is known; risk ratio = margin(all exposed) / margin(all reference); Taylor-linearised influence summed within 67 PSUs / 25 strata, t with 42 df; shares and Shapley values by the delta method across models",
  "inputs": [
   "data/processed/crss_crash.parquet"
  ],
@@ -37,8 +37,14 @@
   "flag"
  ],
  "module": "nhtsa_stats.analysis.confounding",
- "git_commit": "ef704fd",
- "generated_utc": "2026-10-23T03:15:58Z",
+ "git_commit": "af9ce88",
+ "source_sha256": "ce9e9585dc4de518775543ed05e860a5a480ec4ecf5452b634bb7c0d9892b151",
+ "code_sha256": "ce553f458d9fe6c70a7f42296bf1f5ed8619575ce056c59a7b4e93dd37620b2e",
+ "inputs_sha256": {
+  "data/processed/crss_crash.parquet": "1a31897f37cce3be223cc5abfb823582b68b9f7096a8c38980e9346f3450c6e3"
+ },
+ "package_sha256": "fbdac1b588be76a011931549cc2f2013fc1b6405f88cee1ba0e10db719e3ed6b",
+ "generated_utc": "2026-11-13T01:17:16Z",
  "exposures": {
   "night": "Night (21:00-05:59) vs day (06:00-20:59); time-of-day bands are not adjusted for because they define the exposure",
   "rural": "Crash in a rural vs urban CRSS PSU (area-level URBANICITY, not crash-site rurality)",

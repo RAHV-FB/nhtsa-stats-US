@@ -12,9 +12,11 @@ from common import KIND_BADGE, ROOT, output_table
 def render() -> None:
     st.title("Research findings")
     st.markdown(
-        "What makes police-reported crashes in the US deadly, which conditions intensify that risk, and what the "
-        "FARS/CRSS data can and cannot say about interventions (2016-2024). Each finding states its population, "
-        "denominator, estimate type and main limitations. Full report: `reports/findings.md`."
+        "What the FARS/CRSS data answer (2016-2024): how much less often belted and helmeted people died in the "
+        "same vehicle, which circumstances stay associated with a reported crash being fatal after adjustment, how "
+        "police-recorded fields behave, and how the fatal share changed after 2020. They cannot give risk per mile, "
+        "the effect of any intervention, or drug effects. Each finding states its population, denominator, estimate "
+        "type and main limitations; the speeding-type split is exploratory. Full report: `reports/findings.md`."
     )
     path = ROOT / "reports" / "findings.json"
     if not path.exists():

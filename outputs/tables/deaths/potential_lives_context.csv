@@ -1,0 +1,12 @@
+metric,deaths,denominator,share,note
+pv_occupant_deaths,215277,,,"killed passenger-vehicle occupants, 2016-2024"
+unbelted_deaths,94400,215277,0.438505,the death count potential_lives applies the belt effect to
+belted_deaths,99879,215277,0.463956,belt use recorded as used
+unknown_belt_use_deaths,20998,215277,0.0975394,"belt use unknown: in neither count, excluded from potential_lives"
+unknown_belt_use_deaths_share_of_unbelted_plus_unknown,20998,115398,0.181962,unknown use relative to the unbelted deaths it would add to if all were unbelted
+unbelted_deaths_single_occupant_vehicle,57294,94400,0.606928,the vehicle had exactly one recorded occupant: no within-vehicle comparison exists
+unbelted_deaths_two_plus_occupant_vehicle,37106,94400,0.393072,vehicles with at least two recorded occupants (where the pair design applies)
+unbelted_deaths_occupancy_unknown,0,94400,0,no occupant record found
+motorcyclist_deaths,51254,,,killed motorcycle operators and passengers
+unhelmeted_deaths,18789,51254,0.366586,the death count potential_lives applies the helmet effect to
+unknown_helmet_use_deaths,1665,51254,0.0324853,helmet use unknown: excluded from potential_lives

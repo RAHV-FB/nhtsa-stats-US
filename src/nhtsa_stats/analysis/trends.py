@@ -93,6 +93,7 @@ from scipy.special import expit
 from nhtsa_stats import config
 from nhtsa_stats.analysis import data, specs
 from nhtsa_stats.analysis.confounding import cluster_design, data_fingerprint
+from nhtsa_stats.analysis.descriptive import KNOWN_RESTRAINT_USE
 from nhtsa_stats.analysis.survey import (
     MarginSet,
     ModelSpec,
@@ -151,7 +152,7 @@ CRSS_INPUT = "data/processed/crss_crash.parquet"
 FARS_INPUTS = [
     "data/processed/fars_crash.parquet",
     "data/processed/fars_person.parquet",
-    "data/interim/FARS/midrvacc (multiply-imputed driver BAC, 10 implicates)",
+    "data/interim/FARS/midrvacc",
 ]
 LPV_BODIES = LPV_BODY_GROUPS
 
@@ -1136,7 +1137,23 @@ def numerator_denominator(
             )
     out = pd.DataFrame(rows)
     out["definition"] = out["outcome"].map(DEFINITION_LABELS)
+    out["flag"] = _share_of_log_rise_flag(out)
     return out
+
+
+def _share_of_log_rise_flag(out: pd.DataFrame) -> np.ndarray:
+    """Instability flag of the share-of-log-rise rows (same rule as ``decomposition_table``).
+
+    The shares are ratios with the total change, log(ratio of fatal shares), as denominator,
+    so they are unstable when that total change is not distinguishable from zero, i.e. when
+    the CI of ``ratio_fatal_share`` includes 1 (log ratio 0) in the same comparison.
+    """
+    tot = out[out["quantity"] == "ratio_fatal_share"].set_index(["outcome", "comparison"])
+    includes_zero = (tot["low"] <= 1) & (tot["high"] >= 1)
+    key = pd.MultiIndex.from_frame(out[["outcome", "comparison"]])
+    unstable = includes_zero.reindex(key).fillna(False).to_numpy(dtype=bool)
+    share_rows = out["units"].str.startswith("proportion of").to_numpy()
+    return np.where(share_rows & unstable, "total change CI includes 0: shares unstable", "")
 
 
 def outcome_definitions_by_year(ms: MarginSet, fars_counts: pd.Series) -> pd.DataFrame:
@@ -1264,7 +1281,7 @@ def fars_composition() -> tuple[pd.DataFrame, pd.DataFrame]:
         # Unrestrained share among LPV occupant deaths with known restraint use (belted, child
         # restraint or none); 'unknown' and 'not applicable' (e.g. riding in a cargo area) are
         # excluded from the denominator and counted separately.
-        known = lv["restraint"].isin(["belted", "none", "child_restraint"]).to_numpy()
+        known = lv["restraint"].isin(KNOWN_RESTRAINT_USE).to_numpy()
         unr = (lv["restraint"] == "none").to_numpy()
         if known.any():
             lvk = lv[known].reset_index(drop=True)
@@ -1393,6 +1410,110 @@ LIN_METHOD = (
 )
 
 
+# --------------------------------------------------------------------------------------
+# Robustness of the composition share and the denominator share (red-team follow-up)
+# --------------------------------------------------------------------------------------
+ROBUSTNESS_SPECS: dict[str, tuple[str, ...]] = {
+    "published (all covariates, imputed alcohol)": (),
+    "without imputed alcohol": ("alcohol_im",),
+    "without coding-drift variables": CODING_DRIFT,
+    "without imputed alcohol and coding-drift variables": ("alcohol_im", *CODING_DRIFT),
+}
+ROBUSTNESS_QUANTITIES = (
+    "total_change",
+    "composition_effect_average",
+    "within_effect_average",
+    "composition_share_of_change_ref_P0",
+    "composition_share_of_change_ref_P1",
+    "composition_share_of_change_average",
+    "risk_ratio_total",
+    "risk_ratio_within_ref_P0",
+)
+DENOMINATOR_QUANTITIES = (
+    "ratio_fatal_share",
+    "ratio_fatal_crashes_numerator",
+    "ratio_reported_crashes_denominator",
+    "numerator_share_of_log_rise",
+    "denominator_share_of_log_rise",
+)
+
+
+def composition_robustness(
+    df_all: pd.DataFrame, design_all: SurveyDesign, outcome: str = "fatal"
+) -> pd.DataFrame:
+    """Composition share of the 2016-19 -> 2020-24 rise under a small set of specifications.
+
+    Each specification is the published decomposition (``decompose``; separate period models,
+    cross-period predictive margins) with covariates removed: NHTSA-imputed alcohol (which the
+    imputation may link to severity) and/or the variables with documented coding drifts
+    (``CODING_DRIFT``).  Both covariate sets (A: pre-crash circumstances; B: + crash
+    configuration) are run.  The published specification reproduces ``decomposition.csv``.  The
+    shares are accounting under a reference model, not causal contributions, and the range
+    over specifications is wider than any single interval.
+    """
+    df, design = outcome_frame(df_all, design_all, outcome)
+    rows = []
+    for set_name, base in COVARIATE_SETS.items():
+        for spec_name, drop in ROBUSTNESS_SPECS.items():
+            covs = [c for c in base if c not in drop]
+            dec = decompose(df, design, covs, outcome, f"robust_{set_name}")
+            tab = decomposition_table(dec, design)
+            tab = tab[tab["quantity"].isin(ROBUSTNESS_QUANTITIES)].copy()
+            tab.insert(0, "covariate_set", set_name)
+            tab.insert(1, "specification", spec_name)
+            tab.insert(2, "dropped", ",".join(drop))
+            rows.append(tab.drop(columns=["covariates", "converged"]))
+            log.info("composition robustness %s / %s done", set_name, spec_name)
+    return pd.concat(rows, ignore_index=True)
+
+
+def denominator_share(ms_k: MarginSet) -> pd.DataFrame:
+    """Numerator and denominator ("fewer reported crashes") shares of the rise in the fatal share
+    under the imputed and the complete-case outcome, for every period comparison.
+
+    Reuses ``numerator_denominator`` (the FARS-dependent quantities it also builds are computed
+    against a constant placeholder and dropped here).
+    """
+    placeholder = pd.Series(1.0, index=list(range(2016, 2025)))
+    nd = numerator_denominator(ms_k, placeholder, tuple(DEFINITIONS))
+    nd = nd[nd["quantity"].isin(DENOMINATOR_QUANTITIES)].copy()
+    return nd.drop(columns=["definition"]).reset_index(drop=True)
+
+
+def run_additional(
+    df_all: pd.DataFrame, design_all: SurveyDesign, ms_k: MarginSet | None = None
+) -> dict[str, pd.DataFrame]:
+    """Tables added after the red-team review; existing tables are never touched."""
+    if ms_k is None:
+        ms_k = kabco_marginset(df_all, design_all)
+    out = {
+        "composition_robustness": composition_robustness(df_all, design_all),
+        "denominator_share": denominator_share(ms_k),
+    }
+    _save(
+        out["composition_robustness"],
+        "composition_robustness",
+        "Composition share of the 2016-19 to 2020-24 rise in the fatal share under four covariate "
+        "specifications (published; without imputed alcohol; without coding-drift variables; "
+        "without both), covariate sets A and B",
+        LIN_METHOD + "; separate period models; cross-period predictive margins",
+        "fatal",
+        extra={"covariate_sets": SET_LABELS, "coding_drift_variables": list(CODING_DRIFT)},
+    )
+    _save(
+        out["denominator_share"],
+        "denominator_share",
+        "Share of the log rise in the fatal share due to the number of fatal crashes (numerator) "
+        "and to the number of reported crashes with a determinable outcome (denominator), under "
+        "the imputed and the complete-case outcome",
+        "Weighted totals, joint linearisation (25 strata / 67 PSUs, t 42 df); CIs cover CRSS "
+        "sampling only",
+        "fatal (imputed MAXSEV_IM); fatal_cc (complete-case MAX_SEV)",
+        extra={"definitions": DEFINITION_LABELS},
+    )
+    return out
+
+
 def run(outcomes: Sequence[str] = OUTCOMES, sensitivity: bool = True) -> dict[str, pd.DataFrame]:
     check_leakage()
     fingerprint = data_fingerprint()
@@ -1476,6 +1597,8 @@ def run(outcomes: Sequence[str] = OUTCOMES, sensitivity: bool = True) -> dict[st
             detail_f.append(by_factor)
             if d is sens[-1]:
                 detail_c.append(by_term)
+
+    out.update(run_additional(df_all, design_all, ms_k))
 
     out["decomposition"] = pd.concat(decomp_tabs, ignore_index=True)
     out["decomposition_detailed_by_factor"] = pd.concat(detail_f, ignore_index=True)

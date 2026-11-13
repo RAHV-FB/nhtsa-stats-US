@@ -1,0 +1,47 @@
+{
+ "table": "measurement/imputed_bac_injury.csv",
+ "description": "Diagnostic (not causal): association of NHTSA's imputed BAC >= .08 with the driver being killed among untested FARS drivers, compared with tested drivers, adjusted for age band, sex, vehicle type, crash type, time of day and year",
+ "population": "FARS drivers (PER_TYP 1) 2016-2024 with known survival status and an NHTSA-imputed BAC probability, split into untested (imputed) and tested (measured BAC)",
+ "unit": "driver (FARS census, crash-clustered)",
+ "outcome": "driver killed; OR for imputed/measured BAC >= .08 (p08 = 1 vs 0)",
+ "method": "Logistic regression of killed on p08 plus covariates, cluster-robust CI, no sampling weights; group x p08 interaction gives the ratio of ORs; diagnostic, not causal",
+ "inputs": [
+  "data/processed/crss_crash.parquet",
+  "data/processed/crss_person.parquet",
+  "data/processed/fars_crash.parquet",
+  "data/processed/fars_person.parquet",
+  "data/interim/FARS/drugs"
+ ],
+ "rows": 6,
+ "columns": [
+  "covariate_set",
+  "group",
+  "n_drivers",
+  "n_killed",
+  "mean_p08",
+  "share_p08_above_half",
+  "crude_or",
+  "crude_or_low",
+  "crude_or_high",
+  "adj_or",
+  "adj_or_low",
+  "adj_or_high",
+  "p",
+  "converged",
+  "adjusted_for",
+  "note"
+ ],
+ "module": "nhtsa_stats.analysis.measurement",
+ "git_commit": "af9ce88",
+ "source_sha256": "776adad0aa3abe8fe09719b2fc731f1beeeef97059a97b006cc3be3b361decc6",
+ "code_sha256": "10e1f146a1007abcfe246d05cdad2115b7f6c42ebaa985dc3de296aadd5f3e70",
+ "inputs_sha256": {
+  "data/processed/crss_crash.parquet": "1a31897f37cce3be223cc5abfb823582b68b9f7096a8c38980e9346f3450c6e3",
+  "data/processed/crss_person.parquet": "145d300272256d566371ce07d81005f71959a9eeab5e00e3066d85abaca91fa8",
+  "data/processed/fars_crash.parquet": "30f4314e8984ce2ba3cd764b561628edf36950705c1fc3bdd16769a417846ddf",
+  "data/processed/fars_person.parquet": "97b40b82c1b47f76bf99a8e05ebaa84e14c4b1ea2ecea3e86be6de4c2189bfa2",
+  "data/interim/FARS/drugs": "1465e225b8dba4c5d27993cb876acde51b0b70aac9b5c4c5347350a6665ca721"
+ },
+ "package_sha256": "fbdac1b588be76a011931549cc2f2013fc1b6405f88cee1ba0e10db719e3ed6b",
+ "generated_utc": "2026-11-13T00:36:37Z"
+}

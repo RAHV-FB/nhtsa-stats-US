@@ -5,7 +5,7 @@ light passenger vehicle,581793,215438,382474,279020
 seat front-left / front-other / second row,565447,211582,382224,278845
 age 13+ (known),524353,206362,378612,276316
 restraint belted or none (known),477977,186574,347876,255519
-known outcome (killed 0/1),474889,186574,346125,254593
->= 2 eligible occupants in the vehicle,224529,65722,95765,85555
-matched sets with discordant outcomes (analysed),110142,48740,45248,44990
-  of which discordant belt use (identify the belt OR),37959,15834,14006,13975
+known outcome (killed 0/1),475933,186574,346611,254712
+>= 2 eligible occupants in the vehicle,225470,65973,96148,85890
+matched sets with discordant outcomes (analysed),110815,49025,45515,45257
+  of which discordant belt use (identify the belt OR),38215,15934,14098,14067

@@ -96,8 +96,8 @@ def render() -> None:
             "outcome, averaged over unrecorded variation.\n"
             "- **Is not:** a causal effect of changing any input; a trip-level crash probability; a prediction for "
             "unreported crashes.\n"
-            "- Police-reported speeding and alcohol are ascertained more thoroughly in severe crashes, which inflates "
-            "their apparent effect (see Methodology).\n"
+            "- Police-reported speeding and alcohol are recorded differently by severity, which can bias "
+            "associations in either direction (see Methodology).\n"
             "- Temporal validation and machine-learning comparisons: `docs/model_validation.md`."
         )
     try:

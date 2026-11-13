@@ -8,6 +8,8 @@
     nhtsa analyze [MODULE ...]   run analysis modules (default: all, in dependency order)
     nhtsa all         build + analyze
     nhtsa list        list analysis modules
+    nhtsa status      list tables whose code or input data changed since they were written,
+                      and tables without a code hash
 
 Each analysis module exposes ``run()`` and writes its own tables/figures, so a single module
 can be re-run without rebuilding anything else.
@@ -20,6 +22,7 @@ import importlib
 import logging
 import sys
 import time
+from typing import NamedTuple
 
 # Analysis modules in dependency order (later modules may read earlier outputs).
 ANALYSES: dict[str, str] = {
@@ -43,7 +46,6 @@ ANALYSES: dict[str, str] = {
     "contributions": "nhtsa_stats.analysis.contributions",
     "stages": "nhtsa_stats.analysis.stages",
     "deaths": "nhtsa_stats.analysis.deaths",
-    "cases": "nhtsa_stats.analysis.cases",
     "policy": "nhtsa_stats.simulation.evidence",
     "figures": "nhtsa_stats.reporting.figures",
     "report": "nhtsa_stats.reporting.render",
@@ -119,7 +121,79 @@ def cmd_list(_: argparse.Namespace) -> None:
         print(f"{k:14} {v}")
 
 
+class TableStatus(NamedTuple):
+    stale: list[str]  # code (module or an imported helper) changed since the table was written
+    unhashed: list[str]  # sidecar has no code_sha256
+    inputs_changed: list[str]  # a local input file differs from the recorded inputs_sha256
+    n_checked: int
+
+
+def stale_tables() -> TableStatus:
+    """Compare table sidecars (and ``_provenance`` of JSON outputs) under ``outputs/tables``
+    with the current code and, where the data exist locally, the current input files."""
+    import json
+
+    from nhtsa_stats import config
+    from nhtsa_stats.reporting.provenance import current_code_sha256, input_sha256
+
+    stale: list[str] = []
+    unhashed: list[str] = []
+    changed: list[str] = []
+    n = 0
+    current: dict[str, str | None] = {}
+    for side in sorted(config.TABLES_DIR.rglob("*.json")):
+        try:
+            meta = json.loads(side.read_text())
+        except (OSError, ValueError):
+            continue
+        if not isinstance(meta, dict):
+            continue
+        if "module" in meta and "table" in meta:
+            rel, prov = meta["table"], meta
+        elif isinstance(meta.get("_provenance"), dict):
+            rel, prov = side.relative_to(config.TABLES_DIR).as_posix(), meta["_provenance"]
+        else:
+            continue  # neither a table sidecar nor a provenance-carrying JSON output
+        n += 1
+        recorded = prov.get("code_sha256")
+        if not recorded:
+            unhashed.append(rel)
+            continue
+        mod = prov["module"]
+        if mod not in current:
+            current[mod] = current_code_sha256(mod)
+        if current[mod] != recorded:
+            stale.append(rel)
+        for spec, digest in (prov.get("inputs_sha256") or {}).items():
+            now = input_sha256(spec)
+            if now is not None and now != digest:
+                changed.append(rel)
+                break
+    return TableStatus(stale, unhashed, changed, n)
+
+
+def cmd_status(_: argparse.Namespace) -> None:
+    st = stale_tables()
+    print(
+        f"{st.n_checked} table sidecars / provenance-carrying JSON outputs: {len(st.stale)} stale "
+        f"(code changed), {len(st.unhashed)} without code_sha256, "
+        f"{len(st.inputs_changed)} with changed input data"
+    )
+    for label, items in (
+        ("stale", st.stale),
+        ("no-hash", st.unhashed),
+        ("inputs-changed", st.inputs_changed),
+    ):
+        for t in items:
+            print(f"{label:14} {t}")
+
+
 def main(argv: list[str] | None = None) -> None:
+    # One snapshot of the package source, before anything else is imported: every code hash
+    # recorded by this process comes from it, whatever is edited on disk during the run.
+    from nhtsa_stats.reporting.provenance import take_snapshot
+
+    take_snapshot()
     parser = argparse.ArgumentParser(
         prog="nhtsa", description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
     )
@@ -133,6 +207,7 @@ def main(argv: list[str] | None = None) -> None:
         ("build", cmd_build),
         ("all", cmd_all),
         ("list", cmd_list),
+        ("status", cmd_status),
     ):
         p = sub.add_parser(name)
         p.set_defaults(func=fn)

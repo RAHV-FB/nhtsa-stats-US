@@ -153,6 +153,38 @@ def test_af_matches_closed_form_and_scales_only_fatal():
     assert np.isnan(ka[0]["fars_scaled_deaths_per_year"])
 
 
+def test_af_variant_alcohol_variable_gives_same_fractions_and_joint_union():
+    """Swapping the alcohol variable (police-reported instead of imputed) through the shifts and
+    the joint pair changes nothing but the column name."""
+    import dataclasses
+
+    rng = np.random.default_rng(5)
+    burden, df, design, model, y = _burden_fixture(rng, rr_speed=2.0)
+    base = burden._af_rows(model, df, design, burden.SHIFTS[:2] + burden.SHIFTS[-1:], "fatal", 1, 1)
+    d2 = df.rename(columns={"alcohol_im": "alcohol"})
+    shifts = [
+        dataclasses.replace(sh, var="alcohol") if sh.var == "alcohol_im" else sh
+        for sh in burden.SHIFTS
+    ]
+    spec = ModelSpec(categorical={"speeding": ["no", "yes"], "alcohol": ["no", "yes"]})
+    m2 = SurveyLogit(spec).fit(d2, y, design)
+    alt = burden._af_rows(
+        m2, d2, design, shifts[:2] + shifts[-1:], "fatal", 1, 1, joint=(shifts[0], shifts[1])
+    )
+    assert [r["shift"] for r in alt] == [r["shift"] for r in base]
+    for a, b in zip(alt, base, strict=True):
+        assert a["af"] == pytest.approx(b["af"], rel=1e-9)
+        assert a["af_low"] == pytest.approx(b["af_low"], rel=1e-6)
+        assert a["n_exposed_crss"] == b["n_exposed_crss"]
+    assert set(burden.ALCOHOL_CODINGS) == {
+        "imputed",
+        "police_unknown_level",
+        "police_complete_case",
+        "police_unknown_as_no",
+    }
+    assert burden.PERIODS["2022-2024"] == burden.WINDOW
+
+
 def test_af_near_zero_without_effect_and_joint_counts_union():
     rng = np.random.default_rng(4)
     burden, df, design, model, _ = _burden_fixture(rng, rr_speed=1.0)
@@ -162,3 +194,22 @@ def test_af_near_zero_without_effect_and_joint_counts_union():
     assert lo < 0 < hi
     union = ((df["speeding"] == "yes") | (df["alcohol_im"] == "yes")).sum()
     assert rows[1]["n_exposed_crss"] == union
+
+
+def test_complete_case_af_is_not_scaled_to_fars():
+    rng = np.random.default_rng(5)
+    burden, df, design, model, _ = _burden_fixture(rng, rr_speed=3.0)
+    rows = burden._af_rows(
+        model, df, design, burden.SHIFTS[:1], "fatal", 1000.0, 900.0, scale_to_fars=False
+    )
+    for col in (
+        "fars_scaled_deaths_per_year",
+        "fars_scaled_fatal_crashes_per_year",
+        "fars_scaled_deaths_low",
+        "fars_scaled_deaths_high",
+    ):
+        assert np.isnan(rows[0][col])
+    assert rows[0]["af"] > 0
+    assert "not scaled" in burden.scaling_note("fatal", False)
+    assert "known police alcohol" in burden.scaling_note("fatal", False)
+    assert "scaled to" in burden.scaling_note("fatal", True)

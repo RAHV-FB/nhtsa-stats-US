@@ -6,6 +6,8 @@ from __future__ import annotations
 import streamlit as st
 
 from common import BLUE, output_table, point_range
+from nhtsa_stats import config
+from nhtsa_stats.analysis.factorial import MIN_EVENTS
 
 
 def render() -> None:
@@ -14,7 +16,8 @@ def render() -> None:
         "Each analysis links factors to the unit they belong to: crash-level flags for crash outcomes, the "
         "driver's own behaviour for the driver's death, the driver of the vehicle for a passenger's death, and "
         "the striking driver for pedestrians. Risks are standardised (model-based, conditional on a reported "
-        "crash); combinations with fewer than 30 sample units or 10 deaths are withheld. "
+        f"crash); combinations with fewer than {config.MIN_CELL_N} sample units or {MIN_EVENTS} deaths are "
+        "withheld. "
         "Report: `reports/multifactor_interactions.md`."
     )
     meta = output_table("multifactor", "analyses")
@@ -91,7 +94,12 @@ def render() -> None:
     vic = output_table("multifactor", "victims")
     if vic is not None:
         st.subheader("Driver versus occupant versus other road user")
-        st.caption("The same recorded driver behaviour, related to the death of different people.")
+        st.caption(
+            "The same recorded driver behaviour, related to the death of different people. Each row "
+            "uses its own adjustment set, so ratios are not comparable across rows; the common "
+            "specification below puts them on one footing. The pedestrian ratio is small in relative "
+            "terms only."
+        )
         st.dataframe(
             vic[
                 [
@@ -108,3 +116,19 @@ def render() -> None:
             ],
             hide_index=True,
         )
+        common = output_table("multifactor", "victims_common_spec")
+        if common is not None:
+            st.markdown("**Alcohol only, same victims under a common specification**")
+            st.dataframe(
+                common[
+                    [
+                        "victim",
+                        "specification",
+                        "rr_alcohol_only",
+                        "rr_alcohol_only_low",
+                        "rr_alcohol_only_high",
+                        "rd_alcohol_only",
+                    ]
+                ],
+                hide_index=True,
+            )

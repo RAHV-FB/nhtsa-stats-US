@@ -1,0 +1,5 @@
+speeding,label,n_crss_crashes,n_crss_fatal,crss_share_all_crashes,crss_share_all_crashes_low,crss_share_all_crashes_high,crss_share_fatal_crashes,crss_share_fatal_crashes_low,crss_share_fatal_crashes_high,crss_only_ratio,crss_only_ratio_low,crss_only_ratio_high,n_fars_fatal,fars_share_fatal_crashes,mixed_fars_crss_ratio,mixed_ratio_low,mixed_ratio_high,crss_only_over_mixed
+exceeded_limit_or_racing,exceeded limit / racing,468993,9958,0.00851802,0.00691935,0.0104822,0.0732252,0.0605928,0.0882437,8.5965,7.14584,10.3416,325922,0.108956,12.7912,10.3923,15.7438,0.672065
+too_fast_for_conditions,too fast for conditions,468993,9958,0.0792804,0.0588408,0.10602,0.091033,0.07463,0.11061,1.14824,0.951408,1.38579,325922,0.11673,1.47237,1.09652,1.97706,0.779857
+speeding_unspecified,"speeding, type unspecified",468993,9958,0.0130465,0.00937869,0.0181225,0.0400036,0.0314896,0.050699,3.06623,2.42246,3.88109,325922,0.0467627,3.58431,2.5783,4.98284,0.855459
+any_speeding,any police-reported speeding,468993,9958,0.100845,0.0786393,0.128447,0.204262,0.183066,0.227229,2.0255,1.6583,2.47402,325922,0.272449,2.70166,2.1134,3.45365,0.749726

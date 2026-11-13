@@ -1,0 +1,37 @@
+{
+ "table": "deaths/prior_dwi_by_state.csv",
+ "description": "Prior-DWI share of drivers with BAC >= .08 by state (measured BAC only; measured plus imputed), with driver counts and a flag for states with fewer than 100 drivers",
+ "population": "FARS fatal crashes 2016-2024 (census)",
+ "unit": "driver in a fatal crash",
+ "outcome": "death (INJ_SEV 4)",
+ "method": "Measured BAC = a test result in FARS person.ALC_RES (0-940 thousandths; 940 = .94 or greater); NHTSA's implicates fill untested drivers.  'measured only' counts a driver as BAC >= .08 only with a measured result >= .08 (observed counts, no imputation SE); 'all' / 'imputed' use the 10 implicates (mean, MI SE sqrt(1.1 * between-implicate variance)); state = FARS STATE; 'small' = fewer than 100 such drivers",
+ "inputs": [
+  "data/interim/FARS/person",
+  "data/interim/FARS/vehicle",
+  "data/interim/FARS/veh_aux",
+  "data/interim/FARS/miper"
+ ],
+ "rows": 102,
+ "columns": [
+  "state",
+  "bac_basis",
+  "n_group",
+  "n_known",
+  "share",
+  "mi_se",
+  "small",
+  "estimate_type"
+ ],
+ "module": "nhtsa_stats.analysis.deaths",
+ "git_commit": "af9ce88",
+ "source_sha256": "a0edccfffe60b2d158c26ea33ae6d086ac5f34a9ff5d8ce231cafde9b3574c46",
+ "code_sha256": "4168758768c027921b2dc401087bdcacf5d8a4bf3380526a9acf33b0180f0adc",
+ "inputs_sha256": {
+  "data/interim/FARS/person": "ab2fbf61917410a498e38958cbe753aa8f1dfa4ff495aad4cc3c68fde67e683c",
+  "data/interim/FARS/vehicle": "702adb3480853493e1f04fbe94ed36a882e70b2f2582030ff09c3c39c1677bfb",
+  "data/interim/FARS/veh_aux": "09a79ab9a3a9dd83de0453c3f03a54268d18138c34dc09ab6277ef1b6548c6b0",
+  "data/interim/FARS/miper": "1273c3d172d20ca96774b0f11c87fc23c061a0316653d44259ed5cc02a0bc725"
+ },
+ "package_sha256": "fbdac1b588be76a011931549cc2f2013fc1b6405f88cee1ba0e10db719e3ed6b",
+ "generated_utc": "2026-11-13T02:17:59Z"
+}

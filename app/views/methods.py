@@ -14,7 +14,6 @@ DOCS = {
     "Data audit": "docs/data_audit.md",
     "Variable harmonisation": "docs/variable_harmonization.md",
     "Model validation": "docs/model_validation.md",
-    "Policy assumptions": "docs/policy_assumptions.md",
 }
 
 

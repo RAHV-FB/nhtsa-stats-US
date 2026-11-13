@@ -44,7 +44,9 @@ Method
     * Interactions (pre-specified): restraint x age band and restraint x crash type
       (complete-case: belted vs none only), age band x sex (sex known).  Product terms in
       model A (B for crash type); four standardised margins per cell give the stratum
-      specific RR, the additive interaction contrast (IC), RERI and the ratio of risk ratios,
+      specific RR (for crash type each stratum is standardised over its own persons, since
+      setting the crash type for everyone while the number of vehicles and partner vehicle stay
+      observed would average over impossible crashes), the additive interaction contrast (IC), RERI and the ratio of risk ratios,
       plus a design-adjusted Wald F test of all product terms.
     * Leakage control: every feature is checked against ``harmonize.REGISTRY``; post-crash
       variables (ejection, airbag deployment, rollover) are never used.
@@ -81,7 +83,7 @@ import polars as pl
 from scipy import stats
 
 from nhtsa_stats import config
-from nhtsa_stats.analysis import data, specs
+from nhtsa_stats.analysis import data, multiplicity, specs
 from nhtsa_stats.analysis.severity import crude_table, factor_contrasts, observed_levels
 from nhtsa_stats.analysis.survey import (
     Estimate,
@@ -106,7 +108,10 @@ MIN_RESTRAINT_AGE = 8
 # for levels with zero events (e.g. occupants in pedestrian crashes) while shrinking any level
 # with >= 1,000 persons by well under 1%.
 RIDGE = 0.01
-INPUT = "data/processed/crss_person.parquet (+ young/older_driver from crss_crash.parquet)"
+INPUTS = [
+    "data/processed/crss_person.parquet",
+    "data/processed/crss_crash.parquet",  # young/older_driver flags
+]
 
 # Crash-level columns of the PRE_CRASH set that the person file does not carry.
 CRASH_ONLY_COLS: tuple[str, ...] = ("young_driver", "older_driver")
@@ -599,23 +604,38 @@ def interaction_table(
     a_exp: str,
     b: str,
     b_levels: Sequence[str],
+    stratum_domain: bool = False,
 ) -> pd.DataFrame:
     """Stratum-specific adjusted RRs of ``a_exp`` vs ``a_ref`` within each level of ``b``,
     and additive / multiplicative interaction measures versus the reference level of ``b``.
 
     Four standardised margins per level (everyone set to the (a, b) combination) share one
     joint linearisation, so every contrast has a design-based CI.
+
+    With ``stratum_domain`` the margins of level ``bv`` average over the persons observed at
+    ``bv`` only (the standardisation population of each stratum is its own).  This is needed
+    when ``b`` is the crash type: setting ``crash_type`` for everyone while the number of
+    vehicles and the partner-vehicle body stay observed would average over impossible crashes
+    (e.g. an angle collision in a crash with one vehicle, a single-vehicle crash type with a
+    partner vehicle).  The stratum-specific RRs are then effects in each stratum's own
+    population, and IC / RERI / ratio of RRs compare those strata-specific effects.
     """
     b_ref = b_levels[0]
 
     def key(av: str, bv: str) -> str:
         return f"{a}={av}|{b}={bv}"
 
-    scenarios = {key(av, bv): _setter({a: av, b: bv}) for bv in b_levels for av in (a_ref, a_exp)}
-    ms: MarginSet = model.margins(df, scenarios)
-    y = df[outcome].to_numpy(dtype=float)
     av_obs = df[a].to_numpy()
     bv_obs = df[b].to_numpy()
+    values, influence = {}, {}
+    for bv in b_levels:
+        dom = (bv_obs == bv) if stratum_domain else None
+        for av in (a_ref, a_exp):
+            values[key(av, bv)], influence[key(av, bv)] = model.margin_influence(
+                df, _setter({a: av, b: bv}), dom
+            )
+    ms = MarginSet(values, influence, model.design_)
+    y = df[outcome].to_numpy(dtype=float)
     rows = []
     ref_flag = ""
     for bv in b_levels:
@@ -749,7 +769,15 @@ def run_interaction(pop: Population, outcome: str, ispec: InteractionSpec) -> di
     b_levels = levels_for(sub, ispec.b)
     lean = sub.df[[*covs, outcome]]
     tab = interaction_table(
-        model, lean, outcome, ispec.a, ispec.a_ref, ispec.a_exp, ispec.b, b_levels
+        model,
+        lean,
+        outcome,
+        ispec.a,
+        ispec.a_ref,
+        ispec.a_exp,
+        ispec.b,
+        b_levels,
+        stratum_domain=ispec.b == "crash_type",
     )
     tab.insert(0, "interaction", ispec.name)
     terms = [t for t in model.names_ if ":" in t]
@@ -793,7 +821,7 @@ def _save(
         unit="person",
         outcome=outcome,
         method=method,
-        inputs=[INPUT],
+        inputs=INPUTS,
         extra=extra,
     )
 
@@ -954,20 +982,9 @@ def run(outcomes: Sequence[str] = OUTCOMES, interactions: bool = True) -> dict:
 
 
 def holm(p: np.ndarray) -> np.ndarray:
-    """Holm step-down adjusted p-values (NaN-safe)."""
-    p = np.asarray(p, dtype=float)
-    out = np.full_like(p, np.nan)
-    ok = np.isfinite(p)
-    pv = p[ok]
-    m = len(pv)
-    order = np.argsort(pv)
-    adj = np.empty(m)
-    running = 0.0
-    for rank, idx in enumerate(order):
-        running = max(running, min(1.0, (m - rank) * pv[idx]))
-        adj[idx] = running
-    out[ok] = adj
-    return out
+    """Holm step-down over the registered tests; a non-estimable test counts as p = 1 and is
+    reported as NaN (``analysis.multiplicity``)."""
+    return multiplicity.holm(p)
 
 
 def key_numbers(results: dict) -> dict:

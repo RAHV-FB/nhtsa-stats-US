@@ -1,0 +1,33 @@
+# Manual only. On a cache miss this downloads ~675 MB of Git LFS data (the raw NHTSA
+# archives), which counts against the repository's Git LFS bandwidth quota; that is why it
+# is never triggered by push or pull_request.
+name: Data tests
+
+on:
+  workflow_dispatch:
+
+jobs:
+  data-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: false
+      - name: Hash of the LFS pointers
+        id: lfs
+        run: echo "hash=$(git lfs ls-files -l | sha256sum | cut -d' ' -f1)" >> "$GITHUB_OUTPUT"
+      - uses: actions/cache@v4
+        with:
+          path: .git/lfs
+          key: lfs-${{ steps.lfs.outputs.hash }}
+      - name: Fetch LFS objects
+        run: git lfs pull
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: "3.13"
+      - name: Install
+        run: uv sync --frozen --all-extras
+      - name: Build caches and analytic datasets
+        run: uv run nhtsa build
+      - name: Tests (with data)
+        run: uv run pytest -q

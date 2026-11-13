@@ -8,7 +8,7 @@
  "inputs": [
   "data/processed/fars_crash.parquet",
   "data/processed/fars_person.parquet",
-  "data/interim/FARS/midrvacc (multiply-imputed driver BAC, 10 implicates)"
+  "data/interim/FARS/midrvacc"
  ],
  "rows": 9,
  "columns": [
@@ -47,6 +47,14 @@
   "rural_road_crashes"
  ],
  "module": "nhtsa_stats.analysis.trends",
- "git_commit": "ef704fd",
- "generated_utc": "2026-10-23T03:18:34Z"
+ "git_commit": "af9ce88",
+ "source_sha256": "272d2840dd92807b72d51b9d3d98a7c916e560a0871f3df7f16010da5ed5ddba",
+ "code_sha256": "cf192a0dd133b2be6dbe6e8518b552f757491798b55e25b9aec97a14f8a29617",
+ "inputs_sha256": {
+  "data/processed/fars_crash.parquet": "30f4314e8984ce2ba3cd764b561628edf36950705c1fc3bdd16769a417846ddf",
+  "data/processed/fars_person.parquet": "97b40b82c1b47f76bf99a8e05ebaa84e14c4b1ea2ecea3e86be6de4c2189bfa2",
+  "data/interim/FARS/midrvacc": "cd0b539b2a41971a2afb2d594984c708cbb441aa51f90a8c6da1139eab2dfd34"
+ },
+ "package_sha256": "fbdac1b588be76a011931549cc2f2013fc1b6405f88cee1ba0e10db719e3ed6b",
+ "generated_utc": "2026-11-13T01:19:59Z"
 }

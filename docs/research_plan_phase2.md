@@ -25,7 +25,7 @@ this document records what Phase 2 adds, why, and how it will be judged. Change 
 | Attributable fractions | speeding 9.1%, alcohol 19.7%, joint 26.5% (< 28.8% sum) | `burden/attributable_fractions_fatal` |
 | Shapley/sequential confounding | for night, rural, weekend, older driver only | `confounding/*` |
 | Person-level restraint | CRSS unbelted RR 24 (adjusted); FARS within-vehicle belt reduction 66%, sensitive to survivor misreporting | `person/*`, `matched/*` |
-| Measurement | speeding recorded in 27% of FARS vs 20% of CRSS fatal crashes; QBA grid for speeding; drugs declared unusable | `measurement/*`, `docs/audit/alcohol_drugs.md` |
+| Measurement | speeding recorded in 27% of FARS vs 20% of CRSS fatal crashes; QBA grid for speeding; drugs declared unusable | `measurement/*`, alcohol and drugs audit note (Git history, commit 7ee597e) |
 
 ### 1.2 What Phase 1 did not do (the scientific gap)
 
@@ -41,7 +41,7 @@ this document records what Phase 2 adds, why, and how it will be judged. Change 
    were never distinguished by whose behaviour was recorded.
 3. **No factorial analysis of speeding × alcohol × drugs × restraint**, and no occupant-level
    combination of driver behaviour with the occupant's own restraint use.
-4. **Drugs were excluded by verdict, not by a pipeline analysis.** The audit appendix
+4. **Drugs were excluded by verdict, not by a pipeline analysis.** The audit note (Git history, commit 7ee597e)
    documents the selection problems in scripts; no reproducible table quantifies them, and no
    bound shows how wide a drug association could be.
 5. **No comparison of "contribution" under different meanings** (association, adjusted risk
@@ -94,7 +94,7 @@ person. Crash-level "any driver" flags are used only for crash-level outcomes.
 | Q4 | How much does restraint use change fatality associations within comparable occupants, and is belt protection modified by the driver's behaviour? | H: belt association is large and similar whether or not the driver sped or drank (Stage C independent of Stage A/B) | (a) CRSS occupant standardised risks over own-driver speeding × alcohol × own belt; (b) FARS within-vehicle belt RR stratified by driver speeding / alcohol | CRSS light-vehicle occupants aged ≥ 8; FARS front-seat pairs |
 | Q5 | Which combinations show additive or multiplicative interaction? | H0: no interaction on either scale | 2^k standardised cells; IC, RERI, ratio of RRs, 3-way IC; Holm across a registered family (below) | Crash level; driver level (single-vehicle); occupant level |
 | Q6 | How much do contributions depend on unit, definition, specification and missingness? | — | The same contrast across units, definitions (any speeding / exceeded; imputed / police alcohol), outcomes (K / KA), complete-case vs imputed outcome, configuration in/out | as above |
-| Q7 | Can a principal cause of an individual death be identified? | H: no — individual attribution is not identified | Demonstration: Shapley allocations of a modelled prediction difference change with the reference scenario, ordering scale (risk vs log-odds) and factor set | Case explorer |
+| Q7 | Can a principal cause of an individual death be identified? | H: no — individual attribution is not identified | Demonstration: Shapley allocations of the joint attributable fraction and of the crude log-RR depend on the factor set and the order of addition | Contributions; speeding lattice |
 | Q8 | How should official counts be read? | H: deaths "involving" factors overlap so that factor counts sum to well over the death total | FARS deaths by combination of speeding, driver BAC ≥ .08 (multiple imputation, expected count), drug-positive (tested), unbelted; sum of single-factor counts / union; conditioning-on-fatality distortion of factor co-occurrence (CRSS all vs fatal vs FARS) | FARS deaths and fatal crashes; CRSS crashes |
 
 Mapping to the A–H labels used in `reports/factor_contributions.md` (its "Answers to the
@@ -205,14 +205,12 @@ are reported in separate tables and never pooled.
 * Selection by fatality: speeding–alcohol odds ratio among all CRSS crashes, non-fatal,
   fatal, and in FARS.
 
-### 5.5 Case explorer (Q7) — `analysis/cases.py`
+### 5.5 Case explorer (Q7) — removed
 
-Pre-computed scenario grid (speeding type × alcohol × drugs × restraint × night ×
-single/multi-vehicle) at driver level: support counts (CRSS sample, FARS deaths), observed
-weighted outcome with CI where n ≥ 30 and events ≥ 10, standardised model risk with CI where
-the cell is supported, one-factor-removed contrasts, Shapley allocation of the modelled risk
-difference from the reference scenario on two scales (risk and log-odds) to show
-non-uniqueness, and an explicit statement of what cannot be inferred.
+A pre-computed single-case scenario grid (`analysis/cases.py`, a "Case comparison" page and
+`reports/case_comparisons.md`) was part of the original Phase-2 delivery and has been removed.
+Q7 is answered from the Shapley allocations in `contributions/` and `speeding/shapley` and from
+`docs/limitations.md` §7.
 
 ### 5.6 Stage D — `analysis/stages.py`
 
@@ -241,7 +239,7 @@ non-identifiability (no non-fatal comparison group; EMS times recorded for fatal
   calibration helper, counterfactual comparison arithmetic.
 * Data tests (real cache, skipped when absent): driver-file row counts reconcile with raw
   vehicle tables; every occupant links to at most one driver; FARS drug status reproduces the
-  audit appendix test rates; single-vehicle crash-level and driver-level speeding agree.
+  audit-note test rates; single-vehicle crash-level and driver-level speeding agree.
 * Consistency: every number in the new reports is a placeholder resolved from
   `outputs/tables` by the existing renderer, and `tests/test_reports_in_sync.py` covers them.
 * Cross-checks against Phase 1: the full-block exceeded-limit RR must reproduce the Phase-1
@@ -253,10 +251,10 @@ non-identifiability (no non-fatal comparison group; EMS times recorded for fatal
 |---|---|---|---|
 | 1 | This plan | Gap list, estimands, criteria written before code | Delivered |
 | 2 | `processing/drivers.py`, driver datasets, data dictionary entries | Row counts reconcile with raw; linkage tests pass | Delivered |
-| 3–4 | Modules `speeding`, `drugs`, `restraint_behaviour`, `multifactor`, `contributions`, `cases`, `stages` | ruff clean; unit tests; deterministic | Delivered |
+| 3–4 | Modules `speeding`, `drugs`, `restraint_behaviour`, `multifactor`, `contributions`, `stages` (a `cases` module was later removed) | ruff clean; unit tests; deterministic | Delivered |
 | 5 | Outputs in `outputs/tables/<module>/` with provenance sidecars | All registered estimands produced with CIs and support | Delivered |
 | 6 | Challenge analyses (recording, selection, mediator, outcome definition, definitions) | Each headline result has at least one alternative-explanation test | Delivered |
-| 7 | Reports (`reports/factor_contributions.md`, `speeding_confounding.md`, `alcohol_drugs_restraints.md`, `multifactor_interactions.md`, `case_comparisons.md`) rendered from templates | Render succeeds; sync test passes; questions A–H answered | Delivered |
+| 7 | Reports (`reports/factor_contributions.md`, `speeding_confounding.md`, `alcohol_drugs_restraints.md`, `multifactor_interactions.md`) rendered from templates | Render succeeds; sync test passes; questions A–H answered | Delivered |
 | 8 | Streamlit pages | App smoke tests pass headless | Delivered |
 | 9 | Full test suite; module runs | All tests pass | Delivered |
 | 10 | Independent audit of claims vs tables | Confirmed errors fixed | Delivered |

@@ -133,14 +133,22 @@ def test_linear_and_ratio_contrasts_match_numeric_delta_method():
     assert se == pytest.approx(num.se, rel=1e-4)
 
 
-def test_shapley_values_additive_game_and_symmetry():
+def _shapley(v, players):
+    """Plain-number Shapley values from the coefficients the pipeline uses (shapley_table)."""
+    return {
+        j: sum(c * v(s) for s, c in coefs.items())
+        for j, coefs in C.shapley_coefficients(players).items()
+    }
+
+
+def test_shapley_coefficients_additive_game_and_symmetry():
     players = ["a", "b", "c", "d"]
     a = {"a": 0.3, "b": -0.1, "c": 0.0, "d": 0.25}
-    phi = C.shapley_values(lambda s: 1.0 - sum(a[j] for j in s), players)
+    phi = _shapley(lambda s: 1.0 - sum(a[j] for j in s), players)
     for j in players:
         assert phi[j] == pytest.approx(a[j])
     # Pure interaction between a and b: split equally; c, d get nothing.
-    phi = C.shapley_values(lambda s: -1.0 if {"a", "b"} <= s else 0.0, players)
+    phi = _shapley(lambda s: -1.0 if {"a", "b"} <= s else 0.0, players)
     assert phi["a"] == pytest.approx(0.5) and phi["b"] == pytest.approx(0.5)
     assert phi["c"] == pytest.approx(0.0) and phi["d"] == pytest.approx(0.0)
     # Efficiency for an arbitrary game.
@@ -148,7 +156,7 @@ def test_shapley_values_additive_game_and_symmetry():
     vals = {
         frozenset(s): rng.normal() for r in range(5) for s in itertools.combinations(players, r)
     }
-    phi = C.shapley_values(lambda s: vals[s], players)
+    phi = _shapley(lambda s: vals[s], players)
     assert sum(phi.values()) == pytest.approx(vals[frozenset()] - vals[frozenset(players)])
 
 
@@ -215,3 +223,165 @@ def test_real_data_night_crude_and_adjusted():
     overlap = C.night_light_overlap(df, design)
     night_day = overlap[(overlap["period"] == "night") & (overlap["light"] == "daylight")]
     assert float(night_day["weighted_share_of_period"].iloc[0]) < 0.05
+
+
+# --------------------------------------------------------------------------------------
+# Red-team follow-up tables (speeding over-representation, speeding-type QBA, interstate bands)
+# --------------------------------------------------------------------------------------
+def test_crss_overrepresentation_ratio_ci_and_mixed_ratio():
+    from nhtsa_stats.analysis import speeding as S
+
+    rng = np.random.default_rng(21)
+    n = 9000
+    types = ["no", "exceeded_limit_or_racing", "too_fast_for_conditions", "speeding_unspecified"]
+    st = rng.choice(types, n, p=[0.8, 0.05, 0.1, 0.05])
+    fatal = (rng.random(n) < np.where(st == "exceeded_limit_or_racing", 0.15, 0.02)).astype(float)
+    df = pd.DataFrame({"speeding_type": st, "fatal": fatal})
+    stratum = rng.integers(0, 4, n)
+    design = SurveyDesign.from_arrays(
+        rng.uniform(1, 4, n), stratum, stratum * 10 + rng.integers(0, 4, n)
+    )
+    fars = pd.Series(rng.choice(types, 700, p=[0.6, 0.2, 0.15, 0.05]))
+    out = S.crss_overrepresentation(df, design, fars).set_index("speeding")
+    w = design.weight
+    ex = st == "exceeded_limit_or_racing"
+    share_all = np.average(ex, weights=w)
+    share_fat = np.average(ex[fatal == 1], weights=w[fatal == 1])
+    r = out.loc["exceeded_limit_or_racing"]
+    assert r["crss_only_ratio"] == pytest.approx(share_fat / share_all)
+    assert r["crss_only_ratio_low"] < r["crss_only_ratio"] < r["crss_only_ratio_high"]
+    assert r["mixed_fars_crss_ratio"] == pytest.approx((fars == types[1]).mean() / share_all)
+    assert r["crss_only_over_mixed"] == pytest.approx(
+        r["crss_only_ratio"] / r["mixed_fars_crss_ratio"]
+    )
+    parts = ["exceeded_limit_or_racing", "too_fast_for_conditions", "speeding_unspecified"]
+    assert out.loc["any_speeding", "crss_share_all_crashes"] == pytest.approx(
+        out.loc[parts, "crss_share_all_crashes"].sum()
+    )
+    # Fatal crashes have more exceedance than the CRSS crash population: ratio well above 1.
+    assert r["crss_only_ratio_low"] > 1
+
+
+def test_qba_status_explains_blank_rows_at_specificity_below_one():
+    from nhtsa_stats.analysis import severity as S
+    from nhtsa_stats.analysis.measurement import corrected_rr
+
+    # Exposure recorded in 0.5% of non-fatal crashes: a false-positive rate of 1% exceeds it.
+    a, c = 90.0, 910.0
+    b, d = 500.0, 98500.0
+    assert S.qba_status(a, b, c, d, 0.9, 0.9, 1.0) == "ok"
+    assert np.isfinite(corrected_rr(a, b, c, d, 0.9, 0.9, 1.0))
+    status = S.qba_status(a, b, c, d, 0.9, 0.9, 0.99)
+    assert status.startswith("infeasible") and "false-positive rate" in status
+    assert np.isnan(corrected_rr(a, b, c, d, 0.9, 0.9, 0.99))
+    # A common exposure (8% of non-fatal crashes) stays feasible at specificity 0.99.
+    assert S.qba_status(90.0, 8000.0, 910.0, 91992.0, 0.9, 0.9, 0.99) == "ok"
+
+
+def test_key_contrasts_side_by_side_reads_both_models_and_outcomes():
+    from nhtsa_stats.analysis import severity as S
+
+    def frame(shift):
+        rows = []
+        for f, lv, _ in S.KEY_CONTRASTS:
+            rows.append(
+                {
+                    "factor": f,
+                    "level": lv,
+                    "crude_rr": 1.2 + shift,
+                    "n_events": 50,
+                    **{
+                        f"{m}_adj_rr{suf}": val + shift + (0.1 if m == "B" else 0)
+                        for m in "AB"
+                        for suf, val in (("", 0.9), ("_low", 0.8), ("_high", 1.0))
+                    },
+                    **{
+                        f"{m}_adj_rd{suf}": 0.001 * (1 + shift)
+                        for m in "AB"
+                        for suf in ("", "_low", "_high")
+                    },
+                }
+            )
+        return pd.DataFrame(rows)
+
+    out = S.key_contrasts_side_by_side({"fatal": frame(0.0), "ka": frame(1.0)})
+    assert len(out) == len(S.KEY_CONTRASTS) * 2 * 2
+    teen = out[(out["factor"] == "young_driver") & (out["outcome"] == "ka")].set_index("model")
+    assert teen.loc["A", "adj_rr"] == pytest.approx(1.9)
+    assert teen.loc["B", "adj_rr"] == pytest.approx(2.0)
+
+
+@pytest.mark.processed
+def test_real_data_speeding_type_models_and_interstate_bands():
+    from nhtsa_stats.analysis import severity as S
+
+    m = S.speeding_type_models("fatal")
+    tf = m[(m["level"] == "too_fast_for_conditions")].set_index("model")
+    pub = S.speeding_type_contrasts("fatal").set_index("level").loc["too_fast_for_conditions"]
+    assert tf.loc["A", "adj_rr"] == pytest.approx(pub["adj_rr"], rel=1e-6)
+    assert tf.loc["A", "adj_rr_low95"] == pytest.approx(pub["adj_rr_low"], rel=1e-6)
+    for _, r in m.iterrows():
+        assert r["adj_rr_low95"] < r["adj_rr_low90"] < r["adj_rr"] < r["adj_rr_high90"]
+        assert r["adj_rr_high90"] < r["adj_rr_high95"]
+    ib = S.interstate_by_speed_band("fatal")
+    band = ib[ib["quantity"] == "RR interstate vs not"].set_index("speed_limit_band")
+    assert band.loc["50-65 mph", "estimate"] < band.loc["70+ mph", "estimate"]
+    assert band.loc["50-65 mph", "n_crashes"] == (
+        band.loc["50-55 mph", "n_crashes"] + band.loc["60-65 mph", "n_crashes"]
+    )
+
+
+# --------------------------------------------------------------------------------------
+# Outcomes that are missing for some rows (e.g. CRSS ``ka`` where MAXSEV_IM is 5)
+# --------------------------------------------------------------------------------------
+def _with_missing_outcome(seed: int = 21):
+    df, design = _synthetic(n=20000, seed=seed)
+    rng = np.random.default_rng(seed)
+    df["ka"] = df["fatal"].where(rng.random(len(df)) > 0.1)  # ~10% unknown
+    for c in ("night_period", "alcohol_im", "region", "YEAR"):
+        df[c] = pd.Categorical(df[c], categories=C.declared_levels(c))
+    return df, design
+
+
+def test_known_outcome_domain_keeps_the_full_design():
+    df, design = _with_missing_outcome()
+    sub, sd, known = C.known_outcome_domain(df, design, "ka")
+    assert known.sum() == len(sub) == sd.n < len(df)
+    assert sd.n_clusters == design.n_clusters and sd.df == design.df  # PSUs kept
+    same, same_d, all_known = C.known_outcome_domain(df, design, "fatal")
+    assert same is df and same_d is design and all_known.all()
+
+
+def test_odds_ratio_and_fit_subset_use_the_known_outcome_domain():
+    from nhtsa_stats.analysis import speeding as S
+
+    df, design = _with_missing_outcome()
+    blocks = ["alcohol", "calendar_region"]
+    sub, sd, _ = C.known_outcome_domain(df, design, "ka")
+    expected = S.odds_ratio(sub, sd, TOY, blocks, "ka")
+    got = S.odds_ratio(df, design, TOY, blocks, "ka")  # used to raise ValueError
+    np.testing.assert_allclose(got, expected)
+    assert all(np.isfinite(got)) and got[1] < got[0] < got[2]
+    f_all = C.fit_subset(df, design, TOY, blocks, "ka")
+    f_sub = C.fit_subset(sub, sd, TOY, blocks, "ka")
+    assert f_all.m_exposed == pytest.approx(f_sub.m_exposed)
+    # A fully known outcome is unaffected.
+    assert np.isfinite(S.odds_ratio(df, design, TOY, blocks, "fatal")).all()
+
+
+def test_row_level_logit_still_rejects_missing_outcome():
+    df, design = _with_missing_outcome()
+    spec = ModelSpec(categorical={"night_period": ["day", "night"]})
+    with pytest.raises(ValueError, match="without missing"):
+        SurveyLogit(spec).fit(df, df["ka"].to_numpy(), design)
+
+
+def test_contributions_fit_cells_handles_missing_outcome():
+    from nhtsa_stats.analysis import contributions as K
+
+    df, design = _with_missing_outcome()
+    m, cells, cd = K.fit_cells(df, design, ["alcohol_im", "region"], "ka")
+    assert m.converged_ and cd.n_clusters == design.n_clusters
+    assert cells["ka"].notna().all()
+    # Total weight of the cells is the weight of the rows with a known outcome.
+    assert cd.weight.sum() == pytest.approx(design.weight[df["ka"].notna().to_numpy()].sum())

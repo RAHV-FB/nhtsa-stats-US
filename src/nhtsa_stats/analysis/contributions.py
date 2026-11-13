@@ -38,7 +38,7 @@ from sklearn.metrics import roc_auc_score
 
 from nhtsa_stats import config
 from nhtsa_stats.analysis import multifactor
-from nhtsa_stats.analysis.confounding import collapse_cells
+from nhtsa_stats.analysis.confounding import collapse_cells, known_outcome_domain
 from nhtsa_stats.analysis.survey import MarginSet, ModelSpec, SurveyDesign, SurveyLogit
 from nhtsa_stats.reporting.io import save_table
 
@@ -46,6 +46,7 @@ log = logging.getLogger(__name__)
 MODULE = "contributions"
 INPUT = [
     "data/processed/crss_crash.parquet",
+    "data/processed/fars_crash.parquet",
     "data/processed/fars_driver.parquet",
     "data/processed/fars_person.parquet",
 ]
@@ -99,6 +100,16 @@ NESTED_STEPS = {
     "+ crash configuration": [*ENVIRONMENT, "<behaviours>", *MIX, "drugs", *CONFIG],
 }
 BEHAVIOUR_COLS = ["exceeded", "alcohol_im"]
+# Label of the drug count in the FARS overlap tables.  A crash counts as drug-positive when ANY
+# of its drivers has a positive toxicology result, whatever the status of the other drivers,
+# so the count includes deaths in crashes whose drug status is only partly determinate.  The
+# deaths in fully determinate crashes (every driver's result known) are reported separately.
+DRUG_OVERLAP_LABEL = "driver drug-positive (any driver positive; other drivers may be undetermined)"
+RANK_UNCERTAINTY_NOTE = (
+    "P(rank) covers CRSS sampling error only (Taylor-linearised joint normal draws from one "
+    "specification); it excludes outcome-dependent recording, coding changes and specification "
+    "uncertainty"
+)
 
 
 # --------------------------------------------------------------------------------------
@@ -108,6 +119,7 @@ def fit_cells(
     df: pd.DataFrame, design: SurveyDesign, covs: Sequence[str], outcome: str
 ) -> tuple[SurveyLogit, pd.DataFrame, SurveyDesign]:
     covs = list(dict.fromkeys(covs))
+    df, design, _ = known_outcome_domain(df, design, outcome)
     work = df[[*covs, outcome]].copy()
     for c in covs:
         work[c] = np.asarray(work[c], dtype=object)
@@ -465,8 +477,9 @@ def burden(df: pd.DataFrame, design: SurveyDesign, fars_deaths_per_year: float) 
 # --------------------------------------------------------------------------------------
 def fars_overlap() -> pd.DataFrame:
     """Deaths by combination of crash speeding, any-driver BAC >= .08 (per MI implicate,
-    averaged), any-driver drug positivity (among determinate crashes) and the dead person's
-    own restraint (unbelted light-vehicle occupant)."""
+    averaged), any-driver drug positivity (a crash is positive if any driver is positive;
+    crashes with no positive driver and at least one untested/indeterminate driver are
+    ``undetermined``) and the dead person's own restraint (unbelted light-vehicle occupant)."""
     drv = pl.read_parquet(
         config.PROCESSED_DIR / "fars_driver.parquet",
         columns=["YEAR", "case_id", "drv_drug_any", *[f"drv_bac08_mi_{i}" for i in range(1, 11)]],
@@ -515,14 +528,145 @@ def fars_overlap() -> pd.DataFrame:
     return combos, total
 
 
-def overlap_summary(combos: pd.DataFrame, total: int) -> pd.DataFrame:
+def _death_flags() -> tuple[pd.DataFrame, np.ndarray]:
+    """One row per FARS death 2016-2024: speeding crash, unbelted occupant, drug status of the
+    crash ("yes" any driver positive; "no" every driver determinate negative; "undetermined"
+    otherwise or no driver rows), ``fully_determinate`` (every driver's result known) and the
+    per-implicate any-driver BAC >= .08 indicators (n x 10 array)."""
+    drv = pl.read_parquet(
+        config.PROCESSED_DIR / "fars_driver.parquet",
+        columns=["YEAR", "case_id", "drv_drug_any", *[f"drv_bac08_mi_{i}" for i in range(1, 11)]],
+    )
+    crash = drv.group_by(["YEAR", "case_id"]).agg(
+        *[pl.col(f"drv_bac08_mi_{i}").max().fill_null(0).alias(f"a{i}") for i in range(1, 11)],
+        (pl.col("drv_drug_any") == 1).any().alias("any_pos"),
+        (pl.col("drv_drug_any").null_count() == 0).alias("all_known"),
+    )
+    per = pl.read_parquet(
+        config.PROCESSED_DIR / "fars_person.parquet",
+        columns=["YEAR", "case_id", "killed", "restraint", "PER_TYP", "speeding"],
+    ).filter(pl.col("killed") == 1)
+    per = per.join(crash, on=["YEAR", "case_id"], how="left").to_pandas()
+    any_pos = per["any_pos"].fillna(False).astype(bool)
+    all_known = per["all_known"].fillna(False).astype(bool)
+    flags = pd.DataFrame(
+        {
+            "speeding": (per["speeding"] == 1).to_numpy(),
+            "unbelted": ((per["restraint"] == "none") & per["PER_TYP"].isin([1, 2, 9])).to_numpy(),
+            "drug_positive": any_pos.to_numpy(),
+            "drug_undetermined": (~any_pos & ~all_known).to_numpy(),
+            "fully_determinate": (all_known).to_numpy(),
+        }
+    )
+    alc = per[[f"a{i}" for i in range(1, 11)]].fillna(0).to_numpy().astype(bool)
+    return flags, alc
+
+
+def fars_drug_determinacy() -> dict[str, float]:
+    """Deaths in crashes whose drug status is fully determinate (every driver's result known),
+    and the drug-positive deaths among them."""
+    f, _ = _death_flags()
+    det = f["fully_determinate"].to_numpy()
+    return {
+        "deaths_fully_determinate": float(det.sum()),
+        "deaths_drug_positive_fully_determinate": float((det & f["drug_positive"]).sum()),
+    }
+
+
+def overlap_treatments() -> pd.DataFrame:
+    """Share of FARS deaths involving any of speeding, alcohol (BAC >= .08, imputed), drugs and
+    the victim's own non-use of restraint, and the mean factor count, under four explicit
+    treatments of the 63% of deaths whose crash has undetermined drug status.
+
+    The published 65% / 1.68 scores undetermined as drug-negative, so it is a floor; scoring
+    undetermined as positive gives the ceiling; restricting to deaths whose drug factor is determinate drops
+    the undetermined deaths, and restricting to fully determinate crashes also drops positive
+    crashes with an undetermined second driver (both are selected subsets: crashes where the
+    drivers were tested); the
+    three measured factors leave drugs out.  Alcohol is averaged over the 10 implicates
+    (indicator-level means, as in ``fars_overlap``).  ``mean_factors_per_death_with_any`` is
+    the sum of factor counts over deaths with at least one factor (the published 1.68 =
+    sum / union); ``mean_factors_per_death`` divides by all deaths in the population."""
+    f, alc = _death_flags()
+    s, u, d = f["speeding"].to_numpy(), f["unbelted"].to_numpy(), f["drug_positive"].to_numpy()
+    und, det = f["drug_undetermined"].to_numpy(), f["fully_determinate"].to_numpy()
+    treatments = [
+        (
+            "undetermined drug status scored negative (published; a floor)",
+            "undetermined = no drug",
+            True,
+            d,
+            np.ones(len(f), bool),
+        ),
+        (
+            "undetermined drug status scored positive (ceiling)",
+            "undetermined = drug",
+            True,
+            d | und,
+            np.ones(len(f), bool),
+        ),
+        (
+            "restricted to deaths whose drug factor is determinate",
+            "undetermined deaths dropped (a driver positive, or every driver determinate negative)",
+            True,
+            d,
+            ~und,
+        ),
+        (
+            "restricted to deaths in fully determinate crashes",
+            "undetermined deaths and positive crashes with an undetermined driver dropped "
+            "(every driver's result known)",
+            True,
+            d,
+            det,
+        ),
+        (
+            "three measured factors only (speeding, alcohol, unbelted; no drugs)",
+            "drugs not used",
+            False,
+            np.zeros(len(f), bool),
+            np.ones(len(f), bool),
+        ),
+    ]
+    rows = []
+    for name, handling, uses_drugs, dd, mask in treatments:
+        n = int(mask.sum())
+        shares, counts, sums = [], [], []
+        for i in range(alc.shape[1]):
+            a = alc[mask, i]
+            k = s[mask].astype(int) + a + dd[mask] + u[mask]
+            shares.append((k > 0).mean())
+            counts.append(k.mean())
+            sums.append(k.sum() / max((k > 0).sum(), 1))
+        rows.append(
+            {
+                "treatment": name,
+                "drug_status_handling": handling,
+                "drugs_in_factor_set": uses_drugs,
+                "deaths_n": n,
+                "share_of_all_deaths_in_row": n / len(f),
+                "share_deaths_undetermined_drug_status": float(und[mask].mean()),
+                "share_with_any_factor": float(np.mean(shares)),
+                "mean_factors_per_death": float(np.mean(counts)),
+                "mean_factors_per_death_with_any": float(np.mean(sums)),
+                "note": "alcohol = any-driver BAC >= .08 averaged over 10 implicates; "
+                "unbelted = the dead occupant's own non-use; share undetermined is in the row's "
+                "population (0 by construction when restricted)",
+            }
+        )
+    return pd.DataFrame(rows)
+
+
+def overlap_summary(
+    combos: pd.DataFrame, total: int, determinacy: dict[str, float] | None = None
+) -> pd.DataFrame:
     def cnt(mask) -> float:
         return float(combos.loc[mask, "deaths"].sum())
 
     f = {
         "speeding-related crash": combos["speeding"] == 1,
         "driver BAC >= .08 (MI)": combos["alcohol_bac08"] == 1,
-        "driver drug-positive (determinate crashes only)": combos["drugs"] == "yes",
+        DRUG_OVERLAP_LABEL: combos["drugs"] == "yes",
         "victim an unbelted vehicle occupant": combos["unbelted_victim"] == 1,
     }
     rows = []
@@ -563,6 +707,18 @@ def overlap_summary(combos: pd.DataFrame, total: int) -> pd.DataFrame:
     out = pd.DataFrame(rows)
     out["overcount_ratio_sum_over_union"] = s / union
     out["deaths_undetermined_drug_status"] = cnt(combos["drugs"] == "undetermined")
+    if determinacy is not None:
+        out["deaths_in_fully_determinate_crashes"] = determinacy["deaths_fully_determinate"]
+        out["share_deaths_in_fully_determinate_crashes"] = (
+            determinacy["deaths_fully_determinate"] / total
+        )
+        out["deaths_drug_positive_in_fully_determinate_crashes"] = determinacy[
+            "deaths_drug_positive_fully_determinate"
+        ]
+        out["note"] = (
+            "A crash is drug-positive if any driver is positive, regardless of the other "
+            "drivers' status; fully determinate = every driver's drug result known"
+        )
     return out
 
 
@@ -648,6 +804,7 @@ def rank_probabilities(
             rows.append(rec)
     out = pd.DataFrame(rows)
     out["rank_point"] = out.groupby("metric")["estimate"].rank(ascending=False).astype(int)
+    out["uncertainty_covered"] = RANK_UNCERTAINTY_NOTE
     return out
 
 
@@ -714,9 +871,7 @@ def ranking_table(
                     "speeding_other": fars_speed.get("too_fast_for_conditions", 0.0)
                     + fars_speed.get("speeding_unspecified", 0.0),
                     "alcohol": ov.loc["driver BAC >= .08 (MI)", "deaths"],
-                    "drugs_police": ov.loc[
-                        "driver drug-positive (determinate crashes only)", "deaths"
-                    ],
+                    "drugs_police": ov.loc[DRUG_OVERLAP_LABEL, "deaths"],
                 }[f],
             }
         )
@@ -841,15 +996,26 @@ def run(n_boot: int = 200) -> dict[str, pd.DataFrame]:
         method="Census counts; alcohol as expected counts over multiple-imputation implicates",
         inputs=INPUT,
     )
-    out["fars_overlap_summary"] = overlap_summary(combos, total)
+    out["fars_overlap_summary"] = overlap_summary(combos, total, fars_drug_determinacy())
     save_table(
         out["fars_overlap_summary"],
         MODULE,
         "fars_overlap_summary",
-        description="Deaths counted under each factor, the sum of factor counts and the union",
+        description="Deaths counted under each factor, the sum of factor counts and the union; the drug count is crash-level (any driver positive) and deaths in fully determinate crashes are reported alongside",
         population="FARS deaths 2016-2024",
         unit="person killed",
         method="Census counts",
+        inputs=INPUT,
+    )
+    out["fars_overlap_treatments"] = overlap_treatments()
+    save_table(
+        out["fars_overlap_treatments"],
+        MODULE,
+        "fars_overlap_treatments",
+        description="Share of deaths involving any of speeding, alcohol, drugs and no restraint, and mean factor count, under five treatments of undetermined drug status (floor, ceiling, drug factor determinate, fully determinate crashes, no drugs)",
+        population="FARS deaths 2016-2024",
+        unit="person killed",
+        method="Census counts; alcohol as the mean over 10 imputation implicates; drug status per crash (any driver positive / all determinate negative / undetermined)",
         inputs=INPUT,
     )
     out["fars_pairwise_overlap"] = pairwise_overlap(combos, total)
@@ -898,6 +1064,6 @@ def run(n_boot: int = 200) -> dict[str, pd.DataFrame]:
         unit="factor",
         outcome="fatal",
         method="Assembled from nested_models, predictive, burden_shapley, fars_overlap_summary and restraint_behaviour/crss_unbelted_nested",
-        inputs=INPUT,
+        inputs=[*INPUT, "outputs/tables/restraint_behaviour/crss_unbelted_nested.csv"],
     )
     return out

@@ -7,7 +7,9 @@
  "method": "g-computation with survey logistic model A; AF = (observed - counterfactual predicted)/observed; linearised CI; for the fatal outcome only, FARS-scaled = AF x mean annual FARS fatal crashes (or deaths) 2022-2024, assuming the averted fatal crashes carry the average number of deaths per fatal crash; fractions of KA crashes are not scaled",
  "inputs": [
   "data/processed/crss_crash.parquet",
-  "data/processed/fars_crash.parquet"
+  "data/processed/fars_crash.parquet",
+  "outputs/tables/measurement/qba_grid.csv",
+  "outputs/tables/severity/fatal_crude_vs_adjusted.csv"
  ],
  "rows": 64,
  "columns": [
@@ -22,6 +24,15 @@
   "note"
  ],
  "module": "nhtsa_stats.analysis.burden",
- "git_commit": "ef704fd",
- "generated_utc": "2026-10-23T03:38:15Z"
+ "git_commit": "af9ce88",
+ "source_sha256": "5a89474955b87ac87f37cfcd785f806563869bfdfad445a974ba4835440c9489",
+ "code_sha256": "cb79880d53b7d4cd62f5582a038ef28682e68f8da7521758dcec7aa391ee8853",
+ "inputs_sha256": {
+  "data/processed/crss_crash.parquet": "1a31897f37cce3be223cc5abfb823582b68b9f7096a8c38980e9346f3450c6e3",
+  "data/processed/fars_crash.parquet": "30f4314e8984ce2ba3cd764b561628edf36950705c1fc3bdd16769a417846ddf",
+  "outputs/tables/measurement/qba_grid.csv": "70d4208ed9dc3ca976c78a6febd4c122baae82d74472104c1e493f57c7e5aebd",
+  "outputs/tables/severity/fatal_crude_vs_adjusted.csv": "ba73429d4a9b3b78ab8bf0897ffea97499a0bb96a5aea8c3d4340ec53de2ed7c"
+ },
+ "package_sha256": "fbdac1b588be76a011931549cc2f2013fc1b6405f88cee1ba0e10db719e3ed6b",
+ "generated_utc": "2026-11-13T01:43:03Z"
 }

@@ -1,0 +1,12 @@
+metric,count,denominator,share,note
+unhelmeted_motorcyclist_deaths,18336,,,"operators and passengers, helmet coded none, killed"
+unhelmeted_deaths_single_rider_motorcycle,15383,18336,0.838951,no second rider: no within-motorcycle comparison
+unhelmeted_deaths_two_occupant_motorcycle,2944,18336,0.160558,motorcycles with two recorded riders
+unhelmeted_deaths_three_plus_occupant_motorcycle,9,18336,0.000490838,not in the operator / passenger pair design
+unhelmeted_deaths_in_pair_design,2893,18336,0.157777,"one operator and one passenger, helmet use and outcome known for both"
+unhelmeted_deaths_in_informative_pairs,223,18336,0.0121619,pairs discordant on helmet use and on outcome (they identify the matched-pair OR)
+pairs_operator_passenger,4768,,,pairs entering the helmet DPC
+pairs_with_a_death,4513,4768,0.946518,at least one rider killed
+pairs_discordant_helmet_use,459,4768,0.0962668,exactly one rider helmeted
+pairs_discordant_outcome,3468,4768,0.727349,exactly one rider killed
+pairs_discordant_helmet_and_outcome,341,4768,0.0715185,informative pairs for the matched-pair OR (n10 + n01)

@@ -14,9 +14,8 @@ For every intervention the ledger records, with provenance:
 9. the assumptions a numeric projection would require;
 10. a verdict on whether a defensible numeric policy-effect estimate is possible.
 
-The ledger is the bridge between empirical findings and the simulator: it fixes which
-numbers in Layer A of the simulator are observed / estimated / adjusted associations, and which
-inputs must come from the user.
+The ledger restates measured results (with their provenance) and records what the data cannot
+identify; it estimates no intervention effect.
 """
 
 from __future__ import annotations
@@ -29,6 +28,7 @@ import pandas as pd
 from nhtsa_stats.analysis import data
 from nhtsa_stats.processing import harmonize as h
 from nhtsa_stats.reporting.io import load_table, save_json, save_table
+from nhtsa_stats.simulation import baseline
 
 log = logging.getLogger(__name__)
 MODULE = "policy"
@@ -41,7 +41,11 @@ NO_INTERVENTION_DATA = (
 )
 
 
+_TABLES_READ: dict[str, None] = {}  # output tables read by _tab (ordered, de-duplicated)
+
+
 def _tab(module: str, name: str) -> pd.DataFrame | None:
+    _TABLES_READ[f"outputs/tables/{module}/{name}.csv"] = None
     try:
         return load_table(module, name)
     except FileNotFoundError:
@@ -74,11 +78,9 @@ def segment_deaths() -> dict[str, dict]:
     per = data.fars_person(WINDOW)
     killed = per[per["killed"] == 1].copy()
     k = len(WINDOW)
-    from nhtsa_stats.simulation import engine  # segment definitions shared with the simulator
-
     seg_crash = {
         "speeding": crash["speeding"] == 1,
-        "speeding_exceeded_limit": crash["speeding_type"] == engine.EXCEEDED,
+        "speeding_exceeded_limit": crash["speeding_type"] == baseline.EXCEEDED,
         "alcohol_bac08": None,  # expected value over implicates, handled below
         "drugs_police_reported": crash["drugs"] == 1,
         "night_weekend": (crash["night"] == 1) & (crash["weekend"] == 1),
@@ -106,8 +108,8 @@ def segment_deaths() -> dict[str, dict]:
             "kind": "observed (FARS census)",
         }
     # The population of the within-vehicle belt estimate (LPV occupants aged 13+, front or
-    # second row), as in the simulator's unrestrained segment.
-    lpv = killed[engine.belt_eligible_mask(killed)]
+    # second row), as in the baseline's unrestrained segment.
+    lpv = killed[baseline.belt_eligible_mask(killed)]
     unb = lpv[lpv["restraint"] == "none"]
     out["unrestrained_lpv_occupants"] = {
         "deaths_per_year": len(unb) / k,
@@ -366,7 +368,7 @@ def build_ledger() -> pd.DataFrame:
             "assumptions_required": "cameras act on exceeding the posted limit, not on 'too fast for conditions'; "
             "camera units -> coverage of speeding exposure; behavioural response (reduction in speeding prevalence "
             "where covered; spillover); effect on crash occurrence; effect on severity of remaining crashes",
-            "numeric_estimate_possible": "Only conditional/hypothetical (simulator + break-even).",
+            "numeric_estimate_possible": "None: the data contain no intervention, so no effect can be estimated.",
             "evidence_grade_target_association": "strong for exceeding the limit (large association); none detected for "
             "'too fast for conditions'; aggregate magnitude sensitive to ascertainment",
             "phase2_evidence": p2.get("speeding", ""),
@@ -430,7 +432,7 @@ def build_ledger() -> pd.DataFrame:
             "severity_pathway_af": "not estimated",
             "evidence_intervention_changes_factor": NO_INTERVENTION_DATA,
             "assumptions_required": "everything: prevalence of impairment, impairment-specific risk, test coverage, deterrence",
-            "numeric_estimate_possible": "No defensible estimate from these data; simulator can only show what effect sizes would be required",
+            "numeric_estimate_possible": "No defensible estimate from these data.",
             "evidence_grade_target_association": "insufficient",
             "phase2_evidence": p2.get("drugs", ""),
         },
@@ -456,7 +458,7 @@ def build_ledger() -> pd.DataFrame:
             "interactions": "restraint x age / crash type: person module",
             "most_affected": f"{seg['unrestrained_lpv_occupants']['pct_male']:.0f}% male; {seg['unrestrained_lpv_occupants']['pct_age_15_34']:.0f}% aged 15-34; "
             f"{seg['unrestrained_lpv_occupants']['pct_night']:.0f}% at night",
-            "severity_pathway_af": "use belt effectiveness x unrestrained deaths in simulator",
+            "severity_pathway_af": "not estimated",
             "evidence_intervention_changes_factor": NO_INTERVENTION_DATA,
             "assumptions_required": "share of unbelted occupants who would buckle up under enforcement; whether converters resemble "
             "other unbelted occupants (likely riskier)",
@@ -561,7 +563,7 @@ def build_ledger() -> pd.DataFrame:
             "evidence_intervention_changes_factor": "None for programmes; the contrasts compare existing conditions, not interventions",
             "assumptions_required": "that adding lighting / lowering limits changes conditions to those of currently lit / lower-limit roads "
             "without changing exposure",
-            "numeric_estimate_possible": "Conditional/hypothetical via the simulator's generic segment intervention",
+            "numeric_estimate_possible": "None: the contrasts compare existing conditions, not interventions.",
             "evidence_grade_target_association": "strong (large, objective measures, consistent across adjustment)",
             "phase2_evidence": "Phase 2: given a pedestrian is struck, the striking driver's recorded speeding and alcohol add "
             "little once the posted limit and light are held fixed (multifactor/victims).",
@@ -571,6 +573,7 @@ def build_ledger() -> pd.DataFrame:
 
 
 def run() -> dict:
+    _TABLES_READ.clear()
     ledger = build_ledger()
     seg = segment_deaths()
     save_table(
@@ -581,11 +584,13 @@ def run() -> dict:
         population="FARS 2022-2024 (deaths); CRSS 2016-2024 (associations)",
         unit="intervention",
         method="Assembled from descriptive, severity, measurement, interactions, burden and matched outputs",
-        inputs=["outputs/tables/*"],
+        inputs=[
+            "data/processed/fars_crash.parquet",  # segment_deaths
+            "data/processed/fars_person.parquet",
+            *_TABLES_READ,
+        ],
     )
     save_json(seg, MODULE, "segment_deaths")
     out = {"evidence_ledger": ledger, "segment_deaths": seg}
-    from nhtsa_stats.simulation import engine
-
-    out["engine"] = engine.run()
+    out["baseline"] = baseline.run()
     return out

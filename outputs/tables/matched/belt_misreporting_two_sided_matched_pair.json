@@ -1,0 +1,36 @@
+{
+ "table": "matched/belt_misreporting_two_sided_matched_pair.csv",
+ "description": "Matched-pair OR (unbelted vs belted, two-occupant vehicles with one death) under two-sided misreporting (f survivors, g deaths) with closed-form tipping fractions",
+ "population": "FARS 2016-2024 occupants (driver/passenger) of in-transport light passenger vehicles, seat front-left/front-other/second row, age 13+, belted or unbelted, known outcome; vehicles with exactly 2 eligible occupants and exactly one death",
+ "unit": "person within vehicle (matched set = vehicle)",
+ "outcome": "killed (died within 30 days)",
+ "method": "Expected discordant counts n10(1-f)(1-g) and n01 + f n00 + g n11 + f g n10; Poisson CI treating vehicles as independent",
+ "inputs": [
+  "data/processed/fars_person.parquet"
+ ],
+ "rows": 12,
+ "columns": [
+  "analysis",
+  "survivor_misreport_f",
+  "death_misreport_g",
+  "n10_exposed_died_unexposed_survived",
+  "n01_unexposed_died_exposed_survived",
+  "n00_both_unexposed",
+  "n11_both_exposed",
+  "or_exposed_vs_unexposed",
+  "or_low",
+  "or_high",
+  "n_informative_vehicles",
+  "tipping_f_given_g",
+  "tipping_g_given_f"
+ ],
+ "module": "nhtsa_stats.analysis.matched",
+ "git_commit": "af9ce88",
+ "source_sha256": "9d6eab56b34f60be154068ec100a85f04d36758d10d1412cf03888a394dba064",
+ "code_sha256": "4e1b2a03b3b721896a30de5653db1f70abd4abd355a7ce5e0d56e7e31906b8fa",
+ "inputs_sha256": {
+  "data/processed/fars_person.parquet": "97b40b82c1b47f76bf99a8e05ebaa84e14c4b1ea2ecea3e86be6de4c2189bfa2"
+ },
+ "package_sha256": "fbdac1b588be76a011931549cc2f2013fc1b6405f88cee1ba0e10db719e3ed6b",
+ "generated_utc": "2026-11-13T01:41:24Z"
+}

@@ -123,9 +123,11 @@ def test_missing_values_rejected():
 def test_holm():
     p = pd.Series([0.01, 0.04, np.nan, 0.03])
     adj = fa.holm(p)
-    assert adj[0] == pytest.approx(0.03)
-    assert adj[3] == pytest.approx(0.06)
-    assert adj[1] == pytest.approx(0.06)
+    # Fixed family of 4: the NaN contrast is a test that cannot be rejected (p = 1), not a
+    # dropped one, so m stays 4: 4*.01, 3*.03, 2*.04 (running max), NaN reported.
+    assert adj[0] == pytest.approx(0.04)
+    assert adj[3] == pytest.approx(0.09)
+    assert adj[1] == pytest.approx(0.09)
     assert np.isnan(adj[2])
 
 
@@ -147,3 +149,28 @@ def test_saturated_in_all_levels_is_calibrated_within_recorded_cells():
 def test_product_terms_with_levels():
     terms = fa.product_terms(FACTORS3[:2], {"f0": ["no", "yes"], "f1": ["no", "yes", "unknown"]})
     assert len(terms) == 2
+
+
+def test_missing_outcome_is_fitted_as_a_domain_of_the_full_design():
+    df, design = _data(n=8000, seed=7)
+    rng = np.random.default_rng(7)
+    df["y_unk"] = df["y"].where(rng.random(len(df)) > 0.15)  # ~15% unknown outcome
+    known = df["y_unk"].notna().to_numpy()
+    std = (df["cov"] == "b").to_numpy()
+    kw = dict(min_n=1, min_events=1)
+    got = fa.fit_factorial(df, design, FACTORS3, ["cov"], "y_unk", standardise=std, **kw)
+    sub = df.loc[known].reset_index(drop=True)
+    want = fa.fit_factorial(
+        sub, design.subset(known), FACTORS3, ["cov"], "y_unk", standardise=std[known], **kw
+    )
+    assert got.n_rows == known.sum() == want.n_rows
+    assert got.n_events == int(df.loc[known, "y_unk"].sum())
+    for key in fa.keys(3):
+        assert got.margins.values[key] == pytest.approx(want.margins.values[key])
+    pd.testing.assert_frame_equal(got.support, want.support)
+    # Support counts only rows with a known outcome.
+    assert got.support["n"].sum() == known.sum()
+    # The full PSU structure is kept: variances are those of a domain, not of a smaller design.
+    tab = fa.interaction_table(got).set_index("contrast").loc["f0 x f1"]
+    tab_w = fa.interaction_table(want).set_index("contrast").loc["f0 x f1"]
+    assert tab["additive_contrast"] == pytest.approx(tab_w["additive_contrast"])

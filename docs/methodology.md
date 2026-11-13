@@ -27,7 +27,7 @@ Weights `WEIGHT`; variance strata `PSUSTRAT` (25); variance PSUs `PSU_VAR` (67),
 strata, with identical IDs and stratum membership in every year 2016–2024 and at least two
 PSUs per stratum (no lonely PSUs). Pooled multi-year analyses use these 67 clusters, which also
 captures the correlation of a PSU's crashes across years. Design degrees of freedom
-d = 67 − 25 = 42; confidence intervals use the t distribution with d df.
+d = 67 − 25 = 42 (the design counts are tabulated in `descriptive/crss_design`); confidence intervals use the t distribution with d df.
 
 The with-replacement (ultimate-cluster) approximation is used: for a vector of weighted
 linearised contributions z_k,
@@ -128,7 +128,9 @@ that leaves the downstream variables out — "A excluding downstream variables",
 columns of `severity/*_crude_vs_adjusted` — is reported as the closer analogue of a total
 association; for the other factors the two coincide. Post-crash variables (ejection, rollover as an
 outcome, fire, towing, airbag deployment, hospital transport, time of death) and outcome
-counts are never covariates (`harmonize.REGISTRY` + `assert_no_leakage`). The conceptual
+counts are never covariates (`harmonize.REGISTRY` + `assert_no_leakage`). Police-judged speeding is
+recorded after the crash and flagged `recorded_after_crash` in the registry; it is allowed with a
+documented reason, and results that use it are conditional on the police having recorded it. The conceptual
 dependency diagram is in `docs/research_plan.md` §5.
 
 The *share of the crude log risk ratio retained* after adjustment, log(RR_adj)/log(RR_crude),
@@ -143,12 +145,12 @@ recorded circumstances; negative: reverses).
 * CRSS severity outcomes use NHTSA's imputed severity (`MAXSEV_IM` for crashes, `INJSEV_IM`
   for persons). The unimputed `MAX_SEV` is the maximum over persons whose severity is known,
   so a crash containing a person of unknown severity would be classed by the others' injuries
-  — "unknown" silently treated as "not fatal". Its weighted fatal total falls 0.6–12.8% short
-  of the FARS count, by an amount that varies by year, whereas the imputed total reproduces
-  FARS within 0.9% in every year (the weights are calibrated to FARS through it; tested in
+  — "unknown" silently treated as "not fatal". Its weighted fatal total falls short
+  of the FARS count by an amount that varies by year (up to about 13%), whereas the imputed total reproduces
+  FARS within about 1% in every year (the weights are calibrated to FARS through it; tested in
   `tests/test_features.py`). The imputation fills only unknown codes. Crashes whose imputed
-  maximum is still undeterminable (codes 5, 6, 8; 0.4%) are excluded. A strict complete-case
-  outcome (`fatal_cc`, `ka_cc`: negative only when no person's severity is unknown; ~8% of
+  maximum is still undeterminable (codes 5, 6, 8; a fraction of 1%) are excluded. A strict complete-case
+  outcome (`fatal_cc`, `ka_cc`: negative only when no person's severity is unknown; under 10% of
   crashes undetermined) is the sensitivity analysis; it changes levels and trends, so both
   are reported where trends are concerned.
 * Alcohol: imputed `ALCHL_IM` is used for adjustment because the police-reported field has a
@@ -218,13 +220,17 @@ See `docs/model_validation.md`: temporal split (train 2016–2021, validate 2022
 weighted and unweighted metrics, calibration, PSU-cluster bootstrap CIs, and confirmatory
 checks of any machine-learning pattern with the transparent survey models above.
 
-## 10. Policy simulation and costs
+## 10. Interventions: observed segment baseline and evidence ledger
 
-See `docs/policy_assumptions.md`. The simulator separates (A) empirical baseline quantities
-from this database, (B) intervention mechanisms, (C) user-supplied assumptions and (D)
-outcomes, and labels every output *hypothetical*. No effect sizes or prices are supplied by
-the project, except that belt effectiveness defaults to the project's own FARS within-vehicle
-estimate (treated as causal by assumption, and labelled so) when the user gives none.
+The project estimates no intervention effect and projects no outcome of a hypothetical
+programme: the archives contain no enforcement, camera, testing-programme or cost fields
+(`simulation/inventory_enforcement_cost_fields`). `nhtsa analyze policy` writes (i) the evidence
+ledger, which restates measured results per candidate intervention
+(`outputs/tables/policy/`), and (ii) the observed baseline (`nhtsa_stats.simulation.baseline`,
+`outputs/tables/simulation/`): FARS deaths and CRSS crashes by overlapping segment (speeding,
+exceeding the limit, alcohol, drugs, unrestrained light-vehicle occupants), the pairwise overlap
+between segments, and the field inventory. Segment counts are lower bounds (unknown status is
+not counted) and are not preventable fractions.
 
 ## 11. Reproducibility
 
@@ -237,7 +243,7 @@ Random seeds are fixed (`config.RANDOM_SEED`).
 ## 12. Phase 2: factor attribution, confounding and combinations
 
 Plan and estimands: `docs/research_plan_phase2.md`. Modules (each `nhtsa analyze <name>`):
-`speeding`, `drugs`, `multifactor`, `restraint_behaviour`, `contributions`, `stages`, `cases`.
+`speeding`, `drugs`, `multifactor`, `restraint_behaviour`, `contributions`, `stages`.
 
 ### 12.1 Observation levels and linkage (`processing/drivers.py`)
 
@@ -270,7 +276,7 @@ the rest of the model is visible. Stratum-specific RRs use model-A blocks minus 
 define the stratum; heterogeneity between two strata is the ratio of their RRs with a CI from
 the joint PSU-level linearisation.
 
-### 12.3 Factorial margins (`analysis/factorial.py`, `analysis/multifactor.py`, `analysis/cases.py`)
+### 12.3 Factorial margins (`analysis/factorial.py`, `analysis/multifactor.py`)
 
 For k binary factors, a survey logistic model with all main effects (factor levels other than
 exposed/reference, e.g. unknown, keep their own coefficients), a product term for every
@@ -281,12 +287,7 @@ linearised. Contrasts: single-factor RR/RD within every combination of the other
 three- and four-way additive contrasts Σ(−1)^(k−|s|)p_s and their log-scale (multiplicative)
 analogues; excess of the joint RD over the sum of single RDs. A combination whose *recorded*
 cell has fewer than 30 sample units or 10 events is withheld together with every contrast using
-it. Holm adjustment across the registered family, per scale. The case explorer's model is saturated
-in the case factors (main effects and products for every subset of factors), so it is calibrated
-within every factor cell by construction; it withholds model risks, contrasts and allocations
-whenever any required combination is unsupported. (A first version with pairwise products only
-was mis-calibrated in two large cells — observed/predicted 0.59 and 1.74 — which a calibration
-test caught; higher-order interactions among the case factors are therefore material.)
+it. Holm adjustment across the registered family, per scale.
 
 Nested models (§12.4) add police-reported drugs as a separate step after the other behaviours
 and the driver/vehicle mix, because the police co-record drugs with alcohol; burden and rank
@@ -372,3 +373,63 @@ killed (FARS person files, `INJ_SEV` = 4) rather than from crash severity.
 The public website (`website/index.html`) is rendered from `website/templates/index.html` by
 `nhtsa analyze site`, with the same placeholder grammar as the reports, so every number on the page
 is looked up in `outputs/tables` at build time.
+
+## 14. Changes after the red-team review (November 2026)
+
+These record what changed in the pipeline; numbers are in the tables named, not here.
+
+* **Recodes** (details in `docs/variable_harmonization.md`).
+  * CRSS fatal is 0, not missing, when the maximum severity (`MAXSEV_IM`) is "injured, severity
+    unknown" (5), "died prior to crash" (6) or "no person involved" (8): none of them can contain a
+    crash death. The same rule applies to person-level killed and to the complete-case outcomes,
+    which still require every person's severity to be known unless a death is recorded. The old
+    coding dropped those crashes and overstated fatal shares slightly (relatively, and more in
+    early years), so most CRSS numbers shift a little after a re-run.
+  * "Looked but did not see" (2016–17 only) no longer counts as distracted.
+  * FARS rollover code 8 is 0 for motorcycles and missing otherwise.
+  * FARS 2016–17 `PREV_SUS` is a different quantity from `PREV_SUS1` and is explicitly missing.
+* **Interaction margins** (`analysis/interactions.py`) set the crash type together with the number
+  of vehicles from their observed joint distribution inside the exposed or reference level, so a
+  multi-vehicle crash type is never assigned to a one-vehicle crash. Margins therefore average over
+  coherent crash-type and vehicle-count combinations; the mixture weights of those combinations are
+  treated as fixed (see `docs/limitations.md` §10).
+* **Person-level margins** (`analysis/person.py`): when the interaction modifier is the crash type,
+  each stratum is standardised over its own persons (a stratum domain in the linearisation), because
+  setting the crash type for everyone while the number of vehicles and partner vehicle stay observed
+  would average over impossible crashes.
+* **Effect modification and calibration** (`analysis/severity.py`): model A is fitted once with an
+  exposure-by-stratum interaction, the stratum being single- or multi-vehicle crashes or crash type
+  (`severity/fatal_effect_modification`; the other covariate effects are shared across strata;
+  exploratory, with a homogeneity test and a minimum of 20 events in the exposed and reference
+  cells), and its calibration by weighted decile of predicted risk is tabulated
+  (`severity/fatal_calibration`; in-sample, so predictions are treated as fixed).
+* **Imputed-BAC diagnostic** (`analysis/measurement.py`): `measurement/imputed_bac_injury` compares
+  the adjusted association of imputed BAC of .08 or more with being killed, among untested drivers,
+  with that of measured BAC among tested drivers, with and without police-reported alcohol, light,
+  area and weekend. It is a diagnostic, not a causal estimate: a larger imputed-BAC association is
+  consistent with the imputation using injury severity, but the tested group is itself selected on
+  the outcome, so the comparison cannot show it.
+* **Shared unrestrained-share definition.** The share of unrestrained occupants among passenger-
+  vehicle occupant deaths with known restraint use (belted, child restraint counted as restrained,
+  or none; unknown and not applicable leave the denominator) is defined once
+  (`analysis/descriptive.py`, `unrestrained_share_of_known`) and used by both the FARS composition table
+  and the trend module.
+* **EMS intervals** (`analysis/stages.py`): crash-to-arrival intervals that are negative or longer
+  than 12 hours are set to missing, and the timing tables add a "driver BAC unknown" row.
+* **Sidecar code and input hashes** (`reporting/provenance.py`). Every table's JSON sidecar records
+  `code_sha256`, one SHA-256 over the producing module and every `nhtsa_stats` module it imports
+  transitively (so a change to a shared helper makes dependent tables stale). Each file is digested
+  as a canonical text (comments and docstrings cut out, trailing whitespace stripped, empty lines
+  dropped, indentation kept; no `ast.dump`, so the digest is identical on every Python version),
+  so comment, blank-line and docstring edits do not make tables
+  stale while any code, indentation or string-literal change (sidecar method text included) does; the
+  provenance module itself is excluded. One snapshot of all `nhtsa_stats/**/*.py` is taken when
+  the process starts and every closure comes from it, so edits during a long run cannot mark old
+  results fresh. A syntax or decode error in a closure member raises. The sidecar also records
+  `inputs_sha256` (SHA-256 of each local input under `NHTSA_DATA_DIR` / the outputs directory),
+  plus the older `source_sha256` and `package_sha256`. JSON outputs that are dictionaries carry a
+  `_provenance` entry (module, `code_sha256`, git commit, time). `nhtsa status` lists stale
+  tables, tables without a `code_sha256`, and, when the data exist locally, tables whose input
+  data changed.
+* **README.** `README.md` is rendered from `reports/templates/README.md` by `nhtsa analyze report`
+  like the reports, and `tests/test_reports_in_sync.py` fails if it is stale.

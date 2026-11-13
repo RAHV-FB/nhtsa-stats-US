@@ -64,6 +64,12 @@
  "ridge": 0.01,
  "design_df": 42,
  "stochastic_components": "none (deterministic estimators)",
- "crss_crash_fingerprint": "10045693-1792722264",
- "data_unchanged_during_run": true
+ "crss_crash_fingerprint": "10040002-1794529373",
+ "data_unchanged_during_run": true,
+ "_provenance": {
+  "module": "nhtsa_stats.analysis.trends",
+  "code_sha256": "cf192a0dd133b2be6dbe6e8518b552f757491798b55e25b9aec97a14f8a29617",
+  "git_commit": "af9ce88",
+  "generated_utc": "2026-11-13T01:19:59Z"
+ }
 }

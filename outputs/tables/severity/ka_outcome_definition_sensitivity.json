@@ -23,6 +23,12 @@
   "adj_rr_ratio_cc_vs_primary"
  ],
  "module": "nhtsa_stats.analysis.severity",
- "git_commit": "ef704fd",
- "generated_utc": "2026-10-23T02:33:05Z"
+ "git_commit": "af9ce88",
+ "source_sha256": "95fcc4ff73f94baa5a973e84d9fed0f7290196f6f528ce5324ed6f10df8d8c58",
+ "code_sha256": "10e1f146a1007abcfe246d05cdad2115b7f6c42ebaa985dc3de296aadd5f3e70",
+ "inputs_sha256": {
+  "data/processed/crss_crash.parquet": "1a31897f37cce3be223cc5abfb823582b68b9f7096a8c38980e9346f3450c6e3"
+ },
+ "package_sha256": "fbdac1b588be76a011931549cc2f2013fc1b6405f88cee1ba0e10db719e3ed6b",
+ "generated_utc": "2026-11-13T00:30:38Z"
 }

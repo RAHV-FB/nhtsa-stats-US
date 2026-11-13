@@ -1,19 +1,22 @@
 {
  "table": "simulation/baseline.csv",
- "description": "Layer A empirical baseline for the intervention simulator: every quantity with provenance (observed / estimated / adjusted_association) and source",
+ "description": "Layer A empirical baseline of deaths and crashes by target segment: every quantity with provenance (observed / estimated / adjusted_association) and source",
  "population": "FARS fatal crashes and deaths 2022-2024 (census); CRSS police-reported crashes 2022-2024 (sample)",
  "unit": "see 'unit' column",
  "outcome": "",
- "method": "FARS counts (window mean); CRSS design-based totals (Taylor linearisation, t with 42 df; suppressed if n<30, flagged unstable if RSE>30%); associations copied from the severity and matched modules",
+ "method": "FARS counts (window mean); CRSS design-based totals (Taylor linearisation, t with 42 df; suppressed if n<30, flagged unstable if RSE>30%); KA counts include only crashes/persons with a known KA status (unknown, MAXSEV_IM/INJSEV_IM 5 or 9, is shown separately, not counted as non-KA); associations copied from the severity and matched modules",
  "inputs": [
   "data/processed/fars_crash.parquet",
   "data/processed/fars_person.parquet",
   "data/processed/crss_crash.parquet",
   "data/processed/crss_person.parquet",
-  "outputs/tables/severity/*.csv",
+  "outputs/tables/severity/fatal_crude_vs_adjusted.csv",
+  "outputs/tables/severity/fatal_speeding_type.csv",
+  "outputs/tables/severity/ka_crude_vs_adjusted.csv",
+  "outputs/tables/severity/ka_speeding_type.csv",
   "outputs/tables/matched/belt_effect.csv"
  ],
- "rows": 62,
+ "rows": 64,
  "columns": [
   "name",
   "value",
@@ -28,9 +31,23 @@
   "flag",
   "note"
  ],
- "module": "nhtsa_stats.simulation.engine",
- "git_commit": "ef704fd",
- "generated_utc": "2026-10-23T03:46:10Z",
+ "module": "nhtsa_stats.simulation.baseline",
+ "git_commit": "af9ce88",
+ "source_sha256": "7fa12cd0e2d338d64f7ec7eafaff281667b6486eaa3b6da5b0590d71528262cc",
+ "code_sha256": "d7aa9d3d4c8a4cc6278959af059ba115bdae772ec6a0a8e424d31e684cbaaf86",
+ "inputs_sha256": {
+  "data/processed/fars_crash.parquet": "30f4314e8984ce2ba3cd764b561628edf36950705c1fc3bdd16769a417846ddf",
+  "data/processed/fars_person.parquet": "97b40b82c1b47f76bf99a8e05ebaa84e14c4b1ea2ecea3e86be6de4c2189bfa2",
+  "data/processed/crss_crash.parquet": "1a31897f37cce3be223cc5abfb823582b68b9f7096a8c38980e9346f3450c6e3",
+  "data/processed/crss_person.parquet": "145d300272256d566371ce07d81005f71959a9eeab5e00e3066d85abaca91fa8",
+  "outputs/tables/severity/fatal_crude_vs_adjusted.csv": "ba73429d4a9b3b78ab8bf0897ffea97499a0bb96a5aea8c3d4340ec53de2ed7c",
+  "outputs/tables/severity/fatal_speeding_type.csv": "d3677f25d5e0a9842c8ed5ad4c5cc270358d428c4d64c7afa9ad8b1faf39fdfc",
+  "outputs/tables/severity/ka_crude_vs_adjusted.csv": "10bf6a96115b9bcda7fe66295f1dbb37e9fa6867d14b9124129e2f3c8a4ca5fc",
+  "outputs/tables/severity/ka_speeding_type.csv": "30e32cdc6d5dc72cdfe05d229c8fa19bc7288cd5ad23289f194bcb6368dc106c",
+  "outputs/tables/matched/belt_effect.csv": "672180fc8934594b9760a7adf8cb1179a5a2a00270d347e22a01cce7c6f0fb7f"
+ },
+ "package_sha256": "fbdac1b588be76a011931549cc2f2013fc1b6405f88cee1ba0e10db719e3ed6b",
+ "generated_utc": "2026-11-13T02:18:04Z",
  "baseline": {
   "window": [
    2022,
@@ -77,7 +94,7 @@
     "n": 35358,
     "reliability": "moderate",
     "flag": "",
-    "note": "Police judgement, ascertained more thoroughly in fatal crashes; mixes exceeding the limit with 'too fast for conditions'. Crashes with unknown status are NOT counted (count is a lower bound in that respect)."
+    "note": "Police judgement, recorded differently by severity (more often unknown in fatal crashes, which can bias severity associations either way); mixes exceeding the limit with 'too fast for conditions'. Crashes with unknown status are NOT counted (count is a lower bound in that respect)."
    },
    "fars.share_of_deaths.speeding": {
     "name": "fars.share_of_deaths.speeding",
@@ -203,7 +220,7 @@
     "n": 14995,
     "reliability": "low",
     "flag": "",
-    "note": "LOW reliability: drug status is unknown for about half of fatal crashes, testing is selective by injury severity and state, and presence is not impairment (docs/audit/alcohol_drugs.md 4.1, 5.5)."
+    "note": "LOW reliability: drug status is unknown for about half of fatal crashes, testing is selective by injury severity and state, and presence is not impairment (docs/limitations.md; reports/alcohol_drugs_restraints.md)."
    },
    "fars.share_of_deaths.drugs": {
     "name": "fars.share_of_deaths.drugs",
@@ -553,7 +570,21 @@
     "n": 20556,
     "reliability": "high",
     "flag": "",
-    "note": "KA = fatal or suspected serious injury, NHTSA-imputed maximum severity (ka)"
+    "note": "KA = fatal or suspected serious injury, NHTSA-imputed maximum severity (ka); crashes whose KA status is unknown (injured with severity unknown, MAXSEV_IM 5, or unknown, 9) are neither KA nor non-KA here: they are not counted as KA, so the KA total is a lower bound, and they are shown separately (crss.ka_unknown_crashes_per_year)"
+   },
+   "crss.ka_unknown_crashes_per_year": {
+    "name": "crss.ka_unknown_crashes_per_year",
+    "value": 9755.917413951,
+    "kind": "estimated",
+    "source": "data/processed/crss_crash.parquet",
+    "unit": "crashes/year with unknown KA status (mean 2022-2024)",
+    "low": 1871.6803760169034,
+    "high": 17640.154451885097,
+    "se": 3906.7977411038432,
+    "n": 352,
+    "reliability": "moderate",
+    "flag": "unstable",
+    "note": "not KA and not non-KA: MAXSEV_IM 5 (injured, severity unknown) or 9 (unknown) in ka"
    },
    "crss.fatal_crashes_per_year": {
     "name": "crss.fatal_crashes_per_year",
@@ -749,160 +780,174 @@
     "n": 3707,
     "reliability": "low",
     "flag": "",
-    "note": "LOW reliability: belt use of surviving occupants is largely self-reported and likely over-reported, so unrestrained occupants are under-counted"
+    "note": "LOW reliability: belt use of surviving occupants is largely self-reported and likely over-reported, so unrestrained occupants are under-counted; persons with unknown injury severity (INJSEV_IM 5 or 9) are neither KA nor non-KA: they are not counted as KA (lower bound) and are shown separately (crss.ka_unknown_persons_per_year.unrestrained_lpv)"
+   },
+   "crss.ka_unknown_persons_per_year.unrestrained_lpv": {
+    "name": "crss.ka_unknown_persons_per_year.unrestrained_lpv",
+    "value": null,
+    "kind": "estimated",
+    "source": "data/processed/crss_person.parquet",
+    "unit": "unrestrained LPV occupants with unknown injury severity/year",
+    "low": null,
+    "high": null,
+    "se": 429.12538747635244,
+    "n": 24,
+    "reliability": "low",
+    "flag": "suppressed",
+    "note": "neither KA nor non-KA (INJSEV_IM 5 or 9); excluded from the KA count above"
    }
   },
   "associations": {
    "severity.fatal_adj_rr.speeding": {
     "name": "severity.fatal_adj_rr.speeding",
-    "value": 1.82118,
+    "value": 1.81677,
     "kind": "adjusted_association",
     "source": "outputs/tables/severity/fatal_crude_vs_adjusted.csv (A_adj_rr; {'factor': 'speeding', 'level': 'yes'})",
     "unit": "adjusted risk ratio of a fatal outcome given a police-reported crash",
-    "low": 1.51169,
-    "high": 2.19402,
+    "low": 1.5089,
+    "high": 2.18746,
     "se": null,
-    "n": 49410,
+    "n": 49636,
     "reliability": "moderate",
     "flag": "",
-    "note": "CRSS survey logistic model A (pre-crash adjustment set), standardised margins; conditional on a crash; not a causal effect; police-reported exposure ascertained more thoroughly in severe crashes"
+    "note": "CRSS survey logistic model A (pre-crash adjustment set), standardised margins; conditional on a crash; not a causal effect; police-reported exposure recorded differently by severity (more testing after a death, but more often unknown in fatal crashes), which can bias the association in either direction"
    },
    "severity.fatal_adj_rr.alcohol": {
     "name": "severity.fatal_adj_rr.alcohol",
-    "value": 4.24382,
+    "value": 4.23889,
     "kind": "adjusted_association",
     "source": "outputs/tables/severity/fatal_crude_vs_adjusted.csv (A_adj_rr; {'factor': 'alcohol_im', 'level': 'yes'})",
     "unit": "adjusted risk ratio of a fatal outcome given a police-reported crash",
-    "low": 3.57604,
-    "high": 5.03631,
+    "low": 3.57268,
+    "high": 5.02934,
     "se": null,
-    "n": 29993,
+    "n": 30183,
     "reliability": "moderate",
     "flag": "",
-    "note": "CRSS survey logistic model A (pre-crash adjustment set), standardised margins; conditional on a crash; not a causal effect; police-reported exposure ascertained more thoroughly in severe crashes"
+    "note": "CRSS survey logistic model A (pre-crash adjustment set), standardised margins; conditional on a crash; not a causal effect; police-reported exposure recorded differently by severity (more testing after a death, but more often unknown in fatal crashes), which can bias the association in either direction"
    },
    "severity.fatal_adj_rr.speeding_exceeded_limit": {
     "name": "severity.fatal_adj_rr.speeding_exceeded_limit",
-    "value": 5.21631,
+    "value": 5.20685,
     "kind": "adjusted_association",
     "source": "outputs/tables/severity/fatal_speeding_type.csv (adj_rr; {'level': 'exceeded_limit_or_racing'})",
     "unit": "adjusted risk ratio of a fatal outcome given a police-reported crash",
-    "low": 4.33693,
-    "high": 6.27398,
+    "low": 4.33567,
+    "high": 6.25308,
     "se": null,
-    "n": 5884,
+    "n": 5910,
     "reliability": "moderate",
     "flag": "",
-    "note": "CRSS survey logistic model A (pre-crash adjustment set), standardised margins; conditional on a crash; not a causal effect; police-reported exposure ascertained more thoroughly in severe crashes"
+    "note": "CRSS survey logistic model A (pre-crash adjustment set), standardised margins; conditional on a crash; not a causal effect; police-reported exposure recorded differently by severity (more testing after a death, but more often unknown in fatal crashes), which can bias the association in either direction"
    },
    "severity.ka_adj_rr.speeding": {
     "name": "severity.ka_adj_rr.speeding",
-    "value": 1.56173,
+    "value": 1.56244,
     "kind": "adjusted_association",
     "source": "outputs/tables/severity/ka_crude_vs_adjusted.csv (A_adj_rr; {'factor': 'speeding', 'level': 'yes'})",
     "unit": "adjusted risk ratio of a ka outcome given a police-reported crash",
-    "low": 1.36184,
-    "high": 1.79096,
+    "low": 1.36232,
+    "high": 1.79196,
     "se": null,
     "n": 49410,
     "reliability": "moderate",
     "flag": "",
-    "note": "CRSS survey logistic model A (pre-crash adjustment set), standardised margins; conditional on a crash; not a causal effect; police-reported exposure ascertained more thoroughly in severe crashes"
+    "note": "CRSS survey logistic model A (pre-crash adjustment set), standardised margins; conditional on a crash; not a causal effect; police-reported exposure recorded differently by severity (more testing after a death, but more often unknown in fatal crashes), which can bias the association in either direction"
    },
    "severity.ka_adj_rr.alcohol": {
     "name": "severity.ka_adj_rr.alcohol",
-    "value": 2.7405,
+    "value": 2.74189,
     "kind": "adjusted_association",
     "source": "outputs/tables/severity/ka_crude_vs_adjusted.csv (A_adj_rr; {'factor': 'alcohol_im', 'level': 'yes'})",
     "unit": "adjusted risk ratio of a ka outcome given a police-reported crash",
-    "low": 2.50231,
-    "high": 3.00136,
+    "low": 2.50334,
+    "high": 3.00317,
     "se": null,
-    "n": 29993,
+    "n": 29994,
     "reliability": "moderate",
     "flag": "",
-    "note": "CRSS survey logistic model A (pre-crash adjustment set), standardised margins; conditional on a crash; not a causal effect; police-reported exposure ascertained more thoroughly in severe crashes"
+    "note": "CRSS survey logistic model A (pre-crash adjustment set), standardised margins; conditional on a crash; not a causal effect; police-reported exposure recorded differently by severity (more testing after a death, but more often unknown in fatal crashes), which can bias the association in either direction"
    },
    "severity.ka_adj_rr.speeding_exceeded_limit": {
     "name": "severity.ka_adj_rr.speeding_exceeded_limit",
-    "value": 3.38992,
+    "value": 3.39467,
     "kind": "adjusted_association",
     "source": "outputs/tables/severity/ka_speeding_type.csv (adj_rr; {'level': 'exceeded_limit_or_racing'})",
     "unit": "adjusted risk ratio of a ka outcome given a police-reported crash",
-    "low": 3.03163,
-    "high": 3.79056,
+    "low": 3.0392,
+    "high": 3.79171,
     "se": null,
     "n": 5884,
     "reliability": "moderate",
     "flag": "",
-    "note": "CRSS survey logistic model A (pre-crash adjustment set), standardised margins; conditional on a crash; not a causal effect; police-reported exposure ascertained more thoroughly in severe crashes"
+    "note": "CRSS survey logistic model A (pre-crash adjustment set), standardised margins; conditional on a crash; not a causal effect; police-reported exposure recorded differently by severity (more testing after a death, but more often unknown in fatal crashes), which can bias the association in either direction"
    },
    "belt.fatality_reduction": {
     "name": "belt.fatality_reduction",
-    "value": 0.658495,
+    "value": 0.660054,
     "kind": "adjusted_association",
     "source": "outputs/tables/matched/belt_effect.csv (fatality_risk_reduction_belt_given_fatal_crash)",
     "unit": "proportional reduction in P(death) belted vs unbelted, given a fatal crash",
-    "low": 0.645338,
-    "high": 0.66995,
+    "low": 0.648429,
+    "high": 0.67236,
     "se": null,
-    "n": 45805,
+    "n": 46055,
     "reliability": "moderate",
     "flag": "",
     "note": "FARS within-vehicle design (evans_double_pair_comparison_driver_rf_pairs_crash_cluster_bootstrap); primary estimate; survivor misreporting of belt use would bias it upward"
    },
    "belt.fatality_reduction.misreport_f05": {
     "name": "belt.fatality_reduction.misreport_f05",
-    "value": 0.524764,
+    "value": 0.526496,
     "kind": "adjusted_association",
     "source": "outputs/tables/matched/belt_effect.csv (fatality_risk_reduction_belt_given_fatal_crash_misreport_f05)",
     "unit": "proportional reduction in P(death) belted vs unbelted, given a fatal crash",
-    "low": 0.509819,
-    "high": 0.537786,
+    "low": 0.513361,
+    "high": 0.540302,
     "se": null,
-    "n": 45805,
+    "n": 46055,
     "reliability": "low",
     "flag": "",
     "note": "FARS within-vehicle design (evans_double_pair_comparison_driver_rf_pairs_crash_cluster_bootstrap_closed_form_reclassification_f=0.05); sensitivity analysis, not an alternative primary estimate"
    },
    "belt.fatality_reduction.misreport_f10": {
     "name": "belt.fatality_reduction.misreport_f10",
-    "value": 0.378908,
+    "value": 0.380808,
     "kind": "adjusted_association",
     "source": "outputs/tables/matched/belt_effect.csv (fatality_risk_reduction_belt_given_fatal_crash_misreport_f10)",
     "unit": "proportional reduction in P(death) belted vs unbelted, given a fatal crash",
-    "low": 0.36153,
-    "high": 0.393718,
+    "low": 0.36497,
+    "high": 0.396465,
     "se": null,
-    "n": 45805,
+    "n": 46055,
     "reliability": "low",
     "flag": "",
     "note": "FARS within-vehicle design (evans_double_pair_comparison_driver_rf_pairs_crash_cluster_bootstrap_closed_form_reclassification_f=0.10); sensitivity analysis, not an alternative primary estimate"
    },
    "belt.fatality_reduction.misreport_f20": {
     "name": "belt.fatality_reduction.misreport_f20",
-    "value": 0.0436194,
+    "value": 0.0458311,
     "kind": "adjusted_association",
     "source": "outputs/tables/matched/belt_effect.csv (fatality_risk_reduction_belt_given_fatal_crash_misreport_f20)",
     "unit": "proportional reduction in P(death) belted vs unbelted, given a fatal crash",
-    "low": 0.0196537,
-    "high": 0.0639725,
+    "low": 0.0232545,
+    "high": 0.0676492,
     "se": null,
-    "n": 45805,
+    "n": 46055,
     "reliability": "low",
     "flag": "",
     "note": "FARS within-vehicle design (evans_double_pair_comparison_driver_rf_pairs_crash_cluster_bootstrap_closed_form_reclassification_f=0.20); sensitivity analysis, not an alternative primary estimate"
    },
    "belt.fatality_reduction.complete_restraint_vehicles": {
     "name": "belt.fatality_reduction.complete_restraint_vehicles",
-    "value": 0.659815,
+    "value": 0.661349,
     "kind": "adjusted_association",
     "source": "outputs/tables/matched/belt_effect.csv (fatality_risk_reduction_belt_given_fatal_crash_complete_restraint_vehicles)",
     "unit": "proportional reduction in P(death) belted vs unbelted, given a fatal crash",
-    "low": 0.647428,
-    "high": 0.672713,
+    "low": 0.649255,
+    "high": 0.67459,
     "se": null,
-    "n": 45106,
+    "n": 45352,
     "reliability": "low",
     "flag": "",
     "note": "FARS within-vehicle design (evans_double_pair_comparison_vehicles_without_unknown_restraint_crash_cluster_bootstrap); sensitivity analysis, not an alternative primary estimate"
@@ -1188,7 +1233,9 @@
     "crss_crashes": 5930496.115157646,
     "crss_crashes_se": 352876.7978994683,
     "crss_ka_crashes": 196116.3888624972,
-    "crss_ka_crashes_se": 8953.867677944
+    "crss_ka_crashes_se": 8953.867677944,
+    "crss_ka_unknown_crashes": 8456.844606088,
+    "crss_ka_unknown_crashes_se": 4603.6607983699
    },
    {
     "YEAR": 2023,
@@ -1208,7 +1255,9 @@
     "crss_crashes": 6138358.911912155,
     "crss_crashes_se": 341020.2361081403,
     "crss_ka_crashes": 192197.742222382,
-    "crss_ka_crashes_se": 9135.4607397212
+    "crss_ka_crashes_se": 9135.4607397212,
+    "crss_ka_unknown_crashes": 11454.526203859,
+    "crss_ka_unknown_crashes_se": 3584.3886582457
    },
    {
     "YEAR": 2024,
@@ -1228,7 +1277,9 @@
     "crss_crashes": 6180240.934543617,
     "crss_crashes_se": 346794.7958602833,
     "crss_ka_crashes": 193136.3680011653,
-    "crss_ka_crashes_se": 9706.8656413549
+    "crss_ka_crashes_se": 9706.8656413549,
+    "crss_ka_unknown_crashes": 9356.381431906,
+    "crss_ka_unknown_crashes_se": 3810.8377207926
    }
   ],
   "segments": {
@@ -1246,7 +1297,7 @@
     "fars": "any in-transport vehicle with SPEEDREL 2-5 (racing, exceeded limit, too fast for conditions, unspecified)",
     "crss": "same definition (CRSS vehicle SPEEDREL)",
     "reliability": "moderate",
-    "note": "Police judgement, ascertained more thoroughly in fatal crashes; mixes exceeding the limit with 'too fast for conditions'. Crashes with unknown status are NOT counted (count is a lower bound in that respect)."
+    "note": "Police judgement, recorded differently by severity (more often unknown in fatal crashes, which can bias severity associations either way); mixes exceeding the limit with 'too fast for conditions'. Crashes with unknown status are NOT counted (count is a lower bound in that respect)."
    },
    "speeding_exceeded_limit": {
     "name": "speeding_exceeded_limit",
@@ -1270,7 +1321,7 @@
     "fars": "any driver with police-reported drug involvement (DRUGS = 1)",
     "crss": "same definition",
     "reliability": "low",
-    "note": "LOW reliability: drug status is unknown for about half of fatal crashes, testing is selective by injury severity and state, and presence is not impairment (docs/audit/alcohol_drugs.md 4.1, 5.5)."
+    "note": "LOW reliability: drug status is unknown for about half of fatal crashes, testing is selective by injury severity and state, and presence is not impairment (docs/limitations.md; reports/alcohol_drugs_restraints.md)."
    },
    "unrestrained_lpv": {
     "name": "unrestrained_lpv",

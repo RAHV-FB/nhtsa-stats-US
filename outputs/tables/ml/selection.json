@@ -2,33 +2,39 @@
  "fatal|pre_crash": {
   "selected": "hgb",
   "rule": "first of ['logit_main', 'logit_l2', 'logit_interact', 'hgb', 'rf'] with 2022 weighted log loss <= best x 1.01 and weighted AUROC >= best - 0.005",
-  "best_valid_log_loss": 0.033571281896211,
-  "best_valid_auroc": 0.837046870865214,
-  "selected_valid_log_loss": 0.033571281896211,
-  "selected_valid_auroc": 0.837046870865214
+  "best_valid_log_loss": 0.03367581412902297,
+  "best_valid_auroc": 0.8376646367560179,
+  "selected_valid_log_loss": 0.03367581412902297,
+  "selected_valid_auroc": 0.8376646367560179
  },
  "fatal|pre_crash+circumstance": {
   "selected": "hgb",
   "rule": "first of ['logit_main', 'logit_l2', 'logit_interact', 'hgb', 'rf'] with 2022 weighted log loss <= best x 1.01 and weighted AUROC >= best - 0.005",
-  "best_valid_log_loss": 0.02883041666306932,
-  "best_valid_auroc": 0.9136247371665914,
-  "selected_valid_log_loss": 0.02883041666306932,
-  "selected_valid_auroc": 0.9136247371665914
+  "best_valid_log_loss": 0.028858157775969992,
+  "best_valid_auroc": 0.9127423948084001,
+  "selected_valid_log_loss": 0.028858157775969992,
+  "selected_valid_auroc": 0.9127423948084001
  },
  "ka|pre_crash": {
   "selected": "hgb",
   "rule": "first of ['logit_main', 'logit_l2', 'logit_interact', 'hgb', 'rf'] with 2022 weighted log loss <= best x 1.01 and weighted AUROC >= best - 0.005",
-  "best_valid_log_loss": 0.12708557459312636,
-  "best_valid_auroc": 0.7561533611861238,
-  "selected_valid_log_loss": 0.12708557459312636,
-  "selected_valid_auroc": 0.7561533611861238
+  "best_valid_log_loss": 0.12696816364431618,
+  "best_valid_auroc": 0.756968449160575,
+  "selected_valid_log_loss": 0.12696816364431618,
+  "selected_valid_auroc": 0.756968449160575
  },
  "ka|pre_crash+circumstance": {
   "selected": "hgb",
   "rule": "first of ['logit_main', 'logit_l2', 'logit_interact', 'hgb', 'rf'] with 2022 weighted log loss <= best x 1.01 and weighted AUROC >= best - 0.005",
-  "best_valid_log_loss": 0.11284595361322913,
-  "best_valid_auroc": 0.8452125242410966,
-  "selected_valid_log_loss": 0.11284595361322913,
-  "selected_valid_auroc": 0.8452125242410966
+  "best_valid_log_loss": 0.11303337122245903,
+  "best_valid_auroc": 0.8442531471238163,
+  "selected_valid_log_loss": 0.11303337122245903,
+  "selected_valid_auroc": 0.8442531471238163
+ },
+ "_provenance": {
+  "module": "nhtsa_stats.models.severity_ml",
+  "code_sha256": "66ec0673990fd6d92ad6c8b8736f9ad98fbd4f0538e077eeb9865c5b046919e9",
+  "git_commit": "af9ce88",
+  "generated_utc": "2026-11-13T01:45:33Z"
  }
 }

@@ -47,6 +47,15 @@ Methods
        reclassified cell counts are computed in closed form and the DPC estimate and the
        matched-pair odds ratio (two-occupant vehicles, one death) are recomputed; the
        adjusted conditional logit is refitted after a seeded random reclassification.
+    4. Added analyses (all use the estimators above, nothing is re-estimated differently):
+       (a) the belt effect (DPC, matched-pair OR, conditional logit) within crash configuration
+       (harmonised ``crash_type`` groups and vehicle rollover), with the misreporting tipping
+       point per stratum (``belt_by_crash_type``); (b) two-sided misreporting: besides the
+       fraction f of belted-coded survivors truly unbelted, a fraction g of unbelted-coded
+       deaths truly belted (``belt_misreporting_two_sided_*``); (c) the same scenarios, the
+       tipping point and the informative-pair counts for the motorcycle helmet estimate, and
+       the share of unhelmeted motorcyclist deaths on two-occupant motorcycles, the only
+       population the pair design covers (``helmet_misreporting_*``, ``helmet_pair_coverage``).
 Reliability flags
     ``flag`` columns: ``suppressed`` when fewer than 30 persons carry a conditional-logit term
     or a DPC ratio rests on a death count below 30; ``unstable`` when the SE of the log
@@ -141,6 +150,8 @@ FARS_COLUMNS: tuple[str, ...] = (
     "restraint",
     "helmet",
     "body",
+    "crash_type",
+    "veh_rollover",
 )
 
 
@@ -899,7 +910,7 @@ def _dpc_belt_rows(r: pd.Series, suffix: str, method: str) -> list[dict]:
 def belt_effect_table(
     dpc: pd.DataFrame, cl: dict[str, CLResult], mp: pd.DataFrame, dpc_cc: pd.DataFrame
 ) -> pd.DataFrame:
-    """Machine-readable belt estimates for the policy simulator.
+    """Machine-readable belt estimates (read by the segment baseline).
 
     The first two rows are the primary estimand (Evans DPC, crash-cluster bootstrap CI);
     every other row is either a different estimator (within-vehicle ORs, which are not risk
@@ -957,6 +968,576 @@ def belt_effect_table(
             }
         )
     return pd.DataFrame(rows)
+
+
+# --------------------------------------------------------------------------------------
+# Two-sided misreporting, crash-configuration strata and helmet coverage (added analyses)
+# --------------------------------------------------------------------------------------
+DEATH_MISREPORT_FRACTIONS: tuple[float, ...] = (0.0, 0.05, 0.10)
+
+
+def reclassify_two_sided(c: np.ndarray, f: float, g: float) -> np.ndarray:
+    """Expected cell counts under survivor error ``f`` and reverse error among deaths ``g``.
+
+    ``f``: share of survivors coded x=1 truly x=0 (as :func:`reclassify`); ``g``: share of
+    deaths coded x=0 truly x=1.  Both errors are applied independently to the driver and the
+    other occupant.  Works on any array whose last four axes are [x_d, k_d, x_p, k_p].
+    """
+    if not 0 <= g < 1:
+        raise ValueError("g must be in [0, 1)")
+    out = reclassify(c, f)
+    moved = g * out[..., 0, 1, :, :]
+    out[..., 0, 1, :, :] -= moved
+    out[..., 1, 1, :, :] += moved
+    moved = g * out[..., :, :, 0, 1]
+    out[..., :, :, 0, 1] -= moved
+    out[..., :, :, 1, 1] += moved
+    return out
+
+
+def _crossing(fn, x_max: float) -> float:
+    """Smallest x in [0, x_max] at which ``fn`` (a log RR) reaches 0; NaN if it does not."""
+    if not np.isfinite(fn(0.0)):
+        return float("nan")
+    if fn(0.0) >= 0:
+        return 0.0
+    if fn(x_max) < 0:
+        return float("nan")
+    return float(optimize.brentq(fn, 0.0, x_max, xtol=1e-6))
+
+
+def dpc_tipping_two_sided(
+    c: np.ndarray, f: float = 0.0, g: float = 0.0, vary: str = "f", x_max: float = 0.95
+) -> float:
+    """Value of ``vary`` ('f' survivors or 'g' deaths) at which the combined RR reaches 1.
+
+    The other error rate is held at its given value.  NaN if no crossing on [0, x_max].
+    """
+    if vary == "f":
+
+        def fn(x: float) -> float:
+            return float(dpc_combined(reclassify_two_sided(c, x, g)))
+
+    else:
+
+        def fn(x: float) -> float:
+            return float(dpc_combined(reclassify_two_sided(c, f, x)))
+
+    return _crossing(fn, x_max)
+
+
+def dpc_two_sided(
+    pairs: pd.DataFrame,
+    label: str,
+    attribute_label: str,
+    rng: np.random.Generator,
+    n_boot: int = N_BOOT,
+    fractions: Sequence[float] = MISREPORT_FRACTIONS,
+    death_fractions: Sequence[float] = DEATH_MISREPORT_FRACTIONS,
+) -> pd.DataFrame:
+    """Combined DPC risk ratio over the grid of survivor error f x reverse death error g.
+
+    Point estimates are the closed-form expected-count solution; CIs are percentile bootstrap
+    CIs (crash clusters, primary; vehicles, secondary) of the same function of each replicate.
+    ``tipping_f_given_g`` / ``tipping_g_given_f`` are the error rates at which the RR reaches 1.
+    """
+    c = cell_counts(pairs)
+    boot_v = bootstrap_counts(pairs, n_boot, rng)
+    boot_c = bootstrap_counts(pairs, n_boot, rng, cluster="crash_id")
+    n_contrib = int(((pairs["k_d"] + pairs["k_p"]) > 0).sum())
+    rows = []
+    for g in death_fractions:
+        tip_f = dpc_tipping_two_sided(c, 0.0, g, vary="f")
+        for f in fractions:
+            cf = reclassify_two_sided(c, f, g)
+            est = float(dpc_combined(cf))
+            bc = dpc_combined(reclassify_two_sided(boot_c, f, g))
+            bv = dpc_combined(reclassify_two_sided(boot_v, f, g))
+            clo, chi, deg = _pct_ci(bc)
+            vlo, vhi, _ = _pct_ci(bv)
+            se = _boot_sd(bc)
+            rows.append(
+                {
+                    "analysis": label,
+                    "attribute_x1": attribute_label,
+                    "survivor_misreport_f": f,
+                    "death_misreport_g": g,
+                    "rr_x1_vs_x0": float(np.exp(est)),
+                    "rr_low": float(np.exp(clo)),
+                    "rr_high": float(np.exp(chi)),
+                    "reduction_1_minus_rr": float(1 - np.exp(est)),
+                    "reduction_low": float(1 - np.exp(chi)),
+                    "reduction_high": float(1 - np.exp(clo)),
+                    "rr_low_vehicle_boot": float(np.exp(vlo)),
+                    "rr_high_vehicle_boot": float(np.exp(vhi)),
+                    "se_log_bootstrap": se,
+                    "boot_degenerate_share": deg,
+                    "n_pairs": len(pairs),
+                    "n_pairs_with_death": n_contrib,
+                    "min_death_count": float(dpc_min_deaths(cf)[-1]),
+                    "tipping_f_given_g": tip_f,
+                    "tipping_g_given_f": dpc_tipping_two_sided(c, f, 0.0, vary="g"),
+                    "flag": _flag(float(dpc_min_deaths(cf)[-1]), se),
+                }
+            )
+    return pd.DataFrame(rows)
+
+
+def matched_pair_counts(sets: pd.DataFrame) -> dict[str, float]:
+    """n10, n01, n00, n11 of the two-occupant, one-death vehicles (see matched_pair_or)."""
+    r = matched_pair_or(sets, 0.0)
+    return {
+        "n10": r["n10_unbelted_died_belted_survived"],
+        "n01": r["n01_belted_died_unbelted_survived"],
+        "n00": r["n00_both_belted"],
+        "n11": r["n11_both_unbelted"],
+    }
+
+
+def matched_pair_or_two_sided(
+    counts: dict[str, float], f: float, g: float, level: float = 0.95
+) -> dict:
+    """Matched-pair OR (exposed vs unexposed) under survivor error f and death error g.
+
+    The dead / surviving member of each pair is (exposed, unexposed) as coded: n10 = exposed
+    died & unexposed survived, n01 = unexposed died & exposed survived, n00 = both unexposed,
+    n11 = both exposed.  A fraction f of unexposed-coded survivors is truly exposed and a
+    fraction g of exposed-coded deaths truly unexposed (exposure = unbelted / unhelmeted),
+    giving the expected discordant counts
+      n10' = n10 (1 - f)(1 - g),  n01' = n01 + f n00 + g n11 + f g n10.
+    The tipping fractions solve n10' = n01' (closed form, linear in the other rate).
+    """
+    n10, n01, n00, n11 = (counts[k] for k in ("n10", "n01", "n00", "n11"))
+    a = n10 * (1 - f) * (1 - g)
+    b = n01 + f * n00 + g * n11 + f * g * n10
+    z = stats.norm.ppf(0.5 + level / 2)
+    with np.errstate(divide="ignore", invalid="ignore"):
+        lor = np.log(a / b)
+        se = np.sqrt(1 / a + 1 / b)
+
+    def tip(num: float, den: float) -> float:
+        if den <= 0:
+            return float("nan")
+        x = num / den
+        return 0.0 if x <= 0 else (float(x) if x < 1 else float("nan"))
+
+    return {
+        "survivor_misreport_f": f,
+        "death_misreport_g": g,
+        "n10_exposed_died_unexposed_survived": n10,
+        "n01_unexposed_died_exposed_survived": n01,
+        "n00_both_unexposed": n00,
+        "n11_both_exposed": n11,
+        "or_exposed_vs_unexposed": float(np.exp(lor)),
+        "or_low": float(np.exp(lor - z * se)),
+        "or_high": float(np.exp(lor + z * se)),
+        "n_informative_vehicles": n10 + n01,
+        "tipping_f_given_g": tip(n10 * (1 - g) - n01 - n11 * g, n10 + n00),
+        "tipping_g_given_f": _tip_g_given_f(counts, f),
+    }
+
+
+def _tip_g_given_f(counts: dict[str, float], f: float) -> float:
+    """g at which n10' = n01' for a given f (the equation is linear in g).
+
+    n10 (1 - f)(1 - g) = n01 + f n00 + g n11 + f g n10  <=>
+    g = (n10 (1 - f) - n01 - f n00) / (n10 (1 - f) + n11 + f n10) = (...) / (n10 + n11).
+    """
+    n10, n01, n00, n11 = (counts[k] for k in ("n10", "n01", "n00", "n11"))
+    den = n10 + n11
+    if den <= 0:
+        return float("nan")
+    x = (n10 * (1 - f) - n01 - f * n00) / den
+    return 0.0 if x <= 0 else (float(x) if x < 1 else float("nan"))
+
+
+def matched_pair_two_sided_table(
+    sets: pd.DataFrame,
+    label: str,
+    fractions: Sequence[float] = MISREPORT_FRACTIONS,
+    death_fractions: Sequence[float] = DEATH_MISREPORT_FRACTIONS,
+) -> pd.DataFrame:
+    """Grid of :func:`matched_pair_or_two_sided` for one exposure (column ``unbelted``)."""
+    counts = matched_pair_counts(sets)
+    rows = [
+        {"analysis": label, **matched_pair_or_two_sided(counts, f, g)}
+        for g in death_fractions
+        for f in fractions
+    ]
+    return pd.DataFrame(rows)
+
+
+CRASH_TYPE_GROUPS: dict[str, tuple[str, ...]] = {
+    "single vehicle, rollover first": ("sv_rollover_first",),
+    "single vehicle, no rollover first": ("sv_off_roadway", "sv_on_roadway"),
+    "multi-vehicle, angle": ("mv_angle",),
+    "multi-vehicle, head-on": ("mv_head_on",),
+    "multi-vehicle, rear-end": ("mv_rear_end",),
+    "multi-vehicle, sideswipe": ("mv_sideswipe",),
+    "other (multi-vehicle other, non-motorist)": ("mv_other", "pedestrian", "cyclist"),
+}
+
+
+def configuration_strata(elig: pd.DataFrame) -> list[tuple[str, str, pd.Series]]:
+    """(partition, stratum, row mask): harmonised crash-type groups and vehicle rollover."""
+    out = [
+        ("crash type", name, elig["crash_type"].isin(list(types)))
+        for name, types in CRASH_TYPE_GROUPS.items()
+    ]
+    roll = elig.groupby("vehicle_id")["veh_rollover"].transform("max")
+    out.append(("vehicle rollover", "vehicle rolled over (any crash type)", roll == 1))
+    out.append(("vehicle rollover", "vehicle did not roll over", roll == 0))
+    return out
+
+
+def _clogit_belt(sub: pd.DataFrame) -> dict:
+    """Within-vehicle conditional-logit unbelted OR (main model) in a stratum, or NaNs."""
+    nan = {
+        "clogit_or": np.nan,
+        "clogit_low": np.nan,
+        "clogit_high": np.nan,
+        "clogit_n_sets": 0,
+        "clogit_belt_discordant_sets": 0,
+        "clogit_converged": False,
+    }
+    sets = matched_sets(sub)["discordant"].sort_values(["vehicle_id", "PER_NO"])
+    if len(sets) == 0 or sets["unbelted"].nunique() < 2:
+        return nan
+    try:
+        res = fit_clogit(
+            sets["killed"].to_numpy(),
+            occupant_covariates(sets),
+            sets["vehicle_id"].to_numpy(),
+            sets["crash_id"].to_numpy(),
+        )
+        t = res.table.set_index("term").loc["unbelted"]
+    except (KeyError, ValueError, np.linalg.LinAlgError):
+        return nan
+    return {
+        "clogit_or": float(t["odds_ratio"]),
+        "clogit_low": float(t["or_low"]),
+        "clogit_high": float(t["or_high"]),
+        "clogit_n_sets": res.info["n_sets"],
+        "clogit_belt_discordant_sets": exposure_set_counts(sets, "unbelted")[
+            "sets_discordant_exposure"
+        ],
+        "clogit_converged": res.info["converged"],
+    }
+
+
+def belt_by_stratum(
+    elig: pd.DataFrame,
+    strata: Sequence[tuple[str, str, pd.Series]],
+    rng: np.random.Generator,
+    n_boot: int = N_BOOT,
+    scenario_f: float = 0.10,
+) -> pd.DataFrame:
+    """Belt effect in each stratum: DPC RR, matched-pair OR, conditional-logit OR, tipping points.
+
+    ``elig`` needs ``belted``, ``unbelted``, ``killed``, ``SEAT_POS``, ``ptype``, ``seat``,
+    ``age``, ``sex``, ``PER_NO`` and the ids.  The DPC RR carries the crash-cluster bootstrap CI
+    (as in ``belt_effect.csv``) and its value if ``scenario_f`` of belted survivors were
+    unbelted; both tipping points are the survivor misreporting fraction that brings the
+    estimate to no effect (RR or OR = 1).
+    """
+    rows = []
+    for partition, name, mask in strata:
+        sub = elig.loc[mask.to_numpy()]
+        drv = (sub["ptype"] == "driver") & (sub["SEAT_POS"] == SEAT_POS_DRIVER)
+        rf = (sub["ptype"] == "passenger") & (sub["SEAT_POS"] == SEAT_POS_RIGHT_FRONT)
+        pairs = pair_frame(sub, "belted", drv, rf)
+        rec: dict = {"partition": partition, "stratum": name, "n_persons": len(sub)}
+        if len(pairs) > 0:
+            res = dpc_analysis(pairs, name, "belted", rng, n_boot, (0.0, scenario_f))
+            comb = res[res["component"].str.startswith("combined")]
+            r0 = comb.loc[comb["misreport_fraction"] == 0].iloc[0]
+            r1 = comb.loc[comb["misreport_fraction"] == scenario_f].iloc[0]
+            rec.update(
+                {
+                    "dpc_n_pairs": int(r0["n_pairs"]),
+                    "dpc_n_pairs_with_death": int(r0["n_pairs_with_death"]),
+                    "dpc_min_death_count": float(r0["min_death_count"]),
+                    "dpc_rr": float(r0["rr_x1_vs_x0"]),
+                    "dpc_low": float(r0["rr_low_crash_boot"]),
+                    "dpc_high": float(r0["rr_high_crash_boot"]),
+                    "dpc_reduction": float(r0["reduction_1_minus_rr"]),
+                    "dpc_reduction_low": float(1 - r0["rr_high_crash_boot"]),
+                    "dpc_reduction_high": float(1 - r0["rr_low_crash_boot"]),
+                    "dpc_se_log_bootstrap": float(r0["se_log_bootstrap"]),
+                    f"dpc_rr_misreport_f{round(scenario_f * 100):02d}": float(r1["rr_x1_vs_x0"]),
+                    "dpc_tipping_point_f": float(r0["tipping_point_f"]),
+                    "dpc_flag": r0["flag"],
+                }
+            )
+        sets = matched_sets(sub)["discordant"]
+        if len(sets) > 0:
+            counts = matched_pair_counts(sets)
+            m0 = matched_pair_or_two_sided(counts, 0.0, 0.0)
+            m1 = matched_pair_or_two_sided(counts, scenario_f, 0.0)
+            rec.update(
+                {
+                    "mp_n_vehicles": int(
+                        counts["n10"] + counts["n01"] + counts["n00"] + counts["n11"]
+                    ),
+                    "mp_n10_unbelted_died": counts["n10"],
+                    "mp_n01_belted_died": counts["n01"],
+                    "mp_n00_both_belted": counts["n00"],
+                    "mp_or_unbelted_vs_belted": m0["or_exposed_vs_unexposed"],
+                    "mp_or_low": m0["or_low"],
+                    "mp_or_high": m0["or_high"],
+                    f"mp_or_misreport_f{round(scenario_f * 100):02d}": m1[
+                        "or_exposed_vs_unexposed"
+                    ],
+                    "mp_tipping_point_f": m0["tipping_f_given_g"],
+                }
+            )
+        rec.update(_clogit_belt(sub))
+        rows.append(rec)
+        log.info("belt stratum %s done", name)
+    return pd.DataFrame(rows)
+
+
+def heterogeneity_p(tab: pd.DataFrame, partition: str) -> dict:
+    """Cochran Q test (bootstrap SEs of the log DPC RR) across the strata of a partition."""
+    t = tab.loc[(tab["partition"] == partition) & tab["dpc_se_log_bootstrap"].gt(0)]
+    if len(t) < 2:
+        return {"q": float("nan"), "df": 0, "p": float("nan")}
+    lr = np.log(t["dpc_rr"].to_numpy())
+    w = 1 / t["dpc_se_log_bootstrap"].to_numpy() ** 2
+    m = (w * lr).sum() / w.sum()
+    q = float((w * (lr - m) ** 2).sum())
+    return {"q": q, "df": len(t) - 1, "p": float(stats.chi2.sf(q, len(t) - 1))}
+
+
+def helmet_riders(df: pd.DataFrame) -> pd.DataFrame:
+    """Motorcycle operators / passengers with helmet coded helmet / none and known outcome."""
+    mc = df.loc[
+        df["ptype"].isin(OCCUPANT_PTYPES)
+        & (df["body"] == "motorcycle")
+        & df["helmet"].isin(["helmet", "none"])
+        & df["killed"].notna()
+    ].copy()
+    mc["killed"] = mc["killed"].astype(int)
+    mc["helmeted"] = (mc["helmet"] == "helmet").astype(int)
+    mc["unhelmeted"] = 1 - mc["helmeted"]
+    mc["unbelted"] = mc["unhelmeted"]  # exposure column name used by the matched-pair code
+    return mc
+
+
+def helmet_coverage(df: pd.DataFrame) -> pd.DataFrame:
+    """Where the unhelmeted motorcyclist deaths are, relative to the pair design.
+
+    The pair design needs a motorcycle with exactly one operator and one passenger, both with
+    known helmet use and outcome.  Rows count unhelmeted deaths (operators and passengers,
+    helmet coded 'none') by the kind of motorcycle they were on, and the pairs themselves.
+    """
+    occ = df.loc[df["ptype"].isin(OCCUPANT_PTYPES) & (df["body"] == "motorcycle")].copy()
+    occ["n_occ"] = occ.groupby("vehicle_id")["vehicle_id"].transform("size")
+    dead_unhelm = occ.loc[(occ["helmet"] == "none") & (occ["killed"] == 1)]
+    n_all = len(dead_unhelm)
+    mc = helmet_riders(df)
+    drv = mc["ptype"] == "driver"
+    pas = mc["ptype"] == "passenger"
+    pairs = pair_frame(mc, "helmeted", drv, pas)
+    in_pair = dead_unhelm["vehicle_id"].isin(pairs["vehicle_id"])
+    informative = pairs.loc[(pairs["x_d"] != pairs["x_p"]) & (pairs["k_d"] != pairs["k_p"])]
+    in_inf = dead_unhelm["vehicle_id"].isin(informative["vehicle_id"])
+
+    def row(metric: str, n: float, den: float | None, note: str) -> dict:
+        return {
+            "metric": metric,
+            "count": float(n),
+            "denominator": np.nan if den is None else float(den),
+            "share": np.nan if den in (None, 0) else float(n / den),
+            "note": note,
+        }
+
+    rows = [
+        row(
+            "unhelmeted_motorcyclist_deaths",
+            n_all,
+            None,
+            "operators and passengers, helmet coded none, killed",
+        ),
+        row(
+            "unhelmeted_deaths_single_rider_motorcycle",
+            (dead_unhelm["n_occ"] == 1).sum(),
+            n_all,
+            "no second rider: no within-motorcycle comparison",
+        ),
+        row(
+            "unhelmeted_deaths_two_occupant_motorcycle",
+            (dead_unhelm["n_occ"] == 2).sum(),
+            n_all,
+            "motorcycles with two recorded riders",
+        ),
+        row(
+            "unhelmeted_deaths_three_plus_occupant_motorcycle",
+            (dead_unhelm["n_occ"] >= 3).sum(),
+            n_all,
+            "not in the operator / passenger pair design",
+        ),
+        row(
+            "unhelmeted_deaths_in_pair_design",
+            in_pair.sum(),
+            n_all,
+            "one operator and one passenger, helmet use and outcome known for both",
+        ),
+        row(
+            "unhelmeted_deaths_in_informative_pairs",
+            in_inf.sum(),
+            n_all,
+            "pairs discordant on helmet use and on outcome (they identify the matched-pair OR)",
+        ),
+        row("pairs_operator_passenger", len(pairs), None, "pairs entering the helmet DPC"),
+        row(
+            "pairs_with_a_death",
+            ((pairs["k_d"] + pairs["k_p"]) > 0).sum(),
+            len(pairs),
+            "at least one rider killed",
+        ),
+        row(
+            "pairs_discordant_helmet_use",
+            (pairs["x_d"] != pairs["x_p"]).sum(),
+            len(pairs),
+            "exactly one rider helmeted",
+        ),
+        row(
+            "pairs_discordant_outcome",
+            (pairs["k_d"] != pairs["k_p"]).sum(),
+            len(pairs),
+            "exactly one rider killed",
+        ),
+        row(
+            "pairs_discordant_helmet_and_outcome",
+            len(informative),
+            len(pairs),
+            "informative pairs for the matched-pair OR (n10 + n01)",
+        ),
+    ]
+    return pd.DataFrame(rows)
+
+
+def added_analyses(
+    df: pd.DataFrame,
+    elig: pd.DataFrame,
+    sets: pd.DataFrame,
+    rng: np.random.Generator,
+    n_boot: int = N_BOOT,
+) -> dict[str, pd.DataFrame]:
+    """Compute and save the crash-type strata, two-sided misreporting and helmet tables.
+
+    Draws from ``rng`` after every pre-existing analysis, so earlier tables are unaffected.
+    ``elig`` needs the ``belted`` column (set in :func:`run`); ``sets`` are its discordant sets.
+    """
+    out: dict[str, pd.DataFrame] = {}
+    # (a) belt effect within crash configuration ------------------------------------------
+    strata = [("all", "all eligible vehicles (pooled)", pd.Series(True, index=elig.index))]
+    strata += configuration_strata(elig)
+    by_type = belt_by_stratum(elig, strata, rng, n_boot)
+    out["belt_by_crash_type"] = by_type
+    het = {p: heterogeneity_p(by_type, p) for p in ("crash type", "vehicle rollover")}
+    unk_roll = int(elig.groupby("vehicle_id")["veh_rollover"].max().isna().sum())
+    _save(
+        by_type,
+        "belt_by_crash_type",
+        "Belt effect within crash configuration: Evans DPC risk ratio (crash-cluster bootstrap "
+        "CI), matched-pair OR (two-occupant vehicles, one death), within-vehicle conditional "
+        "logit OR (main model) and the survivor-misreporting fraction that brings each estimate "
+        "to no effect (tipping point), by harmonised crash type and by vehicle rollover.  The "
+        "crash-type strata partition the eligible vehicles; the rollover strata exclude vehicles "
+        "with unknown rollover; the two partitions overlap each other",
+        "Same estimators as the pooled analysis, applied to the vehicles of each stratum "
+        f"({n_boot} bootstrap replicates over crashes); tipping_point_f = f at which the RR/OR "
+        "reaches 1 under the one-sided scenario (a fraction f of belted survivors truly "
+        "unbelted); rows 'pooled' are a check on the pooled estimate (CI differs by bootstrap "
+        "seed).  Associations given a fatal crash in the vehicle",
+        LPV_POP,
+        extra={
+            "heterogeneity_cochran_q": het,
+            "vehicles_with_unknown_rollover_among_eligible": unk_roll,
+        },
+    )
+
+    # (b) two-sided misreporting for belts -------------------------------------------------
+    pairs = pair_frame(
+        elig,
+        "belted",
+        (elig["ptype"] == "driver") & (elig["SEAT_POS"] == SEAT_POS_DRIVER),
+        (elig["ptype"] == "passenger") & (elig["SEAT_POS"] == SEAT_POS_RIGHT_FRONT),
+    )
+    two = dpc_two_sided(pairs, "belt_driver_rf", "belted", rng, n_boot)
+    out["belt_misreporting_two_sided_dpc"] = two
+    two_pop = LPV_POP + "; vehicles with one eligible driver and one right-front passenger"
+    _save(
+        two,
+        "belt_misreporting_two_sided_dpc",
+        "Evans DPC belt risk ratio under two-sided misreporting: a fraction f of belted-coded "
+        "survivors truly unbelted (existing scenario) crossed with a fraction g of unbelted-coded "
+        "deaths truly belted (reverse error); tipping_f_given_g / tipping_g_given_f are the "
+        "error rates at which the RR reaches 1 with the other rate fixed",
+        "Closed-form expected-cell reclassification (survivors keep, deaths keep their other "
+        f"status), percentile bootstrap CIs over crashes ({n_boot} replicates); g = 0 rows "
+        "reproduce the one-sided scenarios in double_pair_comparison",
+        two_pop,
+    )
+    mp_two = matched_pair_two_sided_table(sets, "belt_matched_pair_all_eligible_vehicles")
+    out["belt_misreporting_two_sided_matched_pair"] = mp_two
+    _save(
+        mp_two,
+        "belt_misreporting_two_sided_matched_pair",
+        "Matched-pair OR (unbelted vs belted, two-occupant vehicles with one death) under "
+        "two-sided misreporting (f survivors, g deaths) with closed-form tipping fractions",
+        "Expected discordant counts n10(1-f)(1-g) and n01 + f n00 + g n11 + f g n10; Poisson CI "
+        "treating vehicles as independent",
+        LPV_POP + "; vehicles with exactly 2 eligible occupants and exactly one death",
+    )
+
+    # (c) helmets --------------------------------------------------------------------------
+    mc = helmet_riders(df)
+    h_pairs = pair_frame(mc, "helmeted", mc["ptype"] == "driver", mc["ptype"] == "passenger")
+    h_two = dpc_two_sided(h_pairs, "motorcycle_helmet", "helmet worn", rng, n_boot)
+    out["helmet_misreporting_dpc"] = h_two
+    h_pop = (
+        "FARS 2016-2024 motorcycles with one operator and one passenger, helmet coded "
+        "helmet/none for both, known outcome"
+    )
+    _save(
+        h_two,
+        "helmet_misreporting_dpc",
+        "Evans DPC helmet risk ratio (helmeted vs unhelmeted, operator / passenger pairs) under "
+        "misreporting of helmet use: a fraction f of helmeted-coded survivors truly unhelmeted "
+        "crossed with a fraction g of unhelmeted-coded deaths truly helmeted, with tipping "
+        "fractions",
+        "As belt_misreporting_two_sided_dpc, applied to the motorcycle pairs",
+        h_pop,
+    )
+    h_sets = matched_sets(mc)["discordant"]
+    h_mp = matched_pair_two_sided_table(h_sets, "helmet_matched_pair_two_rider_motorcycles")
+    out["helmet_misreporting_matched_pair"] = h_mp
+    _save(
+        h_mp,
+        "helmet_misreporting_matched_pair",
+        "Matched-pair OR (unhelmeted vs helmeted, two-rider motorcycles with one death) under "
+        "two-sided misreporting of helmet use with closed-form tipping fractions; n10 + n01 is "
+        "the number of informative (helmet- and outcome-discordant) pairs",
+        "As belt_misreporting_two_sided_matched_pair, applied to motorcycle riders",
+        "FARS 2016-2024 motorcycles with exactly 2 riders with known helmet use and exactly one "
+        "death",
+    )
+    cov = helmet_coverage(df)
+    out["helmet_pair_coverage"] = cov
+    _save(
+        cov,
+        "helmet_pair_coverage",
+        "Coverage of the helmet pair design: share of unhelmeted motorcyclist deaths on "
+        "single-rider, two-occupant and larger motorcycles and in the operator / passenger "
+        "pairs, and the number of discordant pairs",
+        "Counts and shares from FARS person records (motorcycle operators and passengers)",
+        "FARS 2016-2024 motorcycle operators and passengers (any helmet code for occupancy; "
+        "deaths with helmet coded none)",
+    )
+    return out
 
 
 def run(years: Sequence[int] | None = None, n_boot: int = N_BOOT) -> dict:
@@ -1088,8 +1669,8 @@ def run(years: Sequence[int] | None = None, n_boot: int = N_BOOT) -> dict:
     _save(
         belt,
         "belt_effect",
-        "Machine-readable belt-use estimates (FARS within-vehicle designs) for the policy "
-        "simulator.  All estimates are conditional on a crash severe enough to kill an "
+        "Machine-readable belt-use estimates (FARS within-vehicle designs) for downstream "
+        "modules.  All estimates are conditional on a crash severe enough to kill an "
         "occupant of the vehicle (fatal crash); rows with _misreport_fXX are sensitivity "
         "analyses, not alternative primary estimates.  DPC rows: n_vehicles = driver / "
         "right-front pairs with at least one death; conditional-logit rows: matched sets "
@@ -1099,6 +1680,7 @@ def run(years: Sequence[int] | None = None, n_boot: int = N_BOOT) -> dict:
         "percentile crash-cluster bootstrap CI)",
         LPV_POP,
     )
+    added = added_analyses(df, elig, sets, rng, n_boot)
     digest = {
         "flow": flow.to_dict(orient="records"),
         "belt_sets": belt_sets,
@@ -1117,6 +1699,7 @@ def run(years: Sequence[int] | None = None, n_boot: int = N_BOOT) -> dict:
         "matched_pair_or": mp,
         "motorcycle_clogit": moto_tab,
         "belt_effect": belt,
+        **added,
     }
 
 

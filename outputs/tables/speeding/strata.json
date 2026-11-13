@@ -7,7 +7,8 @@
  "method": "Model A blocks minus the blocks that define the stratum, fitted within stratum; standardised over stratum crashes",
  "inputs": [
   "data/processed/crss_crash.parquet",
-  "data/processed/fars_crash.parquet"
+  "data/processed/fars_crash.parquet",
+  "data/processed/fars_driver.parquet"
  ],
  "rows": 52,
  "columns": [
@@ -31,6 +32,14 @@
   "heterogeneity_p"
  ],
  "module": "nhtsa_stats.analysis.speeding",
- "git_commit": "8fe8986",
- "generated_utc": "2026-10-23T09:19:14Z"
+ "git_commit": "af9ce88",
+ "source_sha256": "0aa2189059bdf285e796f4ef293082cb57ad4c4ec4853755c0cb652094e3ad6c",
+ "code_sha256": "705ae9f4dc6cb786a222b95b6e48857e966c905a3d95beba6a41408ffafbf870",
+ "inputs_sha256": {
+  "data/processed/crss_crash.parquet": "1a31897f37cce3be223cc5abfb823582b68b9f7096a8c38980e9346f3450c6e3",
+  "data/processed/fars_crash.parquet": "30f4314e8984ce2ba3cd764b561628edf36950705c1fc3bdd16769a417846ddf",
+  "data/processed/fars_driver.parquet": "b5ff665422d482118e6f775179b59d8ca90b90501f8ea1d09fa79baa66107d04"
+ },
+ "package_sha256": "fbdac1b588be76a011931549cc2f2013fc1b6405f88cee1ba0e10db719e3ed6b",
+ "generated_utc": "2026-11-13T02:07:20Z"
 }

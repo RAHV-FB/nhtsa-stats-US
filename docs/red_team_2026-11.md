@@ -4,10 +4,13 @@ The owner asked for independent subagents to attack the project's road-safety re
 looked for data leakage, biases, missing uncertainty, broken model assumptions, misused
 significance and irreproducible numbers, and a separate subagent tried to disprove each major
 published finding. This record says how that was done, what held up, what did not, and which
-corrections are recommended.
+corrections are recommended. It is a dated record: numbers quoted from the project's tables are as
+they stood at the review and may differ slightly after a later re-run; the named tables are
+authoritative.
 
-The review changes no analysis code, output table, report, website page or documented
-limitation. Every recommended correction is listed in §5 for the owner to accept or reject. Where
+The review itself changed no analysis code, output table, report, website page or documented
+limitation. Every recommended correction is listed in §5, with its status after a later pass that
+applied them. Where
 a correction needs a new number in `reports/`, that number has to come from a new output table
 through the templates (CLAUDE.md). The reviewers' scripts show how to compute it.
 
@@ -31,7 +34,7 @@ through the templates (CLAUDE.md). The reviewers' scripts show how to compute it
   * verdicts are REFUTED, WEAKENED, SURVIVES or NOT TESTABLE.
 
   No reviewer saw another reviewer's work or any hypothesis from the coordinator. The briefs are
-  in `docs/red_team/`.
+  preserved in Git history at commit 7ee597e.
 * **Verification.** A damaging claim was not taken on trust. Fifteen independent verifiers
   re-checked them in three ways: they re-ran the attacker's scripts, they checked what the
   published text actually says, and they tried to refute the attacker's inference. The
@@ -101,8 +104,8 @@ X2 rated it as bordering on material.
 
 ## 3. Issues, most consequential first
 
-Numbers come from the reviewers' scripts (`scripts/audit/red_team/<ID>/`) or from committed
-tables. Each issue carries the label from §1.
+Numbers come from the reviewers' scripts (preserved in Git history at commit 7ee597e) or from
+committed tables. Each issue carries the label from §1.
 
 ### Material
 
@@ -306,8 +309,8 @@ tables. Each issue carries the label from §1.
 * **Directions.** No direction reversed under any attack:
   * exceeding the limit is strongly associated with a fatal crash;
   * alcohol explains only a minority of that association;
-  * pedestrians in unlit darkness amplify on both scales (ratio of RRs 1.62–1.85 across six
-    definitions);
+  * pedestrians in unlit darkness are super-multiplicative (ratio of RRs above 1 across six
+    definitions), so also carry an additive excess;
   * belted front-seat occupants die less often than unbelted ones in the same vehicle, in every
     stratum;
   * teen and 75+ drivers are over-involved as the culpable party;
@@ -320,7 +323,103 @@ tables. Each issue carries the label from §1.
 * **Interventions.** No archive column measures or proxies enforcement or cost. "The database
   identifies no intervention effect" stands (F10).
 
-## 5. Recommended corrections (not applied)
+## 5. Corrections: status after re-computation (November 2026)
+
+*Note (13 November 2026).* The numbers recorded below were recomputed on 12 November 2026, before the
+outcome-recoding fixes of 13 November. The current values, which differ slightly (mostly in the last
+digit), are in `outputs/tables/` and the rendered reports; the conclusions recorded here are unchanged.
+
+The review itself changed nothing. A later pass computed the new output tables that the † items
+needed (30 CSVs under `outputs/tables/`) and applied the corrections for
+`README.md`, `reports/templates/findings.md` and `findings.json`, `reports/templates/road_deaths.md`,
+the public website template, `docs/limitations.md`, `docs/model_validation.md` and
+`docs/methodology.md`. The same pass applied the corrections to the Phase-2 report templates
+(`alcohol_drugs_restraints`, `multifactor_interactions`, `factor_contributions`,
+`speeding_confounding`, `interactions`) and reduced `policy_analysis.md` to the observed baseline
+and evidence ledger. `case_comparisons.md` and the hypothetical simulator were deleted, so their
+items no longer apply.
+The original recommendations follow unchanged, as the record.
+
+**Applied (in the files above).** Wording of "too fast for conditions" (models A and B, the ±22%
+equivalence bound, exploratory label, explanation of blank bias-grid rows); within-CRSS speeding
+ratio beside the mixed one; interstate by speed band; rain and teen wording with models A and B;
+belt crash-type table, two-sided misreporting with tipping points, and the corrected Phase-2
+conclusion that belts are somewhat less protective with a speeding driver within crash
+configuration; helmet misreporting and coverage; post-2020 composition "roughly a quarter to a
+half" and both denominator shares; the corrected severity-recording statement and the selection
+caveat for 87% vs 98%; attributable-fraction variants and the withdrawn "alcohol does not shrink";
+measured-BAC rows for victim roles and prior DWI; belt lives "as recorded, excluding unknown belt
+use"; large-truck fault caveat; "among the steepest"; periods beside "a year" figures; pedestrian
+speed-limit missingness and unadjusted ratio; the prediction leakage sentence (with the 0.016 AUROC
+from `ml/feature_sensitivity`); RQ5 moved to exploratory; the seven new limitations; "pre-specified in
+the module docstring" and the random-forest qualification; a pinned Python version
+(`.python-version`); `deaths` now fails when its matched inputs are missing (`MatchedInputsError`).
+
+**Red-team numbers confirmed on re-computation.** The 1.06 and 1.18 for "too fast for conditions" and
+the 22% bound; the 1.29 (1.13–1.47) under model B (previously unverified); within-CRSS speeding
+×8.60 against ×12.79 mixed; interstate 0.57 on 50–65 mph roads; rain KA 0.89 (0.82–0.97); teen model B
+0.92 (0.84–1.01); belt reductions of 50.9% (angle) and 84.4% (rollover), the 28.2% two-sided scenario
+and the helmet tipping point of 5.6% with 455 discordant pairs and 15.7% coverage; 27.4% and 9.5% on
+measured BAC; 60.7% of unbelted deaths in single-occupant vehicles; 2022–24 speeding fraction 11.9%
+(9.1–14.8); pedestrian 50–55 mph ratio 12.2 without location, light and time of day; union 95.4%,
+87.5% and 57.7%; denominator share 46% (29–64%); AUROC cost 0.016.
+
+**Differed from the tables.**
+* Within-CRSS speeding ratio CI is 7.1–10.3 (joint linearisation), not 6.5–11.4.
+* Interstate at 70+ mph is 0.94 (0.63–1.38), not 1.00 (0.67–1.48).
+* Within-configuration belt ratio of RRs for speeding (exploratory follow-up) is 1.17 (1.08–1.27)
+  pooling single and multi-vehicle crashes, 1.24 (1.13–1.35) with rollover also crossed, and 1.10
+  to 1.24 across the four layering schemes, not 1.16 (1.06–1.26); the BAC contrast is 0.96–1.03,
+  null. The CIs come from a joint crash bootstrap of both arms (an earlier version treated the
+  arms as independent and gave 1.18 (1.08–1.28) and 1.23 (1.13–1.35)).
+* Model-B composition share runs 24–49% across the four specifications, not up to 56%; without crash
+  configuration it is 9–34%.
+* 40.8% of the BAC ≥ .08 driver group is imputed (not 40.5%); 20,998 deaths have unknown belt use (not
+  21,003).
+* Police-reported alcohol does not give a uniformly lower attributable fraction: 13.4% with unknowns
+  as a level and 10.6% with unknown as no, but 27.2% for complete cases.
+* Unknown pedestrian speed limit: 29.6% non-fatal vs 10.8% fatal (not 29.7%).
+
+**Applied in the follow-up pass (tables now exist).** The items that were open above now have
+committed tables, text in the reports, website and `docs/limitations.md`, and these outcomes:
+* *Large-truck split* (`deaths/large_truck_crash_types`): the 55% not the truck driver in single-truck
+  crashes is confirmed. The 97% holds only under the strict definition of exactly one truck and one
+  passenger vehicle (two-vehicle crashes, 96.9%); the broader truck-and-passenger-vehicle definition
+  gives 96.0%.
+* *Invalid licence* (`deaths/licence_trend`): the rise in deaths in invalid-licence crashes from 2019
+  to 2021 is +44% with expired and cancelled licences counted and +40.5% without; both confirmed.
+* *State range of prior-DWI shares* (`deaths/prior_dwi_state_range`, `deaths/prior_dwi_by_state`):
+  now tabulated, with measured-BAC-only shares beside the all-driver shares; the spread is wide and
+  partly reflects state record completeness.
+* *Imputed BAC and injury* (`measurement/imputed_bac_injury`): the reviewer's odds ratio of 1.62 was
+  **not reproduced**. The project's specification (age band, sex, vehicle type, crash type, time of
+  day, year) gives a much larger odds ratio for imputed BAC of .08 or more among untested drivers
+  than for measured BAC among tested drivers (values in the table). That is consistent with the
+  imputation using injury, which is the direction the reviewer suspected, but the tested comparison
+  group is itself selected on the outcome and the gap depends on the covariates, so it does not
+  show it; the size differs from the reviewer's because the specifications differ. A diagnostic, not a
+  causal estimate.
+* *Calibration* (`severity/fatal_calibration`): the suspected miscalibration of model A is
+  confirmed. It is calibrated overall and over-predicts in the middle deciles (observed/predicted
+  about 0.74 to 0.80).
+* *Code hash per module*: done; after the full re-run every table sidecar carries `code_sha256` (the producing
+  module plus the package modules it imports, taken when the module is loaded) and `inputs_sha256`;
+  dictionary JSON outputs carry a `_provenance` entry; `nhtsa status` lists stale, unhashed and
+  input-changed tables, and `tests/test_provenance.py` fails on any committed sidecar without a
+  current `code_sha256`. Sidecars written before the re-run carried only `source_sha256` and
+  `package_sha256`.
+* *Crash-type interaction comparison for `model_validation.md` §8*: partly answered by
+  `severity/fatal_effect_modification` (adjusted fatal risk ratios differ sharply between single-
+  and multi-vehicle crashes for exceeding the limit, alcohol, motorcycles and large trucks, with no
+  detectable difference for "too fast for conditions"); the boosting-versus-interacted-logistic AUROC comparison was not done.
+* *Attacker-only claims in §6*: P03, P04 and W06 were confirmed on recomputation, and G01 was
+  applied.
+
+**Still open.**
+* Attacker-only claims in §6 other than those listed above, which this pass did not re-run.
+* The boosting-versus-interacted-logistic AUROC comparison (`docs/model_validation.md` §8).
+
+### Original recommendations (record)
 
 Wording-only changes can go into the templates directly. Changes marked † need a new output table
 first, because every number in `reports/` comes from `outputs/tables/`.
@@ -400,6 +499,9 @@ first, because every number in `reports/` comes from `outputs/tables/`.
   * P04: same-driver ORs and non-differential bounds;
   * W06: helmet tipping point;
   * G01.
+
+  (Status after the follow-up pass, §5: P03, P04 and W06 were confirmed on recomputation and G01
+  was applied.)
 * **Stopped early.** Several late reviewers were stopped and reported partial work. Their reports
   list what they did not test, for example X1's belt-ejection check, X3's interaction-contrast
   jackknife, X4's lives-saved heterogeneity and X6's seed-sensitivity run. Partial scripts
@@ -417,19 +519,7 @@ first, because every number in `reports/` comes from `outputs/tables/`.
 
 ## 7. Reproducing the review
 
-* **Protocol.**
-  * `docs/red_team/BRIEFING.md`: the rules every reviewer followed.
-  * `docs/red_team/FINDINGS_REGISTER.md`: the targets.
-  * `docs/red_team/VERIFY_BRIEF.md`: the verifiers' protocol.
-* **Results.** Reviewer reports are in `docs/red_team/reports/<ID>.md`, including `COVERAGE.md`.
-  Verifier verdicts are in `docs/red_team/verify/<ID>.md`.
-* **Scripts.** They are in `scripts/audit/red_team/<ID>/`, numbered in run order; verifiers'
-  scripts start with `v`. Run them from the repository root after `nhtsa build`:
-
-  ```bash
-  .venv/bin/python scripts/audit/red_team/<ID>/<script>.py
-  ```
-
-  They are single-threaded and print their results. Some take several minutes. Some also write
-  intermediate CSVs to the review session's scratch directory, so create that directory or edit
-  the path before re-running.
+The briefing, the findings register, the verifiers' protocol, the per-reviewer reports and
+verifier verdicts, and the numbered scripts of every reviewer and verifier are preserved in Git
+history at commit 7ee597e (under `docs/red_team/` and `scripts/audit/red_team/<ID>/`); they were
+removed from the working tree. The consolidated results are this document.

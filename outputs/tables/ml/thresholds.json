@@ -1,10 +1,10 @@
 {
  "table": "ml/thresholds.csv",
  "description": "Confusion matrices on test at risk thresholds fixed on 2022",
- "population": "CRSS police-reported crashes (all severities, national probability sample) with a determinable maximum severity; train 2016-2021, validation 2022, test 2023-2024",
+ "population": "CRSS police-reported crashes (all severities, national probability sample) with a determinable maximum severity (fatal: MAXSEV_IM 9 excluded; ka: MAXSEV_IM 5 and 9 excluded, so ka rows are a subset); train 2016-2021, validation 2022, test 2023-2024",
  "unit": "crash",
  "outcome": "",
- "method": "Thresholds from weighted 2022 predictions; test counts weighted (per year) and unweighted; Weighted (WEIGHT) and unweighted metrics; 95% percentile CIs from 200 Rao-Wu rescaled bootstrap replicates of PSU_VAR within PSUSTRAT (seed config.RANDOM_SEED)",
+ "method": "Thresholds from weighted 2022 predictions; test counts weighted (per year) and unweighted; Weighted (WEIGHT) and unweighted metrics; 95% percentile CIs from 200 Rao-Wu rescaled bootstrap replicates of PSU_VAR within PSUSTRAT (seed config.RANDOM_SEED); fatal metrics use every crash with a known fatal outcome; ka metrics use only the crashes where ka is known (MAXSEV_IM 5 and 9 excluded), so the two outcomes differ in n",
  "inputs": [
   "data/processed/crss_crash.parquet"
  ],
@@ -44,6 +44,12 @@
   "quantity"
  ],
  "module": "nhtsa_stats.models.severity_ml",
- "git_commit": "ef704fd",
- "generated_utc": "2026-10-23T03:41:24Z"
+ "git_commit": "af9ce88",
+ "source_sha256": "1a91ec37672ca5537d660e602d7dc138dad5fabfbc916507a249cfdbb701a783",
+ "code_sha256": "66ec0673990fd6d92ad6c8b8736f9ad98fbd4f0538e077eeb9865c5b046919e9",
+ "inputs_sha256": {
+  "data/processed/crss_crash.parquet": "1a31897f37cce3be223cc5abfb823582b68b9f7096a8c38980e9346f3450c6e3"
+ },
+ "package_sha256": "fbdac1b588be76a011931549cc2f2013fc1b6405f88cee1ba0e10db719e3ed6b",
+ "generated_utc": "2026-11-13T01:46:12Z"
 }

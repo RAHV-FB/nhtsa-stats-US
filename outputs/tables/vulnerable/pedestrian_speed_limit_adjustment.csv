@@ -1,0 +1,81 @@
+victim,outcome,specification,dropped,level,n,n_events,adj_rr,adj_rr_low,adj_rr_high,adj_rd,adj_rd_low,adj_rd_high
+pedestrian,killed,full (published),,<=25,5026,97,1,1,1,0,0,0
+pedestrian,killed,full (published),,30-35,5939,374,2.3967,1.76491,3.25465,0.0402313,0.0277874,0.0526752
+pedestrian,killed,full (published),,40-45,4052,561,4.06593,2.93836,5.62619,0.0883129,0.0712935,0.105332
+pedestrian,killed,full (published),,50-55,1021,307,6.74197,4.92403,9.23108,0.165395,0.13317,0.19762
+pedestrian,killed,full (published),,60-65,417,146,8.01116,5.64186,11.3754,0.201954,0.151979,0.251929
+pedestrian,killed,full (published),,70+,293,119,8.49368,5.88798,12.2525,0.215853,0.163155,0.26855
+pedestrian,killed,full (published),,none_nontrafficway,1049,12,0.612833,0.323173,1.16211,-0.0111522,-0.0238512,0.00154683
+pedestrian,killed,full (published),,unknown,7169,161,1.24961,0.858814,1.81822,0.0071898,-0.00538862,0.0197682
+pedestrian,killed,without location,location,<=25,5026,97,1,1,1,0,0,0
+pedestrian,killed,without location,location,30-35,5939,374,2.52027,1.84843,3.43629,0.0411103,0.0287948,0.0534258
+pedestrian,killed,without location,location,40-45,4052,561,4.54142,3.25041,6.3452,0.0957655,0.0775907,0.11394
+pedestrian,killed,without location,location,50-55,1021,307,7.74665,5.59528,10.7252,0.18244,0.146659,0.21822
+pedestrian,killed,without location,location,60-65,417,146,9.15942,6.42556,13.0564,0.220643,0.170239,0.271048
+pedestrian,killed,without location,location,70+,293,119,9.07481,6.12488,13.4455,0.218355,0.158856,0.277855
+pedestrian,killed,without location,location,none_nontrafficway,1049,12,0.644779,0.337058,1.23344,-0.00960571,-0.0221655,0.00295407
+pedestrian,killed,without location,location,unknown,7169,161,1.30002,0.884289,1.9112,0.00811303,-0.00437847,0.0206045
+pedestrian,killed,without light,light,<=25,5026,97,1,1,1,0,0,0
+pedestrian,killed,without light,light,30-35,5939,374,2.56029,1.88451,3.47838,0.0418601,0.0295581,0.054162
+pedestrian,killed,without light,light,40-45,4052,561,4.54408,3.30171,6.25393,0.0950822,0.0783562,0.111808
+pedestrian,killed,without light,light,50-55,1021,307,8.08878,6.06534,10.7873,0.190181,0.157762,0.2226
+pedestrian,killed,without light,light,60-65,417,146,9.20394,6.55736,12.9187,0.220099,0.17016,0.270038
+pedestrian,killed,without light,light,70+,293,119,10.1489,7.34255,14.0278,0.24545,0.197439,0.293462
+pedestrian,killed,without light,light,none_nontrafficway,1049,12,0.592418,0.311405,1.12702,-0.0109348,-0.0225108,0.000641156
+pedestrian,killed,without light,light,unknown,7169,161,1.27812,0.870803,1.87595,0.00746144,-0.00481074,0.0197336
+pedestrian,killed,without time of day,tod,<=25,5026,97,1,1,1,0,0,0
+pedestrian,killed,without time of day,tod,30-35,5939,374,2.3914,1.77628,3.21952,0.0398143,0.0277276,0.051901
+pedestrian,killed,without time of day,tod,40-45,4052,561,4.09378,2.95955,5.66272,0.0885276,0.0711508,0.105904
+pedestrian,killed,without time of day,tod,50-55,1021,307,6.98802,5.13272,9.51394,0.171345,0.138616,0.204074
+pedestrian,killed,without time of day,tod,60-65,417,146,8.48669,6.03546,11.9335,0.214229,0.163153,0.265306
+pedestrian,killed,without time of day,tod,70+,293,119,9.09601,6.3426,13.0447,0.231665,0.176639,0.28669
+pedestrian,killed,without time of day,tod,none_nontrafficway,1049,12,0.596485,0.311986,1.14042,-0.0115464,-0.0240835,0.000990639
+pedestrian,killed,without time of day,tod,unknown,7169,161,1.2334,0.841977,1.80678,0.00667854,-0.00597297,0.01933
+pedestrian,killed,"without location, light and time of day","location,light,tod",<=25,5026,97,1,1,1,0,0,0
+pedestrian,killed,"without location, light and time of day","location,light,tod",30-35,5939,374,2.96424,2.17325,4.04312,0.0456506,0.0335296,0.0577717
+pedestrian,killed,"without location, light and time of day","location,light,tod",40-45,4052,561,6.23817,4.45593,8.73325,0.12174,0.101051,0.142428
+pedestrian,killed,"without location, light and time of day","location,light,tod",50-55,1021,307,12.514,9.24907,16.9316,0.267596,0.224661,0.310532
+pedestrian,killed,"without location, light and time of day","location,light,tod",60-65,417,146,14.2673,10.1039,20.1463,0.308345,0.252196,0.364493
+pedestrian,killed,"without location, light and time of day","location,light,tod",70+,293,119,14.8576,10.5796,20.8656,0.322063,0.258785,0.385342
+pedestrian,killed,"without location, light and time of day","location,light,tod",none_nontrafficway,1049,12,0.490293,0.252893,0.950548,-0.011846,-0.021225,-0.00246713
+pedestrian,killed,"without location, light and time of day","location,light,tod",unknown,7169,161,1.27168,0.831054,1.94593,0.00631411,-0.00546106,0.0180893
+pedestrian,killed_or_serious,full (published),,<=25,4920,909,1,1,1,0,0,0
+pedestrian,killed_or_serious,full (published),,30-35,5866,1788,1.45464,1.29343,1.63593,0.0924554,0.0639761,0.120935
+pedestrian,killed_or_serious,full (published),,40-45,4016,1677,1.76384,1.60278,1.94107,0.155335,0.129536,0.181135
+pedestrian,killed_or_serious,full (published),,50-55,1012,596,2.21432,2.00635,2.44385,0.246946,0.208175,0.285716
+pedestrian,killed_or_serious,full (published),,60-65,415,245,2.17849,1.7948,2.6442,0.239659,0.165646,0.313672
+pedestrian,killed_or_serious,full (published),,70+,292,190,2.48853,2.19228,2.82481,0.30271,0.250415,0.355005
+pedestrian,killed_or_serious,full (published),,none_nontrafficway,1034,134,0.770765,0.627236,0.947137,-0.0466175,-0.0815081,-0.011727
+pedestrian,killed_or_serious,full (published),,unknown,7096,1194,1.01728,0.830748,1.2457,0.00351458,-0.0381716,0.0452007
+pedestrian,killed_or_serious,without location,location,<=25,4920,909,1,1,1,0,0,0
+pedestrian,killed_or_serious,without location,location,30-35,5866,1788,1.47206,1.31075,1.65322,0.0944843,0.0661587,0.12281
+pedestrian,killed_or_serious,without location,location,40-45,4016,1677,1.84142,1.66896,2.03171,0.168415,0.140763,0.196068
+pedestrian,killed_or_serious,without location,location,50-55,1012,596,2.33658,2.11495,2.58144,0.267523,0.226441,0.308605
+pedestrian,killed_or_serious,without location,location,60-65,415,245,2.28486,1.8944,2.7558,0.257172,0.183434,0.33091
+pedestrian,killed_or_serious,without location,location,70+,292,190,2.50577,2.20175,2.85177,0.301388,0.246249,0.356527
+pedestrian,killed_or_serious,without location,location,none_nontrafficway,1034,134,0.760928,0.622078,0.93077,-0.0478515,-0.0811728,-0.0145301
+pedestrian,killed_or_serious,without location,location,unknown,7096,1194,1.01482,0.826975,1.24533,0.00296579,-0.0384318,0.0443633
+pedestrian,killed_or_serious,without light,light,<=25,4920,909,1,1,1,0,0,0
+pedestrian,killed_or_serious,without light,light,30-35,5866,1788,1.4882,1.3228,1.67429,0.0968753,0.0687252,0.125025
+pedestrian,killed_or_serious,without light,light,40-45,4016,1677,1.84347,1.67596,2.02772,0.167372,0.14189,0.192854
+pedestrian,killed_or_serious,without light,light,50-55,1012,596,2.39052,2.17174,2.63133,0.275925,0.238455,0.313395
+pedestrian,killed_or_serious,without light,light,60-65,415,245,2.30136,1.90813,2.77562,0.258232,0.186063,0.330401
+pedestrian,killed_or_serious,without light,light,70+,292,190,2.67481,2.36227,3.0287,0.332336,0.280895,0.383777
+pedestrian,killed_or_serious,without light,light,none_nontrafficway,1034,134,0.757145,0.613049,0.935111,-0.0481903,-0.0825899,-0.0137907
+pedestrian,killed_or_serious,without light,light,unknown,7096,1194,1.02204,0.828536,1.26073,0.00437287,-0.0379157,0.0466615
+pedestrian,killed_or_serious,without time of day,tod,<=25,4920,909,1,1,1,0,0,0
+pedestrian,killed_or_serious,without time of day,tod,30-35,5866,1788,1.45616,1.29407,1.63856,0.092348,0.0636727,0.121023
+pedestrian,killed_or_serious,without time of day,tod,40-45,4016,1677,1.76794,1.60647,1.94564,0.155466,0.129534,0.181398
+pedestrian,killed_or_serious,without time of day,tod,50-55,1012,596,2.25791,2.05061,2.48618,0.254658,0.216798,0.292518
+pedestrian,killed_or_serious,without time of day,tod,60-65,415,245,2.25457,1.87413,2.71223,0.253981,0.182334,0.325629
+pedestrian,killed_or_serious,without time of day,tod,70+,292,190,2.57361,2.27753,2.90818,0.318569,0.267535,0.369602
+pedestrian,killed_or_serious,without time of day,tod,none_nontrafficway,1034,134,0.765221,0.624468,0.9377,-0.0475298,-0.0815431,-0.0135165
+pedestrian,killed_or_serious,without time of day,tod,unknown,7096,1194,1.01909,0.831849,1.24847,0.00386436,-0.0377785,0.0455072
+pedestrian,killed_or_serious,"without location, light and time of day","location,light,tod",<=25,4920,909,1,1,1,0,0,0
+pedestrian,killed_or_serious,"without location, light and time of day","location,light,tod",30-35,5866,1788,1.57465,1.40265,1.76774,0.107179,0.0796462,0.134712
+pedestrian,killed_or_serious,"without location, light and time of day","location,light,tod",40-45,4016,1677,2.10802,1.90823,2.32873,0.20666,0.177985,0.235336
+pedestrian,killed_or_serious,"without location, light and time of day","location,light,tod",50-55,1012,596,2.89889,2.63098,3.19408,0.354167,0.314053,0.394281
+pedestrian,killed_or_serious,"without location, light and time of day","location,light,tod",60-65,415,245,2.81753,2.39242,3.31816,0.338992,0.271238,0.406746
+pedestrian,killed_or_serious,"without location, light and time of day","location,light,tod",70+,292,190,3.12094,2.74974,3.54224,0.395582,0.338937,0.452227
+pedestrian,killed_or_serious,"without location, light and time of day","location,light,tod",none_nontrafficway,1034,134,0.686612,0.56189,0.839018,-0.0584509,-0.0873345,-0.0295674
+pedestrian,killed_or_serious,"without location, light and time of day","location,light,tod",unknown,7096,1194,1.02756,0.824575,1.28051,0.00513986,-0.0367093,0.046989

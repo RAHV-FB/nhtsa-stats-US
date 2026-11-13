@@ -42,6 +42,9 @@
   "speeding": [
    "speeding"
   ],
+  "speeding_type": [
+   "speeding_type"
+  ],
   "driver_vehicle_mix": [
    "young_driver",
    "older_driver",
@@ -264,14 +267,20 @@
    ]
   }
  },
- "n_crashes": 467008,
+ "n_crashes": 468993,
  "n_fatal": 9958,
  "n_ka": 60345,
- "n_complete_case": 431402,
+ "n_complete_case": 433040,
  "n_fatal_complete_case": 9810,
  "design_df": 42,
  "ridge": 0.01,
  "stochastic_components": "none (deterministic estimators)",
- "crss_crash_fingerprint": "10045693-1792722264",
- "data_unchanged_during_run": true
+ "crss_crash_fingerprint": "10040002-1794529373",
+ "data_unchanged_during_run": true,
+ "_provenance": {
+  "module": "nhtsa_stats.analysis.confounding",
+  "code_sha256": "ce553f458d9fe6c70a7f42296bf1f5ed8619575ce056c59a7b4e93dd37620b2e",
+  "git_commit": "af9ce88",
+  "generated_utc": "2026-11-13T01:17:41Z"
+ }
 }

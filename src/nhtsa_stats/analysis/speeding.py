@@ -13,7 +13,7 @@ Method
     The Phase-1 lattice estimator (``confounding``): for every subset of seven covariate blocks
     {calendar/area, time, light, road environment, driver/vehicle mix, the other behaviour,
     crash configuration} a survey logistic model gives the exposure's standardised risk ratio
-    and difference over all crashes.  Reported: sequential tables along several orderings
+    and difference over the crashes where the outcome is known.  Reported: sequential tables along several orderings
     (including "other behaviour first" and "other behaviour last"), exact Shapley shares of the
     crude log-RR with and without the configuration block (a plausible mediator), the range of
     each block's share over orderings, and odds ratios from the same specifications to show
@@ -64,7 +64,11 @@ from nhtsa_stats.reporting.io import save_table
 log = logging.getLogger(__name__)
 MODULE = "speeding"
 POP = cf.POPULATION
-INPUT = ["data/processed/crss_crash.parquet", "data/processed/fars_crash.parquet"]
+INPUT = [
+    "data/processed/crss_crash.parquet",
+    "data/processed/fars_crash.parquet",
+    "data/processed/fars_driver.parquet",
+]
 OUTCOMES = ("fatal", "ka")
 
 ENV_BLOCKS = ("calendar_area", "time", "light", "road_environment", "driver_vehicle_mix")
@@ -153,6 +157,7 @@ def odds_ratio(
     df: pd.DataFrame, design: SurveyDesign, exposure: cf.Exposure, blocks, outcome: str
 ) -> tuple[float, float, float]:
     """Conditional odds ratio of the exposure from the same specification as a lattice fit."""
+    df, design, _ = cf.known_outcome_domain(df, design, outcome)
     blocks = frozenset(blocks)
     covs = [exposure.column, *exposure.variables(sorted(blocks, key=exposure.blocks.index))]
     cells, cdesign = cf.collapse_cells(df, design, covs, outcome)
@@ -331,7 +336,8 @@ def stratified_table(df: pd.DataFrame, design: SurveyDesign, outcome: str) -> pd
                     if isinstance(sub[c].dtype, pd.CategoricalDtype):
                         sub[c] = sub[c].cat.remove_unused_categories()
                 blocks = [b for b in ex.blocks if b != "configuration" and b not in drop]
-                exposed = sub[ex.column].astype(str) == ex.exposed
+                known = sub[outcome].notna()
+                exposed = (sub[ex.column].astype(str) == ex.exposed) & known
                 if exposed.sum() < config.MIN_CELL_N or sub.loc[exposed, outcome].sum() < 10:
                     continue
                 f = cf.fit_subset(sub, sd, ex, blocks, outcome)
@@ -344,7 +350,7 @@ def stratified_table(df: pd.DataFrame, design: SurveyDesign, outcome: str) -> pd
                         "outcome": outcome,
                         "split": split,
                         "stratum": label,
-                        "n_crashes": int(mask.sum()),
+                        "n_crashes": int(known.sum()),
                         "n_exposed": int(exposed.sum()),
                         "n_exposed_events": int(sub.loc[exposed, outcome].sum()),
                         "adj_rate_exposed": f.m_exposed,
@@ -500,6 +506,93 @@ def fars_crss_recording(df: pd.DataFrame, design: SurveyDesign) -> pd.DataFrame:
                     "crss_over_fars_high": hi / fars_share,
                 }
             )
+    return pd.DataFrame(rows)
+
+
+def _domain_mean_influence(
+    design: SurveyDesign, y: np.ndarray, domain: np.ndarray
+) -> tuple[float, np.ndarray]:
+    """Weighted domain mean and its per-row linearised contribution."""
+    w = design.weight * np.asarray(domain, dtype=float)
+    big_w = w.sum()
+    m = float(w @ y / big_w)
+    return m, w * (y - m) / big_w
+
+
+def crss_overrepresentation(
+    crss: pd.DataFrame | None = None,
+    design: SurveyDesign | None = None,
+    fars_types: pd.Series | None = None,
+) -> pd.DataFrame:
+    """Over-representation of speeding in fatal crashes using CRSS for numerator and denominator.
+
+    The published ratio divides the FARS (census) share of fatal crashes by the CRSS share of all
+    crashes; the two systems record SPEEDREL with different completeness.  Here both shares come
+    from CRSS: ``share_fatal_crss / share_all_crashes``, with a design-based CI from the joint
+    linearisation of the two domain means (they share PSUs; t, 42 df).  CRSS records speeding less
+    often in fatal crashes than FARS does (``fars_crss_recording``), so under-recording in fatal
+    crashes alone would push the CRSS-only ratio down.  It is a lower bound on the
+    over-representation under full recording only if CRSS records speeding in non-fatal crashes
+    at least as fully as in fatal ones; that is untested, and under-recording that is stronger in
+    non-fatal crashes would push the ratio the other way.  The mixed FARS/CRSS
+    ratio is repeated for comparison (its CI reflects CRSS sampling of the denominator only).
+    """
+    if crss is None or design is None:
+        crss, design = data.crss_crash(outcome=None, tri_state_cols=specs.CRASH_TRI)
+    if fars_types is None:
+        fars_types = data.fars_crash()["speeding_type"]
+    fatal = crss["fatal"].to_numpy(dtype=float)
+    is_fatal = fatal == 1
+    everyone = np.ones(len(crss), dtype=bool)
+    st = crss["speeding_type"].fillna("unknown").astype(str)
+    fst = fars_types.fillna("unknown").astype(str)
+    t = design.tcrit()
+    groups = {
+        "exceeded_limit_or_racing": (["exceeded_limit_or_racing"], "exceeded limit / racing"),
+        "too_fast_for_conditions": (["too_fast_for_conditions"], "too fast for conditions"),
+        "speeding_unspecified": (["speeding_unspecified"], "speeding, type unspecified"),
+        "any_speeding": (
+            ["exceeded_limit_or_racing", "too_fast_for_conditions", "speeding_unspecified"],
+            "any police-reported speeding",
+        ),
+    }
+    rows = []
+    for key, (levels, label) in groups.items():
+        ind = st.isin(levels).to_numpy(float)
+        p_all, z_all = _domain_mean_influence(design, ind, everyone)
+        p_fat, z_fat = _domain_mean_influence(design, ind, is_fatal)
+        ratio = p_fat / p_all
+        se_log = float(np.sqrt(design.vcov_total(z_fat / p_fat - z_all / p_all)[0, 0]))
+        se_fat = float(np.sqrt(design.vcov_total(z_fat)[0, 0]))
+        lo_f, hi_f = logit_ci(p_fat, se_fat, design.df)
+        se_all = float(np.sqrt(design.vcov_total(z_all)[0, 0]))
+        lo_a, hi_a = logit_ci(p_all, se_all, design.df)
+        fars_share = float(fst.isin(levels).mean())
+        # Mixed ratio: FARS census share of fatal crashes over the CRSS share of all crashes.
+        mixed = fars_share / p_all
+        rows.append(
+            {
+                "speeding": key,
+                "label": label,
+                "n_crss_crashes": len(crss),
+                "n_crss_fatal": int(is_fatal.sum()),
+                "crss_share_all_crashes": p_all,
+                "crss_share_all_crashes_low": lo_a,
+                "crss_share_all_crashes_high": hi_a,
+                "crss_share_fatal_crashes": p_fat,
+                "crss_share_fatal_crashes_low": lo_f,
+                "crss_share_fatal_crashes_high": hi_f,
+                "crss_only_ratio": ratio,
+                "crss_only_ratio_low": ratio * float(np.exp(-t * se_log)),
+                "crss_only_ratio_high": ratio * float(np.exp(t * se_log)),
+                "n_fars_fatal": len(fst),
+                "fars_share_fatal_crashes": fars_share,
+                "mixed_fars_crss_ratio": mixed,
+                "mixed_ratio_low": mixed * float(np.exp(-t * se_all / p_all)),
+                "mixed_ratio_high": mixed * float(np.exp(t * se_all / p_all)),
+                "crss_only_over_mixed": ratio / mixed,
+            }
+        )
     return pd.DataFrame(rows)
 
 
@@ -690,7 +783,7 @@ def run(cache_dir: Path | None = config.OUTPUT_DIR / "cache") -> dict[str, pd.Da
     out = run_lattices(df, design, cache_dir)
     lat_method = (
         "Survey logistic models for every subset of 7 covariate blocks (exact cell compression); "
-        "standardised RR/RD over all crashes by g-computation; joint Taylor linearisation on the "
+        "standardised RR/RD over the crashes where the outcome is known by g-computation; joint Taylor linearisation on the "
         "25-stratum/67-PSU design (t, 42 df); Shapley shares exact over all orderings"
     )
     _save(
@@ -758,6 +851,21 @@ def run(cache_dir: Path | None = config.OUTPUT_DIR / "cache") -> dict[str, pd.Da
         outcome="fatal",
     )
     out["stratified_qba"] = qba
+    ovr = crss_overrepresentation()
+    _save(
+        ovr,
+        "crss_overrepresentation",
+        "Over-representation of police-reported speeding in fatal crashes: CRSS-only ratio "
+        "(fatal-crash share over all-crash share, both CRSS) next to the mixed FARS/CRSS ratio",
+        "Weighted domain means; ratio of the CRSS fatal-crash share to the CRSS all-crash share "
+        "with joint Taylor linearisation (25 strata / 67 PSUs, t 42 df); the mixed ratio divides "
+        "the FARS census share by the CRSS all-crash share (CI: CRSS denominator only). The "
+        "CRSS-only ratio is a lower bound on the over-representation under full recording only if "
+        "CRSS records speeding in non-fatal crashes at least as fully as in fatal ones, which is "
+        "untested (see fars_crss_recording)",
+        outcome="fatal",
+    )
+    out["crss_overrepresentation"] = ovr
     ev = e_values(out["key_models"], strata)
     _save(
         ev,
@@ -776,12 +884,6 @@ def run(cache_dir: Path | None = config.OUTPUT_DIR / "cache") -> dict[str, pd.Da
     )
     out["selection_by_fatality"] = sel
     return out
-
-
-def reproduce_phase1(df: pd.DataFrame, design: SurveyDesign) -> float:
-    """Exceedance RR with the model-A block set (should equal severity/fatal_speeding_type)."""
-    ex = EXPOSURES["exceeded"]
-    return float(np.exp(cf.fit_subset(df, design, ex, [*ENV_BLOCKS, "alcohol"], "fatal").log_rr))
 
 
 __all__: Sequence[str] = ("EXPOSURES", "load_frame", "run")

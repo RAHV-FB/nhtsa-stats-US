@@ -6,7 +6,26 @@
  "outcome": "",
  "method": "Assembled from descriptive, severity, measurement, interactions, burden and matched outputs",
  "inputs": [
-  "outputs/tables/*"
+  "data/processed/fars_crash.parquet",
+  "data/processed/fars_person.parquet",
+  "outputs/tables/measurement/fars_crss_fatal_composition.csv",
+  "outputs/tables/measurement/restraint_reporting.csv",
+  "outputs/tables/measurement/fars_testing.csv",
+  "outputs/tables/measurement/unknown_by_year.csv",
+  "outputs/tables/descriptive/frequency_vs_severity.csv",
+  "outputs/tables/speeding/strata.csv",
+  "outputs/tables/restraint_behaviour/dpc_by_driver_behaviour.csv",
+  "outputs/tables/drugs/crss_bounds.csv",
+  "outputs/tables/drugs/killed_vs_survived.csv",
+  "outputs/tables/contributions/burden_shapley.csv",
+  "outputs/tables/contributions/fars_overlap_summary.csv",
+  "outputs/tables/severity/fatal_crude_vs_adjusted.csv",
+  "outputs/tables/interactions/pairs_fatal.csv",
+  "outputs/tables/burden/attributable_fractions_fatal.csv",
+  "outputs/tables/measurement/qba_grid.csv",
+  "outputs/tables/matched/belt_effect.csv",
+  "outputs/tables/severity/fatal_speeding_type.csv",
+  "outputs/tables/measurement/alcohol_coding_sensitivity.csv"
  ],
  "rows": 8,
  "columns": [
@@ -28,6 +47,31 @@
   "phase2_evidence"
  ],
  "module": "nhtsa_stats.simulation.evidence",
- "git_commit": "8fe8986",
- "generated_utc": "2026-10-23T09:41:58Z"
+ "git_commit": "af9ce88",
+ "source_sha256": "ac8c0dd8593406a9ba45e46e32059bc6232931184426bbd2821e83a96228c2ae",
+ "code_sha256": "1e402ddaed97cd018784eab65202dfbe1eec0a767dd39a60c1c8b922362e6d0b",
+ "inputs_sha256": {
+  "data/processed/fars_crash.parquet": "30f4314e8984ce2ba3cd764b561628edf36950705c1fc3bdd16769a417846ddf",
+  "data/processed/fars_person.parquet": "97b40b82c1b47f76bf99a8e05ebaa84e14c4b1ea2ecea3e86be6de4c2189bfa2",
+  "outputs/tables/measurement/fars_crss_fatal_composition.csv": "1c2df3c3ceb7e7f691c7baa4874f09423dc92081d5007c5a40ab1be73a5ee34f",
+  "outputs/tables/measurement/restraint_reporting.csv": "d28c36e33843807b1c49df5f686ee12aef31cf8fa933b2ede3cb2be7d5f574c9",
+  "outputs/tables/measurement/fars_testing.csv": "043faceca3131f541defa3fca1689f3520e0e52812c334fba9867a90f36e8caf",
+  "outputs/tables/measurement/unknown_by_year.csv": "5f4a0321ad839e9935dae39e1bc9701b0dad60ca331fa5b6ffd60700e4fdd632",
+  "outputs/tables/descriptive/frequency_vs_severity.csv": "1dc89daaad065a88932b94f6fbb1b69ed82c62736d7ac26eabaff5ffd850dd81",
+  "outputs/tables/speeding/strata.csv": "83d32e7ca99d622f7ccf72d2a1890a3ac6ae4c8315b23d263905215bedf61f52",
+  "outputs/tables/restraint_behaviour/dpc_by_driver_behaviour.csv": "3dea02ce80c1f1eeca2beb45ab3bf9f09838a55e0bd1e7824f77ca9b16d85a6a",
+  "outputs/tables/drugs/crss_bounds.csv": "386279425acce54843999667f5dd3984e23dab77b66926db4925521613ad60c2",
+  "outputs/tables/drugs/killed_vs_survived.csv": "57b58bd1200914dc2e4af7f6929e255554d460a344b17a90b837857bbfc6fe85",
+  "outputs/tables/contributions/burden_shapley.csv": "4b0b9bdeea208261a00a58a14c66aa94d1a8096a1b48febe92ef0ceef41f133a",
+  "outputs/tables/contributions/fars_overlap_summary.csv": "4139f2fc5237d70e8d59d4c071afac1ca07a0653c523d5582df33bd3eac0c0f5",
+  "outputs/tables/severity/fatal_crude_vs_adjusted.csv": "ba73429d4a9b3b78ab8bf0897ffea97499a0bb96a5aea8c3d4340ec53de2ed7c",
+  "outputs/tables/interactions/pairs_fatal.csv": "c659f144891342d2377e3f5b5db3069d0e84a99ed2632b4fac269c847a1e1fa3",
+  "outputs/tables/burden/attributable_fractions_fatal.csv": "bdb71b455b136b7f828dd3311113b8e649cca2c12cd558679906b8a2cd7e7d18",
+  "outputs/tables/measurement/qba_grid.csv": "70d4208ed9dc3ca976c78a6febd4c122baae82d74472104c1e493f57c7e5aebd",
+  "outputs/tables/matched/belt_effect.csv": "672180fc8934594b9760a7adf8cb1179a5a2a00270d347e22a01cce7c6f0fb7f",
+  "outputs/tables/severity/fatal_speeding_type.csv": "d3677f25d5e0a9842c8ed5ad4c5cc270358d428c4d64c7afa9ad8b1faf39fdfc",
+  "outputs/tables/measurement/alcohol_coding_sensitivity.csv": "bf736e11903b44b4e4d42c620741176ad5490c72d70d567a35d5885d2914c947"
+ },
+ "package_sha256": "fbdac1b588be76a011931549cc2f2013fc1b6405f88cee1ba0e10db719e3ed6b",
+ "generated_utc": "2026-11-13T02:18:01Z"
 }

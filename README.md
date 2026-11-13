@@ -1,227 +1,195 @@
-# What makes US road crashes deadly? — FARS & CRSS 2016–2024
+<!-- Generated from reports/templates/README.md by `nhtsa analyze report`; every number is looked up in outputs/tables. Edit the template, not this file. -->
 
-A reproducible Python research system that uses the 36 NHTSA archives in `data/raw/` —
-**FARS** (census of fatal crashes) and **CRSS** (national probability sample of
-police-reported crashes) for 2016–2024 — to study:
+# What makes US road crashes deadly? FARS and CRSS, 2016–2024
 
-* which circumstances are associated with a reported crash being fatal or serious, before and
-  after accounting for other circumstances;
-* which circumstances *combine* to produce disproportionately severe outcomes (additive and
-  multiplicative interaction, with co-occurrence kept separate);
-* how far behavioural associations can be trusted, given that police record speeding,
-  alcohol, drugs and restraint use differently depending on how severe a crash was;
-* who dies given involvement (person-level and within-vehicle matched designs), and which
-  driver groups are over-involved in crashes (quasi-induced exposure);
-* what can — and cannot — be inferred about interventions such as speed cameras or roadside
-  alcohol/drug testing, through an evidence ledger and a transparent, assumption-driven
-  policy simulator with cost-effectiveness and break-even tools.
+A reproducible Python research system built on the 36 NHTSA archives in `data/raw/`: **FARS**
+(census of fatal crashes) and **CRSS** (national probability sample of police-reported crashes).
+No other data are used. Every estimate, count and share in `reports/`, on the website and in this README is read from an output table
+in `outputs/tables/`, each with a provenance sidecar. The few facts typed into the text are not results: the
+number of archives, the tally of the review record and the run time. This README is generated from
+`reports/templates/README.md` by `nhtsa analyze report`; edit the template, not this file.
 
-No external data are used. Every empirical number traces to the raw archives through code in
-`src/nhtsa_stats` and an output table with a provenance sidecar. Hypothetical policy outputs
-are always labelled as such.
+## What the data answer, and what they cannot
 
-> **Start here:** `reports/road_deaths.md` (where the deaths are: behaviours, victims, driver
-> records, vehicles, places, states; the basis of the public website) · `reports/findings.md`
-> (what makes a police-reported crash deadly: severity models) · `docs/limitations.md` (what the
-> data cannot answer) · `docs/audit_2026-11.md` (November 2026 audit and re-analysis) ·
-> `docs/research_plan.md` (questions and design).
->
-> **Phase 2** — how overlapping factors (speeding, alcohol, drugs, restraint) combine and which
-> associations survive adjustment and bias analysis: `reports/factor_contributions.md`,
-> `reports/speeding_confounding.md`, `reports/alcohol_drugs_restraints.md`,
-> `reports/multifactor_interactions.md`, `reports/case_comparisons.md`; plan in
-> `docs/research_plan_phase2.md`.
+The data answer four kinds of question reasonably well:
+
+1. **Within the same vehicle in the same fatal crash, how much less often belted occupants and
+   helmeted riders died**, how that varies by crash type, and how far misreported belt or helmet use
+   could change it.
+2. **Which circumstances stay associated with a reported crash being fatal after design-based
+   adjustment in CRSS**: exceeding the limit, motorcycles, alcohol (with its coding range),
+   pedestrians struck on faster roads, older drivers.
+3. **How the records themselves behave**: coding breaks and selective testing.
+4. **How the fatal share of reported crashes changed after 2020**, and how much of that the recorded
+   crash mix explains.
+
+They cannot answer: **crash risk per mile, trip or driver** (there is no exposure measure); **the
+effect of any enforcement, camera, testing or campaign** (none is recorded); **the effect of drugs**
+(testing is selective and the fields unreliable); or **any causal effect**. Everything about severity
+is conditional on a police-reported crash. Intervals cover sampling error only unless stated.
+Limitations: `docs/limitations.md`. An independent adversarial review weakened 21 of 31 published
+findings, never in direction: `docs/red_team_2026-11.md`.
+
+## Findings
+
+Numbers are quoted as the named tables give them. Full text, intervals and caveats are in
+`reports/findings.md` and `reports/road_deaths.md`.
+
+**1. Belts and helmets (FARS, within the same vehicle).**
+* Belted drivers and right-front passengers died 66.0% (64.8–67.2%) less often than their unbelted
+  companion (`matched/belt_effect`).
+* The pooled figure averages different crash types: 51.0% in multi-vehicle angle crashes, 84.5% in
+  single-vehicle rollovers (`matched/belt_by_crash_type`).
+* It depends on truthful reporting by survivors. Allowing 10% of belted survivors and 5% of
+  unbelted-coded deaths to be misrecorded gives 28.4% (26.7–29.9%); the reduction vanishes at
+  21.2% survivor misreporting alone and 18.2% with 5% reverse error
+  (`matched/belt_misreporting_two_sided_dpc`).
+* Exploratory follow-up: within crash configuration, belts are somewhat *less* protective with a
+  speeding driver. The ratio of belt risk ratios is 1.10 to 1.23 across four ways of layering crashes
+  (lower confidence limits 1.01 or above): 1.23 (1.13–1.34) with single/multi-vehicle and rollover
+  crossed (3 of 4 layers pooled), the largest of the four; the crash-type scheme pools only 3 of its 8
+  crash types. Pooling crashes first gives 1.00 (0.93–1.08). The alcohol contrast shows no detectable difference (p = 0.66), 1.02 (0.93–1.11) (`restraint_behaviour/dpc_contrast_within_configuration`). The earlier unstratified
+  conclusion that the belt effect does not vary with driver speeding does not hold within crash
+  configuration.
+* Motorcycle helmets: 29.9% (19.2–39.3%) fewer deaths among riders and passengers of the same
+  motorcycle, but 459 of 4,768 pairs differ in helmet use, the pair design covers 15.8% of unhelmeted
+  deaths, and the effect vanishes at 5.5% survivor misreporting
+  (`matched/helmet_misreporting_dpc`, `matched/helmet_pair_coverage`).
+
+**2. Conditional associations in CRSS that survive adjustment** (associations, not effects).
+* Exceeding the limit or racing: adjusted fatal risk ratio 5.21 (4.34–6.25) under model A and 4.87 (4.12–5.77)
+  with crash configuration also held fixed (`severity/speeding_type_models`).
+* Motorcycle involvement 8.6 (7.7–9.6); heavy truck or bus 1.91 (1.72–2.13); unlit darkness 1.73 (1.50–2.00); driver aged 65+ 1.65 (1.51–1.81) (`severity/fatal_crude_vs_adjusted`).
+* Alcohol 4.24 (3.57–5.03) with NHTSA's imputation, 5.84 (5.00–6.83) among crashes with known police
+  alcohol, 2.79 (2.36–3.29) if unknown is treated as "no" (`measurement/alcohol_coding_sensitivity`).
+* Pedestrians struck on 50–55 mph roads against 25 mph or less: 6.74 (4.92–9.23) adjusted, 12.5 without
+  adjustment for location, light and time of day (`vulnerable/pedestrian_speed_limit_adjustment`).
+* "Too fast for conditions" is a small, imprecise association: 1.05 (0.89–1.26) under model A, which
+  excludes only effects beyond about ±22%, and 1.28 (1.13–1.46) under model B. **The split of speeding
+  by type is exploratory.**
+* Within CRSS alone, limit exceedance is over-represented among fatal crashes 8.60 (7.15–10.34) times,
+  against 12.79 (10.39–15.74) for the mixed FARS/CRSS ratio; both intervals reflect CRSS sampling only
+  (`speeding/crss_overrepresentation`).
+* Interstates are safer than comparable roads on 50–65 mph roads, 0.57 (0.45–0.73), but not at 70+ mph,
+  0.94 (0.64–1.39) (`severity/interstate_by_speed_band`). Rain and teenage drivers: see
+  `severity/key_contrasts_ab` (models A and B).
+* Exploratory follow-up added after the red-team review: the pooled model-A risk ratios above average over very different
+  crash configurations, and the relative association is larger in multi-vehicle crashes, where the baseline fatal risk is low.
+  Adjusted fatal risk ratios in single-vehicle against multi-vehicle crashes: exceeding the limit 3.4 against 10.0; alcohol 3.1 against 6.4; motorcycle 4.3 against 16.5; large truck or bus 1.5 against 2.7 (homogeneity p ≤ 2.9e-05 for each). "Too fast for conditions" shows no detectable difference, 1.04 against 1.08 (p = 0.84)
+  (`severity/fatal_effect_modification`). Associations conditional on a police-reported crash, not causal effects.
+
+**3. Measurement.**
+* Killed drivers are tested for alcohol far more often than survivors (67.5% against 25.2%,
+  `measurement/alcohol_testing_share`), but police-recorded alcohol, drug and distraction fields are
+  more often *unknown* in fatal crashes (alcohol 47.4% against 28.2% for no-injury crashes,
+  `measurement/unknown_by_severity`).
+* Police reports identify BAC ≥ .08 in 87.1% of tested killed drivers and 98.2% of tested survivors, but
+  survivors are tested mainly on suspicion; their sensitivity falls from 99.0% to 97.2% as testing broadens
+  (`measurement/police_vs_bac_selection`).
+* CRSS alcohol coding broke in 2019; the alcohol association is reported under three codings. Drug and
+  distraction fields cannot support severity or trend analysis.
+
+**4. The post-2020 rise.** The fatal share of police-reported crashes rose by a factor of 1.25 (1.14–1.37). The recorded crash mix accounts for 9% to 33% of it without
+crash configuration (model A) and 24% to 47% with it (model B, where configuration may itself be a mediator),
+across four specifications and two reference periods; several of the individual intervals include zero
+(`trends/composition_robustness`). "Roughly a quarter to a half" is the model-B range only. The fall in
+reported crashes accounts for 53.6% (29.1–78.1%) of the rise in the share, or 46.6% (29.2–64.1%) under
+the complete-case outcome (`trends/denominator_share`).
+
+**Also.** Official factor counts overlap and cannot be added: deaths in speeding, drunk-driving,
+drug-positive and unbelted categories sum to at least 109% of deaths, and between 64.8% and 95.4% involve
+at least one, depending on how undetermined drug status is scored (`contributions/fars_overlap_treatments`).
+Drug effects cannot be ranked or estimated. Attributable fractions are model-based, change with the alcohol
+coding and model period (`burden/attributable_fraction_variants`), and are not lives saved by any programme.
+
+**Appendix: prediction models** (`docs/model_validation.md`). Boosted trees reach a test AUROC of 0.919 (0.910–0.928) for fatal crashes in 2023–2024, but they are descriptive, not a finding about causes. Police-judged
+speeding and imputed alcohol are recorded after the crash; dropping both changes test AUROC by -0.016
+(`ml/feature_sensitivity`).
+
+**Interventions.** The policy part is an observed baseline (deaths by overlapping segment) and an evidence
+ledger restating measured associations (`reports/policy_analysis.md`). It estimates no intervention effect.
 
 ## Quick start
 
-Requirements: Python ≥ 3.11, [uv](https://docs.astral.sh/uv/), Git LFS (the archives are
-LFS objects).
+Requirements: Python ≥ 3.11, [uv](https://docs.astral.sh/uv/), Git LFS (the archives are LFS objects).
 
 ```bash
 git lfs pull                      # fetch the 36 archives (~675 MB)
 uv sync --extra app               # create the environment from uv.lock
-uv run nhtsa all                  # validate → cache → inventory → integrity → datasets → analyses
-uv run pytest                     # unit + data-integrity tests
+uv run nhtsa list                 # list the analysis modules
+uv run nhtsa all                  # build the datasets, then run every module
+uv run pytest                     # unit tests; data tests skip without the caches
 uv run streamlit run app/streamlit_app.py   # research interface
 ```
 
-The Phase-1 pipeline (a clean `nhtsa all` from the raw archives) took 84 minutes on a 4-core
-machine, measured before Phase 2: about 3 minutes to build the datasets, then the analyses,
-dominated by the confounding lattices (34 min), person-level models (12 min), severity and
-interaction models (9 min each), the prediction models (8 min) and the within-vehicle bootstraps
-(7 min). Expect longer when other processes compete for the cores. The pipeline is deterministic: a clean rebuild reproduces
-the processed datasets exactly and the output tables to the last digit or so (multi-threaded
-numerical libraries can change the final digits). Individual steps:
+A change to one analysis only needs `uv run nhtsa analyze <module>`; the caches and datasets are reused.
 
-| Command | What it does | Output |
-|---|---|---|
-| `nhtsa ingest` | Validate archives (LFS pointer check, CRC, SHA-256 vs committed pointer) and convert changed ones to typed Parquet (incremental) | `data/interim/` (git-ignored) |
-| `nhtsa inventory` | Tables, columns, embedded codebook, availability matrix | `outputs/audit/*.csv` |
-| `nhtsa validate` | 841 relational-integrity checks; exits non-zero on structural failure | `outputs/audit/integrity_checks.csv` |
-| `nhtsa features` | Harmonised analytic datasets | `data/processed/` (git-ignored) |
-| `nhtsa analyze [module …]` | Run analyses (`nhtsa list` shows modules) | `outputs/tables/<module>/`, `outputs/figures/` |
-| `nhtsa analyze speeding drugs multifactor restraint_behaviour contributions stages cases` | Phase-2 modules (add about 75 minutes on 4 cores; the speeding lattices take most of it) | `outputs/tables/<module>/` |
+| Command | What it does |
+|---|---|
+| `nhtsa ingest` | Validate archives, convert changed ones to typed Parquet (`data/interim/`, git-ignored) |
+| `nhtsa inventory` / `validate` | Data inventory and relational-integrity checks (`outputs/audit/`) |
+| `nhtsa features` | Harmonised analytic datasets (`data/processed/`, git-ignored) |
+| `nhtsa analyze [module …]` | Run modules into `outputs/tables/<module>/`. Modules: descriptive, severity, measurement, interactions, confounding, trends, person, matched, exposure, burden, vulnerable, ml, speeding, drugs, multifactor, restraint_behaviour, contributions, stages, deaths, policy, plus figures, report, site, docs |
+| `nhtsa analyze report site docs` | Re-render `reports/`, the website page and generated docs from the tables |
 
-Changing one analysis only requires `nhtsa analyze <module>`; the cache and datasets are
-reused.
+**Runtime.** A clean `nhtsa all` takes about two hours on 4 idle cores (measured November 2026).
+Building the datasets from the archives takes a few minutes; the longest modules are `confounding`
+(about 32 minutes), `speeding` (16), `severity` (13), `matched` (11), `person` (10), `interactions` (9)
+and `ml` (8). Re-run one module with `uv run nhtsa analyze <module>`; `uv run nhtsa status` lists tables
+whose producing code or input data changed since they were written. A clean rebuild from the raw archives
+in November 2026 reproduced every committed table byte for byte.
 
 ## Data
 
 | | FARS | CRSS |
 |---|---|---|
 | What | Every crash on a public trafficway with a death within 30 days | Probability sample of police-reported crashes, all severities |
-| Years | 2016–2024 (main + auxiliary archives) | 2016–2024 (main + auxiliary archives) |
-| Crashes | 325,922 fatal crashes, 353,706 deaths | 468,993 sampled crashes (~5.3–6.8 million/yr weighted) |
-| Use | Observed counts and composition of fatal crashes; within-vehicle designs | Denominators, severity rates and models (design-based: 25 strata, 67 PSUs) |
+| Years | 2016–2024 | 2016–2024 |
+| Size | 325,922 fatal crashes, 353,706 deaths | 468,993 sampled crashes (about 5.3–6.8 million a year weighted) |
+| Use | Counts and composition of fatal crashes; within-vehicle designs | Denominators, severity rates and models (design-based: 25 strata, 67 PSUs) |
 
-The archives contain no PDF manuals; variable meanings come from the value labels embedded
-in the CSVs (harvested into `outputs/audit/codebook.csv`) and, where labels are absent (CRSS
-2016–2018, all auxiliary files), from verified cross-tabulation against labelled fields. See
-`docs/data_audit.md`, `docs/data_dictionary.md`, `docs/variable_harmonization.md` and the
-domain appendices in `docs/audit/`.
+FARS and CRSS rows are never pooled. CRSS weights are benchmarked to FARS fatal totals, so agreement between
+them on fatal counts is partly by construction. The archives contain no manuals; variable meanings come from the
+embedded value labels and verified cross-tabulation. See `docs/data_audit.md`, `docs/data_dictionary.md`,
+`docs/variable_harmonization.md` and `docs/audit_2026-11.md`.
 
 ## Repository layout
 
 ```
-data/raw/                 36 original ZIP archives (Git LFS, unchanged)
-src/nhtsa_stats/
-  ingestion/              archive discovery, validation, CSV reading, Parquet cache
-  validation/             inventory and relational-integrity checks
-  processing/             harmonised code mappings (+ leakage registry), analytic datasets,
-                          driver-level files and person-to-driver links (Phase 2)
-  analysis/               survey inference core and the research modules
-  models/                 severity-prediction pipeline (temporal validation)
-  simulation/             evidence ledger, intervention simulator, cost model
-  reporting/              provenance-stamped outputs, generated documentation
-app/                      Streamlit research interface
-docs/                     plan, audit, dictionary, harmonisation, methodology, limitations,
-                          model validation, policy assumptions (+ docs/audit/, docs/generated/)
-reports/                  main findings (findings.md, findings.json), seven topic reports,
-                          templates/
-outputs/                  generated tables/figures (small, committed) and audit inventory
-tests/                    unit tests (synthetic fixtures) and data tests (real cache)
-website/                  static public site: templates/index.html (rendered to index.html by
-                          `nhtsa analyze site`), assets/, data/ (CSV downloads synced from
-                          outputs/tables/), tools/sync_public_data.py, tests/
-scripts/                  policy_worked_examples.py; audit/ one-off domain-audit scripts
+data/raw/            36 original ZIP archives (Git LFS, unchanged)
+src/nhtsa_stats/     ingestion, validation, processing (harmonisation + leakage registry), analysis,
+                     models (prediction), simulation (observed baseline, evidence ledger), reporting
+app/                 Streamlit research interface
+docs/                research plans, audits, methodology, limitations, model validation, red-team record
+reports/             rendered reports; templates/ holds the sources (edit those, not the output)
+outputs/             generated tables and figures (small, committed) and the audit inventory
+tests/               unit tests (synthetic fixtures) and data tests (real cache)
+website/             static public site (see below)
 ```
 
-## Findings
+Reading order: `reports/road_deaths.md` (where the deaths are), `reports/findings.md` (what makes a reported
+crash deadly), `docs/limitations.md`, then the Phase-2 reports on overlapping factors
+(`reports/factor_contributions.md`, `speeding_confounding.md`, `alcohol_drugs_restraints.md`,
+`multifactor_interactions.md`) and `docs/research_plan.md`.
 
-Full report with sources, intervals and caveats: `reports/findings.md` (interactive version in
-the app). In brief — all conditional on a police-reported crash, and associations, not effects:
+## Public website
 
-1. **Frequency is not danger.** Pedestrian crashes are about 1% of police-reported crashes but
-   about 19% of fatal ones; rain, wet roads, intersections and teenage drivers are common in
-   crashes but under-represented among fatal ones.
-2. **Adjustment changes the picture.** Much of the night-time excess is accounted for by
-   darkness, alcohol, road type and crash configuration; rain-crashes are no less severe than
-   others on the same road surface; interstates are safer than other roads with the same speed
-   limit; crashes involving drivers aged 65+ are more severe once their low-risk settings are
-   held constant.
-3. **"Speeding" is two things.** Exceeding the limit is associated with about five times the
-   fatal risk; "too fast for conditions", the larger category, shows little or no excess.
-4. **The most robust associations involve objective circumstances**: motorcycles, pedestrians,
-   the speed environment, unlit darkness and heavy trucks; alcohol under every coding.
-5. **Some combinations amplify each other**, notably pedestrians in unlit darkness; others
-   often assumed to (speeding in darkness, young drivers at night) are not detected for the
-   fatal outcome.
-6. **Involvement is not severity.** Teenage drivers are over-represented as the culpable party
-   in two-vehicle crashes, but their crashes are less severe.
-7. **Belts.** Within the same vehicle in fatal crashes, belted front-seat occupants died about
-   two-thirds less often than unbelted ones; the size of that estimate depends strongly on how
-   truthfully surviving occupants report belt use.
-8. **The post-2020 rise** in the fatal share of crashes is only partly (roughly 30–50%)
-   accounted for by the recorded crash mix; about half of the rise in the share reflects fewer
-   reported non-fatal crashes.
-9. **Measurement.** Police-recorded behaviours are recorded more completely in severe crashes;
-   drug and distraction fields cannot support severity or trend analysis.
-10. **Interventions.** The data identify no intervention effect; the policy tools show where
-    deaths concentrate and what an intervention would have to achieve, under stated
-    assumptions (`reports/policy_analysis.md`).
-
-## Phase 2 findings: overlapping factors
-
-All conditional on a police-reported crash; associations, not effects. Details, intervals and
-caveats in the Phase-2 reports (every number there is rendered from `outputs/tables/`).
-
-1. **Official factor counts overlap and cannot be added.** In FARS 2016–2024, deaths in
-   speeding-related crashes, crashes with a driver at BAC ≥ .08, crashes with a drug-positive
-   driver and unbelted-occupant deaths sum to 109% of all deaths, while 65% of deaths involve any
-   of them; about 70% of the deaths counted under each factor also involve another.
-2. **Alcohol does not explain away speeding.** Exceeding the limit has a crude fatal risk ratio
-   of 10.0; alcohol accounts for about 9% of its log (4–16% depending on the adjustment order),
-   and 69% remains after every recorded circumstance. Without alcohol the adjusted risk ratio is
-   6.5, *higher* than with alcohol (3.3). Speeding likewise explains little of alcohol's
-   association (4%).
-3. **The unit matters.** In single-vehicle crashes no departure from multiplicativity is detected
-   for one driver's exceedance and alcohol; at crash level the combination is sub-multiplicative,
-   possibly because different drivers and crash types are pooled. A struck pedestrian's death is
-   much more weakly (and imprecisely) associated with the striking driver's recorded speeding or
-   alcohol than an occupant's death, once road speed limit and light are held fixed.
-4. **Drugs cannot be ranked.** Drug testing follows survival and suspicion (62% of killed vs 19%
-   of surviving drivers), police co-record drugs with alcohol several times more often than
-   toxicology finds them together, and the CRSS drug risk ratio ranges from 1.7 to 73 depending
-   only on how unknowns are allocated.
-5. **Belts act at a different stage.** Within the same vehicle the belt risk ratio (about 0.34)
-   does not change with the driver's speeding and is only slightly lower with a drinking driver
-   (it does differ between single- and multi-vehicle crashes); across crashes the unbelted risk
-   ratio falls from 46 (crude) to 28 (with the driver's own behaviour) and 19 (with crash
-   configuration).
-6. **No defensible single ranking.** Exceeding the limit ranks first on adjusted risk (P ≈ 0.97);
-   alcohol ranks first on deaths involved and attributed burden; predictive importance depends
-   on the measure. The
-   hypothesised ranking drugs > alcohol > belts > speeding is not supported.
-7. **No individual attribution.** The case explorer shows that "shares" of a modelled risk
-   change with scale and order and often require combinations that do not exist in the data.
-
-New interface pages: *Factor contributions*, *Multiple-factor explorer*, *Case comparison*.
-
-## What this project cannot tell you
-
-The databases contain no exposure (trips, miles), enforcement, camera, testing-programme or
-cost data. Therefore they cannot estimate crash rates per mile or trip, the effect of any
-enforcement programme, or lives saved by an intervention. The simulator makes the required
-assumptions explicit, computes conditional projections and break-even thresholds, and never
-presents them as measured effects. Details: `docs/limitations.md`,
-`docs/policy_assumptions.md`.
-
-## Public research website
-
-The results are published as a static public site, **Road Deaths in America**, live at
-https://rahv-fb.github.io/nhtsa-stats-US/. It leads with where the deaths are: the four behaviours
-involved in most deaths and how they overlap, who died in drunk-driving, speeding and large-truck
-crashes, the records of the drivers involved, seat belts and the lives they would have saved,
-speed and pedestrians, helmets, vehicle age, what changed after 2019, and a sortable comparison of
-states, followed by the limits of the data and the method.
-
-The page is rendered at build time: `website/templates/index.html` holds the text, with every
-number written as a placeholder that `nhtsa analyze site` looks up in `outputs/tables` (the same
-grammar as the reports), and the charts are drawn from the same tables into static HTML and SVG.
-`tests/test_site.py` fails if the committed page differs from a fresh render or if the template
-contains a number that is not a placeholder. `.github/workflows/public-site.yml` deploys the
-`website/` folder on each push to `main`.
+**Road Deaths in America** is a static site, live at https://rahv-fb.github.io/nhtsa-stats-US/. The text is in
+`website/templates/index.html`; every number is a placeholder that `nhtsa analyze site` fills from
+`outputs/tables`, and `tests/test_site.py` fails if the committed page is stale or contains a typed number.
+Details and checks: `website/README.md`.
 
 ```bash
 uv run nhtsa analyze deaths site                    # refresh the tables and re-render the page
 python website/tools/sync_public_data.py            # copy the downloadable CSVs into website/data/
-python website/tools/sync_public_data.py --check    # confirm the copies are current
 node --test website/tests/site.test.mjs             # page structure and script tests
-python -m http.server 8000 --directory website      # then visit http://localhost:8000
 ```
 
-[Website details](website/README.md).
+## Working with Claude Code
 
-## Working on this project with Claude Code
-
-`CLAUDE.md` holds the rules for Claude Code sessions in this repository. To save usage,
-subagents use the cheapest model that can do the job:
-
-- `haiku`: quick writing and simple checks (the default).
-- `sonnet`: all coding, simple or complex, and routine checking.
-- `opus`: only the final review before a push.
-
-`CLAUDE.md` also lists the data and reporting conventions and the checks to run before a push.
+`CLAUDE.md` holds the rules for Claude Code sessions (cheapest sufficient model, data and reporting
+conventions, checks before a push): `uv run ruff check src tests app`, `uv run ruff format --check src tests app`,
+`uv run pytest -q`.
 
 ## Licence
 

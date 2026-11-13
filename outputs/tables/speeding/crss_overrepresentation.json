@@ -1,0 +1,46 @@
+{
+ "table": "speeding/crss_overrepresentation.csv",
+ "description": "Over-representation of police-reported speeding in fatal crashes: CRSS-only ratio (fatal-crash share over all-crash share, both CRSS) next to the mixed FARS/CRSS ratio",
+ "population": "CRSS police-reported crashes 2016-2024 with a determinable NHTSA-imputed maximum severity (MAXSEV_IM 0-4)",
+ "unit": "crash",
+ "outcome": "fatal",
+ "method": "Weighted domain means; ratio of the CRSS fatal-crash share to the CRSS all-crash share with joint Taylor linearisation (25 strata / 67 PSUs, t 42 df); the mixed ratio divides the FARS census share by the CRSS all-crash share (CI: CRSS denominator only). The CRSS-only ratio is a lower bound on the over-representation under full recording only if CRSS records speeding in non-fatal crashes at least as fully as in fatal ones, which is untested (see fars_crss_recording)",
+ "inputs": [
+  "data/processed/crss_crash.parquet",
+  "data/processed/fars_crash.parquet",
+  "data/processed/fars_driver.parquet"
+ ],
+ "rows": 4,
+ "columns": [
+  "speeding",
+  "label",
+  "n_crss_crashes",
+  "n_crss_fatal",
+  "crss_share_all_crashes",
+  "crss_share_all_crashes_low",
+  "crss_share_all_crashes_high",
+  "crss_share_fatal_crashes",
+  "crss_share_fatal_crashes_low",
+  "crss_share_fatal_crashes_high",
+  "crss_only_ratio",
+  "crss_only_ratio_low",
+  "crss_only_ratio_high",
+  "n_fars_fatal",
+  "fars_share_fatal_crashes",
+  "mixed_fars_crss_ratio",
+  "mixed_ratio_low",
+  "mixed_ratio_high",
+  "crss_only_over_mixed"
+ ],
+ "module": "nhtsa_stats.analysis.speeding",
+ "git_commit": "af9ce88",
+ "source_sha256": "0aa2189059bdf285e796f4ef293082cb57ad4c4ec4853755c0cb652094e3ad6c",
+ "code_sha256": "705ae9f4dc6cb786a222b95b6e48857e966c905a3d95beba6a41408ffafbf870",
+ "inputs_sha256": {
+  "data/processed/crss_crash.parquet": "1a31897f37cce3be223cc5abfb823582b68b9f7096a8c38980e9346f3450c6e3",
+  "data/processed/fars_crash.parquet": "30f4314e8984ce2ba3cd764b561628edf36950705c1fc3bdd16769a417846ddf",
+  "data/processed/fars_driver.parquet": "b5ff665422d482118e6f775179b59d8ca90b90501f8ea1d09fa79baa66107d04"
+ },
+ "package_sha256": "fbdac1b588be76a011931549cc2f2013fc1b6405f88cee1ba0e10db719e3ed6b",
+ "generated_utc": "2026-11-13T02:07:26Z"
+}

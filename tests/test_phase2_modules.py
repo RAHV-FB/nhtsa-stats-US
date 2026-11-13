@@ -358,23 +358,253 @@ def test_dpc_by_stratum_heterogeneity_arithmetic(monkeypatch):
 
     monkeypatch.setattr(matched, "pair_frame", fake_pair_frame)
     monkeypatch.setattr(matched, "dpc_analysis", fake_dpc)
+    seen = []
+
+    def fake_joint(el, beh_mask, ref_mask, rng, n_boot):
+        seen.append((int(beh_mask.sum()), int(ref_mask.sum())))
+        return 0.05  # a joint SE well below hypot(0.1, 0.1) = 0.141
+
+    monkeypatch.setattr(restraint_behaviour, "joint_log_ratio_se", fake_joint)
     out = restraint_behaviour.dpc_by_stratum(elig, np.random.default_rng(0), n_boot=1)
+    assert seen  # the test calls the joint bootstrap, one call per two-stratum split
     r = out[(out["split"] == "driver speeding (any)")].set_index("stratum")
     assert np.isnan(
         r.loc["driver not speeding", "heterogeneity_ratio"]
     )  # only on the second stratum
     het = r.loc["driver speeding", "heterogeneity_ratio"]
     assert het == pytest.approx(0.5)
-    z = np.log(0.5) / np.hypot(0.1, 0.1)
+    # The SE is the joint-bootstrap SE (0.05), not hypot of the arm SEs (0.141).
+    z = np.log(0.5) / 0.05
     from scipy import stats
 
     assert r.loc["driver speeding", "heterogeneity_p"] == pytest.approx(2 * stats.norm.sf(abs(z)))
+    assert r.loc["driver speeding", "heterogeneity_low"] == pytest.approx(
+        np.exp(np.log(0.5) - 1.96 * 0.05)
+    )
+    assert r.loc["driver speeding", "heterogeneity_high"] == pytest.approx(
+        np.exp(np.log(0.5) + 1.96 * 0.05)
+    )
     row = r.loc["driver not speeding"]
     assert row["reduction"] == pytest.approx(0.5)
     assert row["reduction_low"] == pytest.approx(1 - 1.0)  # 1 - rr_high
     assert row["reduction_high"] == pytest.approx(1 - 0.25)  # 1 - rr_low
     # The "all" split has one stratum and so no heterogeneity test.
     assert out[out["split"] == "all"]["heterogeneity_p"].isna().all()
+
+
+def test_dpc_by_stratum_heterogeneity_uses_joint_bootstrap_for_shared_crashes(monkeypatch):
+    """Real DPC on synthetic data.  The heterogeneity SE must be ``joint_log_ratio_se`` seeded as
+    documented (RANDOM_SEED + 2), not hypot of the arm SEs: when both strata hold the same
+    crashes the joint SE collapses far below the independent one."""
+    from scipy import stats
+
+    from nhtsa_stats import config
+
+    n_boot = 300
+    full = restraint_behaviour.strata
+    only = lambda e: {"driver exceeded limit": full(e)["driver exceeded limit"]}  # noqa: E731
+    monkeypatch.setattr(restraint_behaviour, "strata", only)
+    se_by = {}
+    for shared in (False, True):
+        elig = _shared_crash_frame(1500, shared)
+        elig["drv_p_p08"] = 0.0
+        elig["n_vehicles"] = "2"
+        elig["night"] = 0
+        out = restraint_behaviour.dpc_by_stratum(elig, np.random.default_rng(1), n_boot=n_boot)
+        r = out.set_index("stratum")
+        a, b = r.loc["driver not speeding"], r.loc["driver exceeded limit / racing"]
+        masks = list(only(elig)["driver exceeded limit"].values())
+        se = restraint_behaviour.joint_log_ratio_se(
+            elig, masks[1], masks[0], np.random.default_rng(config.RANDOM_SEED + 2), n_boot
+        )
+        d = np.log(b["rr_belted_vs_unbelted"]) - np.log(a["rr_belted_vs_unbelted"])
+        hyp = np.hypot(a["se_log_bootstrap"], b["se_log_bootstrap"])
+        # CI half-width on the log scale = 1.96 * joint SE
+        assert (np.log(b["heterogeneity_high"]) - np.log(b["heterogeneity_low"])) / 3.92 == (
+            pytest.approx(se)
+        )
+        if not shared:
+            assert b["heterogeneity_p"] == pytest.approx(2 * stats.norm.sf(abs(d / se)))
+        se_by[shared] = (se, hyp)
+    assert se_by[True][0] < 0.1 * se_by[True][1]  # identical vehicles in both strata
+    assert se_by[False][0] == pytest.approx(se_by[False][1], rel=0.2)
+
+
+def test_pool_log_ratios_inverse_variance_and_heterogeneity():
+    d = np.log(np.array([1.2, 1.2, 1.2]))
+    se = np.array([0.1, 0.1, 0.1])
+    out = restraint_behaviour.pool_log_ratios(d, se)
+    assert out["ratio"] == pytest.approx(1.2)
+    assert out["q_heterogeneity_p"] == pytest.approx(1.0)
+    s = 0.1 / np.sqrt(3)
+    assert out["low"] == pytest.approx(1.2 * np.exp(-1.959964 * s), rel=1e-5)
+    # unequal precision: the precise layer dominates the pooled estimate
+    out2 = restraint_behaviour.pool_log_ratios(np.log(np.array([1.0, 2.0])), np.array([0.01, 1.0]))
+    assert out2["ratio"] == pytest.approx(1.0, abs=0.01)
+    assert 0 <= out2["p"] <= 1
+
+
+def _config_frame(n: int = 16) -> pd.DataFrame:
+    rng = np.random.default_rng(0)
+    return pd.DataFrame(
+        {
+            "ptype": ["driver", "passenger"] * (n // 2),
+            "SEAT_POS": [matched.SEAT_POS_DRIVER, matched.SEAT_POS_RIGHT_FRONT] * (n // 2),
+            "own_speeding_type": rng.choice(["no", "exceeded_limit_or_racing"], n),
+            "drv_p_p08": rng.choice([0.0, 0.9], n),
+            "n_vehicles": rng.choice(["1", "2"], n),
+            "veh_rollover": rng.choice([0.0, 1.0, np.nan], n),
+            "crash_type": rng.choice(["mv_angle", "sv_rollover_first", "sv_off_roadway"], n),
+        }
+    )
+
+
+def test_configuration_layers_and_behaviour_masks():
+    elig = _config_frame()
+    lay = restraint_behaviour.configuration_layers(elig)
+    assert set(lay) == {
+        "single vs multi-vehicle crash",
+        "rollover vs no rollover",
+        "single/multi-vehicle x rollover",
+        "crash type",
+    }
+    sm = lay["single vs multi-vehicle crash"]
+    assert (sm["single vehicle"] ^ sm["multi-vehicle"]).all()
+    rl = lay["rollover vs no rollover"]
+    unknown = elig["veh_rollover"].isna().to_numpy()
+    assert not (rl["rollover"] | rl["no rollover"])[unknown].any()  # unknown rollover in neither
+    assert not (rl["rollover"] & rl["no rollover"]).any()
+    cross = lay["single/multi-vehicle x rollover"]
+    assert sum(m.astype(int) for m in cross.values()).max() == 1
+    beh = restraint_behaviour.behaviour_masks(elig)
+    spd, ref = beh["driver speeding (any) vs not speeding"]
+    assert not (spd & ref).any()
+
+
+def test_config_contrasts_pools_layer_log_ratios(monkeypatch):
+    """Stub the DPC: a behaviour effect that is constant within layers (ratio 1.5) but whose
+    marginal ratio is confounded by layer composition must pool to 1.5 within layers."""
+    elig = _config_frame(40)
+    elig["n_vehicles"] = ["1", "1", "2", "2"] * 10
+    elig["own_speeding_type"] = ["exceeded_limit_or_racing", "no"] * 20
+    layer_rr = {True: 0.2, False: 0.4}  # belt RR in single-vehicle vs multi-vehicle crashes
+
+    def fake_belt_rr(el, mask, label, rng, n_boot):
+        sub = el.loc[mask]
+        single = (sub["n_vehicles"] == "1").mean()
+        beh = label.endswith("behaviour") or "behaviour" in label
+        rr = (layer_rr[True] if single > 0.5 else layer_rr[False]) * (1.5 if beh else 1.0)
+        return {
+            "n_pairs": len(sub),
+            "n_pairs_with_death": len(sub),
+            "rr": rr,
+            "rr_low": rr / 1.2,
+            "rr_high": rr * 1.2,
+            "se_log": 0.05,
+            "min_death_count": 100.0,
+        }
+
+    monkeypatch.setattr(restraint_behaviour, "belt_rr", fake_belt_rr)
+    monkeypatch.setattr(restraint_behaviour, "joint_log_ratio_se", lambda *a, **k: 0.07)
+    contrasts, by_layer = restraint_behaviour.config_contrasts(elig, np.random.default_rng(0), 1)
+    c = contrasts[contrasts["contrast"] == "driver speeding (any) vs not speeding"]
+    pooled = c[
+        (c["adjustment"] == "single vs multi-vehicle crash") & (c["layer"].str.startswith("pooled"))
+    ]
+    assert pooled["ratio_of_rrs"].item() == pytest.approx(1.5)
+    assert pooled["n_layers_pooled"].item() == 2
+    unstrat = c[c["adjustment"].str.startswith("none")]
+    assert len(unstrat) == 1 and unstrat["ratio_low"].item() < unstrat["ratio_of_rrs"].item()
+    assert {"adjustment", "layer", "rr_belted_vs_unbelted"} <= set(by_layer.columns)
+
+
+def test_config_contrasts_drops_thin_layers_from_the_pool(monkeypatch):
+    elig = _config_frame(40)
+
+    def fake_belt_rr(el, mask, label, rng, n_boot):
+        thin = "rollover" in label and "no rollover" not in label
+        return {
+            "n_pairs": 10,
+            "n_pairs_with_death": 5,
+            "rr": 0.3,
+            "rr_low": 0.2,
+            "rr_high": 0.4,
+            "se_log": 0.1,
+            "min_death_count": 5.0 if thin else 100.0,
+        }
+
+    monkeypatch.setattr(restraint_behaviour, "belt_rr", fake_belt_rr)
+    monkeypatch.setattr(restraint_behaviour, "joint_log_ratio_se", lambda *a, **k: 0.1)
+    contrasts, _ = restraint_behaviour.config_contrasts(elig, np.random.default_rng(0), 1)
+    r = contrasts[
+        (contrasts["adjustment"] == "rollover vs no rollover")
+        & (contrasts["contrast"] == "driver speeding (any) vs not speeding")
+    ].set_index("layer")
+    assert not r.loc["rollover", "used_in_pooled"] and r.loc["no rollover", "used_in_pooled"]
+    assert r.loc["pooled within layers", "n_layers_pooled"] == 1
+
+
+def _shared_crash_frame(n_crash: int, shared: bool, seed: int = 0) -> pd.DataFrame:
+    """Two-vehicle crashes; vehicle 1 is a reference-arm vehicle, vehicle 2 a behaviour-arm one.
+
+    With ``shared`` vehicle 2 repeats vehicle 1's belts and deaths (the arms' belt RRs are then
+    identical and perfectly correlated across crashes); otherwise each vehicle is drawn
+    independently.
+    """
+    rng = np.random.default_rng(seed)
+
+    def draw() -> list[tuple[str, int, int, int]]:
+        belts = rng.random(2) < 0.5
+        dead = rng.random() < 0.6
+        out = []
+        for ptype, seat, belted in (
+            ("driver", matched.SEAT_POS_DRIVER, belts[0]),
+            ("passenger", matched.SEAT_POS_RIGHT_FRONT, belts[1]),
+        ):
+            died = bool(dead and rng.random() < (0.3 if belted else 0.6))
+            out.append((ptype, seat, int(belted), int(died)))
+        return out
+
+    rows = []
+    for c in range(n_crash):
+        first = draw()
+        for veh, arm in ((1, "no"), (2, "exceeded_limit_or_racing")):
+            for ptype, seat, belted, died in first if (shared or veh == 1) else draw():
+                rows.append(
+                    {
+                        "crash_id": c,
+                        "vehicle_id": c * 10 + veh,
+                        "ptype": ptype,
+                        "SEAT_POS": seat,
+                        "belted": belted,
+                        "killed": died,
+                        "own_speeding_type": arm,
+                    }
+                )
+    return pd.DataFrame(rows)
+
+
+def test_joint_log_ratio_se_accounts_for_arms_sharing_crashes():
+    """The joint crash bootstrap differs from combining independent arm SEs when the two arms
+    contain vehicles of the same crashes, and equals it (up to noise) when they do not."""
+    n_boot = 400
+    out = {}
+    for shared in (True, False):
+        el = _shared_crash_frame(1500, shared)
+        spd = (el["own_speeding_type"] != "no").to_numpy()
+        joint = restraint_behaviour.joint_log_ratio_se(
+            el, spd, ~spd, np.random.default_rng(1), n_boot
+        )
+        arms = [
+            restraint_behaviour.belt_rr(el, m, "x", np.random.default_rng(2), n_boot)["se_log"]
+            for m in (spd, ~spd)
+        ]
+        out[shared] = (joint, float(np.hypot(*arms)))
+    assert all(np.isfinite(v) for pair in out.values() for v in pair)
+    # identical arms in the same crashes: the difference is (almost) constant across replicates
+    assert out[True][0] < 0.1 * out[True][1]
+    # independent crashes within the same frame: close to the independent-arms value
+    assert out[False][0] == pytest.approx(out[False][1], rel=0.2)
 
 
 def test_nested_sequence_is_nested_and_uses_one_factor():
@@ -514,6 +744,7 @@ def _stub_factorial(monkeypatch, p_values):
 
     class Res:
         n_events = 7
+        n_rows = 100  # rows with a known outcome (the fitted domain)
         meta = None  # set in __init__ (avoids a shared mutable class attribute)
         suppressed = None
 
@@ -537,10 +768,8 @@ def _stub_factorial(monkeypatch, p_values):
     monkeypatch.setattr(factorial, "interaction_table", inter)
 
 
-def test_run_analyses_assembly_and_holm_only_for_registered(monkeypatch):
-    n = len(multifactor.ANALYSES)
-    # One p-value per analysis, in order; the registered ones come first in ANALYSES.
-    p = [0.001, 0.01, 0.02, 0.5, 0.04, 0.03] + [0.0001] * (n - 6)
+def _run_stubbed_analyses(monkeypatch, p, selected=(True, True, True), outcome=(1.0, 1.0, 1.0)):
+    """run_analyses with the model stubbed to return ``p`` (one per analysis, in order)."""
     _stub_factorial(monkeypatch, p)
     frame = pd.DataFrame(
         {
@@ -564,6 +793,8 @@ def test_run_analyses_assembly_and_holm_only_for_registered(monkeypatch):
     big = pd.DataFrame(index=range(3))
     for c in frame.columns:
         big[c] = ["x"] * 3
+    for a in multifactor.ANALYSES:  # outcome columns (``ka`` may be unknown, i.e. NaN)
+        big[a.outcome] = list(outcome)
 
     class D:
         def subset(self, mask):
@@ -580,7 +811,7 @@ def test_run_analyses_assembly_and_holm_only_for_registered(monkeypatch):
                 a.population,
                 a.outcome_label,
                 a.frame,
-                lambda d: np.ones(len(d), bool),
+                lambda d: np.asarray(selected, bool),
                 a.factors,
                 a.covariates,
                 a.outcome,
@@ -593,6 +824,14 @@ def test_run_analyses_assembly_and_holm_only_for_registered(monkeypatch):
     out = multifactor.run_analyses(
         {"crash": (big, D()), "driver": (big, D()), "person": (big, D())}
     )
+    return out
+
+
+def test_run_analyses_assembly_and_holm_only_for_registered(monkeypatch):
+    n = len(multifactor.ANALYSES)
+    # One p-value per analysis, in order; the registered ones come first in ANALYSES.
+    p = [0.001, 0.01, 0.02, 0.5, 0.04, 0.03] + [0.0001] * (n - 6)
+    out = _run_stubbed_analyses(monkeypatch, p)
     meta = out["analyses"]
     assert (
         len(meta) == n and meta["n_suppressed_cells"].eq(1).all() and meta["n_events"].eq(7).all()
@@ -612,3 +851,90 @@ def test_run_analyses_assembly_and_holm_only_for_registered(monkeypatch):
         inter_df.loc[reg, "additive_contrast_p_holm"] >= inter_df.loc[reg, "additive_contrast_p"]
     ).all()
     assert inter_df.loc[reg, "multiplicative_ratio_p_holm"].notna().all()
+
+
+def test_add_configuration_replaces_existing_columns_and_takes_vehicle_max(tmp_path, monkeypatch):
+    import polars as pl
+
+    from nhtsa_stats import config
+
+    per = pl.DataFrame(
+        {
+            "YEAR": [2020, 2020, 2020],
+            "case_id": [1, 1, 2],
+            "VEH_NO": [1, 1, 1],
+            "veh_rollover": [0, 1, None],
+            "crash_type": ["mv_angle", "mv_angle", "sv_rollover_first"],
+        }
+    )
+    per.write_parquet(tmp_path / "fars_person.parquet")
+    monkeypatch.setattr(config, "PROCESSED_DIR", tmp_path)
+    elig = pd.DataFrame(
+        {
+            "YEAR": [2020, 2020, 2020],
+            "case_id": [1, 1, 2],
+            "VEH_NO": [1, 1, 1],
+            "veh_rollover": [0.0, 1.0, np.nan],  # already present: must not produce _x/_y columns
+            "crash_type": ["x", "x", "x"],
+        }
+    )
+    out = restraint_behaviour.add_configuration(elig)
+    assert out["veh_rollover"].tolist()[:2] == [1.0, 1.0]  # vehicle-level max over occupants
+    assert np.isnan(out["veh_rollover"].iloc[2])
+    assert out["crash_type"].tolist() == ["mv_angle", "mv_angle", "sv_rollover_first"]
+
+
+def test_holm_family_is_fixed_when_a_registered_contrast_is_not_estimable(monkeypatch):
+    """A registered contrast with NaN p stays in the family (m = number registered): it cannot be
+    rejected, its own adjusted p is NaN, and the others are adjusted over m, not over m - 1."""
+    n = len(multifactor.ANALYSES)
+    p = [0.001, 0.012, np.nan, 0.5, 0.04, 0.03] + [0.0001] * (n - 6)
+    out = _run_stubbed_analyses(monkeypatch, p)
+    inter_df = out["interactions"]
+    reg = inter_df["registered"]
+    assert reg.sum() == 6
+    adj = inter_df.loc[reg, "additive_contrast_p_holm"].to_numpy()
+    assert np.isnan(adj[2]) and np.isnan(inter_df.loc[reg, "additive_contrast_p"].to_numpy()[2])
+    # sorted finite p: .001, .012, .03, .04, .5 with m = 6 (not 5): 6*.001, 5*.012, 4*.03,
+    # 3*.04 (running max), 2*.5
+    expected = [0.006, 0.06, np.nan, 1.0, 0.12, 0.12]
+    assert adj == pytest.approx(expected, nan_ok=True)
+    # over the 5 estimable tests only, the second would read 4*.012 = .048 and look significant
+    assert adj[1] >= 0.05
+
+
+def test_share_of_frame_and_n_use_the_same_rows(monkeypatch):
+    """share_of_frame counts rows with a known outcome only (``ka`` is unknown for some crashes
+    where ``fatal`` is known), as ``n`` does: selected-and-known / known, not selected / all."""
+    n = len(multifactor.ANALYSES)
+    out = _run_stubbed_analyses(
+        monkeypatch,
+        [0.01] * n,
+        selected=(True, True, False),
+        outcome=(np.nan, 1.0, 0.0),  # row 0 selected but unknown, row 2 known but not selected
+    )
+    assert out["analyses"]["share_of_frame"].to_numpy() == pytest.approx([0.5] * n)  # 1 of 2
+
+
+def test_detected_directions():
+    nan = np.nan
+    df = pd.DataFrame(
+        {
+            "registered": [True, True, True, True, True, True, False],
+            "flag": [nan, nan, nan, nan, "withheld: a combination lacks support", nan, nan],
+            "additive_contrast": [0.02, -0.01, 0.01, 0.0, nan, nan, 0.02],
+            "multiplicative_ratio": [0.5, 1.5, 0.8, 1.0, nan, nan, 0.5],
+            "additive_contrast_p_holm": [0.01, 0.2, 0.049, 0.001, nan, nan, nan],
+            "multiplicative_ratio_p_holm": [0.01, 0.03, 0.5, 0.5, nan, nan, nan],
+        }
+    )
+    got = multifactor.detected_directions(df).tolist()
+    assert got == [
+        "super-additive and sub-multiplicative",
+        "super-multiplicative",
+        "super-additive",
+        "",
+        "withheld",
+        "",
+        "",
+    ]

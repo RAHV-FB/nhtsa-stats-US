@@ -23,3 +23,13 @@ def test_named_modules_run_in_dependency_order(monkeypatch):
     ran.clear()
     cli.cmd_analyze(argparse.Namespace(modules=[]))
     assert ran == ["first", "second", "third"]
+
+
+def test_status_command_registered(capsys, monkeypatch):
+    status = cli.TableStatus(["a/b.csv"], ["c/d.csv"], ["e/f.csv"], 3)
+    monkeypatch.setattr(cli, "stale_tables", lambda: status)
+    cli.main(["status"])
+    out = capsys.readouterr().out
+    assert "1 stale" in out and "1 without code_sha256" in out and "1 with changed input" in out
+    for line in ("stale          a/b.csv", "no-hash        c/d.csv", "inputs-changed e/f.csv"):
+        assert line in out

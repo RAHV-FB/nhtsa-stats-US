@@ -1,0 +1,43 @@
+{
+ "table": "matched/belt_misreporting_two_sided_dpc.csv",
+ "description": "Evans DPC belt risk ratio under two-sided misreporting: a fraction f of belted-coded survivors truly unbelted (existing scenario) crossed with a fraction g of unbelted-coded deaths truly belted (reverse error); tipping_f_given_g / tipping_g_given_f are the error rates at which the RR reaches 1 with the other rate fixed",
+ "population": "FARS 2016-2024 occupants (driver/passenger) of in-transport light passenger vehicles, seat front-left/front-other/second row, age 13+, belted or unbelted, known outcome; vehicles with one eligible driver and one right-front passenger",
+ "unit": "person within vehicle (matched set = vehicle)",
+ "outcome": "killed (died within 30 days)",
+ "method": "Closed-form expected-cell reclassification (survivors keep, deaths keep their other status), percentile bootstrap CIs over crashes (2000 replicates); g = 0 rows reproduce the one-sided scenarios in double_pair_comparison",
+ "inputs": [
+  "data/processed/fars_person.parquet"
+ ],
+ "rows": 12,
+ "columns": [
+  "analysis",
+  "attribute_x1",
+  "survivor_misreport_f",
+  "death_misreport_g",
+  "rr_x1_vs_x0",
+  "rr_low",
+  "rr_high",
+  "reduction_1_minus_rr",
+  "reduction_low",
+  "reduction_high",
+  "rr_low_vehicle_boot",
+  "rr_high_vehicle_boot",
+  "se_log_bootstrap",
+  "boot_degenerate_share",
+  "n_pairs",
+  "n_pairs_with_death",
+  "min_death_count",
+  "tipping_f_given_g",
+  "tipping_g_given_f",
+  "flag"
+ ],
+ "module": "nhtsa_stats.analysis.matched",
+ "git_commit": "af9ce88",
+ "source_sha256": "9d6eab56b34f60be154068ec100a85f04d36758d10d1412cf03888a394dba064",
+ "code_sha256": "4e1b2a03b3b721896a30de5653db1f70abd4abd355a7ce5e0d56e7e31906b8fa",
+ "inputs_sha256": {
+  "data/processed/fars_person.parquet": "97b40b82c1b47f76bf99a8e05ebaa84e14c4b1ea2ecea3e86be6de4c2189bfa2"
+ },
+ "package_sha256": "fbdac1b588be76a011931549cc2f2013fc1b6405f88cee1ba0e10db719e3ed6b",
+ "generated_utc": "2026-11-13T01:41:24Z"
+}

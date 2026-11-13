@@ -40,3 +40,5 @@ RANDOM_SEED = 20240601
 # relative-standard-error threshold above which it is flagged as unstable.
 MIN_CELL_N = 30
 MAX_RSE = 0.30
+# Fewer events than this in a cell flags its rate as unstable (as in the descriptive tables).
+MIN_RATE_EVENTS = 5

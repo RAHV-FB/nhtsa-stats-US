@@ -289,3 +289,93 @@ def test_decomposition_flags_unstable_shares_when_change_is_null():
     df, design = _two_periods(n=80000, seed=4, z_share=(0.1, 0.4))
     tab = T.decomposition_table(_decompose(df, design), design)
     assert (tab["flag"] == "").all()
+
+
+def test_composition_robustness_specs_and_published_row(monkeypatch):
+    """The 'published' specification equals a direct decomposition; dropping covariates is the
+    only difference between specifications.  Synthetic data (software test only)."""
+    df, design = _two_periods(n=20000, seed=7, z_share=(0.2, 0.4))
+    df = df.assign(
+        junction=pd.Categorical(["a"] * len(df), categories=["a"]),
+    )
+    monkeypatch.setattr(T, "COVARIATE_SETS", {"B": ["z", "a", "junction"]})
+    monkeypatch.setattr(T, "ROBUSTNESS_SPECS", {"published": (), "no a": ("a",)})
+    monkeypatch.setattr(T, "outcome_frame", lambda d, s, oc: (d, s))
+    monkeypatch.setattr(T, "P0_YEARS", (2018,))
+    monkeypatch.setattr(T, "P1_YEARS", (2021,))
+    out = T.composition_robustness(df, design)
+    assert set(out["specification"]) == {"published", "no a"}
+    assert set(out["quantity"]) == set(T.ROBUSTNESS_QUANTITIES)
+    pub = out[out["specification"] == "published"].set_index("quantity")
+    direct = T.decomposition_table(
+        T.decompose(df, design, ["z", "a", "junction"], "fatal", "x", (2018,), (2021,)), design
+    ).set_index("quantity")
+    for q in T.ROBUSTNESS_QUANTITIES:
+        assert pub.loc[q, "estimate"] == pytest.approx(direct.loc[q, "estimate"])
+        assert pub.loc[q, "low"] == pytest.approx(direct.loc[q, "low"])
+    assert out[out["specification"] == "no a"]["dropped"].eq("a").all()
+    # Z's prevalence rose, so the composition share is positive in both specifications.
+    shares = out[out["quantity"] == "composition_share_of_change_ref_P0"]
+    assert (shares["estimate"] > 0).all()
+
+
+def test_denominator_share_matches_numerator_denominator_and_adds_to_one():
+    df, design = _kabco_frame()
+    ms = T.kabco_marginset(df, design)
+    ds = T.denominator_share(ms)
+    assert set(ds["quantity"]) == set(T.DENOMINATOR_QUANTITIES)
+    assert set(ds["outcome"]) == {"fatal", "fatal_cc"}
+    full = T.numerator_denominator(
+        ms, pd.Series(1.0, index=range(2016, 2025)), tuple(T.DEFINITIONS)
+    )
+    key = ["outcome", "comparison", "quantity"]
+    merged = ds.merge(full, on=key, suffixes=("", "_full"))
+    assert len(merged) == len(ds)
+    assert merged["estimate"].to_numpy() == pytest.approx(merged["estimate_full"].to_numpy())
+    pivot = ds.pivot_table(index=["outcome", "comparison"], columns="quantity", values="estimate")
+    assert (
+        pivot["numerator_share_of_log_rise"] + pivot["denominator_share_of_log_rise"]
+    ).to_numpy() == pytest.approx(1.0)
+
+
+def test_numerator_denominator_flags_unstable_shares_like_decomposition_table():
+    # No change in the fatal share (same distribution in both periods): the ratio CI includes 1,
+    # so the share-of-log-rise rows are flagged exactly as decomposition_table does.
+    rng = np.random.default_rng(5)
+    n = 30000
+    years = rng.choice(list(T.P0_YEARS + T.P1_YEARS), n)
+    kab = rng.choice(5, n, p=[0.70, 0.15, 0.10, 0.04, 0.01]).astype(float)
+    df = pd.DataFrame({"YEAR": years, "kabco": kab, "fatal_cc": np.where(kab == 4, 1.0, 0.0)})
+    stratum = rng.integers(0, 4, n)
+    design = SurveyDesign.from_arrays(
+        rng.uniform(1, 3, n), stratum, stratum * 10 + rng.integers(0, 3, n)
+    )
+    ms = T.kabco_marginset(df, design)
+    fars = pd.Series(1000.0, index=list(T.P0_YEARS + T.P1_YEARS))
+    nd = T.numerator_denominator(ms, fars)
+    for comp, grp in nd.groupby("comparison"):
+        tot = grp.set_index("quantity").loc["ratio_fatal_share"]
+        unstable = tot["low"] <= 1 <= tot["high"]
+        shares = grp["quantity"].isin(
+            ["numerator_share_of_log_rise", "denominator_share_of_log_rise"]
+        )
+        assert (grp.loc[shares, "flag"] == "total change CI includes 0: shares unstable").all() == (
+            unstable
+        ), comp
+        assert (grp.loc[~shares, "flag"] == "").all()
+    assert (nd["flag"] != "").any()
+    # A clear rise carries no flag.
+    df2, design2 = _kabco_frame()
+    nd2 = T.numerator_denominator(T.kabco_marginset(df2, design2), fars)
+    clear = nd2[nd2["comparison"] == "2020-2024 vs 2016-2019"]
+    assert (clear["flag"] == "").all()
+
+
+def test_unrestrained_share_definition_is_shared_and_counts_child_restraint():
+    from nhtsa_stats.analysis import descriptive as D
+
+    assert D.KNOWN_RESTRAINT_USE == ("belted", "none", "child_restraint")
+    r = pd.Series(["belted"] * 6 + ["none"] * 2 + ["child_restraint"] * 2 + ["unknown"] * 5)
+    # child restraint counts as restrained; unknown is excluded: 2 / 10, not 2 / 8
+    assert D.unrestrained_share_of_known(r) == pytest.approx(0.2)
+    assert T.KNOWN_RESTRAINT_USE is D.KNOWN_RESTRAINT_USE

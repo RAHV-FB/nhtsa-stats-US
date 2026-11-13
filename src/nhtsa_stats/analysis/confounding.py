@@ -21,7 +21,7 @@ Method
     model (exposure + blocks in S) is fitted and the exposure's *standardised* risk ratio is
     computed from predictive margins: the weighted mean predicted risk with every crash set
     to "exposed" divided by the same with every crash set to "reference" (g-computation over
-    the observed covariate distribution of all crashes).  Unlike odds ratios, standardised
+    the observed covariate distribution of the crashes where the outcome is known).  Unlike odds ratios, standardised
     risk ratios are collapsible, so a change between nested models reflects the covariates,
     not non-collapsibility.  With all 2^k subsets available:
 
@@ -72,7 +72,7 @@ import itertools
 import logging
 import math
 import pickle
-from collections.abc import Callable, Iterable, Sequence
+from collections.abc import Iterable, Sequence
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -260,8 +260,8 @@ def analysis_columns() -> list[str]:
 def load_frame() -> tuple[pd.DataFrame, SurveyDesign]:
     """CRSS crashes with known severity, tri-state labels, and the night exposure column."""
     df, design = data.crss_crash(outcome="fatal", tri_state_cols=specs.CRASH_TRI)
-    if df["ka"].isna().any():
-        raise ValueError("fatal and ka must be known on the same crashes")
+    # ``fatal`` is known on every crash with a known MAXSEV_IM, ``ka`` is unknown where it is 5
+    # (injured, severity unknown); fit_subset restricts each outcome to its own known domain.
     df[NIGHT_COLUMN] = df["night"].map({1: "night", 0: "day"}).fillna("unknown").astype(object)
     df["YEAR"] = df["YEAR"].astype(int)
     keep = [*analysis_columns(), NIGHT_COLUMN, "night", "fatal", "ka", CC_OUTCOME]
@@ -289,6 +289,21 @@ def category_levels(df: pd.DataFrame, var: str) -> list:
     if extra:
         raise ValueError(f"{var}: undeclared levels {sorted(map(str, extra))}")
     return out
+
+
+def known_outcome_domain(
+    df: pd.DataFrame, design: SurveyDesign, outcome: str
+) -> tuple[pd.DataFrame, SurveyDesign, np.ndarray]:
+    """Rows whose ``outcome`` is known, as a domain of the full design.
+
+    ``design.subset`` keeps the whole stratum/PSU structure (domain estimation), so variances
+    are not understated by dropping PSUs.  Returns ``(df, design, known)``; when every outcome
+    is known the inputs are returned unchanged.
+    """
+    known = df[outcome].notna().to_numpy()
+    if known.all():
+        return df, design, known
+    return df.loc[known].reset_index(drop=True), design.subset(known), known
 
 
 def collapse_cells(
@@ -380,7 +395,10 @@ def fit_subset(
     outcome: str,
     ridge: float = RIDGE,
 ) -> SubsetFit:
-    """Exposure + covariate blocks -> standardised exposed / reference margins."""
+    """Exposure + covariate blocks -> standardised exposed / reference margins.
+
+    Fitted on the crashes whose ``outcome`` is known (a domain of the full design)."""
+    df, design, _ = known_outcome_domain(df, design, outcome)
     blocks = frozenset(blocks)
     covs = [exposure.column, *exposure.variables(sorted(blocks, key=exposure.blocks.index))]
     cells, cdesign = collapse_cells(df, design, covs, outcome)
@@ -483,16 +501,6 @@ def shapley_coefficients(players: Sequence[str]) -> dict[str, dict[frozenset[str
                 coefs[s0 | {j}] = coefs.get(s0 | {j}, 0.0) - w
         out[j] = coefs
     return out
-
-
-def shapley_values(
-    v: Callable[[frozenset[str]], float], players: Sequence[str]
-) -> dict[str, float]:
-    """Plain-number Shapley values of the reduction in ``v`` (used for tests and checks)."""
-    return {
-        j: sum(c * v(s) for s, c in coefs.items())
-        for j, coefs in shapley_coefficients(players).items()
-    }
 
 
 # --------------------------------------------------------------------------------------
@@ -888,7 +896,7 @@ def _meta(description: str, method: str, outcome: str = "fatal; ka") -> dict:
 
 LATTICE_METHOD = (
     "Survey-weighted logistic models (exposure + every subset of covariate blocks; ridge 0.01 on "
-    "mean-1 weights; exact cell compression); standardised predictive margins over all crashes; "
+    "mean-1 weights; exact cell compression); standardised predictive margins over the crashes where the outcome is known; "
     "risk ratio = margin(all exposed) / margin(all reference); Taylor-linearised influence summed "
     "within 67 PSUs / 25 strata, t with 42 df; shares and Shapley values by the delta method "
     "across models"

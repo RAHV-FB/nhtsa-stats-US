@@ -1,0 +1,9 @@
+driver_set,measure,survival,n,share_alcohol,share_drug,share_both,odds_ratio,odds_ratio_low,odds_ratio_high,prevalence_ratio_drug_by_alcohol,prevalence_ratio_low,prevalence_ratio_high
+"same drivers: drug-tested (determinate), BAC measured, police alcohol and drugs known",toxicology: BAC >= .08 and any psychoactive drug,killed,68755,0.308138,0.464519,0.162534,1.44116,1.39508,1.48876,1.20846,1.18889,1.22836
+"same drivers: drug-tested (determinate), BAC measured, police alcohol and drugs known",police report: alcohol and drugs both recorded,killed,68755,0.321518,0.297084,0.154941,3.50969,3.39052,3.63305,2.30026,2.24951,2.35214
+"same drivers: drug-tested (determinate), BAC measured, police alcohol and drugs known",cross: police alcohol and toxicology drug,killed,68755,0.321518,0.464519,0.1783,1.7062,1.65202,1.76215,1.31457,1.29385,1.33563
+"same drivers: drug-tested (determinate), BAC measured, police alcohol and drugs known",cross: toxicology BAC >= .08 and police drugs,killed,68755,0.308138,0.297084,0.1213,1.90606,1.84154,1.97284,1.54938,1.51457,1.58499
+"same drivers: drug-tested (determinate), BAC measured, police alcohol and drugs known",toxicology: BAC >= .08 and any psychoactive drug,survived,31870,0.148321,0.353373,0.0742391,2.05549,1.93116,2.18783,1.52719,1.47734,1.57872
+"same drivers: drug-tested (determinate), BAC measured, police alcohol and drugs known",police report: alcohol and drugs both recorded,survived,31870,0.223313,0.256479,0.109507,4.12275,3.89699,4.36159,2.59143,2.50227,2.68377
+"same drivers: drug-tested (determinate), BAC measured, police alcohol and drugs known",cross: police alcohol and toxicology drug,survived,31870,0.223313,0.353373,0.119329,2.66066,2.52101,2.80803,1.77328,1.72291,1.82511
+"same drivers: drug-tested (determinate), BAC measured, police alcohol and drugs known",cross: toxicology BAC >= .08 and police drugs,survived,31870,0.148321,0.256479,0.0639787,2.59752,2.43598,2.76976,1.90842,1.83461,1.98521

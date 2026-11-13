@@ -1,0 +1,13 @@
+analysis,survivor_misreport_f,death_misreport_g,n10_exposed_died_unexposed_survived,n01_unexposed_died_exposed_survived,n00_both_unexposed,n11_both_exposed,or_exposed_vs_unexposed,or_low,or_high,n_informative_vehicles,tipping_f_given_g,tipping_g_given_f
+helmet_matched_pair_two_rider_motorcycles,0,0,224,118,1489,1642,1.89831,1.51895,2.37241,342,0.0618797,0.056806
+helmet_matched_pair_two_rider_motorcycles,0.05,0,224,118,1489,1642,1.10574,0.909871,1.34378,342,0.0618797,0.0109057
+helmet_matched_pair_two_rider_motorcycles,0.1,0,224,118,1489,1642,0.755339,0.629093,0.90692,342,0.0618797,0
+helmet_matched_pair_two_rider_motorcycles,0.2,0,224,118,1489,1642,0.430976,0.361734,0.513473,342,0.0618797,0
+helmet_matched_pair_two_rider_motorcycles,0,0.05,224,118,1489,1642,1.06347,0.876809,1.28986,342,0.00741389,0.056806
+helmet_matched_pair_two_rider_motorcycles,0.05,0.05,224,118,1489,1642,0.734833,0.612825,0.881132,342,0.00741389,0.0109057
+helmet_matched_pair_two_rider_motorcycles,0.1,0.05,224,118,1489,1642,0.547012,0.458665,0.652378,342,0.00741389,0
+helmet_matched_pair_two_rider_motorcycles,0.2,0.05,224,118,1489,1642,0.340385,0.286049,0.405041,342,0.00741389,0
+helmet_matched_pair_two_rider_motorcycles,0,0.1,224,118,1489,1642,0.714387,0.596264,0.855911,342,0,0.056806
+helmet_matched_pair_two_rider_motorcycles,0.05,0.1,224,118,1489,1642,0.535316,0.449157,0.638002,342,0,0.0109057
+helmet_matched_pair_two_rider_motorcycles,0.1,0.1,224,118,1489,1642,0.418701,0.352076,0.497935,342,0,0
+helmet_matched_pair_two_rider_motorcycles,0.2,0.1,224,118,1489,1642,0.275938,0.231793,0.328489,342,0,0

@@ -1,7 +1,7 @@
 {
  "table": "severity/fatal_cc_crude_vs_adjusted.csv",
  "description": "Crude and standardised adjusted risk ratios for crash outcome 'fatal_cc' by factor level",
- "population": "CRSS police-reported crashes 2016-2024 with known maximum severity",
+ "population": "CRSS police-reported crashes 2016-2024 where the complete-case outcome is determined (crashes with a person of unknown severity are excluded unless the outcome is already met)",
  "unit": "crash",
  "outcome": "fatal_cc",
  "method": "Weighted rates; standardised predictive margins from survey logistic models A (pre-crash) and B (pre-crash + configuration); ratios of margins with linearised 95% CIs (t, 42 df)",
@@ -62,6 +62,12 @@
   "B_logrr_retained"
  ],
  "module": "nhtsa_stats.analysis.severity",
- "git_commit": "ef704fd",
- "generated_utc": "2026-10-23T02:30:45Z"
+ "git_commit": "af9ce88",
+ "source_sha256": "95fcc4ff73f94baa5a973e84d9fed0f7290196f6f528ce5324ed6f10df8d8c58",
+ "code_sha256": "10e1f146a1007abcfe246d05cdad2115b7f6c42ebaa985dc3de296aadd5f3e70",
+ "inputs_sha256": {
+  "data/processed/crss_crash.parquet": "1a31897f37cce3be223cc5abfb823582b68b9f7096a8c38980e9346f3450c6e3"
+ },
+ "package_sha256": "fbdac1b588be76a011931549cc2f2013fc1b6405f88cee1ba0e10db719e3ed6b",
+ "generated_utc": "2026-11-13T00:28:30Z"
 }

@@ -1,0 +1,17 @@
+adjustment,layer,n_pairs,n_pairs_with_death,rr_belted_vs_unbelted,rr_low,rr_high,se_log_bootstrap,min_death_count
+single vs multi-vehicle crash,single vehicle,30111,19565,0.26816,0.253726,0.283695,0.0290337,625
+single vs multi-vehicle crash,multi-vehicle,60556,26490,0.437627,0.41675,0.45995,0.0252549,759
+rollover vs no rollover,rollover,18101,14202,0.228725,0.214893,0.243743,0.0335725,424
+rollover vs no rollover,no rollover,72566,31853,0.43228,0.412963,0.452739,0.0231249,1014
+single/multi-vehicle x rollover,"single vehicle, rollover",12536,10621,0.203503,0.187915,0.220552,0.0406641,306
+single/multi-vehicle x rollover,"single vehicle, no rollover",17575,8944,0.376118,0.347854,0.405606,0.03928,300
+single/multi-vehicle x rollover,"multi-vehicle, rollover",5565,3581,0.328661,0.291986,0.368012,0.0613893,118
+single/multi-vehicle x rollover,"multi-vehicle, no rollover",54991,22909,0.467666,0.442622,0.49088,0.0273891,641
+crash type,sv_rollover_first,4578,3790,0.155295,0.13337,0.179513,0.0741176,86
+crash type,sv_off_roadway,17053,14943,0.308247,0.290376,0.327283,0.0308938,501
+crash type,sv_on_roadway,1172,785,0.252873,0.185109,0.3326,0.15243,23
+crash type,mv_angle,26084,12364,0.490275,0.454423,0.525951,0.0365144,368
+crash type,mv_head_on,14211,7415,0.455889,0.416459,0.494527,0.0451939,191
+crash type,mv_rear_end,9804,3676,0.347987,0.300404,0.398507,0.07308,97
+crash type,mv_sideswipe,4354,1591,0.340038,0.273114,0.404321,0.103604,43
+crash type,mv_other,3763,1377,0.319636,0.251087,0.38672,0.115271,35

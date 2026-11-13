@@ -84,6 +84,24 @@ snow and ice and on 60+ mph roads. Among fatal crashes about a third of recorded
 exceedance, against under a tenth among minor crashes. The overlap of exceedance with alcohol is
 what makes the confounding question real.
 
+**Over-representation among fatal crashes, within one recording system.** Comparing the share of
+fatal crashes that record each speeding type with the share of *all* crashes that do, both taken
+from CRSS (`speeding/crss_overrepresentation`), avoids mixing FARS's fuller recording of fatal
+crashes with CRSS's police-report recording of all crashes. The mixed FARS-over-CRSS ratio is
+the larger figure and overstates over-representation because FARS records speeding more
+completely than CRSS does.
+
+{{mdtable:speeding/crss_overrepresentation||label:Speeding record:;crss_share_all_crashes:Share of all CRSS crashes:pct:1;crss_share_fatal_crashes:Share of CRSS fatal crashes:pct:1;crss_only_ratio:Within-CRSS ratio:ci:1@crss_only_ratio;mixed_fars_crss_ratio:Mixed FARS/CRSS ratio:ci:1@mixed_ratio;crss_only_over_mixed:Within-CRSS / mixed:.2f}}
+
+Exceeding the limit is recorded
+{{speeding/crss_overrepresentation|speeding=exceeded_limit_or_racing|crss_only_ratio|ci:1@crss_only_ratio}}
+times as often among fatal crashes as among all crashes within CRSS, against
+{{speeding/crss_overrepresentation|speeding=exceeded_limit_or_racing|mixed_fars_crss_ratio|ci:1@mixed_ratio}}
+when FARS fatal crashes are set against CRSS all crashes; "too fast for conditions" is
+over-represented only slightly
+({{speeding/crss_overrepresentation|speeding=too_fast_for_conditions|crss_only_ratio|ci:2@crss_only_ratio}}
+within CRSS). This is a ratio of shares, not a risk ratio, and it is not adjusted.
+
 ## 3. Sequential and Shapley accounting (adjusted association)
 
 *Sources: `speeding/key_models`, `speeding/shapley`, `speeding/sequential`,
@@ -197,6 +215,85 @@ and {{speeding/stratified_qba|alcohol_stratum=yes;se_fatal=0.9;se_nonfatal=0.2|r
 The association survives moderate differential recording; only severe under-recording in
 non-fatal crashes would remove it, and the alcohol-stratum association is the more fragile.
 
+## 5b. Speeding type: Model A and Model B (exploratory)
+
+*Source: `severity/speeding_type_models`, `severity/speeding_type_qba`. These speeding-type
+estimates, their equivalence bounds and the bias grid are **exploratory**: they were not part
+of the registered Phase-2 analyses and are not in the Holm family. Model A is the published
+specification; Model B adds crash type and number of vehicles (crash configuration).*
+
+{{mdtable:severity/speeding_type_models|outcome=fatal|model:Model:;level:Speeding record:;adj_rr:Adjusted RR:.2f;adj_rr_low95:95% low:.2f;adj_rr_high95:95% high:.2f;adj_rd:RD per crash:.4f;equivalence_bound_pct:Equivalence bound (%):.0f}}
+
+The *equivalence bound* is the smallest symmetric margin, in percent on the risk-ratio scale,
+within which the 90% interval (two one-sided 5% tests) lies; only a small bound would support
+a claim of "no meaningful association", and a large bound means the data cannot show
+equivalence. For "too fast for conditions" the adjusted RR is
+{{severity/speeding_type_models|outcome=fatal;model=A;level=too_fast_for_conditions|adj_rr|.2f}}
+({{severity/speeding_type_models|outcome=fatal;model=A;level=too_fast_for_conditions|adj_rr_low95|.2f}}–{{severity/speeding_type_models|outcome=fatal;model=A;level=too_fast_for_conditions|adj_rr_high95|.2f}})
+in Model A, with an equivalence bound of
+{{severity/speeding_type_models|outcome=fatal;model=A;level=too_fast_for_conditions|equivalence_bound_pct|.0f}}%,
+and {{severity/speeding_type_models|outcome=fatal;model=B;level=too_fast_for_conditions|adj_rr|.2f}}
+({{severity/speeding_type_models|outcome=fatal;model=B;level=too_fast_for_conditions|adj_rr_low95|.2f}}–{{severity/speeding_type_models|outcome=fatal;model=B;level=too_fast_for_conditions|adj_rr_high95|.2f}})
+in Model B, with a bound of
+{{severity/speeding_type_models|outcome=fatal;model=B;level=too_fast_for_conditions|equivalence_bound_pct|.0f}}%.
+"Weakly associated" is therefore the supportable description: the association is small next to
+that of exceedance
+({{severity/speeding_type_models|outcome=fatal;model=A;level=exceeded_limit_or_racing|adj_rr|.1f}}
+in Model A), but in Model B it is distinguishable from none, and it is not shown to be
+negligible.
+
+**Bias grid for outcome-dependent recording.** Speeding type is recorded after the crash and
+possibly less completely in non-fatal crashes. The grid varies sensitivity among fatal crashes
+(0.7–1.0), among non-fatal crashes (0.3–1.0) and specificity (1.00 and 0.99) and corrects the
+crude counts, then rescales the Model-A ratio. For exceedance every cell with
+specificity {{severity/speeding_type_qba|outcome=fatal;speeding_type=exceeded_limit_or_racing;se_fatal=0.7;se_nonfatal=0.3;specificity=0.99|specificity|.2f}}
+is **infeasible**, not benign: exceedance is recorded in only
+{{speeding/crss_overrepresentation|speeding=exceeded_limit_or_racing|crss_share_all_crashes|pct:1}}
+of crashes, which is less than the false-positive rate that specificity implies, so the
+corrected count of exposed non-fatal crashes would be negative. Across the feasible cells
+(specificity 1.00) the bias-corrected Model-A ratio for exceedance ranges from
+{{severity/speeding_type_qba|outcome=fatal;speeding_type=exceeded_limit_or_racing;status=ok|min(adj_rr_bias_corrected)|.2f}}
+to {{severity/speeding_type_qba|outcome=fatal;speeding_type=exceeded_limit_or_racing;status=ok|max(adj_rr_bias_corrected)|.2f}},
+so the exceedance association stays above one wherever the grid can be computed. For "too fast
+for conditions" the corrected ratio ranges from
+{{severity/speeding_type_qba|outcome=fatal;speeding_type=too_fast_for_conditions;status=ok|min(adj_rr_bias_corrected)|.2f}}
+to {{severity/speeding_type_qba|outcome=fatal;speeding_type=too_fast_for_conditions;status=ok|max(adj_rr_bias_corrected)|.2f}}:
+recording error within the grid is enough to move it on either side of one, so its direction
+is not identified.
+
+**Effect modification by crash configuration (exploratory follow-up added after the red-team
+review).** The pooled Model-A ratios above average over very different crash configurations
+(`severity/fatal_effect_modification`; adjusted fatal risk ratios within single-vehicle and
+within multi-vehicle crashes). For exceeding the limit the ratio is {{severity/fatal_effect_modification|modifier=single vs multi-vehicle;exposure=exceeded_limit;stratum=single-vehicle|adj_rr|ci:2}} in single-vehicle and
+{{severity/fatal_effect_modification|modifier=single vs multi-vehicle;exposure=exceeded_limit;stratum=multi-vehicle|adj_rr|ci:2}} in multi-vehicle crashes (ratio of ratios
+{{severity/fatal_effect_modification|modifier=single vs multi-vehicle;exposure=exceeded_limit;stratum=multi-vehicle|rr_ratio_to_first_stratum|.1f}}, homogeneity p {{severity/fatal_effect_modification|modifier=single vs multi-vehicle;exposure=exceeded_limit;stratum=single-vehicle|p_homogeneity_rr|.1e}}), against a pooled
+{{severity/fatal_effect_modification|modifier=single vs multi-vehicle;exposure=exceeded_limit;stratum=single-vehicle|pooled_model_a_rr|.2f}}. For "too fast for conditions" the ratios are
+{{severity/fatal_effect_modification|modifier=single vs multi-vehicle;exposure=too_fast_for_conditions;stratum=single-vehicle|adj_rr|ci:2}} and {{severity/fatal_effect_modification|modifier=single vs multi-vehicle;exposure=too_fast_for_conditions;stratum=multi-vehicle|adj_rr|ci:2}} (homogeneity p {{severity/fatal_effect_modification|modifier=single vs multi-vehicle;exposure=too_fast_for_conditions;stratum=single-vehicle|p_homogeneity_rr|.2f}}), so the
+weak association shows no detectable dependence on the configuration split. The relative association of exceeding
+the limit is larger in multi-vehicle crashes, where the baseline fatal risk is low, so the pooled
+ratio describes neither configuration well. An association conditional on a police-reported crash,
+not an effect; the split by crash type is in the same table.
+
+## 5c. Interstate roads by posted speed limit (exploratory)
+
+*Source: `severity/interstate_by_speed_band`. Adjusted risk ratio of a fatal crash on an
+interstate versus other roads within each posted-limit band; an association, not the effect of
+road type.*
+
+{{mdtable:severity/interstate_by_speed_band|outcome=fatal;quantity=RR interstate vs not|speed_limit_band:Posted limit:;n_interstate_crashes:Interstate crashes:,.0f;estimate:RR interstate vs other:ci:2;rd:RD:.4f}}
+
+Averaged over limits, interstates have a lower fatal-crash risk than other roads, but the
+average hides a pattern by band: the ratio is below one at 50–65 mph
+({{severity/interstate_by_speed_band|outcome=fatal;speed_limit_band=50-65 mph;quantity=RR interstate vs not|estimate|ci:2}})
+and near one at 70+ mph
+({{severity/interstate_by_speed_band|outcome=fatal;speed_limit_band=70+ mph;quantity=RR interstate vs not|estimate|ci:2}}),
+and the 70+ band differs from the 50–65 band by a ratio of
+{{severity/interstate_by_speed_band|outcome=fatal;quantity=ratio of RRs|estimate|ci:2}}
+(interaction p {{severity/interstate_by_speed_band|outcome=fatal;quantity=ratio of RRs|interaction_wald_p|.3f}}).
+Speed-limit bands with few interstate crashes (25 mph and below, 30–35 mph) have wide
+intervals. The interstate advantage therefore weakens at the highest posted limits, which is
+compatible with, but does not show, a role for travel speed.
+
 ## 6. Selection by fatality: why co-occurrence among deaths misleads
 
 *Source: `speeding/selection_by_fatality`.*
@@ -209,12 +306,13 @@ crashes than among all crashes — for exceedance
 against {{speeding/selection_by_fatality|measure=exceeded limit / racing;population=CRSS all crashes|or|.2f}}.
 Both behaviours raise the chance that a crash is fatal, so a fatal crash without alcohol is more
 likely to have *another* reason to be fatal, such as speeding (collider stratification). FARS
-records both behaviours more completely than CRSS police reports; its odds ratios
+adds toxicology results and crash investigation to the police report, although speeding remains
+a police judgement; its odds ratios
 ({{speeding/selection_by_fatality|measure=any speeding;interval=range over 10 implicates|or|.2f}}
 for any speeding, {{speeding/selection_by_fatality|measure=exceeded limit / racing;interval=range over 10 implicates|or|.2f}}
 for exceedance) are larger than the CRSS fatal-crash values but, for exceedance, still about
 half the all-crash association. Two forces therefore act on FARS-only co-occurrence statistics —
-selection on fatality weakens the association, fuller recording strengthens it — and a
+selection on fatality weakens the association, and recording that differs by system or severity can move it in either direction — and a
 "speeding and alcohol" category among deaths cannot be read as the overlap of the two
 behaviours in the crashes that produced the deaths.
 

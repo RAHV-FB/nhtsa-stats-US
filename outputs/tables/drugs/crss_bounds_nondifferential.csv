@@ -1,0 +1,49 @@
+period,share_unknown,rr_complete_case,known_drug_prevalence_fatal,known_drug_prevalence_nonfatal,row_type,allocation,parameter,parameter_value,rr,rr_min,rr_max
+2016-2018,0.170616,11.3643,0.131116,0.0126031,scenario,"non-differential, proportional (k_fatal = k_nonfatal = k)",k,0,8.96601,,
+2016-2018,0.170616,11.3643,0.131116,0.0126031,scenario,"non-differential, proportional (k_fatal = k_nonfatal = k)",k,0.5,10.1833,,
+2016-2018,0.170616,11.3643,0.131116,0.0126031,scenario,"non-differential, proportional (k_fatal = k_nonfatal = k)",k,1,11.2714,,
+2016-2018,0.170616,11.3643,0.131116,0.0126031,scenario,"non-differential, proportional (k_fatal = k_nonfatal = k)",k,2,13.1986,,
+2016-2018,0.170616,11.3643,0.131116,0.0126031,scenario,"non-differential, proportional (k_fatal = k_nonfatal = k)",k,3,14.9396,,
+2016-2018,0.170616,11.3643,0.131116,0.0126031,scenario,"non-differential, equal absolute prevalence e in fatal and non-fatal unknowns",e,0,8.96601,,
+2016-2018,0.170616,11.3643,0.131116,0.0126031,scenario,"non-differential, equal absolute prevalence e in fatal and non-fatal unknowns",e,0.05,5.96072,,
+2016-2018,0.170616,11.3643,0.131116,0.0126031,scenario,"non-differential, equal absolute prevalence e in fatal and non-fatal unknowns",e,0.1,4.80368,,
+2016-2018,0.170616,11.3643,0.131116,0.0126031,scenario,"non-differential, equal absolute prevalence e in fatal and non-fatal unknowns",e,0.2,3.83078,,
+2016-2018,0.170616,11.3643,0.131116,0.0126031,scenario,"non-differential, equal absolute prevalence e in fatal and non-fatal unknowns",e,0.3,3.41926,,
+2016-2018,0.170616,11.3643,0.131116,0.0126031,scenario,"non-differential, equal absolute prevalence e in fatal and non-fatal unknowns",e,0.5,3.09388,,
+2016-2018,0.170616,11.3643,0.131116,0.0126031,scenario,"non-differential, equal absolute prevalence e in fatal and non-fatal unknowns",e,1,3.07854,,
+2016-2018,0.170616,11.3643,0.131116,0.0126031,range,"non-differential, proportional (k_fatal = k_nonfatal = k)",,,,8.96601,14.9396
+2016-2018,0.170616,11.3643,0.131116,0.0126031,range,"non-differential, equal absolute prevalence e",,,,3.07854,8.96601
+2016-2018,0.170616,11.3643,0.131116,0.0126031,range,"published grid (k_fatal, k_nonfatal in 0-3, any combination)",,,,5.61002,23.3869
+2016-2018,0.170616,11.3643,0.131116,0.0126031,range,published limits: all unknown negative / all unknown positive,,,,3.07854,8.96601
+2019-2024,0.54424,11.8747,0.205636,0.0204807,scenario,"non-differential, proportional (k_fatal = k_nonfatal = k)",k,0,7.77231,,
+2019-2024,0.54424,11.8747,0.205636,0.0204807,scenario,"non-differential, proportional (k_fatal = k_nonfatal = k)",k,0.5,10.0815,,
+2019-2024,0.54424,11.8747,0.205636,0.0204807,scenario,"non-differential, proportional (k_fatal = k_nonfatal = k)",k,1,11.7204,,
+2019-2024,0.54424,11.8747,0.205636,0.0204807,scenario,"non-differential, proportional (k_fatal = k_nonfatal = k)",k,2,14.8887,,
+2019-2024,0.54424,11.8747,0.205636,0.0204807,scenario,"non-differential, proportional (k_fatal = k_nonfatal = k)",k,3,19.0393,,
+2019-2024,0.54424,11.8747,0.205636,0.0204807,scenario,"non-differential, equal absolute prevalence e in fatal and non-fatal unknowns",e,0,7.77231,,
+2019-2024,0.54424,11.8747,0.205636,0.0204807,scenario,"non-differential, equal absolute prevalence e in fatal and non-fatal unknowns",e,0.05,3.01558,,
+2019-2024,0.54424,11.8747,0.205636,0.0204807,scenario,"non-differential, equal absolute prevalence e in fatal and non-fatal unknowns",e,0.1,2.30472,,
+2019-2024,0.54424,11.8747,0.205636,0.0204807,scenario,"non-differential, equal absolute prevalence e in fatal and non-fatal unknowns",e,0.2,1.88106,,
+2019-2024,0.54424,11.8747,0.205636,0.0204807,scenario,"non-differential, equal absolute prevalence e in fatal and non-fatal unknowns",e,0.3,1.74544,,
+2019-2024,0.54424,11.8747,0.205636,0.0204807,scenario,"non-differential, equal absolute prevalence e in fatal and non-fatal unknowns",e,0.5,1.68812,,
+2019-2024,0.54424,11.8747,0.205636,0.0204807,scenario,"non-differential, equal absolute prevalence e in fatal and non-fatal unknowns",e,1,2.13444,,
+2019-2024,0.54424,11.8747,0.205636,0.0204807,range,"non-differential, proportional (k_fatal = k_nonfatal = k)",,,,7.77231,19.0393
+2019-2024,0.54424,11.8747,0.205636,0.0204807,range,"non-differential, equal absolute prevalence e",,,,1.68812,7.77231
+2019-2024,0.54424,11.8747,0.205636,0.0204807,range,"published grid (k_fatal, k_nonfatal in 0-3, any combination)",,,,1.7019,73.3573
+2019-2024,0.54424,11.8747,0.205636,0.0204807,range,published limits: all unknown negative / all unknown positive,,,,2.13444,7.77231
+2016-2024,0.411619,11.6882,0.169958,0.0165384,scenario,"non-differential, proportional (k_fatal = k_nonfatal = k)",k,0,8.13448,,
+2016-2024,0.411619,11.6882,0.169958,0.0165384,scenario,"non-differential, proportional (k_fatal = k_nonfatal = k)",k,0.5,10.0784,,
+2016-2024,0.411619,11.6882,0.169958,0.0165384,scenario,"non-differential, proportional (k_fatal = k_nonfatal = k)",k,1,11.5487,,
+2016-2024,0.411619,11.6882,0.169958,0.0165384,scenario,"non-differential, proportional (k_fatal = k_nonfatal = k)",k,2,14.0883,,
+2016-2024,0.411619,11.6882,0.169958,0.0165384,scenario,"non-differential, proportional (k_fatal = k_nonfatal = k)",k,3,16.7332,,
+2016-2024,0.411619,11.6882,0.169958,0.0165384,scenario,"non-differential, equal absolute prevalence e in fatal and non-fatal unknowns",e,0,8.13448,,
+2016-2024,0.411619,11.6882,0.169958,0.0165384,scenario,"non-differential, equal absolute prevalence e in fatal and non-fatal unknowns",e,0.05,3.67286,,
+2016-2024,0.411619,11.6882,0.169958,0.0165384,scenario,"non-differential, equal absolute prevalence e in fatal and non-fatal unknowns",e,0.1,2.80377,,
+2016-2024,0.411619,11.6882,0.169958,0.0165384,scenario,"non-differential, equal absolute prevalence e in fatal and non-fatal unknowns",e,0.2,2.24919,,
+2016-2024,0.411619,11.6882,0.169958,0.0165384,scenario,"non-differential, equal absolute prevalence e in fatal and non-fatal unknowns",e,0.3,2.06112,,
+2016-2024,0.411619,11.6882,0.169958,0.0165384,scenario,"non-differential, equal absolute prevalence e in fatal and non-fatal unknowns",e,0.5,1.96172,,
+2016-2024,0.411619,11.6882,0.169958,0.0165384,scenario,"non-differential, equal absolute prevalence e in fatal and non-fatal unknowns",e,1,2.28209,,
+2016-2024,0.411619,11.6882,0.169958,0.0165384,range,"non-differential, proportional (k_fatal = k_nonfatal = k)",,,,8.13448,16.7332
+2016-2024,0.411619,11.6882,0.169958,0.0165384,range,"non-differential, equal absolute prevalence e",,,,1.96172,8.13448
+2016-2024,0.411619,11.6882,0.169958,0.0165384,range,"published grid (k_fatal, k_nonfatal in 0-3, any combination)",,,,2.65545,46.5805
+2016-2024,0.411619,11.6882,0.169958,0.0165384,range,published limits: all unknown negative / all unknown positive,,,,2.28209,8.13448

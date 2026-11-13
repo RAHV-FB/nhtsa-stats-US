@@ -218,23 +218,6 @@ def ped_age_band(age: str = "age") -> pl.Expr:
 PED_AGE_BANDS = ["<15", "15-24", "25-44", "45-64", "65+", "unknown"]
 
 
-def licence_category(status: str = "L_STATUS") -> pl.Expr:
-    """0 not licensed, 1 suspended, 2 revoked, 3 expired, 4 cancelled/denied, 6 valid; 7/9/other
-    unknown."""
-    c = pl.col(status)
-    return (
-        pl.when(c == 0)
-        .then(pl.lit("unlicensed"))
-        .when(c.is_in([1, 2]))
-        .then(pl.lit("suspended_or_revoked"))
-        .when(c.is_in([3, 4]))
-        .then(pl.lit("expired_or_cancelled"))
-        .when(c == 6)
-        .then(pl.lit("valid"))
-        .otherwise(pl.lit("unknown"))
-    )
-
-
 def victim_role(ptype: pl.Expr, risk_vehicle: pl.Expr) -> pl.Expr:
     """Role of a killed person relative to the 'risk vehicle' of a behaviour group."""
     risk = risk_vehicle.fill_null(False)
@@ -402,13 +385,6 @@ def striking_vehicle(col: str = "str_body") -> pl.Expr:
 # ---------------------------------------------------------------------------------------
 # Data assembly
 # ---------------------------------------------------------------------------------------
-
-
-def _bac_flags(prefix: str, src: str, threshold: int = BAC_LIMIT) -> list[pl.Expr]:
-    return [
-        (pl.col(f"{src}{m}") >= threshold).fill_null(False).alias(f"{prefix}{m}")
-        for m in IMPLICATES
-    ]
 
 
 def build_driver_frame() -> pl.DataFrame:
@@ -1378,17 +1354,31 @@ def potential_lives_table(
     return pl.DataFrame(rows)
 
 
-def read_effectiveness() -> list[tuple[str, str, float, float, float]] | None:
-    """Within-vehicle effectiveness from the committed matched-module tables (None if missing)."""
+class MatchedInputsError(RuntimeError):
+    """The matched-module tables that ``potential_lives`` is computed from are missing."""
+
+
+def read_effectiveness() -> list[tuple[str, str, float, float, float]]:
+    """Within-vehicle effectiveness from the committed matched-module tables.
+
+    Raises :class:`MatchedInputsError` (rather than silently dropping ``potential_lives``) when
+    ``matched/belt_effect.csv`` or ``matched/double_pair_comparison.csv`` is missing or lacks
+    a row this table needs.
+    """
     mdir = config.TABLES_DIR / "matched"
+    hint = "run `uv run nhtsa analyze matched` first"
     try:
         belt = pd.read_csv(mdir / "belt_effect.csv").set_index("estimand")
         dpc = pd.read_csv(mdir / "double_pair_comparison.csv")
     except FileNotFoundError as e:
-        log.warning("potential_lives skipped: %s", e)
-        return None
+        raise MatchedInputsError(
+            f"deaths needs the matched-module tables for potential_lives ({e.filename} is "
+            f"missing); {hint}"
+        ) from e
     out = []
     for scen, est in BELT_ESTIMANDS.items():
+        if est not in belt.index:
+            raise MatchedInputsError(f"matched/belt_effect.csv has no '{est}' row; {hint}")
         r = belt.loc[est]
         out.append(("seat_belts", scen, float(r["estimate"]), float(r["low"]), float(r["high"])))
     m = dpc[
@@ -1397,8 +1387,9 @@ def read_effectiveness() -> list[tuple[str, str, float, float, float]] | None:
         & (dpc["component"] == "combined (inverse-variance weighted)")
     ]
     if m.empty:
-        log.warning("potential_lives skipped: no motorcycle_helmet combined row")
-        return None
+        raise MatchedInputsError(
+            f"matched/double_pair_comparison.csv has no motorcycle_helmet combined row; {hint}"
+        )
     r = m.iloc[0]
     out.append(
         (
@@ -1413,28 +1404,505 @@ def read_effectiveness() -> list[tuple[str, str, float, float, float]] | None:
 
 
 # ---------------------------------------------------------------------------------------
+# Measured-BAC-only versions, imputed share, and the coverage of the potential-lives figure
+# ---------------------------------------------------------------------------------------
+MEASURED_OBSERVED = "observed (measured BAC only)"
+ROLE_ROWS = ["total", *ROLES, "not_risk_driver", "outside_risk_vehicle"]
+OUTSIDE_ROLES = ("other_vehicle_occupant", "pedestrian_or_cyclist", "other_nonoccupant")
+
+
+def add_measured_bac(drivers: pl.DataFrame, alc: pl.DataFrame) -> pl.DataFrame:
+    """Add ``bac_measured`` (a test result exists) and ``m_bac08`` (measured BAC >= .08).
+
+    ``alc`` has ST_CASE, VEH_NO, PER_NO, ALC_RES (thousandths; 0-939 = .000-.939, 940 = ".94 or
+    greater", both measured results; 995+ = no result).  The NHTSA
+    imputation fills the implicates of untested drivers; measured drivers carry the same
+    value (hundredths, truncated) in every implicate.
+    """
+    keys = [*KEY, "VEH_NO", "PER_NO"]
+    a = alc.select(*keys, pl.col("ALC_RES").alias("alc_res")).unique(subset=keys)
+    d = drivers.join(a, on=keys, how="left")
+    return d.with_columns(
+        pl.col("alc_res").is_between(0, 940).fill_null(False).alias("bac_measured"),
+        pl.col("alc_res").is_between(BAC_LIMIT * 10, 940).fill_null(False).alias("m_bac08"),
+    )
+
+
+def add_measured_risk(deaths: pl.DataFrame, drivers_m: pl.DataFrame) -> pl.DataFrame:
+    """Add ``crash_m_alc`` (a driver in the crash had a measured BAC >= .08) and
+    ``risk_m_alc`` (the person's vehicle's driver did)."""
+    veh = drivers_m.group_by([*KEY, "VEH_NO"]).agg(pl.col("m_bac08").any().alias("risk_m_alc"))
+    crash = drivers_m.group_by(KEY).agg(pl.col("m_bac08").any().alias("crash_m_alc"))
+    return (
+        deaths.join(veh, on=[*KEY, "VEH_NO"], how="left")
+        .join(crash, on=KEY, how="left")
+        .with_columns(pl.col("risk_m_alc").fill_null(False), pl.col("crash_m_alc").fill_null(False))
+    )
+
+
+def victim_roles_bac_basis_table(deaths: pl.DataFrame) -> pl.DataFrame:
+    """Who was killed in drunk-driving crashes, with measured-BAC-only and all-BAC definitions.
+
+    A drunk-driving crash has a driver with BAC >= .08 ('all': NHTSA's multiply imputed crash
+    flag, risk vehicle = the driver's vehicle with imputed-or-measured BAC >= .08; 'measured':
+    a driver with a measured BAC >= .08).  ``risk_passenger`` = the drunk driver's own
+    passengers; ``outside_risk_vehicle`` = occupants of other vehicles and non-occupants;
+    ``not_risk_driver`` = both together.
+    """
+    ptype = pl.col("ptype")
+    bases = {
+        "all_bac_measured_and_imputed": (_alc(), [pl.col(f"risk_alc_{m}") for m in IMPLICATES]),
+        "measured_bac_only": ([pl.col("crash_m_alc")], [pl.col("risk_m_alc")]),
+    }
+    items: dict[str, list[pl.Expr]] = {}
+    for b, (member, risk) in bases.items():
+        k = max(len(member), len(risk))
+        items[f"{b}|total"] = [_pick(member, i) for i in range(k)]
+        for role in ROLES:
+            items[f"{b}|{role}"] = [
+                _pick(member, i) & (victim_role(ptype, _pick(risk, i)) == role) for i in range(k)
+            ]
+        items[f"{b}|not_risk_driver"] = [
+            _pick(member, i) & (victim_role(ptype, _pick(risk, i)) != "risk_driver")
+            for i in range(k)
+        ]
+        items[f"{b}|outside_risk_vehicle"] = [
+            _pick(member, i) & victim_role(ptype, _pick(risk, i)).is_in(list(OUTSIDE_ROLES))
+            for i in range(k)
+        ]
+    wide = agg_sums(deaths, [], items)
+    rows = []
+    for b, (member, risk) in bases.items():
+        k = max(len(member), len(risk))
+        den = _cols(f"{b}|total", k)
+        for role in ROLE_ROWS:
+            num = _cols(f"{b}|{role}", k)
+            share = ratio_exprs(num, den)
+            r = wide.select(
+                mi_mean(num).alias("deaths"),
+                mi_mean(share).alias("share_of_group"),
+                mi_se(share).alias("mi_se"),
+            ).row(0, named=True)
+            rows.append(
+                {
+                    "basis": b,
+                    "group": "alcohol_impaired",
+                    "role": role,
+                    **r,
+                    "estimate_type": ESTIMATED if k > 1 else MEASURED_OBSERVED,
+                }
+            )
+    return pl.DataFrame(rows)
+
+
+def bac_driver_groups() -> dict[str, list[pl.Expr]]:
+    """Drivers with BAC >= .08: all (measured + imputed), measured only, imputed only."""
+    p = [pl.col(f"P{m}") for m in IMPLICATES]
+    meas = pl.col("bac_measured")
+    return {
+        "bac_08_plus_all": [c >= BAC_LIMIT for c in p],
+        "bac_08_plus_measured_only": [pl.col("m_bac08")],
+        "bac_08_plus_imputed_only": [(c >= BAC_LIMIT) & ~meas for c in p],
+    }
+
+
+def driver_records_measured_table(drivers_m: pl.DataFrame) -> pl.DataFrame:
+    """Prior-DWI share (and the other record shares) by BAC >= .08 group, measured vs imputed."""
+    groups, ind = bac_driver_groups(), driver_indicators()
+    keep = {"prior_dwi", "prior_speeding", "licence_invalid"}
+    wide = agg_sums(drivers_m, [], driver_share_items(groups, ind, keep))
+    return _share_rows(wide, [], groups, ind, keep)
+
+
+def driver_bac_imputed_share_table(drivers_m: pl.DataFrame) -> pl.DataFrame:
+    """Share of the BAC >= .08 driver group whose BAC is imputed (overall and by year)."""
+    p = [pl.col(f"P{m}") for m in IMPLICATES]
+    items = {
+        "n_bac_08_plus": [c >= BAC_LIMIT for c in p],
+        "n_measured": [(c >= BAC_LIMIT) & pl.col("bac_measured") for c in p],
+        "n_imputed": [(c >= BAC_LIMIT) & ~pl.col("bac_measured") for c in p],
+    }
+    parts = []
+    for by in ([], ["YEAR"]):
+        wide = agg_sums(drivers_m, by, items)
+        den = _cols("n_bac_08_plus", K_MI)
+        imp = _cols("n_imputed", K_MI)
+        share = ratio_exprs(imp, den)
+        period = pl.lit("2016-2024") if not by else pl.col("YEAR").cast(pl.Utf8)
+        parts.append(
+            wide.select(
+                period.alias("period"),
+                mi_mean(den).alias("n_bac_08_plus"),
+                mi_mean(_cols("n_measured", K_MI)).alias("n_measured"),
+                mi_mean(imp).alias("n_imputed"),
+                mi_mean(share).alias("share_imputed"),
+                mi_se(share).alias("mi_se"),
+            )
+        )
+    return pl.concat(parts).with_columns(pl.lit(ESTIMATED).alias("estimate_type"))
+
+
+def add_occupancy(deaths: pl.DataFrame) -> pl.DataFrame:
+    """Add ``n_occ``: occupants (driver or passenger, A_PTYPE 1/2) recorded in the person's vehicle."""
+    per = load_table("FARS", "person", None, ["ST_CASE", "VEH_NO", "PER_NO"])
+    paux = load_table("FARS", "per_aux", None, ["ST_CASE", "VEH_NO", "PER_NO", "A_PTYPE"])
+    occ = (
+        per.join(paux, on=[*KEY, "VEH_NO", "PER_NO"], how="left")
+        .filter(pl.col("A_PTYPE").is_in([1, 2]))
+        .group_by([*KEY, "VEH_NO"])
+        .agg(pl.len().alias("n_occ"))
+    )
+    return deaths.join(occ, on=[*KEY, "VEH_NO"], how="left")
+
+
+def potential_lives_context_table(deaths: pl.DataFrame) -> pl.DataFrame:
+    """What the potential-lives death counts leave out, and where the unbelted deaths are.
+
+    * deaths with unknown belt (helmet) use are in neither the belted nor the unbelted count,
+      so ``potential_lives`` ignores them;
+    * unbelted deaths in single-occupant vehicles have no second occupant to compare with, so
+      the within-vehicle estimate is transported to them from vehicles with >= 2 occupants.
+    """
+    d = deaths
+    unb = d.filter(pl.col("unbelted"))
+    n_unb = unb.height
+
+    def row(metric: str, n: float, den: float | None, note: str) -> dict:
+        return {
+            "metric": metric,
+            "deaths": float(n),
+            "denominator": None if den is None else float(den),
+            "share": None if not den else float(n) / float(den),
+            "note": note,
+        }
+
+    n_pv = int(d["pv"].sum())
+    n_unk = int(d["restraint_unknown"].sum())
+    n_mc = int(d["mc"].sum())
+    n_unh = int(d["unhelmeted"].sum())
+    n_hunk = int(d["helmet_unknown"].sum())
+    single = unb.filter(pl.col("n_occ") == 1).height
+    multi = unb.filter(pl.col("n_occ") >= 2).height
+    occ_unk = unb.filter(pl.col("n_occ").is_null()).height
+    rows = [
+        row("pv_occupant_deaths", n_pv, None, "killed passenger-vehicle occupants, 2016-2024"),
+        row(
+            "unbelted_deaths",
+            n_unb,
+            n_pv,
+            "the death count potential_lives applies the belt effect to",
+        ),
+        row(
+            "belted_deaths",
+            int(d["belted"].sum()),
+            n_pv,
+            "belt use recorded as used",
+        ),
+        row(
+            "unknown_belt_use_deaths",
+            n_unk,
+            n_pv,
+            "belt use unknown: in neither count, excluded from potential_lives",
+        ),
+        row(
+            "unknown_belt_use_deaths_share_of_unbelted_plus_unknown",
+            n_unk,
+            n_unb + n_unk,
+            "unknown use relative to the unbelted deaths it would add to if all were unbelted",
+        ),
+        row(
+            "unbelted_deaths_single_occupant_vehicle",
+            single,
+            n_unb,
+            "the vehicle had exactly one recorded occupant: no within-vehicle comparison exists",
+        ),
+        row(
+            "unbelted_deaths_two_plus_occupant_vehicle",
+            multi,
+            n_unb,
+            "vehicles with at least two recorded occupants (where the pair design applies)",
+        ),
+        row("unbelted_deaths_occupancy_unknown", occ_unk, n_unb, "no occupant record found"),
+        row("motorcyclist_deaths", n_mc, None, "killed motorcycle operators and passengers"),
+        row(
+            "unhelmeted_deaths",
+            n_unh,
+            n_mc,
+            "the death count potential_lives applies the helmet effect to",
+        ),
+        row(
+            "unknown_helmet_use_deaths",
+            n_hunk,
+            n_mc,
+            "helmet use unknown: excluded from potential_lives",
+        ),
+    ]
+    return pl.DataFrame(rows, schema_overrides={"denominator": pl.Float64, "share": pl.Float64})
+
+
+# ---------------------------------------------------------------------------------------
+# Red-team follow-up tables (docs/red_team_2026-11.md section 5): large-truck crash types,
+# prior-DWI share by state, invalid-licence trend with and without expired/cancelled licences
+# ---------------------------------------------------------------------------------------
+TRUCK_CRASH_TYPES = ["single_truck", "truck_and_passenger_vehicle", "other_multi_vehicle_truck"]
+MIN_STATE_DRIVERS = 100
+TWO_VEHICLE_TRUCK_PV = "two_vehicle_truck_and_passenger_vehicle"
+
+
+def crash_vehicle_mix(vehicles: pl.DataFrame) -> pl.DataFrame:
+    """Per crash: motor vehicles (``n_veh``), large trucks (A_BODY 6) and passenger vehicles
+    (A_BODY 1-5), from the ``veh_aux`` rows (``YEAR``, ``ST_CASE``, ``A_BODY``)."""
+    return vehicles.group_by(KEY).agg(
+        pl.len().alias("n_veh"),
+        (pl.col("A_BODY") == 6).sum().alias("n_lt"),
+        pl.col("A_BODY").is_in([1, 2, 3, 4, 5]).sum().alias("n_pv"),
+    )
+
+
+def truck_crash_type() -> pl.Expr:
+    """Large-truck crash type from ``n_veh`` / ``n_lt`` / ``n_pv``.
+
+    ``single_truck``: the large truck is the only motor vehicle (its victims include the truck
+    occupants and any non-occupants it struck); ``truck_and_passenger_vehicle``: two or more
+    motor vehicles, at least one large truck and at least one passenger vehicle;
+    ``other_multi_vehicle_truck``: every other multi-vehicle crash with a large truck (truck
+    with truck, motorcycle, bus or other vehicle only).  The non-exclusive row
+    ``two_vehicle_truck_and_passenger_vehicle`` (exactly one large truck and one passenger
+    vehicle) is a subset of ``truck_and_passenger_vehicle``."""
+    return (
+        pl.when(pl.col("n_veh") == 1)
+        .then(pl.lit("single_truck"))
+        .when(pl.col("n_pv") >= 1)
+        .then(pl.lit("truck_and_passenger_vehicle"))
+        .otherwise(pl.lit("other_multi_vehicle_truck"))
+    )
+
+
+def large_truck_crash_types_table(deaths: pl.DataFrame, mix: pl.DataFrame) -> pl.DataFrame:
+    """Deaths in large-truck crashes (acc_aux A_LT = 1) by who was killed, by crash type.
+
+    ``not_truck_driver`` = everyone killed except the driver of a large truck (the 'not the truck
+    driver' share of the large-truck-crash deaths in ``victim_roles``, here split by crash
+    type).  Census counts.  A large-truck crash is not a statement about fault."""
+    d = (
+        deaths.filter(pl.col("A_LT") == 1)
+        .join(mix, on=KEY, how="left")
+        .with_columns(
+            pl.when(pl.col("n_veh").is_null())
+            .then(pl.lit("unmatched"))
+            .otherwise(truck_crash_type())
+            .alias("crash_type")
+        )
+    )
+    role = victim_role(pl.col("ptype"), pl.col("risk_lt"))
+    d = d.with_columns(role.alias("role"))
+    groups = {ct: d.filter(pl.col("crash_type") == ct) for ct in TRUCK_CRASH_TYPES}
+    groups[TWO_VEHICLE_TRUCK_PV] = d.filter(
+        (pl.col("n_veh") == 2) & (pl.col("n_lt") == 1) & (pl.col("n_pv") == 1)
+    )
+    groups["all"] = d
+    rows = []
+    for ct, g in groups.items():
+        n = g.height
+        cnt = {r: int((g["role"] == r).sum()) for r in ROLES}
+        nd = n - cnt["risk_driver"]
+        rows.append(
+            {
+                "crash_type": ct,
+                "exclusive_row": ct in (*TRUCK_CRASH_TYPES, "all"),
+                "crashes": g.select(KEY).unique().height,
+                "deaths": n,
+                "truck_driver": cnt["risk_driver"],
+                "not_truck_driver": nd,
+                "share_not_truck_driver": nd / n if n else None,
+                "truck_passenger": cnt["risk_passenger"],
+                "other_vehicle_occupant": cnt["other_vehicle_occupant"],
+                "pedestrian_or_cyclist": cnt["pedestrian_or_cyclist"],
+                "other_nonoccupant": cnt["other_nonoccupant"],
+                "estimate_type": OBSERVED,
+            }
+        )
+    return pl.DataFrame(rows, schema_overrides={"share_not_truck_driver": pl.Float64})
+
+
+def prior_dwi_by_state_table(drivers_m: pl.DataFrame) -> pl.DataFrame:
+    """Prior-DWI share among BAC >= .08 drivers by state, measured BAC only and all (measured +
+    imputed), 2016-2024.
+
+    ``n_group`` is the number of such drivers in the state, ``n_known`` those with a known
+    PREV_DWI.  ``small`` flags states with fewer than 100 drivers in the group.  ``mi_se`` is the
+    MI standard error (0 for measured only)."""
+    groups = {k: v for k, v in bac_driver_groups().items() if k != "bac_08_plus_imputed_only"}
+    ind = {"prior_dwi": driver_indicators()["prior_dwi"]}
+    d = drivers_m.with_columns(pl.col("STATE").alias("_state"))
+    wide = agg_sums(d, ["_state"], driver_share_items(groups, ind))
+    share = _share_rows(wide, ["_state"], groups, ind)
+    return (
+        share.with_columns(
+            pl.col("_state").replace_strict(FIPS_TO_USPS, default="unknown").alias("state"),
+            pl.col("group").str.replace("bac_08_plus_", "").alias("bac_basis"),
+            (pl.col("n_group") < MIN_STATE_DRIVERS).alias("small"),
+        )
+        .select(
+            "state",
+            "bac_basis",
+            "n_group",
+            "n_known",
+            "share",
+            "mi_se",
+            "small",
+            "estimate_type",
+        )
+        .sort(["bac_basis", "state"])
+    )
+
+
+def prior_dwi_state_range_table(by_state: pl.DataFrame) -> pl.DataFrame:
+    """Min, max and median of the state prior-DWI shares, for all states and for states with at
+    least 100 BAC >= .08 drivers (``small`` = False); shares are unweighted over states."""
+    rows = []
+    for basis in by_state["bac_basis"].unique(maintain_order=True):
+        b = by_state.filter((pl.col("bac_basis") == basis) & pl.col("share").is_not_null())
+        for label, g in (
+            ("all states", b),
+            ("states with >= 100 drivers", b.filter(~pl.col("small"))),
+        ):
+            if g.height == 0:
+                continue
+            lo, hi = g.sort("share").row(0, named=True), g.sort("share").row(-1, named=True)
+            rows.append(
+                {
+                    "bac_basis": basis,
+                    "states": label,
+                    "n_states": g.height,
+                    "min_share": lo["share"],
+                    "min_state": lo["state"],
+                    "max_share": hi["share"],
+                    "max_state": hi["state"],
+                    "median_share": float(g["share"].median()),
+                    "min_n_group": int(g["n_group"].min()),
+                    "n_states_small": int(b["small"].sum()),
+                }
+            )
+    return pl.DataFrame(rows)
+
+
+LICENCE_DEFS = {
+    "invalid_incl_expired_cancelled": [0, 1, 2, 3, 4],
+    "invalid_excl_expired_cancelled": [0, 1, 2],
+    "expired_or_cancelled_only": [3, 4],
+}
+
+
+def licence_trend_table(deaths: pl.DataFrame, drivers: pl.DataFrame) -> pl.DataFrame:
+    """Change 2019 -> 2021 -> 2024 in licence-invalid measures under three definitions.
+
+    ``deaths_in_invalid_licence_crashes``: persons killed in crashes with at least one driver of
+    the definition (the quantity behind the ``invalid_licence_crash`` row of ``segments``);
+    ``drivers``: drivers of the definition; ``driver_share``: such drivers among drivers with a
+    known licence status (L_STATUS 0-4, 6).  Definitions: L_STATUS 0-4 (not licensed, suspended,
+    revoked, expired, cancelled), 0-2 (without expired or cancelled), 3-4 only."""
+    known = drivers.filter(pl.col("L_STATUS").is_in([0, 1, 2, 3, 4, 6]))
+    years = {y: y for y in YEARS_COMPARE}
+    rows = []
+    for name, codes in LICENCE_DEFS.items():
+        inv = drivers.filter(pl.col("L_STATUS").is_in(codes))
+        crashes = inv.select(KEY).unique().with_columns(pl.lit(True).alias("_inv"))
+        in_crash = deaths.join(crashes, on=KEY, how="left").filter(pl.col("_inv").fill_null(False))
+        vals = {
+            "deaths_in_invalid_licence_crashes": {
+                y: float(in_crash.filter(pl.col("YEAR") == y).height) for y in years
+            },
+            "drivers": {y: float(inv.filter(pl.col("YEAR") == y).height) for y in years},
+            "driver_share": {
+                y: inv.filter(pl.col("YEAR") == y).height
+                / max(known.filter(pl.col("YEAR") == y).height, 1)
+                for y in years
+            },
+        }
+        for measure, v in vals.items():
+            rows.append(
+                {
+                    "definition": name,
+                    "licence_status_codes": ",".join(map(str, codes)),
+                    "measure": measure,
+                    "value_2019": v[2019],
+                    "value_2021": v[2021],
+                    "value_2024": v[2024],
+                    "pct_change_2019_2021": v[2021] / v[2019] - 1 if v[2019] else None,
+                    "pct_change_2021_2024": v[2024] / v[2021] - 1 if v[2021] else None,
+                    "pct_change_2019_2024": v[2024] / v[2019] - 1 if v[2019] else None,
+                    "estimate_type": OBSERVED,
+                }
+            )
+    return pl.DataFrame(
+        rows,
+        schema_overrides={
+            "pct_change_2019_2021": pl.Float64,
+            "pct_change_2021_2024": pl.Float64,
+            "pct_change_2019_2024": pl.Float64,
+        },
+    )
+
+
+# ---------------------------------------------------------------------------------------
 # Run
 # ---------------------------------------------------------------------------------------
 
 # Inputs actually read: the death frame uses every FARS file below; the driver frame (licence and
 # record tables) only person, vehicle, veh_aux and miper.
 _INPUTS_DEATH = [
-    "FARS person (INJ_SEV, PER_TYP, AGE, SEX, LOCATION, STR_VEH)",
-    "FARS per_aux",
-    "FARS vehicle (L_STATUS, PREV_*, MOD_YEAR, VSPD_LIM)",
-    "FARS veh_aux",
-    "FARS accident (LGT_COND)",
-    "FARS acc_aux",
-    "FARS midrvacc",
-    "FARS miper",
+    "data/interim/FARS/person",  # INJ_SEV, PER_TYP, AGE, SEX, LOCATION, STR_VEH
+    "data/interim/FARS/per_aux",
+    "data/interim/FARS/vehicle",  # L_STATUS, PREV_*, MOD_YEAR, VSPD_LIM
+    "data/interim/FARS/veh_aux",
+    "data/interim/FARS/accident",  # LGT_COND
+    "data/interim/FARS/acc_aux",
+    "data/interim/FARS/midrvacc",
+    "data/interim/FARS/miper",
 ]
 _INPUTS_DRIVERS = [
-    "FARS person (PER_TYP)",
-    "FARS vehicle (L_STATUS, PREV_*)",
-    "FARS veh_aux (A_SPVEH)",
-    "FARS miper",
+    "data/interim/FARS/person",  # PER_TYP
+    "data/interim/FARS/vehicle",  # L_STATUS, PREV_*
+    "data/interim/FARS/veh_aux",  # A_SPVEH
+    "data/interim/FARS/miper",
 ]
-_DRIVER_TABLES = {"driver_records", "driver_records_by_year"}  # states also uses drivers
+_DRIVER_TABLES = {
+    "prior_dwi_by_state",
+    "prior_dwi_state_range",
+    "licence_trend",
+    "driver_records",
+    "driver_records_by_year",
+    "driver_records_measured_bac",
+    "driver_bac_imputed_share",
+}  # states also uses drivers
+_MEASURED_BASIS = (
+    "Measured BAC = a test result in FARS person.ALC_RES (0-940 thousandths; 940 = .94 or greater); NHTSA's "
+    "implicates fill untested drivers.  'measured only' counts a driver as BAC >= .08 only "
+    "with a measured result >= .08 (observed counts, no imputation SE); 'all' / 'imputed' "
+    "use the 10 implicates (mean, MI SE sqrt(1.1 * between-implicate variance))"
+)
+_MEASURED_TABLES = {
+    "large_truck_crash_types": (
+        "Census counts; large-truck crash = acc_aux A_LT 1; crash type from the number of motor "
+        "vehicles in the crash and their veh_aux A_BODY (6 large truck, 1-5 passenger vehicle); "
+        "truck driver = driver of the large-truck vehicle (victim_roles definition)"
+    ),
+    "prior_dwi_by_state": _MEASURED_BASIS
+    + "; state = FARS STATE; 'small' = fewer than 100 such drivers",
+    "prior_dwi_state_range": "Unweighted min, max and median over the state rows of prior_dwi_by_state",
+    "licence_trend": (
+        "Census counts; invalid = L_STATUS 0-4 (all) or 0-2 (without expired/cancelled); "
+        "driver share among L_STATUS 0-4 and 6"
+    ),
+    "victim_roles_bac_basis": _MEASURED_BASIS,
+    "driver_records_measured_bac": _MEASURED_BASIS,
+    "driver_bac_imputed_share": _MEASURED_BASIS,
+    "potential_lives_context": (
+        "Census counts; occupancy = drivers and passengers (A_PTYPE 1/2) recorded in the "
+        "person's vehicle in FARS person/per_aux, whether or not they were killed"
+    ),
+}
 _MATCHED_INPUTS = ["matched/belt_effect", "matched/double_pair_comparison"]
 LIVES_METHOD = (
     "lives = deaths without the device (unbelted passenger-vehicle occupants or unhelmeted "
@@ -1458,6 +1926,7 @@ def _input_commits() -> dict[str, str | None]:
 
 
 def run() -> dict[str, pl.DataFrame]:
+    eff = read_effectiveness()  # fail before the long build if the matched tables are missing
     drivers = build_driver_frame()
     deaths = build_death_frame(drivers)
     log.info("deaths: %d persons killed, %d drivers", deaths.height, drivers.height)
@@ -1479,14 +1948,68 @@ def run() -> dict[str, pl.DataFrame]:
         "vehicle_age": vehicle_age_table(deaths),
         "states": states_table(deaths, drivers),
     }
-    eff = read_effectiveness()
-    if eff is not None:
-        wo = {
-            "seat_belts": float(deaths["unbelted"].sum()),
-            "helmets": float(deaths["unhelmeted"].sum()),
-        }
-        out["potential_lives"] = potential_lives_table(eff, wo, deaths["YEAR"].n_unique())
+    wo = {
+        "seat_belts": float(deaths["unbelted"].sum()),
+        "helmets": float(deaths["unhelmeted"].sum()),
+    }
+    out["potential_lives"] = potential_lives_table(eff, wo, deaths["YEAR"].n_unique())
+    # Measured-BAC-only versions and the coverage of potential_lives (added tables).
+    alc = load_table("FARS", "person", None, ["ST_CASE", "VEH_NO", "PER_NO", "PER_TYP", "ALC_RES"])
+    drivers_m = add_measured_bac(drivers, alc.filter(pl.col("PER_TYP") == 1))
+    deaths_m = add_occupancy(add_measured_risk(deaths, drivers_m))
+    out["victim_roles_bac_basis"] = victim_roles_bac_basis_table(deaths_m)
+    out["driver_records_measured_bac"] = driver_records_measured_table(drivers_m)
+    out["driver_bac_imputed_share"] = driver_bac_imputed_share_table(drivers_m)
+    out["potential_lives_context"] = potential_lives_context_table(deaths_m)
+    # Red-team follow-up tables (added; they never alter the tables above).
+    vaux = load_table("FARS", "veh_aux", None, ["ST_CASE", "VEH_NO", "A_BODY"])
+    out["large_truck_crash_types"] = large_truck_crash_types_table(deaths, crash_vehicle_mix(vaux))
+    out["prior_dwi_by_state"] = prior_dwi_by_state_table(drivers_m)
+    out["prior_dwi_state_range"] = prior_dwi_state_range_table(out["prior_dwi_by_state"])
+    out["licence_trend"] = licence_trend_table(deaths, drivers)
     meta = {
+        "large_truck_crash_types": (
+            "Deaths in large-truck crashes by who was killed (truck driver or not), for "
+            "single-truck crashes, truck vs passenger-vehicle crashes and other multi-vehicle "
+            "truck crashes; not a statement about fault",
+            "person killed",
+        ),
+        "prior_dwi_by_state": (
+            "Prior-DWI share of drivers with BAC >= .08 by state (measured BAC only; measured "
+            "plus imputed), with driver counts and a flag for states with fewer than 100 drivers",
+            "driver in a fatal crash",
+        ),
+        "prior_dwi_state_range": (
+            "Range and median of the state prior-DWI shares among BAC >= .08 drivers, for all "
+            "states and for states with at least 100 such drivers",
+            "state",
+        ),
+        "licence_trend": (
+            "Change in licence-invalid crashes and drivers 2019-2021-2024 with and without "
+            "expired or cancelled licences counted as invalid",
+            "person killed / driver in a fatal crash",
+        ),
+        "victim_roles_bac_basis": (
+            "Who was killed in drunk-driving crashes (a driver with BAC >= .08), with the "
+            "drunk driver's own passengers separated from people outside that vehicle, for "
+            "measured BAC only and for measured plus imputed BAC",
+            "person killed",
+        ),
+        "driver_records_measured_bac": (
+            "Prior-DWI, prior-speeding and invalid-licence shares of drivers with BAC >= .08: "
+            "all, measured BAC only, imputed BAC only",
+            "driver in a fatal crash",
+        ),
+        "driver_bac_imputed_share": (
+            "Share of drivers with BAC >= .08 whose BAC is imputed rather than measured",
+            "driver in a fatal crash",
+        ),
+        "potential_lives_context": (
+            "Deaths the potential-lives figure leaves out (unknown belt / helmet use) and the "
+            "share of unbelted deaths in single-occupant vehicles, where no pair comparison "
+            "exists",
+            "person killed",
+        ),
         "potential_lives": (
             "Lives the same people would have been expected to survive had they been belted/"
             "helmeted, using the within-vehicle (double pair comparison) effectiveness from the "
@@ -1545,6 +2068,10 @@ def run() -> dict[str, pl.DataFrame]:
             method = LIVES_METHOD
             inputs = [f"outputs/tables/{n}.csv" for n in _MATCHED_INPUTS] + _INPUTS_DEATH
             extra = {"input_git_commits": _input_commits()}
+        elif name in _MEASURED_TABLES:
+            method = _MEASURED_TABLES[name]
+            inputs = _INPUTS_DRIVERS if name in _DRIVER_TABLES else _INPUTS_DEATH
+            extra = None
         else:
             method = mi_method
             inputs = _INPUTS_DRIVERS if name in _DRIVER_TABLES else _INPUTS_DEATH

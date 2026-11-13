@@ -1,0 +1,16 @@
+row_type,definition,tox_any_driver,police_crash_field,deaths,crashes,share_of_all_deaths,deaths_ratio_to_A,crashes_ratio_to_A
+all,all fatal crashes,all,all,353706,325922,1,8.12146,8.44773
+definition,A: police crash-level drugs field = yes,any,yes,43552,38581,0.123131,1,1
+definition,B: any driver drug-positive on toxicology,positive,any,84207,75054,0.238071,1.93348,1.94536
+overlap,A and B,positive,yes,34915,30774,0.0987119,0.801685,0.797647
+overlap,A not B,not positive,yes,8637,7807,0.0244186,0.198315,0.202353
+overlap,B not A,positive,no / not reported,49292,44280,0.139359,1.1318,1.14772
+cross-tab,toxicology status x police field,all drivers determinate negative,yes,1293,1181,0.00365558,0.0296886,0.0306109
+cross-tab,toxicology status x police field,all drivers determinate negative,no,27480,25359,0.0776916,0.63097,0.657292
+cross-tab,toxicology status x police field,all drivers determinate negative,not reported / unknown,17959,16436,0.0507738,0.412358,0.426013
+cross-tab,toxicology status x police field,positive (any driver),yes,34915,30774,0.0987119,0.801685,0.797647
+cross-tab,toxicology status x police field,positive (any driver),no,16665,15152,0.0471154,0.382646,0.392732
+cross-tab,toxicology status x police field,positive (any driver),not reported / unknown,32627,29128,0.0922433,0.74915,0.754983
+cross-tab,toxicology status x police field,undetermined (no positive driver; some driver untested/indeterminate),yes,7344,6626,0.020763,0.168626,0.171743
+cross-tab,toxicology status x police field,undetermined (no positive driver; some driver untested/indeterminate),no,98374,92819,0.278124,2.25877,2.40582
+cross-tab,toxicology status x police field,undetermined (no positive driver; some driver untested/indeterminate),not reported / unknown,117049,108447,0.330922,2.68757,2.81089

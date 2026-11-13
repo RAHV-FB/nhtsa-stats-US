@@ -86,8 +86,9 @@ Not justified
     Probability of crashing (exposure is not observed); causal effects of any feature;
     permutation importance or partial dependence as evidence of preventability; use of the
     model for individual enforcement or triage decisions.  Police-reported behaviours
-    (speeding, alcohol) are ascertained more thoroughly in severe crashes, which can inflate
-    their apparent predictive value.
+    (speeding, alcohol) are recorded differently by severity (more investigation and testing
+    after a death, but police-recorded fields are more often unknown in fatal crashes), which
+    can bias severity associations and the apparent predictive value in either direction.
 """
 
 from __future__ import annotations
@@ -110,7 +111,7 @@ from sklearn.ensemble import HistGradientBoostingClassifier, RandomForestClassif
 from sklearn.linear_model import LogisticRegression
 
 from nhtsa_stats import config
-from nhtsa_stats.analysis import data, specs
+from nhtsa_stats.analysis import data, multiplicity, specs
 from nhtsa_stats.analysis.interactions import PAIRS
 from nhtsa_stats.analysis.survey import (
     ModelSpec,
@@ -128,12 +129,19 @@ MODULE_PATH = "nhtsa_stats.models.severity_ml"
 MODEL_DIR = config.MODELS_DIR / MODULE
 OUTCOMES: tuple[str, ...] = ("fatal", "ka")
 OUTCOME_DEFINITIONS = {
-    "fatal": "MAXSEV_IM 4 (K) vs 0-3 (O/C/B/A); 5/6/8 excluded",
-    "ka": "MAXSEV_IM 3-4 (K or A) vs 0-2 (O/C/B); 5/6/8 excluded",
+    "fatal": "MAXSEV_IM 4 (K) vs 0-3 (O/C/B/A) and 5/6/8 (coded 0: no crash death is possible); "
+    "only 9 (unknown) is excluded",
+    "ka": "MAXSEV_IM 3-4 (K or A) vs 0-2 (O/C/B) and 6/8 (coded 0); 5 (injured, severity "
+    "unknown: a serious injury is possible) and 9 are unknown and excluded",
 }
+OUTCOME_NOTE = (
+    "fatal metrics use every crash with a known fatal outcome; ka metrics use only the crashes "
+    "where ka is known (MAXSEV_IM 5 and 9 excluded), so the two outcomes differ in n"
+)
 POPULATION = (
     "CRSS police-reported crashes (all severities, national probability sample) with a "
-    "determinable maximum severity; train 2016-2021, validation 2022, test 2023-2024"
+    "determinable maximum severity (fatal: MAXSEV_IM 9 excluded; ka: MAXSEV_IM 5 and 9 "
+    "excluded, so ka rows are a subset); train 2016-2021, validation 2022, test 2023-2024"
 )
 N_BOOT = 200
 N_JOBS = 2
@@ -888,8 +896,9 @@ def evaluate(
     w_full = test["WEIGHT"].to_numpy()
     for (outcome, stage, model), p in preds.items():
         y = test[outcome].to_numpy()
+        known = np.isfinite(y)  # domain estimation: unknown-outcome rows keep their PSU
         for dname, var, value in DOMAINS:
-            d = _domain_mask(test, var, value)
+            d = _domain_mask(test, var, value) & known
             for weighting in ("weighted", "unweighted"):
                 if weighting == "unweighted" and dname not in UNWEIGHTED_DOMAINS:
                     continue
@@ -1076,6 +1085,8 @@ def threshold_tables(
         outcome, stage, model = key
         pv = preds_valid[key]
         yv, wv = valid[outcome].to_numpy(), valid["WEIGHT"].to_numpy()
+        kv = np.isfinite(yv)
+        pv, yv, wv = pv[kv], yv[kv], wv[kv]  # 2022 crashes with a known outcome
         o = np.argsort(-pv, kind="stable")
         cum_recall = np.cumsum((wv * yv)[o]) / (wv * yv).sum()
         thresholds = {
@@ -1158,17 +1169,21 @@ def temporal_stability(
                 "hgb": fit_hgb(pre, train, outcome, params, stage),
             }
             for year in range(2020, 2025):
-                ev = df[(df["YEAR"] == year).to_numpy() & known]
+                # Domain estimation as in ``evaluate``: the design (strata, PSUs) is built from
+                # every crash of the year; rows with an unknown outcome are masked, not dropped.
+                yr = df[(df["YEAR"] == year).to_numpy()]
                 cidx, cl_stratum = cluster_index(
-                    ev["PSUSTRAT"].to_numpy(), ev["PSU_VAR"].to_numpy()
+                    yr["PSUSTRAT"].to_numpy(), yr["PSU_VAR"].to_numpy()
                 )
                 mult = rao_wu_multipliers(cl_stratum, n_boot, rng)
+                d = yr[outcome].notna().to_numpy()
+                ev = yr[d]
                 for name, m in models.items():
                     gs, _, point, reps = point_and_boot(
                         m.predict(ev),
                         ev[outcome].to_numpy(),
                         ev["WEIGHT"].to_numpy(),
-                        cidx,
+                        cidx[d],
                         len(cl_stratum),
                         mult,
                     )
@@ -1833,15 +1848,9 @@ def _verdict(r: Any) -> str:
 
 
 def holm(p: np.ndarray) -> np.ndarray:
-    p = np.asarray(p, dtype=float)
-    o = np.argsort(p)
-    m = len(p)
-    adj = np.empty(m)
-    running = 0.0
-    for rank, i in enumerate(o):
-        running = max(running, (m - rank) * p[i])
-        adj[i] = min(1.0, running)
-    return adj
+    """Holm step-down over the registered tests; a non-estimable test counts as p = 1 and is
+    reported as NaN (``analysis.multiplicity``)."""
+    return multiplicity.holm(p)
 
 
 # --------------------------------------------------------------------------------------
@@ -2079,7 +2088,9 @@ CAVEAT = (
     "circumstances is fatal (conditional on the crash having happened and been reported). "
     "It is not the probability of having a crash, not a causal effect of changing any "
     "condition, and not a prediction for an individual person. Police-reported behaviours "
-    "(speeding, alcohol) are ascertained more thoroughly in severe crashes. The interval "
+    "(speeding, alcohol) are recorded differently by severity (more investigation and "
+    "testing after a death, but police-recorded fields are more often unknown in fatal "
+    "crashes), which can bias severity associations in either direction. The interval "
     "reflects survey sampling uncertainty of the fitted model only (not model "
     "misspecification, measurement error or year-to-year drift); 'model_range' shows how "
     "much the fitted model classes disagree. Absolute levels drift between years and are "
@@ -2634,6 +2645,7 @@ def _figures(
 # --------------------------------------------------------------------------------------
 def _save(df: pd.DataFrame, name: str, description: str, **kw: Any) -> None:
     extra = {"module": MODULE_PATH, **kw.pop("extra", {})}
+    kw["method"] = f"{kw['method']}; {OUTCOME_NOTE}" if kw.get("method") else OUTCOME_NOTE
     save_table(
         df,
         MODULE,
@@ -2686,8 +2698,17 @@ def run(n_boot: int = N_BOOT, interpret: bool = True) -> dict[str, Any]:
     tuning_parts, selection, sel_info = [], {}, {}
     preds_valid, preds_test = {}, {}
     splits: dict[str, dict[str, pd.DataFrame]] = {}
+    fatal_known = df["fatal"].notna().to_numpy()
+    eval_valid = df[df["YEAR"].isin(config.VALID_YEARS).to_numpy() & fatal_known].reset_index(
+        drop=True
+    )
+    eval_test = df[df["YEAR"].isin(config.TEST_YEARS).to_numpy() & fatal_known].reset_index(
+        drop=True
+    )
     for outcome in OUTCOMES:
         known = df[outcome].notna().to_numpy()
+        # Every outcome's known rows must lie inside the fatal-known evaluation frames.
+        assert not (known & ~fatal_known).any(), f"{outcome} known where fatal is unknown"
         split = {
             "train": df[df["YEAR"].isin(config.TRAIN_YEARS).to_numpy() & known],
             "valid": df[df["YEAR"].isin(config.VALID_YEARS).to_numpy() & known],
@@ -2703,8 +2724,11 @@ def run(n_boot: int = N_BOOT, interpret: bool = True) -> dict[str, Any]:
             sel_info[f"{outcome}|{stage}"] = {"selected": name, **info}
             for mname, m in models.items():
                 fitted[(outcome, stage, mname)] = m
-                preds_valid[(outcome, stage, mname)] = m.predict(split["valid"])
-                preds_test[(outcome, stage, mname)] = m.predict(split["test"])
+                # Predictions for every outcome are made on the fatal-known evaluation frames
+                # (``ka`` is also unknown for MAXSEV_IM 5, so its known rows are a subset);
+                # the metrics mask each outcome's unknown rows (a domain of the same design).
+                preds_valid[(outcome, stage, mname)] = m.predict(eval_valid)
+                preds_test[(outcome, stage, mname)] = m.predict(eval_test)
                 unseen = m.pre.unseen(split["test"])
                 if unseen:
                     log.warning(
@@ -2724,9 +2748,11 @@ def run(n_boot: int = N_BOOT, interpret: bool = True) -> dict[str, Any]:
     )
     save_json(sel_info, MODULE, "selection")
 
-    # Test evaluation (one test frame: both outcomes are known on the same crashes).
-    test = splits["fatal"]["test"]
-    assert splits["ka"]["test"]["case_id"].equals(test["case_id"])
+    # Test evaluation on one frame (the fatal-known test crashes, one PSU structure for the
+    # bootstrap); an outcome's unknown rows (``ka`` for MAXSEV_IM 5) are masked in each metric.
+    test = eval_test
+    assert test["case_id"].equals(splits["fatal"]["test"]["case_id"])
+    assert splits["ka"]["test"]["case_id"].isin(test["case_id"]).all()
     metrics, diffs, curves, tiers, mult = evaluate(test, preds_test, n_boot, rng)
     method = (
         f"Weighted (WEIGHT) and unweighted metrics; 95% percentile CIs from {n_boot} Rao-Wu "
@@ -2757,7 +2783,7 @@ def run(n_boot: int = N_BOOT, interpret: bool = True) -> dict[str, Any]:
         method="Tiers from the 20 equal-weight reliability groups of each model's test "
         "predictions; " + method,
     )
-    valid = splits["fatal"]["valid"]
+    valid = eval_valid
     thr = threshold_tables(valid, test, preds_valid, preds_test, mult)
     _save(
         thr,

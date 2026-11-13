@@ -1,0 +1,35 @@
+{
+ "table": "descriptive/crss_design.csv",
+ "description": "CRSS design summary: crashes, variance strata, variance PSUs, design degrees of freedom (PSUs minus strata) and the years covered",
+ "population": "CRSS (national probability sample)",
+ "unit": "crash",
+ "outcome": "none (design facts)",
+ "method": "Design-based (CRSS: Taylor linearisation; strata and PSUs in crss_design) or census counts (FARS)",
+ "inputs": [
+  "data/processed/crss_crash.parquet",
+  "data/processed/fars_crash.parquet",
+  "data/processed/fars_person.parquet"
+ ],
+ "rows": 1,
+ "columns": [
+  "n_crashes",
+  "n_strata",
+  "n_psu",
+  "design_df",
+  "first_year",
+  "last_year",
+  "n_years",
+  "years"
+ ],
+ "module": "nhtsa_stats.analysis.descriptive",
+ "git_commit": "af9ce88",
+ "source_sha256": "95039bdc8ba05bee29f6b4e4290e20633e775885d009cf7fefa5ab142305b9f8",
+ "code_sha256": "f2990b880a5e6b8481ecc800cf3a84bd3c573446dc7f11ae4a96541850fc158f",
+ "inputs_sha256": {
+  "data/processed/crss_crash.parquet": "1a31897f37cce3be223cc5abfb823582b68b9f7096a8c38980e9346f3450c6e3",
+  "data/processed/fars_crash.parquet": "30f4314e8984ce2ba3cd764b561628edf36950705c1fc3bdd16769a417846ddf",
+  "data/processed/fars_person.parquet": "97b40b82c1b47f76bf99a8e05ebaa84e14c4b1ea2ecea3e86be6de4c2189bfa2"
+ },
+ "package_sha256": "fbdac1b588be76a011931549cc2f2013fc1b6405f88cee1ba0e10db719e3ed6b",
+ "generated_utc": "2026-11-13T00:23:12Z"
+}

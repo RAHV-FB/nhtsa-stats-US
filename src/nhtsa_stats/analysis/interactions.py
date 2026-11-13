@@ -44,7 +44,7 @@ import pandas as pd
 from scipy import stats
 
 from nhtsa_stats import config
-from nhtsa_stats.analysis import severity, specs
+from nhtsa_stats.analysis import multiplicity, severity, specs
 from nhtsa_stats.analysis.survey import (
     MarginSet,
     ModelSpec,
@@ -68,6 +68,12 @@ class Exposure:
     exposed: tuple
     reference: tuple
     label: str
+    # Variables that are set jointly with ``var`` from their observed joint distribution within
+    # the exposed/reference levels, instead of being held at each row's own value.  Used when
+    # setting ``var`` alone would create impossible records: setting ``crash_type`` to a
+    # multi-vehicle type for a one-vehicle crash (or 'pedestrian' for a three-vehicle crash
+    # with no pedestrian) is not a possible crash, so ``n_vehicles`` moves with it.
+    linked: tuple[str, ...] = ()
 
     def state(self, s: int) -> tuple:
         return self.exposed if s == 1 else self.reference
@@ -119,6 +125,7 @@ PEDESTRIAN = Exposure(
         "cyclist",
     ),
     "pedestrian crash (vs all other types)",
+    linked=("n_vehicles",),
 )
 ANGLE = Exposure("crash_type", ("mv_angle",), ("mv_rear_end",), "angle (vs rear-end) collision")
 
@@ -249,10 +256,20 @@ def _indicator(df: pd.DataFrame, e: Exposure) -> np.ndarray:
 
 
 def _level_weights(df: pd.DataFrame, w: np.ndarray, e: Exposure, s: int) -> dict:
+    """Weights of the (level, *linked values) combinations making up state ``s`` of ``e``.
+
+    Keys are tuples ``(level, *linked_values)``; without linked variables they are 1-tuples.
+    """
     levels = e.state(s)
-    tot = {lv: float(w[(df[e.var] == lv).to_numpy()].sum()) for lv in levels}
+    cols = [e.var, *e.linked]
+    keys = df[cols].astype(object)
+    in_state = df[e.var].isin(levels).to_numpy()
+    tot: dict[tuple, float] = {}
+    for key, idx in keys[in_state].groupby(cols, observed=True, sort=True).indices.items():
+        k = key if isinstance(key, tuple) else (key,)
+        tot[k] = float(w[in_state][idx].sum())
     z = sum(tot.values())
-    return {lv: t / z for lv, t in tot.items() if t > 0}
+    return {k: t / z for k, t in tot.items() if t > 0}
 
 
 def combo_margins(
@@ -271,7 +288,12 @@ def combo_margins(
         # all level combinations within this state
         combos: list[tuple[dict, float]] = [({}, 1.0)]
         for e, s, wmap in zip(comb.exposures, st, weights, strict=True):
-            combos = [({**a, e.var: lv}, pw * wl) for a, pw in combos for lv, wl in wmap[s].items()]
+            names = (e.var, *e.linked)
+            combos = [
+                ({**a, **dict(zip(names, lv, strict=True))}, pw * wl)
+                for a, pw in combos
+                for lv, wl in wmap[s].items()
+            ]
         m_tot, z_tot = 0.0, np.zeros(design.n)
         for assign, pw in combos:
             key = tuple(sorted(assign.items()))
@@ -479,26 +501,11 @@ def analyse_triple(
 
 
 def _adjust_p(p: pd.Series, method: str) -> pd.Series:
+    """Holm or Benjamini-Hochberg over ``len(p)`` registered tests (non-finite p stays in the
+    family as p = 1 and is reported as NaN; ``analysis.multiplicity``)."""
     vals = p.to_numpy(float)
-    ok = np.isfinite(vals)
-    out = np.full(len(vals), np.nan)
-    v = vals[ok]
-    m = len(v)
-    order = np.argsort(v)
-    adj = np.empty(m)
-    if method == "holm":
-        running = 0.0
-        for rank, idx in enumerate(order):
-            running = max(running, min(1.0, (m - rank) * v[idx]))
-            adj[idx] = running
-    else:  # Benjamini-Hochberg
-        running = 1.0
-        for rank in range(m - 1, -1, -1):
-            idx = order[rank]
-            running = min(running, v[idx] * m / (rank + 1))
-            adj[idx] = min(running, 1.0)
-    out[ok] = adj
-    return pd.Series(out, index=p.index)
+    adj = multiplicity.holm(vals) if method == "holm" else multiplicity.benjamini_hochberg(vals)
+    return pd.Series(adj, index=p.index)
 
 
 def run_pairs(
@@ -510,28 +517,50 @@ def run_pairs(
     df, design = severity.load(outcome, years)
     n_years = df["YEAR"].nunique()
     rows = []
-    for comb in PAIRS:
+    for comb in [*PAIRS, *(FOLLOW_UP if include_follow_up else [])]:
         try:
             rows.append({**analyse_pair(df, design, outcome, comb, n_years), "period": tag})
             log.info("%s %s %s done", outcome, tag, comb.name)
         except Exception as exc:  # keep going; record the failure explicitly
             log.exception("pair %s failed", comb.name)
             rows.append(
-                {"pair": comb.name, "outcome": outcome, "period": tag, "flag": f"failed: {exc}"}
-            )
-    for comb in FOLLOW_UP if include_follow_up else []:
-        try:
-            rows.append({**analyse_pair(df, design, outcome, comb, n_years), "period": tag})
-            log.info("%s %s %s done", outcome, tag, comb.name)
-        except Exception as exc:  # keep going; record the failure explicitly
-            log.exception("pair %s failed", comb.name)
-            rows.append(
-                {"pair": comb.name, "outcome": outcome, "period": tag, "flag": f"failed: {exc}"}
+                {
+                    "pair": comb.name,
+                    "prespecified": comb.prespecified,
+                    "outcome": outcome,
+                    "period": tag,
+                    "flag": f"failed: {exc}",
+                }
             )
     res = pd.DataFrame(rows)
-    pre = res["prespecified"].fillna(True).astype(bool)
-    for col in ("ic_p", "ratio_of_rr_p", "product_p"):
+    return _holm_family(res)
+
+
+P_COLUMNS = ("ic_p", "ratio_of_rr_p", "product_p")
+
+
+def _holm_family(res: pd.DataFrame) -> pd.DataFrame:
+    """Holm / Benjamini-Hochberg adjustment over the pre-specified pairs only.
+
+    A pre-specified pair that failed, or has a missing / non-finite p-value in any of
+    ``P_COLUMNS`` (``_adjust_p`` drops non-finite values), would silently shrink the
+    multiplicity family and make the remaining adjusted p-values too small, so it raises
+    instead.  Exploratory pairs are left unadjusted.
+    """
+    pre = res["prespecified"].astype(bool)
+    bad = res.loc[pre & res["flag"].fillna("").str.startswith("failed"), "pair"].tolist()
+    if bad:
+        raise RuntimeError(
+            f"pre-specified pair(s) failed, so the Holm/BH family would be incomplete: {bad}"
+        )
+    for col in P_COLUMNS:
         if col in res:
+            nonfinite = res.loc[pre & ~np.isfinite(res[col].to_numpy(dtype=float)), "pair"]
+            if len(nonfinite):
+                raise RuntimeError(
+                    f"pre-specified pair(s) with a non-finite {col}, so the Holm/BH family "
+                    f"would silently shrink: {nonfinite.tolist()}"
+                )
             # Multiplicity adjustment within the pre-specified family only.
             res[f"{col}_holm"] = np.nan
             res[f"{col}_bh"] = np.nan

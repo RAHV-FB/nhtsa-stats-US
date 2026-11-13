@@ -60,7 +60,7 @@ def test_unknown_is_never_no():
     # SPEEDREL 8 (no driver present / unknown if driver present) is unknown, not "no"
     assert _apply(h.speeding_related(), SPEEDREL=[0, 3, 9, 8]) == [0, 1, None, None]
     assert _apply(h.police_reported("DRINKING"), DRINKING=[0, 1, 8, 9]) == [0, 1, None, None]
-    assert _apply(h.fatal("INJ_SEV"), INJ_SEV=[4, 3, 5, 6, 9]) == [1, 0, None, None, None]
+    assert _apply(h.fatal("INJ_SEV"), INJ_SEV=[4, 3, 5, 6, 9]) == [1, 0, 0, 0, None]
 
 
 def test_body_groups_absorb_2017_pickup_merge():
@@ -129,8 +129,9 @@ def test_crss_crash_reconciles_with_raw_accident():
     )
     assert proc.height == raw.height
     assert proc["case_id"].n_unique() == proc.height
-    # primary outcome: imputed severity; null exactly when MAXSEV_IM is 5, 6 or 8
-    assert proc.filter(pl.col("fatal").is_null())["MAXSEV_IM"].is_in([5, 6, 8]).all()
+    # primary outcome: imputed severity; 5, 6 and 8 hold no crash death, so never null
+    assert proc["fatal"].null_count() == 0
+    assert proc.filter(pl.col("MAXSEV_IM").is_in([5, 6, 8]))["fatal"].eq(0).all()
     assert proc.filter(pl.col("MAXSEV_IM") == 4)["fatal"].eq(1).all()
     # complete-case sensitivity: never 'not fatal' when a person's severity is unknown
     assert proc.filter(pl.col("MAX_SEV") == 4)["fatal_cc"].eq(1).all()
@@ -139,7 +140,7 @@ def test_crss_crash_reconciles_with_raw_accident():
 
 @pytest.mark.processed
 def test_crss_imputed_fatal_total_matches_fars():
-    """CRSS weights are calibrated to FARS through MAXSEV_IM (docs/audit/crss_survey_design.md)."""
+    """CRSS weights are calibrated to FARS through MAXSEV_IM (CRSS survey design audit note, Git history, commit 7ee597e)."""
     crss = pl.read_parquet(
         config.PROCESSED_DIR / "crss_crash.parquet", columns=["YEAR", "WEIGHT", "fatal"]
     )

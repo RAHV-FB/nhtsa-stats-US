@@ -1,89 +1,89 @@
 exposure,outcome,specification,rr,e_value_point,e_value_ci
-exceeded,fatal,model: crude,10.03,19.547,15.9981
-exceeded,fatal,model: other_behaviour_only,6.97488,13.4304,10.9542
-exceeded,fatal,model: environment_only,6.3971,12.273,10.1768
-exceeded,fatal,model: environment_and_other_behaviour,5.21631,9.90604,8.14115
-exceeded,fatal,model: all_blocks,4.88402,9.23944,7.7018
-exceeded,fatal,model: configuration_only,6.46799,12.415,10.3129
-exceeded,ka,model: crude,5.09436,9.66143,8.48884
-exceeded,ka,model: other_behaviour_only,4.21565,7.89751,6.94671
-exceeded,ka,model: environment_only,3.82063,7.1034,6.29655
-exceeded,ka,model: environment_and_other_behaviour,3.38992,6.23626,5.51339
-exceeded,ka,model: all_blocks,2.96764,5.38409,4.8354
-exceeded,ka,model: configuration_only,3.6418,6.74357,6.04269
-speeding_any,fatal,model: crude,2.36388,4.15943,3.18258
-speeding_any,fatal,model: other_behaviour_only,2.04467,3.50619,2.73028
-speeding_any,fatal,model: environment_only,2.02048,3.45639,2.7012
-speeding_any,fatal,model: environment_and_other_behaviour,1.82118,3.04408,2.39119
-speeding_any,fatal,model: all_blocks,2.06965,3.55754,3.03157
-speeding_any,fatal,model: configuration_only,2.06623,3.55051,2.99686
-speeding_any,ka,model: crude,1.78618,2.97119,2.38421
-speeding_any,ka,model: other_behaviour_only,1.65184,2.68949,2.18279
-speeding_any,ka,model: environment_only,1.65104,2.6878,2.20842
-speeding_any,ka,model: environment_and_other_behaviour,1.56173,2.49836,2.06382
-speeding_any,ka,model: all_blocks,1.61643,2.61464,2.32729
-speeding_any,ka,model: configuration_only,1.59576,2.57078,2.24674
-alcohol,fatal,model: crude,6.4059,12.2906,10.4353
-alcohol,fatal,model: other_behaviour_only,5.61951,10.7146,9.07947
-alcohol,fatal,model: environment_only,4.41405,8.29602,6.87728
-alcohol,fatal,model: environment_and_other_behaviour,4.06587,7.59651,6.27797
-alcohol,fatal,model: all_blocks,2.99834,5.44614,4.54895
-alcohol,fatal,model: configuration_only,4.18397,7.83384,6.70748
-alcohol,ka,model: crude,3.54961,6.55796,5.88776
-alcohol,ka,model: other_behaviour_only,3.29053,6.0359,5.44287
-alcohol,ka,model: environment_only,2.81401,5.07335,4.56345
-alcohol,ka,model: environment_and_other_behaviour,2.67877,4.79938,4.32422
-alcohol,ka,model: all_blocks,2.21735,3.86031,3.57
-alcohol,ka,model: configuration_only,2.64697,4.7349,4.37452
-exceeded,fatal,stratum: no alcohol,6.53723,12.5537,10.3817
-exceeded,fatal,stratum: alcohol,3.28594,6.02664,4.77344
-exceeded,fatal,stratum: police: no alcohol,7.98652,15.4563,11.7618
-exceeded,fatal,stratum: police: alcohol,3.21283,5.87918,4.40779
-exceeded,fatal,stratum: day (06-20),6.21917,11.9164,9.34791
-exceeded,fatal,stratum: night (21-05),4.27199,8.01069,6.47636
-exceeded,fatal,stratum: single vehicle,3.43583,6.32877,5.31874
-exceeded,fatal,stratum: multi-vehicle,7.7047,14.892,11.3209
-exceeded,fatal,stratum: limit <= 45 mph,6.24039,11.959,9.72436
-exceeded,fatal,stratum: limit >= 50 mph,3.79265,7.04712,5.42064
-exceeded,fatal,stratum: 2016-2019,4.29605,8.05903,6.25412
-exceeded,fatal,stratum: 2020-2024,5.96119,11.3994,9.35128
-exceeded,fatal,stratum: hit-and-run excluded,5.53487,10.5449,8.60505
-speeding_any,fatal,stratum: no alcohol,1.90485,3.21771,2.47288
-speeding_any,fatal,stratum: alcohol,1.56224,2.49943,1.80677
-speeding_any,fatal,stratum: police: no alcohol,2.05992,3.53754,2.78471
-speeding_any,fatal,stratum: police: alcohol,1.63322,2.65017,2.0134
-speeding_any,fatal,stratum: day (06-20),1.70465,2.80064,2.09481
-speeding_any,fatal,stratum: night (21-05),1.89584,3.19905,2.50897
-speeding_any,fatal,stratum: single vehicle,1.6693,2.72631,2.20374
-speeding_any,fatal,stratum: multi-vehicle,1.94065,3.29175,2.3929
-speeding_any,fatal,stratum: limit <= 45 mph,2.34655,4.12413,3.0754
-speeding_any,fatal,stratum: limit >= 50 mph,1.24001,1.78556,1.25125
-speeding_any,fatal,stratum: 2016-2019,1.55376,2.48134,1.89026
-speeding_any,fatal,stratum: 2020-2024,2.01392,3.44289,2.66728
-speeding_any,fatal,stratum: hit-and-run excluded,1.87673,3.15945,2.40908
-exceeded,ka,stratum: no alcohol,3.72443,6.90987,6.10689
-exceeded,ka,stratum: alcohol,2.43937,4.31317,3.63749
-exceeded,ka,stratum: police: no alcohol,4.13774,7.74095,6.56807
+exceeded,fatal,model: crude,10.0227,19.5323,15.9947
+exceeded,fatal,model: other_behaviour_only,6.96994,13.4205,10.9558
+exceeded,fatal,model: environment_only,6.38614,12.251,10.1729
+exceeded,fatal,model: environment_and_other_behaviour,5.20685,9.88707,8.13861
+exceeded,fatal,model: all_blocks,4.87358,9.21849,7.69552
+exceeded,fatal,model: configuration_only,6.48007,12.4392,10.3414
+exceeded,ka,model: crude,5.0945,9.66171,8.48912
+exceeded,ka,model: other_behaviour_only,4.21539,7.89699,6.9462
+exceeded,ka,model: environment_only,3.82622,7.11465,6.31411
+exceeded,ka,model: environment_and_other_behaviour,3.39467,6.24582,5.52868
+exceeded,ka,model: all_blocks,2.97051,5.38989,4.84262
+exceeded,ka,model: configuration_only,3.64482,6.74964,6.04828
+speeding_any,fatal,model: crude,2.36183,4.15527,3.18135
+speeding_any,fatal,model: other_behaviour_only,2.04408,3.50497,2.73135
+speeding_any,fatal,model: environment_only,2.01552,3.44618,2.6948
+speeding_any,fatal,model: environment_and_other_behaviour,1.81677,3.03492,2.38519
+speeding_any,fatal,model: all_blocks,2.06465,3.54726,3.02409
+speeding_any,fatal,model: configuration_only,2.06689,3.55185,2.99802
+speeding_any,ka,model: crude,1.78622,2.97129,2.38431
+speeding_any,ka,model: other_behaviour_only,1.65182,2.68945,2.1828
+speeding_any,ka,model: environment_only,1.65189,2.6896,2.20964
+speeding_any,ka,model: environment_and_other_behaviour,1.56244,2.49988,2.06488
+speeding_any,ka,model: all_blocks,1.61744,2.61677,2.32911
+speeding_any,ka,model: configuration_only,1.59689,2.57319,2.24875
+alcohol,fatal,model: crude,6.38649,12.2517,10.4093
+alcohol,fatal,model: other_behaviour_only,5.60253,10.6805,9.0564
+alcohol,fatal,model: environment_only,4.40866,8.28521,6.86965
+alcohol,fatal,model: environment_and_other_behaviour,4.06063,7.58598,6.27068
+alcohol,fatal,model: all_blocks,2.9999,5.44928,4.55169
+alcohol,fatal,model: configuration_only,4.18167,7.82923,6.70272
+alcohol,ka,model: crude,3.55141,6.56159,5.89094
+alcohol,ka,model: other_behaviour_only,3.29239,6.03965,5.44605
+alcohol,ka,model: environment_only,2.81555,5.07647,4.56581
+alcohol,ka,model: environment_and_other_behaviour,2.68011,4.80211,4.32622
+alcohol,ka,model: all_blocks,2.21848,3.8626,3.57193
+alcohol,ka,model: configuration_only,2.64974,4.74052,4.37941
+exceeded,fatal,stratum: no alcohol,6.52791,12.535,10.3798
+exceeded,fatal,stratum: alcohol,3.28468,6.0241,4.77442
+exceeded,fatal,stratum: police: no alcohol,7.93371,15.3506,11.6844
+exceeded,fatal,stratum: police: alcohol,3.21007,5.87362,4.40689
+exceeded,fatal,stratum: day (06-20),6.19419,11.8664,9.32546
+exceeded,fatal,stratum: night (21-05),4.27178,8.01027,6.47402
+exceeded,fatal,stratum: single vehicle,3.44669,6.35066,5.35407
+exceeded,fatal,stratum: multi-vehicle,7.63946,14.7614,11.2076
+exceeded,fatal,stratum: limit <= 45 mph,6.22902,11.9362,9.70967
+exceeded,fatal,stratum: limit >= 50 mph,3.78703,7.03582,5.42587
+exceeded,fatal,stratum: 2016-2019,4.29519,8.05729,6.26362
+exceeded,fatal,stratum: 2020-2024,5.94234,11.3617,9.32781
+exceeded,fatal,stratum: hit-and-run excluded,5.51761,10.5103,8.59192
+speeding_any,fatal,stratum: no alcohol,1.90108,3.20991,2.46852
+speeding_any,fatal,stratum: alcohol,1.55815,2.49073,1.80015
+speeding_any,fatal,stratum: police: no alcohol,2.04669,3.51034,2.76163
+speeding_any,fatal,stratum: police: alcohol,1.6291,2.64145,2.0097
+speeding_any,fatal,stratum: day (06-20),1.69838,2.78746,2.08597
+speeding_any,fatal,stratum: night (21-05),1.89484,3.19698,2.50864
+speeding_any,fatal,stratum: single vehicle,1.66779,2.72312,2.20409
+speeding_any,fatal,stratum: multi-vehicle,1.93403,3.27808,2.38145
+speeding_any,fatal,stratum: limit <= 45 mph,2.33488,4.10032,3.06194
+speeding_any,fatal,stratum: limit >= 50 mph,1.2374,1.77939,1.24633
+speeding_any,fatal,stratum: 2016-2019,1.54737,2.46769,1.87924
+speeding_any,fatal,stratum: 2020-2024,2.0111,3.43707,2.66407
+speeding_any,fatal,stratum: hit-and-run excluded,1.87033,3.14619,2.40062
+exceeded,ka,stratum: no alcohol,3.7324,6.92589,6.13098
+exceeded,ka,stratum: alcohol,2.43977,4.31398,3.63814
+exceeded,ka,stratum: police: no alcohol,4.13781,7.74109,6.56825
 exceeded,ka,stratum: police: alcohol,2.30092,4.03104,3.32131
-exceeded,ka,stratum: day (06-20),3.72278,6.90654,5.93359
-exceeded,ka,stratum: night (21-05),2.96556,5.37989,4.78585
-exceeded,ka,stratum: single vehicle,2.31883,4.06759,3.56633
-exceeded,ka,stratum: multi-vehicle,4.45718,8.38264,7.17947
-exceeded,ka,stratum: limit <= 45 mph,3.6151,6.68982,5.93667
-exceeded,ka,stratum: limit >= 50 mph,2.88911,5.22532,4.39395
-exceeded,ka,stratum: 2016-2019,2.86436,5.17526,4.346
-exceeded,ka,stratum: 2020-2024,3.88355,7.22996,6.38347
-exceeded,ka,stratum: hit-and-run excluded,3.64355,6.74709,5.85685
-speeding_any,ka,stratum: no alcohol,1.56508,2.50551,2.02529
-speeding_any,ka,stratum: alcohol,1.50266,2.37175,2.03145
-speeding_any,ka,stratum: police: no alcohol,1.7141,2.82046,2.35376
+exceeded,ka,stratum: day (06-20),3.73456,6.93023,5.96477
+exceeded,ka,stratum: night (21-05),2.96498,5.37871,4.78465
+exceeded,ka,stratum: single vehicle,2.32379,4.07771,3.58281
+exceeded,ka,stratum: multi-vehicle,4.45716,8.38261,7.17937
+exceeded,ka,stratum: limit <= 45 mph,3.61669,6.69301,5.94214
+exceeded,ka,stratum: limit >= 50 mph,2.89404,5.23528,4.40908
+exceeded,ka,stratum: 2016-2019,2.86703,5.18065,4.35106
+exceeded,ka,stratum: 2020-2024,3.89096,7.24485,6.4104
+exceeded,ka,stratum: hit-and-run excluded,3.64796,6.75596,5.87272
+speeding_any,ka,stratum: no alcohol,1.56616,2.5078,2.02679
+speeding_any,ka,stratum: alcohol,1.50288,2.37222,2.03194
+speeding_any,ka,stratum: police: no alcohol,1.71412,2.8205,2.35379
 speeding_any,ka,stratum: police: alcohol,1.52845,2.42718,2.11209
-speeding_any,ka,stratum: day (06-20),1.47518,2.31242,1.82837
-speeding_any,ka,stratum: night (21-05),1.73527,2.86483,2.49533
-speeding_any,ka,stratum: single vehicle,1.45747,2.27402,1.97284
-speeding_any,ka,stratum: multi-vehicle,1.53622,2.44382,1.90753
-speeding_any,ka,stratum: limit <= 45 mph,1.65281,2.69155,2.11012
-speeding_any,ka,stratum: limit >= 50 mph,1.31798,1.96534,1.55849
-speeding_any,ka,stratum: 2016-2019,1.43616,2.2276,1.8049
-speeding_any,ka,stratum: 2020-2024,1.66798,2.72352,2.244
-speeding_any,ka,stratum: hit-and-run excluded,1.61417,2.60985,2.128
+speeding_any,ka,stratum: day (06-20),1.47619,2.31462,1.82985
+speeding_any,ka,stratum: night (21-05),1.73563,2.86558,2.49584
+speeding_any,ka,stratum: single vehicle,1.45851,2.27628,1.97471
+speeding_any,ka,stratum: multi-vehicle,1.53622,2.44383,1.90746
+speeding_any,ka,stratum: limit <= 45 mph,1.6532,2.69236,2.11076
+speeding_any,ka,stratum: limit >= 50 mph,1.31855,1.96665,1.55964
+speeding_any,ka,stratum: 2016-2019,1.43676,2.22893,1.80623
+speeding_any,ka,stratum: 2020-2024,1.6688,2.72525,2.24463
+speeding_any,ka,stratum: hit-and-run excluded,1.61463,2.61083,2.12873

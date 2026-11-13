@@ -64,6 +64,24 @@ def test_registry_assert_no_leakage_called_directly(stage):
         assert h.REGISTRY[src].timing == "pre_crash", f
 
 
+def test_speeding_is_flagged_as_recorded_after_crash(monkeypatch):
+    """The speeding fields stay usable (no model changes) but are labelled honestly: each
+    flagged field needs a documented reason in RECORDED_AFTER_CRASH_ALLOWED, else the gate
+    refuses it."""
+    flagged = {k for k, v in h.REGISTRY.items() if v.recorded_after_crash}
+    assert "speeding" in flagged
+    assert flagged == set(h.RECORDED_AFTER_CRASH_ALLOWED)
+    assert all(h.RECORDED_AFTER_CRASH_ALLOWED[k] for k in flagged)
+    # Every model input that is flagged is documented, so the gate still passes ...
+    assert "speeding" in ml.stage_features("pre_crash")
+    for stage in ml.STAGES:
+        ml.check_features(ml.stage_features(stage), stage)
+    # ... and removing the documentation makes the gate refuse the same inputs.
+    monkeypatch.setattr(h, "RECORDED_AFTER_CRASH_ALLOWED", {})
+    with pytest.raises(ValueError, match="recorded_after_crash"):
+        ml.check_features(ml.stage_features("pre_crash"), "pre_crash")
+
+
 def test_hit_and_run_is_evaluation_only():
     """hit_and_run (post-crash) stratifies the evaluation but is never a model input."""
     assert h.REGISTRY["hit_and_run"].timing == "post_crash"
@@ -732,11 +750,14 @@ def test_figures_render_from_tables(tmp_path, monkeypatch):
 @pytest.mark.processed
 def test_real_data_smoke():
     df = ml.load_crashes()
-    # Outcomes follow the project definition: MAXSEV_IM 4 vs 0-3; 5/6/8 unknown.
+    # Outcomes follow the project definition: fatal = MAXSEV_IM 4 vs 0-3 and 5/6/8 (no crash
+    # death possible: not fatal); ka stays unknown only for 5 (injured, severity unknown).
     assert set(df["fatal"].dropna().unique()) <= {0.0, 1.0}
     assert df.loc[df["MAXSEV_IM"] == 4, "fatal"].eq(1).all()
     assert df.loc[df["MAXSEV_IM"].isin([0, 1, 2, 3]), "fatal"].eq(0).all()
-    assert df.loc[df["MAXSEV_IM"].isin([5, 6, 8]), "fatal"].isna().all()
+    assert df.loc[df["MAXSEV_IM"].isin([5, 6, 8]), "fatal"].eq(0).all()
+    assert df.loc[df["MAXSEV_IM"] == 5, "ka"].isna().all()
+    assert df.loc[df["MAXSEV_IM"].isin([6, 8]), "ka"].eq(0).all()
     for stage in ml.STAGES:
         ml.check_features(ml.stage_features(stage), stage)
     # Tri-state flags keep 'unknown' (never folded into 'no').
@@ -761,3 +782,109 @@ def test_real_data_smoke():
         assert ml.predict_crash_fatal_risk({"light": "purple"})["status"] == "refused"
         impossible = {"crash_type": "sv_rollover_first", "n_vehicles": "3+"}
         assert ml.predict_crash_fatal_risk(impossible)["status"] == "refused"
+
+
+def _eval_frame(n: int = 4000, seed: int = 9) -> pd.DataFrame:
+    df = _synthetic_crashes(n, seed)
+    rng = np.random.default_rng(seed)
+    df["YEAR"] = rng.choice([2023, 2024], n)
+    df["crash_family"] = [
+        "pedestrian_cyclist"
+        if t in ("pedestrian", "cyclist")
+        else ("single_vehicle" if str(t).startswith("sv_") else "multi_vehicle")
+        for t in df["crash_type"]
+    ]
+    # ``ka`` is unknown for ~10% of the crashes (MAXSEV_IM 5) where ``fatal`` is known (0).
+    df["ka"] = np.where(df["fatal"] == 1, 1.0, (rng.random(n) < 0.1).astype(float))
+    df.loc[(df["fatal"] == 0) & (rng.random(n) < 0.1), "ka"] = np.nan
+    return df
+
+
+def test_evaluate_and_thresholds_mask_unknown_outcome_rows():
+    df = _eval_frame()
+    rng = np.random.default_rng(0)
+    p = {
+        (oc, "pre_crash", "logit_main"): np.clip(rng.beta(1, 15, len(df)), 1e-4, 0.9)
+        for oc in ("fatal", "ka")
+    }
+    metrics, _, _, _, mult = ml.evaluate(df, p, 30, np.random.default_rng(1))
+    allw = metrics[(metrics.domain == "all") & (metrics.weighting == "weighted")]
+    n = allw[allw.metric == "auroc"].set_index("outcome")["n"]
+    known = df["ka"].notna()
+    assert n["fatal"] == len(df) and n["ka"] == int(known.sum()) < len(df)
+    # Point metrics of ka equal those computed on the known rows alone.
+    sub = df[known].reset_index(drop=True)
+    m_sub, *_ = ml.evaluate(
+        sub,
+        {("ka", "pre_crash", "logit_main"): p["ka", "pre_crash", "logit_main"][known.to_numpy()]},
+        30,
+        np.random.default_rng(1),
+    )
+    a = metrics[
+        (metrics.outcome == "ka") & (metrics.domain == "all") & (metrics.weighting == "weighted")
+    ]
+    b = m_sub[(m_sub.domain == "all") & (m_sub.weighting == "weighted")]
+    np.testing.assert_allclose(
+        a.set_index("metric")["estimate"].loc[b["metric"]].to_numpy(), b["estimate"].to_numpy()
+    )
+    thr = ml.threshold_tables(df, df, p, p, mult)
+    t = thr[thr.outcome == "ka"]
+    assert (t[["n_tp", "n_fp", "n_fn", "n_tn"]].sum(axis=1) == int(known.sum())).all()
+    t = thr[thr.outcome == "fatal"]
+    assert (t[["n_tp", "n_fp", "n_fn", "n_tn"]].sum(axis=1) == len(df)).all()
+
+    # The thresholds themselves come from the validation rows with a known outcome only.  A
+    # ``ka`` threshold computed over all rows (unknown ka read as 0) would give a 50%-recall
+    # threshold of ~0.476 here instead of ~0.050 (pinned below).
+    for oc in ("fatal", "ka"):
+        d = df[df[oc].notna()]
+        sel = df[oc].notna().to_numpy()
+        pv, yv, wv = p[oc, "pre_crash", "logit_main"][sel], d[oc].to_numpy(), d["WEIGHT"].to_numpy()
+        # brute force: the largest threshold whose weighted recall in the known rows is >= 50%
+        cands = np.unique(pv)[::-1]
+        recall = np.array([(wv * yv)[pv >= c].sum() / (wv * yv).sum() for c in cands])
+        t50 = cands[np.argmax(recall >= 0.5)]
+        got = thr[thr.outcome == oc].set_index("threshold_rule")["threshold"]
+        assert got["50% recall in 2022 (weighted)"] == pytest.approx(t50)
+        for q, rule in ((0.99, "top 1%"), (0.95, "top 5%")):
+            assert got[f"{rule} of 2022 crashes (weighted)"] == pytest.approx(
+                float(ml.weighted_quantile(pv, wv, q)[0])
+            )
+    ka_got = thr[thr.outcome == "ka"].set_index("threshold_rule")["threshold"]
+    assert ka_got["50% recall in 2022 (weighted)"] == pytest.approx(0.0499, abs=5e-4)
+    assert ka_got["top 5% of 2022 crashes (weighted)"] == pytest.approx(0.1813, abs=5e-4)
+    assert ka_got["top 1% of 2022 crashes (weighted)"] == pytest.approx(0.2512, abs=5e-4)
+
+
+def test_temporal_stability_keeps_the_whole_design_and_masks_unknown_outcome_rows(monkeypatch):
+    """The year's PSUs are factorised over every crash (not re-factorised on the rows with a
+    known outcome): a PSU whose crashes all have ``ka`` unknown still counts as a cluster."""
+    df = _eval_frame(n=3000, seed=5)
+    rng = np.random.default_rng(3)
+    df["YEAR"] = rng.choice(list(range(2016, 2025)), len(df))
+    # every crash of one PSU in 2022 has an unknown ka
+    lone = (df["YEAR"] == 2022) & (df["PSU_VAR"] == df.loc[df["YEAR"] == 2022, "PSU_VAR"].iloc[0])
+    df.loc[lone, "ka"] = np.nan
+    stages = {"pre_crash": ml.STAGES["pre_crash"]}
+    monkeypatch.setattr(ml, "STAGES", stages)
+    params = {(oc, "pre_crash"): {} for oc in ml.OUTCOMES}
+    seen = []
+    real = ml.point_and_boot
+
+    def spy(p, y, w, cidx, n_clusters, mult, calibration=True):
+        seen.append((len(y), n_clusters, mult.shape[1], len(cidx)))
+        return real(p, y, w, cidx, n_clusters, mult, calibration)
+
+    monkeypatch.setattr(ml, "point_and_boot", spy)
+    out = ml.temporal_stability(df, params, 10, np.random.default_rng(0))
+    assert len(out)
+    for year in range(2020, 2025):
+        yr = df[df["YEAR"] == year]
+        n_cl = len(yr.groupby(["PSUSTRAT", "PSU_VAR"]))
+        assert any(s[1] == n_cl and s[2] == n_cl for s in seen)
+    yr = df[df["YEAR"] == 2022]
+    full = len(yr.groupby(["PSUSTRAT", "PSU_VAR"]))
+    known = len(yr[yr["ka"].notna()].groupby(["PSUSTRAT", "PSU_VAR"]))
+    assert known < full  # the fixture really loses a PSU if rows were dropped first
+    ka_2022 = [s for s in seen if s[0] == int(yr["ka"].notna().sum())]
+    assert ka_2022 and all(s[1] == full for s in ka_2022)

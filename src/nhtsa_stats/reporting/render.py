@@ -3,6 +3,8 @@
 Every quantitative statement in ``reports/*.md`` is written in ``reports/templates/*.md`` as a
 placeholder that is resolved against ``outputs/tables`` when the report is rendered, so the
 reports cannot drift from the analysis outputs and every number has a traceable source.
+Templates in ``reports/templates/docs/`` (``model_validation.md``) are rendered to ``docs/`` and
+``README.md`` to the repository root; the rest go to ``reports/``.
 
 Placeholder grammar::
 
@@ -19,6 +21,8 @@ Placeholder grammar::
   thousands separators, e.g. ``rnd:-2`` gives ``11,800``), ``x:N`` (ratio such as ``2.2×``),
   ``in10`` (``6 in 10``) and ``oneinN`` (``1 in 4``).
 * A filter value ``a~b`` matches either ``a`` or ``b``.
+* ``key!=value`` excludes the rows where ``key`` equals ``value`` (``a~b`` allowed); a missing
+  cell compares as the empty string, so ``key!=`` keeps the rows where ``key`` is non-empty.
 * ``column`` may be ``min(col)`` or ``max(col)``: the minimum / maximum of ``col`` over all
   rows the filters select (any number of rows).
 
@@ -39,6 +43,11 @@ from nhtsa_stats import config
 PLACEHOLDER = re.compile(r"\{\{(.+?)\}\}", re.DOTALL)
 TEMPLATE_DIR = config.PROJECT_ROOT / "reports" / "templates"
 REPORT_DIR = config.PROJECT_ROOT / "reports"
+# Templates written to the repository root instead of ``reports/`` (README.md is generated too).
+ROOT_TEMPLATES = frozenset({"README.md"})
+# Templates in ``reports/templates/docs/`` are written to ``docs/`` (rendered documentation).
+DOCS_TEMPLATE_SUBDIR = "docs"
+DOCS_DIR = config.PROJECT_ROOT / "docs"
 
 
 class RenderError(RuntimeError):
@@ -63,6 +72,8 @@ def _json(path: str):
 
 def _norm(v) -> str:
     """String form used for filter matching: 2016.0 -> '2016', 'yes' -> 'yes'."""
+    if v is None or (isinstance(v, float) and v != v):
+        return ""  # missing cells (empty in the CSV) compare as the empty string
     if isinstance(v, float) and v.is_integer():
         return str(int(v))
     return str(v)
@@ -101,6 +112,9 @@ def _fmt(value, fmt: str, row: pd.Series | None = None, column: str | None = Non
         return f"{'+' if pct > 0 else chr(0x2212)}{text}%"
     if fmt.startswith("rnd:"):
         return f"{round(num(value), int(fmt[4:])):,.0f}"
+    if fmt.startswith("mn:"):
+        # Millions, e.g. "mn:1" renders 5_312_000 as "5.3" (the template adds "million").
+        return f"{num(value) / 1e6:.{int(fmt[3:])}f}"
     if fmt.startswith("x:"):
         return f"{num(value):.{int(fmt[2:])}f}\u00d7"
     if fmt == "in10":
@@ -121,10 +135,13 @@ def _filtered(table: str, filters: str, spec: str) -> pd.DataFrame:
     if filters:
         for f in filters.split(";"):
             k, v = (x.strip() for x in f.split("=", 1))
+            negate = k.endswith("!")
+            k = k.rstrip("!").strip()
             if k not in df.columns:
                 raise RenderError(f"{table}: no column {k!r} (filter in {spec})")
             vals = [x.strip() for x in v.split("~")]  # "a~b" matches either value
-            mask &= df[k].map(_norm).isin(vals)
+            hit = df[k].map(_norm).isin(vals)
+            mask &= ~hit if negate else hit
     return df[mask]
 
 
@@ -200,7 +217,17 @@ def render_text(text: str) -> str:
     return out
 
 
-def render_all(template_dir: Path = TEMPLATE_DIR, out_dir: Path = REPORT_DIR) -> list[Path]:
+def render_all(
+    template_dir: Path = TEMPLATE_DIR,
+    out_dir: Path = REPORT_DIR,
+    root_dir: Path | None = None,
+    docs_dir: Path | None = None,
+) -> list[Path]:
+    """Render every template; ``ROOT_TEMPLATES`` (README.md) go to ``root_dir``
+    (the repository root by default), ``<template_dir>/docs/*.md`` to ``docs_dir``
+    (``<root_dir>/docs`` by default), the rest to ``out_dir``."""
+    root_dir = config.PROJECT_ROOT if root_dir is None else root_dir
+    docs_dir = root_dir / "docs" if docs_dir is None else docs_dir
     _table.cache_clear()
     _json.cache_clear()
     written = []
@@ -209,7 +236,17 @@ def render_all(template_dir: Path = TEMPLATE_DIR, out_dir: Path = REPORT_DIR) ->
             f"<!-- Generated from reports/templates/{tpl.name} by `nhtsa analyze report`; "
             "every number is looked up in outputs/tables. Edit the template, not this file. -->\n\n"
         )
-        out = out_dir / tpl.name
+        out = (root_dir if tpl.name in ROOT_TEMPLATES else out_dir) / tpl.name
+        out.write_text(header + render_text(tpl.read_text()))
+        written.append(out)
+    for tpl in sorted((template_dir / DOCS_TEMPLATE_SUBDIR).glob("*.md")):
+        header = (
+            f"<!-- Generated from reports/templates/{DOCS_TEMPLATE_SUBDIR}/{tpl.name} by "
+            "`nhtsa analyze report`; every number is looked up in outputs/tables. "
+            "Edit the template, not this file. -->\n\n"
+        )
+        docs_dir.mkdir(parents=True, exist_ok=True)
+        out = docs_dir / tpl.name
         out.write_text(header + render_text(tpl.read_text()))
         written.append(out)
     for tpl in sorted(template_dir.glob("*.json")):

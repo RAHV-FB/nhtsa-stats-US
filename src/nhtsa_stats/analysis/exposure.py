@@ -13,7 +13,7 @@ equals the odds of culpability within g.  RIR > 1 means g is over-represented am
 judged responsible relative to its presence as an innocent party.
 
 Culpability, primary definition C1 (action-based, positive evidence both ways; recommended in
-docs/audit/driver_behaviour_factors.md §16): a driver is *culpable* if the vehicle was
+the driver behaviour audit note §16, Git history, commit 7ee597e): a driver is *culpable* if the vehicle was
 speeding-related (SPEEDREL 2-5), or its critical pre-crash event P_CRASH2 is in the culpable
 class (own loss of control, lane departure, turning/crossing, backing, U-turn, striking a
 slower/stopped vehicle in own lane), or a driver-error code common to FARS and CRSS is present

@@ -20,6 +20,7 @@ from common import (
     point_range,
     rate_by_level,
 )
+from nhtsa_stats import config
 
 
 def render() -> None:
@@ -49,7 +50,9 @@ def render() -> None:
     kind_note("estimated")
     shown = tab[~tab["flag"].str.startswith("suppressed")]
     if len(shown) < len(tab):
-        st.warning(f"{len(tab) - len(shown)} level(s) suppressed (fewer than 30 sample crashes).")
+        st.warning(
+            f"{len(tab) - len(shown)} level(s) suppressed (fewer than {config.MIN_CELL_N} sample crashes)."
+        )
     chart = point_range(
         shown.assign(
             rate_pct=100 * shown["rate"], low_pct=100 * shown["low"], high_pct=100 * shown["high"]
@@ -72,7 +75,7 @@ def render() -> None:
         ],
         crashes_per_year=tab["crashes_per_year"].round(-2).astype(int).astype(str),
     )[["level", "sample_n", "events", "crashes_per_year", "share_of_crashes", "rate", "ci", "flag"]]
-    # Suppressed levels (< 30 sample crashes): counts only, no estimates.
+    # Suppressed levels (< MIN_CELL_N sample crashes): counts only, no estimates.
     sup = tab["flag"].str.startswith("suppressed").to_numpy()
     nice.loc[sup, ["crashes_per_year", "share_of_crashes", "rate", "ci"]] = "—"
     st.dataframe(nice, hide_index=True, width="stretch")

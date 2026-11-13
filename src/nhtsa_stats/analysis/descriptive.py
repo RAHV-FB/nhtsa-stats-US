@@ -14,6 +14,7 @@ Outputs (outputs/tables/descriptive):
   and the over-representation ratio ``share_fatal_fars / share_all_crashes``.  A ratio near 1
   means a factor is common in fatal crashes *because it is common in crashes*; a ratio well
   above 1 means fatal crashes are disproportionately concentrated in it.
+* ``crss_design`` -- CRSS design facts (strata, PSUs, design df, years) for citation.
 * ``fars_composition_by_year`` -- yearly shares of key characteristics among FARS fatal crashes
   and deaths.
 
@@ -172,6 +173,18 @@ def rec_events(ind: np.ndarray, is_fatal: np.ndarray) -> int:
     return int((ind * is_fatal).sum())
 
 
+# Known restraint use among FARS passenger-vehicle occupant deaths: belted, child restraint
+# (counted as restrained) or none.  'unknown' and 'not applicable' are excluded from the
+# denominator.  Single definition shared with ``trends.fars_composition``.
+KNOWN_RESTRAINT_USE = ("belted", "none", "child_restraint")
+
+
+def unrestrained_share_of_known(restraint: pd.Series) -> float:
+    """Share 'none' among occupants with known restraint use (child restraint = restrained)."""
+    known = restraint[restraint.isin(KNOWN_RESTRAINT_USE)]
+    return float((known == "none").mean()) if len(known) else float("nan")
+
+
 def fars_composition_by_year() -> pd.DataFrame:
     crash = data.fars_crash()
     per = data.fars_person()
@@ -182,7 +195,6 @@ def fars_composition_by_year() -> pd.DataFrame:
     for y, g in crash.groupby("YEAR"):
         k = killed[killed["YEAR"] == y]
         lv = lpv[lpv["YEAR"] == y]
-        known_belt = lv["restraint"].isin(["belted", "none"])
         rows.append(
             {
                 "YEAR": y,
@@ -201,12 +213,32 @@ def fars_composition_by_year() -> pd.DataFrame:
                 * ((k["body"] == "motorcycle") & k["ptype"].isin(["driver", "passenger"])).mean(),
                 "lpv_occupant_deaths": len(lv),
                 "pct_lpv_deaths_unrestrained_of_known": 100
-                * (lv.loc[known_belt, "restraint"] == "none").mean(),
+                * unrestrained_share_of_known(lv["restraint"]),
                 "pct_lpv_deaths_restraint_unknown": 100
-                * (~lv["restraint"].isin(["belted", "none", "child_restraint"])).mean(),
+                * (~lv["restraint"].isin(KNOWN_RESTRAINT_USE)).mean(),
             }
         )
     return pd.DataFrame(rows)
+
+
+def crss_design() -> pd.DataFrame:
+    """CRSS design facts of the crash file (all years), one row: strata, variance PSUs, df."""
+    df, design = data.crss_crash(outcome=None)
+    years = sorted(int(y) for y in df["YEAR"].unique())
+    return pd.DataFrame(
+        [
+            {
+                "n_crashes": int(design.n),
+                "n_strata": int(design.n_strata),
+                "n_psu": int(design.n_clusters),
+                "design_df": int(design.df),
+                "first_year": years[0],
+                "last_year": years[-1],
+                "n_years": len(years),
+                "years": ", ".join(map(str, years)),
+            }
+        ]
+    )
 
 
 def run() -> dict[str, pd.DataFrame]:
@@ -215,6 +247,7 @@ def run() -> dict[str, pd.DataFrame]:
         "crss_annual": crss_annual(),
         "frequency_vs_severity": frequency_vs_severity(),
         "fars_composition_by_year": fars_composition_by_year(),
+        "crss_design": crss_design(),
     }
     meta = {
         "fars_annual": (
@@ -243,6 +276,13 @@ def run() -> dict[str, pd.DataFrame]:
             "crash / person",
             "fatal",
         ),
+        "crss_design": (
+            "CRSS design summary: crashes, variance strata, variance PSUs, design degrees of "
+            "freedom (PSUs minus strata) and the years covered",
+            "CRSS (national probability sample)",
+            "crash",
+            "none (design facts)",
+        ),
     }
     for name, df in out.items():
         desc, pop, unit, oc = meta[name]
@@ -254,7 +294,7 @@ def run() -> dict[str, pd.DataFrame]:
             population=pop,
             unit=unit,
             outcome=oc,
-            method="Design-based (CRSS: Taylor linearisation, 25 strata/67 PSUs) or census counts (FARS)",
+            method="Design-based (CRSS: Taylor linearisation; strata and PSUs in crss_design) or census counts (FARS)",
             inputs=[
                 "data/processed/crss_crash.parquet",
                 "data/processed/fars_crash.parquet",

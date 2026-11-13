@@ -54,12 +54,33 @@ def binary(col: str, yes: list[int], no: list[int]) -> pl.Expr:
 # unknown, 6 died prior to crash, 8 no person involved (MAX_SEV), 9 unknown.
 # --------------------------------------------------------------------------------------
 def fatal(col: str = "INJ_SEV") -> pl.Expr:
-    """1 = fatal (K); 0 = O/C/B/A; null = 5, 6, 8, 9 (severity unknown / not a crash death)."""
-    return binary(col, yes=[4], no=[0, 1, 2, 3])
+    """1 = fatal (K); 0 = O/C/B/A and also 5, 6, 8; null = 9 (unknown).
+
+    A person (or crash) with a crash death has code 4, so 5 (injured, severity unknown), 6
+    (died prior to the crash, not a crash death) and 8 (MAX_SEV only: no person involved)
+    can contain no crash fatality and are 'not fatal'.  Only 9 (unknown) leaves the outcome
+    undetermined.  Caveat for the complete-case versions: a crash whose *other* persons are
+    unknown (INJ_SEV 9) is handled by ``fatal_cc`` in ``features.build_crss``, not here.
+    """
+    return binary(col, yes=[4], no=[0, 1, 2, 3, 5, 6, 8])
 
 
 def killed_or_serious(col: str = "INJ_SEV") -> pl.Expr:
-    """1 = K or A; 0 = O/C/B; null = 5, 6, 8, 9."""
+    """1 = K or A; 0 = O/C/B and also 6, 8 (no crash K/A possible); null = 5, 9.
+
+    5 (injured, severity unknown) stays null: that person may have had a serious (A) injury.
+    """
+    return binary(col, yes=[3, 4], no=[0, 1, 2, 6, 8])
+
+
+def person_fatal(col: str = "INJ_SEV") -> pl.Expr:
+    """Person-level ``killed``: 1 = K; 0 = O/C/B/A and 5; null = 6 (died prior to the crash:
+    neither a crash death nor a survivor), 9 (unknown).  Crash-level ``fatal`` keeps 6 as 0."""
+    return binary(col, yes=[4], no=[0, 1, 2, 3, 5])
+
+
+def person_killed_or_serious(col: str = "INJ_SEV") -> pl.Expr:
+    """Person-level K or A: 1 = K/A; 0 = O/C/B; null = 5, 6 (died prior to the crash), 9."""
     return binary(col, yes=[3, 4], no=[0, 1, 2])
 
 
@@ -240,7 +261,7 @@ BODY_GROUPS: dict[str, list[int]] = {
     "light_truck_other": [40, 41, 42, 45, 48],
     # 49 'unknown light vehicle type': a light vehicle whose type is unknown. Kept apart from
     # the known groups -- its use rises from 0.7% to ~3.7% of light-vehicle occupants in CRSS
-    # from 2018 (docs/audit/vehicle_roadway.md).
+    # from 2018 (vehicle and roadway audit note, Git history, commit 7ee597e).
     "light_unknown_type": [49],
     "bus": [50, 51, 52, 55, 58, 59],
     "medium_heavy_truck": [60, 61, 62, 63, 64, 66, 67, 71, 72, 78],
@@ -313,6 +334,56 @@ def speeding_type(col: str = "SPEEDREL") -> pl.Expr:
             "speeding_unspecified": [5],
         },
     )
+
+
+def distraction_flag(col: str = "code") -> pl.Expr:
+    """Driver-distraction attribute -> 1 distracted, 0 not distracted, null unknown.
+
+    0 'not distracted' and 1 'looked but did not see' -> 0.  Code 1 exists only in 2016-17
+    (FARS and CRSS) and was dropped from 2018 on; it is a failure of perception, not an
+    inattention attribute, so counting it would give 2016-17 a distracted share that 2018+
+    coding cannot reproduce.  16 (no driver present), 96 (not reported), 99 (unknown) and
+    null are unknown, never 'not distracted'.  Everything else is a distraction attribute.
+    """
+    c = pl.col(col)
+    return (
+        pl.when(c.is_in([0, 1]))
+        .then(pl.lit(0, dtype=pl.Int8))
+        .when(c.is_in([16, 96, 99]) | c.is_null())
+        .then(pl.lit(None, dtype=pl.Int8))
+        .otherwise(pl.lit(1, dtype=pl.Int8))
+    )
+
+
+def rollover_flag(col: str = "ROLLOVER", body: str = "BODY_TYP") -> pl.Expr:
+    """FARS vehicle ROLLOVER -> 1 rolled over, 0 did not, null unknown / not applicable.
+
+    1, 2, 3 (type or untyped rollover) and 9 (rollover, unknown type; 2016-21) -> 1; 0 -> 0.
+    2022+ code 8 'Not applicable' is carried only by motorcycle-type bodies (BODY_TYP 80-89:
+    two-wheelers, mopeds, scooters), which cannot roll over by definition and which 2016-21
+    coded 0, so it is 0 for those bodies; for any other body type it is null.
+    """
+    r = pl.col(col)
+    return (
+        pl.when(r.is_in([1, 2, 3, 9]))
+        .then(pl.lit(1, dtype=pl.Int8))
+        .when(r == 0)
+        .then(pl.lit(0, dtype=pl.Int8))
+        .when((r == 8) & pl.col(body).is_between(80, 89))
+        .then(pl.lit(0, dtype=pl.Int8))
+        .otherwise(pl.lit(None, dtype=pl.Int8))
+    )
+
+
+def fars_prior_suspensions(year: str = "YEAR", col: str = "PREV_SUS1") -> pl.Expr:
+    """PREV_SUS1 (prior suspensions/revocations of the first type), null before 2018.
+
+    FARS 2016-17 carry one ``PREV_SUS`` (all suspensions combined; 2016 value 1 in 3,605
+    drivers), a different quantity from the 2018+ ``PREV_SUS1/2/3`` (counts by suspension
+    type; value 1 in 112 drivers), so it is not harmonised: 2016-17 are explicitly null.
+    2018+ keeps the raw codes (0-97 count, 99 unknown, 998 no driver).
+    """
+    return pl.when(pl.col(year) >= 2018).then(pl.col(col)).otherwise(pl.lit(None, dtype=pl.Int64))
 
 
 def hit_and_run(col: str = "HIT_RUN") -> pl.Expr:
@@ -421,7 +492,7 @@ def restraint_in_belted_seat(
     (SEAT_POS 11-49) or in an unrecorded seat (98/99: the occupant is inside the vehicle, so
     the recorded belt use still applies); everyone else (motorcycles 80-89, other 90-97,
     cargo/exterior/trailing positions 50-56, unknown body) is ``not_applicable``.  See
-    docs/audit/person_injury_restraint.md §4.6.
+    the person, injury and restraint audit note §4.6 (Git history, commit 7ee597e).
     """
     eligible = pl.col(body_col).is_between(1, 79) & (
         pl.col(seat_col).is_between(11, 49) | pl.col(seat_col).is_in([98, 99])
@@ -482,6 +553,12 @@ class VarInfo:
     timing: str  # pre_crash | crash_circumstance | post_crash | outcome | design | id
     level: str  # crash | vehicle | driver | person
     note: str = ""
+    # True when the field is a police judgement entered after the crash (it describes the
+    # pre-crash state of the vehicle but is *recorded* afterwards, so it can carry information
+    # about the outcome).  The ``timing`` label stays "pre_crash" (the field describes the
+    # pre-crash state), and ``assert_no_leakage`` admits such a field only if it is listed in
+    # ``RECORDED_AFTER_CRASH_ALLOWED`` with the reason.
+    recorded_after_crash: bool = False
 
 
 REGISTRY: dict[str, VarInfo] = {
@@ -530,9 +607,17 @@ REGISTRY: dict[str, VarInfo] = {
     "interstate": VarInfo("pre_crash", "crash"),
     "junction": VarInfo("pre_crash", "crash"),
     "work_zone": VarInfo("pre_crash", "crash"),
-    "speeding": VarInfo("pre_crash", "crash", "police judgement recorded after the crash"),
+    "speeding": VarInfo(
+        "pre_crash",
+        "crash",
+        "police judgement recorded after the crash",
+        recorded_after_crash=True,
+    ),
     "speeding_type": VarInfo(
-        "pre_crash", "crash", "exceeded limit/racing vs too fast for conditions vs unspecified"
+        "pre_crash",
+        "crash",
+        "exceeded limit/racing vs too fast for conditions vs unspecified",
+        recorded_after_crash=True,
     ),
     "alcohol": VarInfo("pre_crash", "crash", "police-reported; ascertainment varies with severity"),
     "alcohol_im": VarInfo(
@@ -565,7 +650,12 @@ REGISTRY: dict[str, VarInfo] = {
     "str_speed_limit": VarInfo(
         "pre_crash", "person", "posted limit of the striking vehicle's road"
     ),
-    "str_speeding": VarInfo("pre_crash", "person", "striking vehicle speeding-related (police)"),
+    "str_speeding": VarInfo(
+        "pre_crash",
+        "person",
+        "striking vehicle speeding-related (police)",
+        recorded_after_crash=True,
+    ),
     "striking": VarInfo("pre_crash", "person", "body type of the striking vehicle"),
     "location": VarInfo("pre_crash", "person", "non-motorist's location at the crash"),
     "sex": VarInfo("pre_crash", "person"),
@@ -575,12 +665,27 @@ REGISTRY: dict[str, VarInfo] = {
     "helmet": VarInfo("pre_crash", "person"),
     "body": VarInfo("pre_crash", "vehicle"),
     "veh_age_band": VarInfo("pre_crash", "vehicle"),
-    "veh_speeding": VarInfo("pre_crash", "vehicle"),
+    "veh_speeding": VarInfo("pre_crash", "vehicle", recorded_after_crash=True),
     "veh_alcohol": VarInfo("pre_crash", "vehicle"),
     "other_vehicle_heavy": VarInfo("crash_circumstance", "vehicle"),
 }
 
 MODEL_ALLOWED_TIMINGS = {"pre_crash", "crash_circumstance"}
+
+# Fields that describe the pre-crash state but are recorded by the police after the crash
+# (``VarInfo.recorded_after_crash``), with the reason a model may still use them.  A flagged
+# field missing from this mapping is rejected by ``assert_no_leakage``.  Admitting them
+# changes no model: it records that the speeding indicators are police judgements, not
+# measurements, and that a model using them predicts "given the police recorded speeding".
+RECORDED_AFTER_CRASH_ALLOWED: dict[str, str] = {
+    "speeding": "SPEEDREL is the only speed information in the archives; the project's "
+    "associations are explicitly conditional on the police judgement (docs/limitations.md); "
+    "a model using it predicts severity given that the police recorded speeding",
+    "speeding_type": "same SPEEDREL field, split by type; used only in the speeding-type "
+    "sensitivity analyses",
+    "str_speeding": "same SPEEDREL field, striking vehicle (non-motorist analyses)",
+    "veh_speeding": "same SPEEDREL field, vehicle level (person analyses)",
+}
 
 
 def assert_no_leakage(
@@ -600,5 +705,7 @@ def assert_no_leakage(
         info = REGISTRY.get(f)
         if info is None or info.timing not in allowed:
             bad.append((f, None if info is None else info.timing))
+        elif info.recorded_after_crash and f not in RECORDED_AFTER_CRASH_ALLOWED:
+            bad.append((f, "recorded_after_crash (no documented reason)"))
     if bad:
         raise ValueError(f"features not permitted in a severity model: {bad}")

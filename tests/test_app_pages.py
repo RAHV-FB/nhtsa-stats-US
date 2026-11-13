@@ -65,6 +65,7 @@ def test_interaction_explorer_registered_pair_order(tmp_path):
 
 
 def test_multi_vehicle_crash_types_get_the_multi_vehicle_domain():
+    pytest.importorskip("streamlit")
     import sys
 
     sys.path.insert(0, str(APP))
@@ -106,17 +107,3 @@ def test_multifactor_page_switches_analysis(tmp_path):
     assert not at.exception
     at.selectbox(key="mf_analysis").set_value("lpv_driver_drugs_known_4way").run()
     assert not at.exception
-
-
-def test_case_page_withholds_unsupported_cases(tmp_path):
-    at = _table_page(tmp_path, "cases", "cases").run()
-    assert not at.exception
-    # A combination with too little support shows the refusal instead of a model probability.
-    at.selectbox(key="cs_speeding").set_value("exceeded_limit").run()
-    at.selectbox(key="cs_alcohol").set_value("yes").run()
-    at.selectbox(key="cs_unbelted").set_value("no").run()
-    at.selectbox(key="cs_night").set_value("night").run()
-    at.selectbox(key="cs_single_vehicle").set_value("no").run()
-    assert not at.exception
-    assert any("Insufficient support" in e.value for e in at.error)
-    assert any("What cannot be inferred" in i.value for i in at.info)
