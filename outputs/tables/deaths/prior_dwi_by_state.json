@@ -6,10 +6,10 @@
  "outcome": "death (INJ_SEV 4)",
  "method": "Measured BAC = a test result in FARS person.ALC_RES (0-940 thousandths; 940 = .94 or greater); NHTSA's implicates fill untested drivers.  'measured only' counts a driver as BAC >= .08 only with a measured result >= .08 (observed counts, no imputation SE); 'all' / 'imputed' use the 10 implicates (mean, MI SE sqrt(1.1 * between-implicate variance)); state = FARS STATE; 'small' = fewer than 100 such drivers",
  "inputs": [
-  "FARS person (PER_TYP)",
-  "FARS vehicle (L_STATUS, PREV_*)",
-  "FARS veh_aux (A_SPVEH)",
-  "FARS miper"
+  "data/interim/FARS/person",
+  "data/interim/FARS/vehicle",
+  "data/interim/FARS/veh_aux",
+  "data/interim/FARS/miper"
  ],
  "rows": 102,
  "columns": [
@@ -23,6 +23,15 @@
   "estimate_type"
  ],
  "module": "nhtsa_stats.analysis.deaths",
- "git_commit": "53bfb34-dirty",
- "generated_utc": "2026-11-12T17:59:28Z"
+ "git_commit": "af9ce88",
+ "source_sha256": "a0edccfffe60b2d158c26ea33ae6d086ac5f34a9ff5d8ce231cafde9b3574c46",
+ "code_sha256": "ae873977b79074c45c11c3d174e917a24d2eb76f4c7361dcbd4891bfbba5e4c4",
+ "inputs_sha256": {
+  "data/interim/FARS/person": "ab2fbf61917410a498e38958cbe753aa8f1dfa4ff495aad4cc3c68fde67e683c",
+  "data/interim/FARS/vehicle": "702adb3480853493e1f04fbe94ed36a882e70b2f2582030ff09c3c39c1677bfb",
+  "data/interim/FARS/veh_aux": "09a79ab9a3a9dd83de0453c3f03a54268d18138c34dc09ab6277ef1b6548c6b0",
+  "data/interim/FARS/miper": "1273c3d172d20ca96774b0f11c87fc23c061a0316653d44259ed5cc02a0bc725"
+ },
+ "package_sha256": "fbdac1b588be76a011931549cc2f2013fc1b6405f88cee1ba0e10db719e3ed6b",
+ "generated_utc": "2026-11-13T02:17:59Z"
 }

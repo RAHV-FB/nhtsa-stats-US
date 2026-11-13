@@ -205,7 +205,10 @@ def test_shapley_tables_are_efficient():
             "estimate",
         ].iloc[0]
         shap = g.loc[[q for q in g.index if q.startswith("Shapley[")], "estimate"].sum()
-        assert shap == pytest.approx(joint, rel=1e-6), ps
+        # Tables are written to 6 significant digits (save_table's "%.6g"), so a sum of
+        # rounded components can differ from the rounded joint value by a few units in the
+        # sixth digit; a real efficiency failure would be orders of magnitude larger.
+        assert shap == pytest.approx(joint, rel=2e-5), ps
 
 
 def test_readme_is_generated_from_tables():

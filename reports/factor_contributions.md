@@ -30,7 +30,7 @@ and **predictive** (out-of-sample prediction).*
    at the ceiling (§4a). About 70%
    of speeding-related deaths also involve one of the other three factors.
 2. **Statistical attribution is also non-additive.** In the severity-pathway model, removing
-   speeding accounts for 8.9% (6.7–11.1%)
+   speeding accounts for 8.9% (6.7–11.0%)
    of fatal crashes and removing alcohol for
    19.4% (16.3–22.5%),
    but removing both accounts for 25.7% (22.3–29.1%),
@@ -58,7 +58,7 @@ and **predictive** (out-of-sample prediction).*
 | A | How much of the speeding–fatality association is explained statistically by alcohol and other recorded factors? | For exceeding the limit, alcohol accounts for 9% of the crude log-RR on average over orderings (4%–16%); all recorded circumstances together leave 69% (`reports/speeding_confounding.md`) |
 | B | Does exceeding the limit remain independently associated with fatal severity? | Yes: adjusted RR 4.9 (4.1–5.8); 6.5 (5.5–7.8) without alcohol; robust to moderate recording bias (same report) |
 | C | Can alcohol and drugs be separated reliably? | Only in a narrow, selected population (tested drivers in fatal crashes, four high-testing states); not in general (`reports/alcohol_drugs_restraints.md`) |
-| D | How much does restraint use change fatality associations within comparable occupants? | Within the same vehicle, belted occupants' risk is 0.34 (0.33–0.35) times unbelted occupants'. Overall there is no detectable difference with and without a speeding driver, but within crash configuration belts are somewhat less protective with a speeding driver (exploratory follow-up; ratio of RRs 1.10 to 1.24 across four layering schemes, 1.24 (1.13–1.35) with single/multi-vehicle and rollover crossed); the BAC contrast shows no detectable difference within configuration (0.99 (0.91–1.09)) (same report) |
+| D | How much does restraint use change fatality associations within comparable occupants? | Within the same vehicle, belted occupants' risk is 0.34 (0.33–0.35) times unbelted occupants'. Overall there is no detectable difference with and without a speeding driver, but within crash configuration belts are somewhat less protective with a speeding driver (exploratory follow-up; ratio of RRs 1.10 to 1.23 across four layering schemes, 1.23 (1.13–1.34) with single/multi-vehicle and rollover crossed); the BAC contrast shows no detectable difference within configuration (1.00 (0.91–1.09)) (same report) |
 | E | Which combinations show interaction? | Super-additive: exceedance × alcohol, behaviour × belt non-use; sub-multiplicative at crash level, multiplicative for single-vehicle drivers; three-way terms not detected; four-way with drugs not estimable (`reports/multifactor_interactions.md`) |
 | F | How much do contributions depend on units, definitions, specifications and missingness? | Strongly: crash vs driver vs passenger vs pedestrian (alcohol RR from 1.2 to 4.7); "any speeding" vs exceedance; with or without configuration; police drugs as a covariate; drug unknowns (§2–§5 below) |
 | G | Can a principal cause of an individual death be identified? | No (`docs/limitations.md` §7) |
@@ -94,8 +94,8 @@ burden is therefore fixed before post-crash care could act, but the data cannot 
 later deaths better care would have prevented.
 
 EMS arrival times are recorded for only part of fatal crashes (`stages/ems_availability`): the
-share with a known arrival time ranges from 38% to 45% of urban and
-from 45% to 54% of rural fatal crashes across 2016–2024. Intervals from crash to
+share with a known arrival time ranges from 36% to 44% of urban and
+from 44% to 51% of rural fatal crashes across 2016–2024. Intervals from crash to
 arrival that are negative or longer than 12 hours are treated as missing, so the timing summaries
 describe the crashes with a plausible recorded interval, not all fatal crashes.
 
@@ -117,73 +117,73 @@ describe the crashes with a plausible recorded interval, not all fatal crashes.
 ## 2. Crude and adjusted associations on a fixed sample (adjusted association)
 
 *Source: `contributions/nested_models`. CRSS crashes 2016–2024, n =
-467,008; standardised risk ratios
+468,993; standardised risk ratios
 (RR), risk differences per 1,000 crashes (RD) and conditional odds ratios (OR) from the same
 survey logistic models; every step uses the same crashes.*
 
 **Exceeded the limit / racing (vs no speeding):**
 | Model | Standardised RR | RD per 1,000 | Conditional OR | Share of crude log-RR retained |
 |---|---|---|---|---|
-| crude | 10.03 (8.26–12.18) | 44.7 (36.0–53.4) | 10.50 (8.58–12.85) | 1.00 |
-| environment | 7.16 (5.96–8.60) | 30.9 (24.1–37.8) | 7.64 (6.29–9.27) | 0.85 |
-| + other speeding/alcohol | 5.75 (4.75–6.96) | 24.1 (18.4–29.8) | 6.16 (5.02–7.55) | 0.76 |
-| + driver/vehicle mix | 5.20 (4.32–6.25) | 21.4 (16.5–26.3) | 5.69 (4.65–6.96) | 0.71 |
-| + police-reported drugs | 5.07 (4.24–6.05) | 21.0 (16.5–25.6) | 5.59 (4.61–6.79) | 0.70 |
-| + crash configuration | 4.77 (4.06–5.60) | 19.3 (15.1–23.4) | 5.86 (4.82–7.12) | 0.68 |
+| crude | 10.02 (8.26–12.17) | 44.5 (35.9–53.1) | 10.49 (8.58–12.83) | 1.00 |
+| environment | 7.16 (5.96–8.59) | 30.8 (24.1–37.6) | 7.63 (6.29–9.25) | 0.85 |
+| + other speeding/alcohol | 5.75 (4.75–6.95) | 24.0 (18.4–29.6) | 6.15 (5.02–7.54) | 0.76 |
+| + driver/vehicle mix | 5.19 (4.32–6.23) | 21.3 (16.5–26.1) | 5.67 (4.65–6.93) | 0.71 |
+| + police-reported drugs | 5.06 (4.25–6.04) | 21.0 (16.5–25.5) | 5.59 (4.61–6.77) | 0.70 |
+| + crash configuration | 4.76 (4.06–5.58) | 19.2 (15.1–23.3) | 5.84 (4.82–7.09) | 0.68 |
 
 **Alcohol involved (imputed):**
 | Model | Standardised RR | RD per 1,000 | Conditional OR | Share of crude log-RR retained |
 |---|---|---|---|---|
-| crude | 6.41 (5.48–7.49) | 24.4 (20.6–28.2) | 6.57 (5.60–7.70) | 1.00 |
-| environment | 4.43 (3.69–5.31) | 15.8 (12.6–19.1) | 4.56 (3.79–5.49) | 0.80 |
-| + other speeding/alcohol | 4.10 (3.42–4.92) | 14.4 (11.3–17.5) | 4.23 (3.51–5.10) | 0.76 |
-| + driver/vehicle mix | 4.11 (3.45–4.90) | 14.5 (11.4–17.5) | 4.34 (3.62–5.22) | 0.76 |
-| + police-reported drugs | 3.29 (2.81–3.85) | 10.9 (8.6–13.1) | 3.45 (2.92–4.06) | 0.64 |
-| + crash configuration | 2.49 (2.17–2.87) | 7.3 (5.7–9.0) | 2.72 (2.33–3.17) | 0.49 |
+| crude | 6.39 (5.47–7.46) | 24.2 (20.5–28.0) | 6.55 (5.59–7.67) | 1.00 |
+| environment | 4.42 (3.69–5.30) | 15.8 (12.5–19.0) | 4.55 (3.78–5.48) | 0.80 |
+| + other speeding/alcohol | 4.09 (3.41–4.91) | 14.3 (11.2–17.4) | 4.23 (3.51–5.09) | 0.76 |
+| + driver/vehicle mix | 4.11 (3.45–4.89) | 14.4 (11.4–17.4) | 4.34 (3.61–5.21) | 0.76 |
+| + police-reported drugs | 3.28 (2.80–3.84) | 10.8 (8.6–13.0) | 3.44 (2.92–4.05) | 0.64 |
+| + crash configuration | 2.49 (2.17–2.87) | 7.3 (5.6–9.0) | 2.72 (2.33–3.17) | 0.49 |
 
 **Other speeding types (too fast for conditions, unspecified):**
 | Model | Standardised RR | RD per 1,000 | Conditional OR |
 |---|---|---|---|
-| crude | 1.66 (1.34–2.05) | 3.2 (1.7–4.8) | 1.66 (1.34–2.06) |
-| environment | 1.45 (1.18–1.78) | 2.3 (0.9–3.6) | 1.46 (1.18–1.80) |
-| + other speeding/alcohol | 1.34 (1.10–1.64) | 1.7 (0.5–2.9) | 1.35 (1.10–1.65) |
-| + driver/vehicle mix | 1.31 (1.09–1.58) | 1.6 (0.5–2.7) | 1.32 (1.10–1.60) |
-| + police-reported drugs | 1.23 (1.02–1.48) | 1.2 (0.1–2.3) | 1.24 (1.02–1.50) |
-| + crash configuration | 1.46 (1.27–1.68) | 2.4 (1.5–3.2) | 1.51 (1.30–1.76) |
+| crude | 1.65 (1.33–2.05) | 3.2 (1.7–4.7) | 1.66 (1.34–2.06) |
+| environment | 1.45 (1.18–1.78) | 2.2 (0.9–3.6) | 1.45 (1.18–1.79) |
+| + other speeding/alcohol | 1.34 (1.10–1.63) | 1.7 (0.5–2.9) | 1.35 (1.10–1.65) |
+| + driver/vehicle mix | 1.31 (1.09–1.57) | 1.6 (0.5–2.6) | 1.32 (1.10–1.59) |
+| + police-reported drugs | 1.23 (1.02–1.48) | 1.2 (0.1–2.2) | 1.23 (1.02–1.50) |
+| + crash configuration | 1.46 (1.27–1.67) | 2.3 (1.5–3.2) | 1.51 (1.30–1.76) |
 
 **Police-reported drug involvement (not interpretable as a drug association; shown for transparency):**
 | Model | Standardised RR | Conditional OR |
 |---|---|---|
-| crude | 11.73 (9.51–14.46) | 12.22 (9.83–15.19) |
-| environment | 8.00 (6.38–10.04) | 8.43 (6.66–10.68) |
-| + other speeding/alcohol | 3.95 (3.21–4.88) | 4.11 (3.31–5.11) |
-| + driver/vehicle mix | 4.05 (3.30–4.96) | 4.31 (3.48–5.34) |
-| + police-reported drugs | 4.05 (3.30–4.96) | 4.31 (3.48–5.34) |
-| + crash configuration | 3.71 (3.00–4.58) | 4.24 (3.34–5.38) |
+| crude | 11.69 (9.48–14.41) | 12.17 (9.80–15.13) |
+| environment | 7.98 (6.37–10.00) | 8.40 (6.64–10.63) |
+| + other speeding/alcohol | 3.95 (3.21–4.87) | 4.11 (3.31–5.10) |
+| + driver/vehicle mix | 4.05 (3.30–4.97) | 4.31 (3.48–5.34) |
+| + police-reported drugs | 4.05 (3.30–4.97) | 4.31 (3.48–5.34) |
+| + crash configuration | 3.71 (3.00–4.59) | 4.24 (3.34–5.39) |
 
 *What the sequence shows.*
 
 * **Adjusting each behaviour for the other** reduces exceedance from
   7.2 to
-  5.8 and
+  5.7 and
   alcohol from 4.4 to
   4.1. Both
   remain large. `reports/speeding_confounding.md` decomposes this in every order.
 * **Adding police-recorded drugs** reduces alcohol further, from
   4.11 to
-  3.29, but this
+  3.28, but this
   is not evidence that drugs explain the alcohol association: police record drugs mainly when
   they are already investigating alcohol (`drugs/co_occurrence`, `drugs/same_driver_cooccurrence`), so the drug field partly
   re-measures alcohol involvement. This step is reported separately and is not used for
   ranking.
 * **Adding crash configuration** (a likely mediator) reduces alcohol to
   2.49 but leaves
-  exceedance almost unchanged (4.77):
+  exceedance almost unchanged (4.76):
   much of alcohol's association runs through the *type* of crash (single-vehicle departures,
   head-on), whereas exceedance is associated with higher severity within crash types.
 * **Odds ratios drift away from risk ratios** as covariates are added (exceedance: OR
-  5.86 vs
-  RR 4.77 in the
+  5.84 vs
+  RR 4.76 in the
   last model), although the sample is fixed. This is non-collapsibility: conditional odds
   ratios change when outcome-predictive covariates are added even without confounding, so
   comparing ORs across models overstates or understates "how much was explained". All Phase-2
@@ -198,12 +198,12 @@ test-set PSUs within strata (model fixed).*
 
 | Block | Test R² alone | R² lost when removed from the full model | Shapley R² | Shapley share | AUROC alone | Permutation log-loss increase |
 |---|---|---|---|---|---|---|
-| speeding_type | 0.023 (0.018–0.027) | 0.013 (0.010–0.016) | 0.016 (0.013–0.019) | 6% | 0.583 | 0.0007 |
+| speeding_type | 0.023 (0.018–0.027) | 0.013 (0.009–0.015) | 0.016 (0.012–0.019) | 6% | 0.583 | 0.0007 |
 | alcohol | 0.036 (0.028–0.045) | 0.009 (0.005–0.013) | 0.020 (0.014–0.026) | 8% | 0.602 | 0.0007 |
 | drugs_police | 0.021 (0.013–0.027) | 0.006 (0.000–0.010) | 0.012 (0.006–0.016) | 4% | 0.592 | 0.0006 |
-| environment | 0.061 (0.051–0.071) | 0.052 (0.045–0.058) | 0.055 (0.046–0.062) | 20% | 0.736 | 0.0053 |
-| driver_vehicle_mix | 0.043 (0.037–0.050) | 0.038 (0.033–0.044) | 0.041 (0.035–0.047) | 15% | 0.622 | 0.0034 |
-| configuration | 0.132 (0.121–0.144) | 0.123 (0.112–0.134) | 0.125 (0.114–0.135) | 47% | 0.805 | 0.0145 |
+| environment | 0.061 (0.051–0.070) | 0.052 (0.045–0.059) | 0.055 (0.046–0.062) | 20% | 0.736 | 0.0052 |
+| driver_vehicle_mix | 0.043 (0.037–0.050) | 0.038 (0.032–0.044) | 0.040 (0.034–0.047) | 15% | 0.622 | 0.0034 |
+| configuration | 0.131 (0.121–0.143) | 0.123 (0.112–0.134) | 0.125 (0.114–0.135) | 47% | 0.805 | 0.0144 |
 
 The full model reaches a test R² of 0.268 and
 AUROC 0.905. *Interpretation.* Alcohol's
@@ -287,20 +287,20 @@ average.
 | Quantity | Estimate | FARS-scaled deaths per year |
 |---|---|---|
 | AF[exceeded] | 5.8% (4.6–7.0%) | 2,368 |
-| AF[speeding_other] | 3.1% (1.4–4.8%) | 1,271 |
-| AF[alcohol] | 19.4% (16.3–22.5%) | 7,967 |
-| AF[exceeded+speeding_other] | 8.9% (6.7–11.1%) | 3,640 |
-| AF[exceeded+alcohol] | 23.4% (20.2–26.5%) | 9,578 |
-| AF[speeding_other+alcohol] | 21.8% (18.5–25.2%) | 8,942 |
-| AF[exceeded+speeding_other+alcohol] | 25.7% (22.3–29.1%) | 10,553 |
-| sum of single-factor AFs | 28.3% (24.3–32.3%) | 11,607 |
-| overlap = sum of singles - joint | 2.6% (1.9–3.3%) | 1,054 |
-| Shapley[exceeded] | 4.9% (3.8–5.9%) | 1,990 |
+| AF[speeding_other] | 3.1% (1.4–4.8%) | 1,261 |
+| AF[alcohol] | 19.4% (16.3–22.5%) | 7,964 |
+| AF[exceeded+speeding_other] | 8.9% (6.7–11.0%) | 3,629 |
+| AF[exceeded+alcohol] | 23.4% (20.2–26.5%) | 9,574 |
+| AF[speeding_other+alcohol] | 21.8% (18.4–25.1%) | 8,932 |
+| AF[exceeded+speeding_other+alcohol] | 25.7% (22.3–29.1%) | 10,541 |
+| sum of single-factor AFs | 28.3% (24.3–32.3%) | 11,594 |
+| overlap = sum of singles - joint | 2.6% (1.9–3.3%) | 1,052 |
+| Shapley[exceeded] | 4.8% (3.8–5.9%) | 1,988 |
 | Shapley share[exceeded] | 18.9% (14.8–22.9%) | — |
-| Shapley[speeding_other] | 2.7% (1.2–4.3%) | 1,123 |
-| Shapley share[speeding_other] | 10.6% (5.2–16.1%) | — |
-| Shapley[alcohol] | 18.1% (15.2–21.1%) | 7,440 |
-| Shapley share[alcohol] | 70.5% (64.1–76.9%) | — |
+| Shapley[speeding_other] | 2.7% (1.2–4.2%) | 1,115 |
+| Shapley share[speeding_other] | 10.6% (5.1–16.0%) | — |
+| Shapley[alcohol] | 18.1% (15.2–21.1%) | 7,438 |
+| Shapley share[alcohol] | 70.6% (64.2–76.9%) | — |
 
 * Joint removal of speeding (all types) and alcohol: 25.7% (22.3–29.1%);
   the sum of the two single fractions double-counts
@@ -327,11 +327,11 @@ restraint is occupant-level and police-recorded drugs are not rankable.*
 
 | Factor | Share of crashes | Share of fatal crashes | Crude RR | Adjusted RR | Adjusted RD per 1,000 | Shapley test R² | Shapley AF | FARS deaths 2016–2024 | Note |
 |---|---|---|---|---|---|---|---|---|---|
-| exceeded | 0.85% | 7.3% | 10.03 | 5.20 | 21.4 | 0.016 | 4.9% | 40,036 | predictive value is that of the whole speeding-type block |
-| speeding_other | 9.23% | 13.1% | 1.66 | 1.31 | 1.6 | — | 2.7% | 58,657 | shares the speeding-type predictive block with 'exceeded' |
-| alcohol | 5.18% | 25.9% | 6.41 | 4.11 | 14.5 | 0.020 | 18.1% | 105,821 | — |
-| drugs_police | 1.01% | 7.7% | 11.73 | 4.05 | 12.0 | 0.012 | — | 84,207 | NOT RANKED: severity association not identified (drugs/crss_bounds); FARS count is a lower bound (63% of deaths in crashes with undetermined drug status) |
-| unbelted (occupant) | — | — | 46.33 | 28.05 | 25.8 | — | — | 96,706 | occupant-level quantity; not comparable with crash-level factors |
+| exceeded | 0.85% | 7.3% | 10.02 | 5.19 | 21.3 | 0.016 | 4.8% | 40,036 | predictive value is that of the whole speeding-type block |
+| speeding_other | 9.23% | 13.1% | 1.65 | 1.31 | 1.6 | — | 2.7% | 58,657 | shares the speeding-type predictive block with 'exceeded' |
+| alcohol | 5.20% | 25.9% | 6.39 | 4.11 | 14.4 | 0.020 | 18.1% | 105,821 | — |
+| drugs_police | 1.01% | 7.7% | 11.69 | 4.05 | 12.0 | 0.012 | — | 84,207 | NOT RANKED: severity association not identified (drugs/crss_bounds); FARS count is a lower bound (63% of deaths in crashes with undetermined drug status) |
+| unbelted (occupant) | — | — | 46.09 | 27.95 | 25.6 | — | — | 96,706 | occupant-level quantity; not comparable with crash-level factors |
 
 Probability of each rank (joint sampling distribution of the adjusted estimates from one model).
 These probabilities cover **CRSS sampling error only**; they exclude outcome-dependent
@@ -340,12 +340,12 @@ ordering is:
 
 | Metric | Factor | Estimate | P(rank 1) | P(rank 2) | P(rank 3) |
 |---|---|---|---|---|---|
-| adjusted RR | exceeded | 5.197 | 0.97 | 0.03 | 0.00 |
-| adjusted RR | speeding_other | 1.313 | 0.00 | 0.00 | 1.00 |
-| adjusted RR | alcohol | 4.112 | 0.03 | 0.97 | 0.00 |
-| adjusted RD | exceeded | 0.02142 | 0.99 | 0.01 | 0.00 |
-| adjusted RD | speeding_other | 0.001598 | 0.00 | 0.00 | 1.00 |
-| adjusted RD | alcohol | 0.01448 | 0.01 | 0.99 | 0.00 |
+| adjusted RR | exceeded | 5.188 | 0.97 | 0.03 | 0.00 |
+| adjusted RR | speeding_other | 1.31 | 0.00 | 0.00 | 1.00 |
+| adjusted RR | alcohol | 4.107 | 0.03 | 0.97 | 0.00 |
+| adjusted RD | exceeded | 0.02131 | 0.99 | 0.01 | 0.00 |
+| adjusted RD | speeding_other | 0.001577 | 0.00 | 0.00 | 1.00 |
+| adjusted RD | alcohol | 0.01441 | 0.01 | 0.99 | 0.00 |
 
 * **Stable:** on adjusted risk ratio and risk difference, exceeding the limit ranks first with
   probability ≥ 0.97,
@@ -356,7 +356,7 @@ ordering is:
   is ahead alone and by Shapley value, speeding type when each is removed from the full model
   last, and they tie on permutation importance (intervals overlap).
 * **Not rankable:** police-recorded drug involvement (unidentified association; its adjusted RR
-  of 4.0 reflects selective recording
+  of 4.1 reflects selective recording
   as much as risk), and restraint, which is an occupant-level quantity: its adjusted risk ratio
   (28 across crashes after
   environment, person and the driver's own behaviour;

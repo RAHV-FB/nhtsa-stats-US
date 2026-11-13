@@ -1,10 +1,10 @@
 {
  "table": "ml/feature_sets.csv",
  "description": "Model inputs per stage with registry timing; excluded variables",
- "population": "CRSS police-reported crashes (all severities, national probability sample) with a determinable maximum severity; train 2016-2021, validation 2022, test 2023-2024",
+ "population": "CRSS police-reported crashes (all severities, national probability sample) with a determinable maximum severity (fatal: MAXSEV_IM 9 excluded; ka: MAXSEV_IM 5 and 9 excluded, so ka rows are a subset); train 2016-2021, validation 2022, test 2023-2024",
  "unit": "crash",
  "outcome": "",
- "method": "",
+ "method": "fatal metrics use every crash with a known fatal outcome; ka metrics use only the crashes where ka is known (MAXSEV_IM 5 and 9 excluded), so the two outcomes differ in n",
  "inputs": [
   "data/processed/crss_crash.parquet"
  ],
@@ -19,12 +19,12 @@
   "declared_levels"
  ],
  "module": "nhtsa_stats.models.severity_ml",
- "git_commit": "665bc2b-dirty",
- "source_sha256": "d14a19f31a29f5c4a24caee8cc2be9e5bc9f323cc31d76fce38ee16cabd4e4e6",
- "code_sha256": "1bf425ae4c26fcf22c77a7f714ba79cb771d58833f16f5aef72c37e68da23b29",
+ "git_commit": "af9ce88",
+ "source_sha256": "1a91ec37672ca5537d660e602d7dc138dad5fabfbc916507a249cfdbb701a783",
+ "code_sha256": "987851fec7eb5c5ab8b9e5f24eee3b9848fdd0334947cf8fe78a78addd598274",
  "inputs_sha256": {
-  "data/processed/crss_crash.parquet": "364251caddea6a8af2ddb2148c228829cbb74b00c24b414a2f1d3fb55409cf3b"
+  "data/processed/crss_crash.parquet": "1a31897f37cce3be223cc5abfb823582b68b9f7096a8c38980e9346f3450c6e3"
  },
- "package_sha256": "65860adecab2ba9a806171b2e36f208b502e6758aa004fc7c2bcf8f7395fe23b",
- "generated_utc": "2026-11-12T21:44:45Z"
+ "package_sha256": "fbdac1b588be76a011931549cc2f2013fc1b6405f88cee1ba0e10db719e3ed6b",
+ "generated_utc": "2026-11-13T01:43:13Z"
 }

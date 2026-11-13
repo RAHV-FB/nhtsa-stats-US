@@ -33,8 +33,8 @@
  },
  "_provenance": {
   "module": "nhtsa_stats.models.severity_ml",
-  "code_sha256": "407c73e5d6ca85e6a9b75d870932e8670f2299cede723dfa9708c7ec225586da",
-  "git_commit": "665bc2b-dirty",
-  "generated_utc": "2026-11-12T21:42:24Z"
+  "code_sha256": "987851fec7eb5c5ab8b9e5f24eee3b9848fdd0334947cf8fe78a78addd598274",
+  "git_commit": "af9ce88",
+  "generated_utc": "2026-11-13T01:45:33Z"
  }
 }

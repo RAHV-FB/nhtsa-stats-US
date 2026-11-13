@@ -36,46 +36,46 @@ Numbers are quoted as the named tables give them. Full text, intervals and cavea
 `reports/findings.md` and `reports/road_deaths.md`.
 
 **1. Belts and helmets (FARS, within the same vehicle).**
-* Belted drivers and right-front passengers died 65.8% (64.5–67.0%) less often than their unbelted
+* Belted drivers and right-front passengers died 66.0% (64.8–67.2%) less often than their unbelted
   companion (`matched/belt_effect`).
-* The pooled figure averages different crash types: 50.9% in multi-vehicle angle crashes, 84.4% in
+* The pooled figure averages different crash types: 51.0% in multi-vehicle angle crashes, 84.5% in
   single-vehicle rollovers (`matched/belt_by_crash_type`).
 * It depends on truthful reporting by survivors. Allowing 10% of belted survivors and 5% of
-  unbelted-coded deaths to be misrecorded gives 28.2% (26.4–29.9%); the reduction vanishes at
-  21.2% survivor misreporting alone and 18.1% with 5% reverse error
+  unbelted-coded deaths to be misrecorded gives 28.4% (26.7–29.9%); the reduction vanishes at
+  21.2% survivor misreporting alone and 18.2% with 5% reverse error
   (`matched/belt_misreporting_two_sided_dpc`).
 * Exploratory follow-up: within crash configuration, belts are somewhat *less* protective with a
-  speeding driver. The ratio of belt risk ratios is 1.10 to 1.24 across four ways of layering crashes
-  (lower confidence limits 1.02 or above): 1.24 (1.13–1.35) with single/multi-vehicle and rollover
+  speeding driver. The ratio of belt risk ratios is 1.10 to 1.23 across four ways of layering crashes
+  (lower confidence limits 1.01 or above): 1.23 (1.13–1.34) with single/multi-vehicle and rollover
   crossed (3 of 4 layers pooled), the largest of the four; the crash-type scheme pools only 3 of its 8
-  crash types. Pooling crashes first gives 1.01 (0.93–1.09). The alcohol contrast shows no detectable difference (p = 0.68), 1.02 (0.93–1.11) (`restraint_behaviour/dpc_contrast_within_configuration`). The earlier unstratified
+  crash types. Pooling crashes first gives 1.00 (0.93–1.08). The alcohol contrast shows no detectable difference (p = 0.66), 1.02 (0.93–1.11) (`restraint_behaviour/dpc_contrast_within_configuration`). The earlier unstratified
   conclusion that the belt effect does not vary with driver speeding does not hold within crash
   configuration.
-* Motorcycle helmets: 30.7% (20.6–39.9%) fewer deaths among riders and passengers of the same
-  motorcycle, but 455 of 4,735 pairs differ in helmet use, the pair design covers 15.7% of unhelmeted
-  deaths, and the effect vanishes at 5.6% survivor misreporting
+* Motorcycle helmets: 29.9% (19.2–39.3%) fewer deaths among riders and passengers of the same
+  motorcycle, but 459 of 4,768 pairs differ in helmet use, the pair design covers 15.8% of unhelmeted
+  deaths, and the effect vanishes at 5.5% survivor misreporting
   (`matched/helmet_misreporting_dpc`, `matched/helmet_pair_coverage`).
 
 **2. Conditional associations in CRSS that survive adjustment** (associations, not effects).
-* Exceeding the limit or racing: adjusted fatal risk ratio 5.22 (4.34–6.27) under model A and 4.88 (4.12–5.79)
+* Exceeding the limit or racing: adjusted fatal risk ratio 5.21 (4.34–6.25) under model A and 4.87 (4.12–5.77)
   with crash configuration also held fixed (`severity/speeding_type_models`).
-* Motorcycle involvement 8.6 (7.8–9.6); heavy truck or bus 1.91 (1.72–2.13); unlit darkness 1.74 (1.50–2.00); driver aged 65+ 1.66 (1.51–1.81) (`severity/fatal_crude_vs_adjusted`).
-* Alcohol 4.24 (3.58–5.04) with NHTSA's imputation, 5.85 (5.01–6.83) among crashes with known police
-  alcohol, 2.79 (2.37–3.29) if unknown is treated as "no" (`measurement/alcohol_coding_sensitivity`).
-* Pedestrians struck on 50–55 mph roads against 25 mph or less: 6.58 (4.83–8.96) adjusted, 12.2 without
+* Motorcycle involvement 8.6 (7.7–9.6); heavy truck or bus 1.91 (1.72–2.13); unlit darkness 1.73 (1.50–2.00); driver aged 65+ 1.65 (1.51–1.81) (`severity/fatal_crude_vs_adjusted`).
+* Alcohol 4.24 (3.57–5.03) with NHTSA's imputation, 5.84 (5.00–6.83) among crashes with known police
+  alcohol, 2.79 (2.36–3.29) if unknown is treated as "no" (`measurement/alcohol_coding_sensitivity`).
+* Pedestrians struck on 50–55 mph roads against 25 mph or less: 6.74 (4.92–9.23) adjusted, 12.5 without
   adjustment for location, light and time of day (`vulnerable/pedestrian_speed_limit_adjustment`).
-* "Too fast for conditions" is a small, imprecise association: 1.06 (0.89–1.26) under model A, which
-  excludes only effects beyond about ±22%, and 1.29 (1.13–1.47) under model B. **The split of speeding
+* "Too fast for conditions" is a small, imprecise association: 1.05 (0.89–1.26) under model A, which
+  excludes only effects beyond about ±22%, and 1.28 (1.13–1.46) under model B. **The split of speeding
   by type is exploratory.**
 * Within CRSS alone, limit exceedance is over-represented among fatal crashes 8.60 (7.15–10.34) times,
   against 12.79 (10.39–15.74) for the mixed FARS/CRSS ratio; both intervals reflect CRSS sampling only
   (`speeding/crss_overrepresentation`).
 * Interstates are safer than comparable roads on 50–65 mph roads, 0.57 (0.45–0.73), but not at 70+ mph,
-  0.94 (0.63–1.38) (`severity/interstate_by_speed_band`). Rain and teenage drivers: see
+  0.94 (0.64–1.39) (`severity/interstate_by_speed_band`). Rain and teenage drivers: see
   `severity/key_contrasts_ab` (models A and B).
 * Exploratory follow-up added after the red-team review: the pooled model-A risk ratios above average over very different
   crash configurations, and the relative association is larger in multi-vehicle crashes, where the baseline fatal risk is low.
-  Adjusted fatal risk ratios in single-vehicle against multi-vehicle crashes: exceeding the limit 3.3 against 10.1; alcohol 3.1 against 6.4; motorcycle 4.3 against 16.6; large truck or bus 1.5 against 2.7 (homogeneity p ≤ 2.9e-05 for each). "Too fast for conditions" shows no detectable difference, 1.05 against 1.08 (p = 0.85)
+  Adjusted fatal risk ratios in single-vehicle against multi-vehicle crashes: exceeding the limit 3.4 against 10.0; alcohol 3.1 against 6.4; motorcycle 4.3 against 16.5; large truck or bus 1.5 against 2.7 (homogeneity p ≤ 2.9e-05 for each). "Too fast for conditions" shows no detectable difference, 1.04 against 1.08 (p = 0.84)
   (`severity/fatal_effect_modification`). Associations conditional on a police-reported crash, not causal effects.
 
 **3. Measurement.**
@@ -89,11 +89,11 @@ Numbers are quoted as the named tables give them. Full text, intervals and cavea
 * CRSS alcohol coding broke in 2019; the alcohol association is reported under three codings. Drug and
   distraction fields cannot support severity or trend analysis.
 
-**4. The post-2020 rise.** The fatal share of police-reported crashes rose by a factor of 1.25 (1.14–1.37). The recorded crash mix accounts for 9% to 34% of it without
-crash configuration (model A) and 24% to 49% with it (model B, where configuration may itself be a mediator),
+**4. The post-2020 rise.** The fatal share of police-reported crashes rose by a factor of 1.25 (1.14–1.37). The recorded crash mix accounts for 9% to 33% of it without
+crash configuration (model A) and 24% to 47% with it (model B, where configuration may itself be a mediator),
 across four specifications and two reference periods; several of the individual intervals include zero
 (`trends/composition_robustness`). "Roughly a quarter to a half" is the model-B range only. The fall in
-reported crashes accounts for 53.6% (29.1–78.1%) of the rise in the share, or 46.2% (28.6–63.8%) under
+reported crashes accounts for 53.6% (29.1–78.1%) of the rise in the share, or 46.6% (29.2–64.1%) under
 the complete-case outcome (`trends/denominator_share`).
 
 **Also.** Official factor counts overlap and cannot be added: deaths in speeding, drunk-driving,
@@ -102,7 +102,7 @@ at least one, depending on how undetermined drug status is scored (`contribution
 Drug effects cannot be ranked or estimated. Attributable fractions are model-based, change with the alcohol
 coding and model period (`burden/attributable_fraction_variants`), and are not lives saved by any programme.
 
-**Appendix: prediction models** (`docs/model_validation.md`). Boosted trees reach a test AUROC of 0.921 (0.912–0.929) for fatal crashes in 2023–2024, but they are descriptive, not a finding about causes. Police-judged
+**Appendix: prediction models** (`docs/model_validation.md`). Boosted trees reach a test AUROC of 0.919 (0.910–0.928) for fatal crashes in 2023–2024, but they are descriptive, not a finding about causes. Police-judged
 speeding and imputed alcohol are recorded after the crash; dropping both changes test AUROC by -0.016
 (`ml/feature_sensitivity`).
 
@@ -132,11 +132,12 @@ A change to one analysis only needs `uv run nhtsa analyze <module>`; the caches 
 | `nhtsa analyze [module …]` | Run modules into `outputs/tables/<module>/`. Modules: descriptive, severity, measurement, interactions, confounding, trends, person, matched, exposure, burden, vulnerable, ml, speeding, drugs, multifactor, restraint_behaviour, contributions, stages, deaths, policy, plus figures, report, site, docs |
 | `nhtsa analyze report site docs` | Re-render `reports/`, the website page and generated docs from the tables |
 
-**Runtime.** A clean `nhtsa all` took about 84 minutes on 4 cores when timed before the Phase-2 modules
-(`speeding`, `drugs`, `multifactor`, `restraint_behaviour`, `contributions`, `stages`), which add roughly
-75 minutes, mostly the speeding lattices; the later modules were not timed separately. Building the datasets
-from the archives takes a few minutes. The pipeline is deterministic up to the last digits of multi-threaded
-numerical libraries.
+**Runtime.** A clean `nhtsa all` takes about two hours on 4 idle cores (measured November 2026).
+Building the datasets from the archives takes a few minutes; the longest modules are `confounding`
+(about 32 minutes), `speeding` (16), `severity` (13), `matched` (11), `person` (10), `interactions` (9)
+and `ml` (8). Re-run one module with `uv run nhtsa analyze <module>`; `uv run nhtsa status` lists tables
+whose producing code or input data changed since they were written. A clean rebuild from the raw archives
+in November 2026 reproduced every committed table byte for byte.
 
 ## Data
 

@@ -1,6 +1,6 @@
 {
- "runtime_seconds": 463.4,
- "cpu_seconds": 12211.5,
+ "runtime_seconds": 473.3,
+ "cpu_seconds": 13392.8,
  "thread_settings": {
   "OMP_NUM_THREADS": "unset",
   "OPENBLAS_NUM_THREADS": "unset",
@@ -25,19 +25,19 @@
   2024
  ],
  "outcome_definitions": {
-  "fatal": "MAXSEV_IM 4 (K) vs 0-3 (O/C/B/A); 5/6/8 excluded",
-  "ka": "MAXSEV_IM 3-4 (K or A) vs 0-2 (O/C/B); 5/6/8 excluded"
+  "fatal": "MAXSEV_IM 4 (K) vs 0-3 (O/C/B/A) and 5/6/8 (coded 0: no crash death is possible); only 9 (unknown) is excluded",
+  "ka": "MAXSEV_IM 3-4 (K or A) vs 0-2 (O/C/B) and 6/8 (coded 0); 5 (injured, severity unknown: a serious injury is possible) and 9 are unknown and excluded"
  },
  "rows": {
   "fatal": {
-   "train": 311700,
-   "valid": 53828,
-   "test": 101480
+   "train": 313277,
+   "valid": 53955,
+   "test": 101761
   },
   "ka": {
-   "train": 311700,
-   "valid": 53828,
-   "test": 101480
+   "train": 311821,
+   "valid": 53852,
+   "test": 101512
   }
  },
  "events": {
@@ -54,29 +54,29 @@
  },
  "weighted_prevalence": {
   "fatal": {
-   "train": 0.005562390267429443,
-   "valid": 0.006627307829014372,
-   "test": 0.0060161636539938345
+   "train": 0.005539904428843863,
+   "valid": 0.006613443333981243,
+   "test": 0.00600319849023195
   },
   "ka": {
-   "train": 0.03197049955706436,
-   "valid": 0.03313846356050975,
-   "test": 0.03134823151235947
+   "train": 0.03195240547643471,
+   "valid": 0.03311636075054794,
+   "test": 0.03133360900406872
   }
  },
  "unweighted_prevalence": {
   "fatal": {
-   "train": 0.02060314404876484,
-   "valid": 0.024169577171732185,
-   "test": 0.022024044146629878
+   "train": 0.020499430216709174,
+   "valid": 0.024112686498007598,
+   "test": 0.02196322756262222
   },
   "ka": {
-   "train": 0.12765158806544755,
-   "valid": 0.13338782789626216,
-   "test": 0.13180922349231375
+   "train": 0.12760205374237144,
+   "valid": 0.13332838149000967,
+   "test": 0.1317676727874537
   }
  },
- "processed_file_mtime_utc": "2026-10-23T02:24:24Z",
+ "processed_file_mtime_utc": "2026-11-13T00:22:53Z",
  "feature_unknown_shares": {
   "region": 0.0,
   "urbanicity": 0.0,
@@ -97,5 +97,11 @@
   "alcohol_im": 0.0,
   "crash_type": 0.0,
   "n_vehicles": 0.0
+ },
+ "_provenance": {
+  "module": "nhtsa_stats.models.severity_ml",
+  "code_sha256": "987851fec7eb5c5ab8b9e5f24eee3b9848fdd0334947cf8fe78a78addd598274",
+  "git_commit": "af9ce88",
+  "generated_utc": "2026-11-13T01:51:06Z"
  }
 }

@@ -4,7 +4,7 @@
  "population": "CRSS police-reported crashes 2016-2024 with a determinable NHTSA-imputed maximum severity (MAXSEV_IM 0-4)",
  "unit": "crash",
  "outcome": "fatal (MAXSEV_IM); fatal_cc (MAX_SEV complete case)",
- "method": "Survey-weighted logistic models (exposure + every subset of covariate blocks; ridge 0.01 on mean-1 weights; exact cell compression); standardised predictive margins over all crashes; risk ratio = margin(all exposed) / margin(all reference); Taylor-linearised influence summed within 67 PSUs / 25 strata, t with 42 df; shares and Shapley values by the delta method across models; the complete-case models use the crashes whose complete-case outcome is determined",
+ "method": "Survey-weighted logistic models (exposure + every subset of covariate blocks; ridge 0.01 on mean-1 weights; exact cell compression); standardised predictive margins over the crashes where the outcome is known; risk ratio = margin(all exposed) / margin(all reference); Taylor-linearised influence summed within 67 PSUs / 25 strata, t with 42 df; shares and Shapley values by the delta method across models; the complete-case models use the crashes whose complete-case outcome is determined",
  "inputs": [
   "data/processed/crss_crash.parquet"
  ],
@@ -38,6 +38,12 @@
   "rr_ratio_high"
  ],
  "module": "nhtsa_stats.analysis.confounding",
- "git_commit": "ef704fd",
- "generated_utc": "2026-10-23T03:16:25Z"
+ "git_commit": "af9ce88",
+ "source_sha256": "ce9e9585dc4de518775543ed05e860a5a480ec4ecf5452b634bb7c0d9892b151",
+ "code_sha256": "7e367c55e85c48c5d7f63afd3d39e8a52552f3a561a528b8d04aabcd407bcb98",
+ "inputs_sha256": {
+  "data/processed/crss_crash.parquet": "1a31897f37cce3be223cc5abfb823582b68b9f7096a8c38980e9346f3450c6e3"
+ },
+ "package_sha256": "fbdac1b588be76a011931549cc2f2013fc1b6405f88cee1ba0e10db719e3ed6b",
+ "generated_utc": "2026-11-13T01:17:41Z"
 }

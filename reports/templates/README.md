@@ -130,11 +130,12 @@ A change to one analysis only needs `uv run nhtsa analyze <module>`; the caches 
 | `nhtsa analyze [module …]` | Run modules into `outputs/tables/<module>/`. Modules: descriptive, severity, measurement, interactions, confounding, trends, person, matched, exposure, burden, vulnerable, ml, speeding, drugs, multifactor, restraint_behaviour, contributions, stages, deaths, policy, plus figures, report, site, docs |
 | `nhtsa analyze report site docs` | Re-render `reports/`, the website page and generated docs from the tables |
 
-**Runtime.** A clean `nhtsa all` took about 84 minutes on 4 cores when timed before the Phase-2 modules
-(`speeding`, `drugs`, `multifactor`, `restraint_behaviour`, `contributions`, `stages`), which add roughly
-75 minutes, mostly the speeding lattices; the later modules were not timed separately. Building the datasets
-from the archives takes a few minutes. The pipeline is deterministic up to the last digits of multi-threaded
-numerical libraries.
+**Runtime.** A clean `nhtsa all` takes about two hours on 4 idle cores (measured November 2026).
+Building the datasets from the archives takes a few minutes; the longest modules are `confounding`
+(about 32 minutes), `speeding` (16), `severity` (13), `matched` (11), `person` (10), `interactions` (9)
+and `ml` (8). Re-run one module with `uv run nhtsa analyze <module>`; `uv run nhtsa status` lists tables
+whose producing code or input data changed since they were written. A clean rebuild from the raw archives
+in November 2026 reproduced every committed table byte for byte.
 
 ## Data
 

@@ -33,6 +33,13 @@
   "n_events_model"
  ],
  "module": "nhtsa_stats.analysis.burden",
- "git_commit": "76c08de-dirty",
- "generated_utc": "2026-11-12T12:58:34Z"
+ "git_commit": "af9ce88",
+ "source_sha256": "5a89474955b87ac87f37cfcd785f806563869bfdfad445a974ba4835440c9489",
+ "code_sha256": "019f6be2e6accdafedc587215b323c78b01eead9b517e24a5cc20880457bc57b",
+ "inputs_sha256": {
+  "data/processed/crss_crash.parquet": "1a31897f37cce3be223cc5abfb823582b68b9f7096a8c38980e9346f3450c6e3",
+  "data/processed/fars_crash.parquet": "30f4314e8984ce2ba3cd764b561628edf36950705c1fc3bdd16769a417846ddf"
+ },
+ "package_sha256": "fbdac1b588be76a011931549cc2f2013fc1b6405f88cee1ba0e10db719e3ed6b",
+ "generated_utc": "2026-11-13T01:43:03Z"
 }

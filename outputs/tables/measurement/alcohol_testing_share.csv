@@ -1,4 +1,4 @@
 driver_status,n_drivers,n_alcohol_tested,share_alcohol_tested,n_with_bac_result,share_with_bac_result,share_police_alcohol_known,n_in_sensitivity_sample,share_in_sensitivity_sample,bac08_prevalence_in_sample,note
 killed,222856,150393,0.674844,145399,0.652435,0.618202,95900,0.430323,0.357716,tested = FARS alcohol test given (ALC_STATUS); sample = BAC result and police alcohol field both known (the police_vs_bac rows)
-survived,263511,66311,0.251644,60569,0.229854,0.754739,54749,0.207767,0.211401,tested = FARS alcohol test given (ALC_STATUS); sample = BAC result and police alcohol field both known (the police_vs_bac rows)
-all (killed + survived),486367,216704,0.445557,205968,0.423483,0.692177,150649,0.309743,0.304542,tested = FARS alcohol test given (ALC_STATUS); sample = BAC result and police alcohol field both known (the police_vs_bac rows)
+survived,264519,66575,0.251683,60720,0.229549,0.754951,54882,0.207478,0.211763,tested = FARS alcohol test given (ALC_STATUS); sample = BAC result and police alcohol field both known (the police_vs_bac rows)
+all (killed + survived),487375,216968,0.445177,206119,0.422917,0.692422,150782,0.309376,0.304592,tested = FARS alcohol test given (ALC_STATUS); sample = BAC result and police alcohol field both known (the police_vs_bac rows)

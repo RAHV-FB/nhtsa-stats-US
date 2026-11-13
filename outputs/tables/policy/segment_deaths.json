@@ -68,5 +68,11 @@
   "deaths_per_year": 7346.666666666667,
   "pct_dark": 76.58348457350273,
   "kind": "observed (FARS census)"
+ },
+ "_provenance": {
+  "module": "nhtsa_stats.simulation.evidence",
+  "code_sha256": "181e05373406a8857c4133879fe6ee943420223bd6237b7f05ce7c67815bfd1a",
+  "git_commit": "af9ce88",
+  "generated_utc": "2026-11-13T02:18:01Z"
  }
 }

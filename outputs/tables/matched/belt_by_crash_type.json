@@ -43,18 +43,24 @@
   "clogit_converged"
  ],
  "module": "nhtsa_stats.analysis.matched",
- "git_commit": "7ee597e-dirty",
- "generated_utc": "2026-11-12T11:56:56Z",
+ "git_commit": "af9ce88",
+ "source_sha256": "9d6eab56b34f60be154068ec100a85f04d36758d10d1412cf03888a394dba064",
+ "code_sha256": "3a347e2d9b13595f6b14e0bc895ccbaeb9fd3bca985d1d90fb3e86c7a8813587",
+ "inputs_sha256": {
+  "data/processed/fars_person.parquet": "97b40b82c1b47f76bf99a8e05ebaa84e14c4b1ea2ecea3e86be6de4c2189bfa2"
+ },
+ "package_sha256": "fbdac1b588be76a011931549cc2f2013fc1b6405f88cee1ba0e10db719e3ed6b",
+ "generated_utc": "2026-11-13T01:41:21Z",
  "heterogeneity_cochran_q": {
   "crash type": {
-   "q": 259.17608939092526,
+   "q": 256.2503771075912,
    "df": 6,
-   "p": 4.4815637343693395e-53
+   "p": 1.8921501935773776e-52
   },
   "vehicle rollover": {
-   "q": 235.24614621129442,
+   "q": 240.9050319562964,
    "df": 1,
-   "p": 4.278586339178025e-53
+   "p": 2.496719072950618e-54
   }
  },
  "vehicles_with_unknown_rollover_among_eligible": 0

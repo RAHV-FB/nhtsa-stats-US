@@ -17,6 +17,12 @@
   "crashes"
  ],
  "module": "nhtsa_stats.analysis.matched",
- "git_commit": "7ee597e-dirty",
- "generated_utc": "2026-11-12T11:40:26Z"
+ "git_commit": "af9ce88",
+ "source_sha256": "9d6eab56b34f60be154068ec100a85f04d36758d10d1412cf03888a394dba064",
+ "code_sha256": "3a347e2d9b13595f6b14e0bc895ccbaeb9fd3bca985d1d90fb3e86c7a8813587",
+ "inputs_sha256": {
+  "data/processed/fars_person.parquet": "97b40b82c1b47f76bf99a8e05ebaa84e14c4b1ea2ecea3e86be6de4c2189bfa2"
+ },
+ "package_sha256": "fbdac1b588be76a011931549cc2f2013fc1b6405f88cee1ba0e10db719e3ed6b",
+ "generated_utc": "2026-11-13T01:30:29Z"
 }

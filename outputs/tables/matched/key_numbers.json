@@ -44,59 +44,59 @@
   },
   {
    "step": "known outcome (killed 0/1)",
-   "persons": 474889,
+   "persons": 475933,
    "deaths": 186574,
-   "vehicles": 346125,
-   "crashes": 254593
+   "vehicles": 346611,
+   "crashes": 254712
   },
   {
    "step": ">= 2 eligible occupants in the vehicle",
-   "persons": 224529,
-   "deaths": 65722,
-   "vehicles": 95765,
-   "crashes": 85555
+   "persons": 225470,
+   "deaths": 65973,
+   "vehicles": 96148,
+   "crashes": 85890
   },
   {
    "step": "matched sets with discordant outcomes (analysed)",
-   "persons": 110142,
-   "deaths": 48740,
-   "vehicles": 45248,
-   "crashes": 44990
+   "persons": 110815,
+   "deaths": 49025,
+   "vehicles": 45515,
+   "crashes": 45257
   },
   {
    "step": "  of which discordant belt use (identify the belt OR)",
-   "persons": 37959,
-   "deaths": 15834,
-   "vehicles": 14006,
-   "crashes": 13975
+   "persons": 38215,
+   "deaths": 15934,
+   "vehicles": 14098,
+   "crashes": 14067
   }
  ],
  "belt_sets": {
-  "sets_discordant_exposure": 14006,
-  "persons_exposed": 43486,
-  "deaths_exposed": 23480,
-  "deaths_unexposed": 25260
+  "sets_discordant_exposure": 14098,
+  "persons_exposed": 43782,
+  "deaths_exposed": 23634,
+  "deaths_unexposed": 25391
  },
  "dpc_belt_counts": {
   "cells": [
    [
     [
      [
-      2636,
-      4477
+      2661,
+      4508
      ],
      [
-      1398,
-      779
+      1411,
+      782
      ]
     ],
     [
      [
-      4529,
+      4566,
       2515
      ],
      [
-      3498,
+      3529,
       682
      ]
     ]
@@ -104,21 +104,21 @@
    [
     [
      [
-      1406,
-      3658
+      1419,
+      3687
      ],
      [
-      38995,
-      10392
+      39121,
+      10454
      ]
     ],
     [
      [
-      711,
+      715,
       764
      ],
      [
-      9220,
+      9273,
       4580
      ]
     ]
@@ -126,103 +126,109 @@
   ],
   "driver_deaths[x_d][x_p]": [
    [
-    7044,
-    4180
+    7081,
+    4211
    ],
    [
-    1475,
-    13800
+    1479,
+    13853
    ]
   ],
   "other_deaths[x_d][x_p]": [
    [
-    6992,
-    1461
+    7023,
+    1464
    ],
    [
-    4422,
-    14972
+    4451,
+    15034
    ]
   ]
  },
  "clogit_info": {
   "main": {
-   "n_sets": 45248,
-   "n_persons": 110142,
-   "n_deaths": 48740,
-   "n_crash_clusters": 44990,
+   "n_sets": 45515,
+   "n_persons": 110815,
+   "n_deaths": 49025,
+   "n_crash_clusters": 45257,
    "converged": true,
-   "max_abs_score": 7.280842595491777e-12,
-   "max_newton_step_over_se": 8.931105643890178e-14,
-   "loglike": -33118.360625897134
+   "max_abs_score": 3.5045855106830004e-12,
+   "max_newton_step_over_se": 4.2609808289162945e-14,
+   "loglike": -33315.64033141844
   },
   "coarse_age": {
-   "n_sets": 45248,
-   "n_persons": 110142,
-   "n_deaths": 48740,
-   "n_crash_clusters": 44990,
+   "n_sets": 45515,
+   "n_persons": 110815,
+   "n_deaths": 49025,
+   "n_crash_clusters": 45257,
    "converged": true,
-   "max_abs_score": 5.891509502475856e-12,
-   "max_newton_step_over_se": 8.067517447767894e-14,
-   "loglike": -33637.5528394287
+   "max_abs_score": 2.7073898678509067e-12,
+   "max_newton_step_over_se": 3.614629431347436e-14,
+   "loglike": -33834.2456581358
   },
   "belt_by_seat_row": {
-   "n_sets": 45248,
-   "n_persons": 110142,
-   "n_deaths": 48740,
-   "n_crash_clusters": 44990,
+   "n_sets": 45515,
+   "n_persons": 110815,
+   "n_deaths": 49025,
+   "n_crash_clusters": 45257,
    "converged": true,
-   "max_abs_score": 4.285793941960492e-12,
-   "max_newton_step_over_se": 6.642310219923363e-14,
-   "loglike": -33088.94390261209
+   "max_abs_score": 4.348743587456738e-12,
+   "max_newton_step_over_se": 4.1298248347534734e-14,
+   "loglike": -33286.10050836473
   },
   "misreport_0.05": {
-   "n_sets": 45248,
-   "n_persons": 110142,
-   "n_deaths": 48740,
-   "n_crash_clusters": 44990,
+   "n_sets": 45515,
+   "n_persons": 110815,
+   "n_deaths": 49025,
+   "n_crash_clusters": 45257,
    "converged": true,
-   "max_abs_score": 3.5713654256142036e-12,
-   "max_newton_step_over_se": 6.089234410011383e-14,
-   "loglike": -34361.096111195315
+   "max_abs_score": 8.12128142513302e-13,
+   "max_newton_step_over_se": 1.5040678088313546e-14,
+   "loglike": -34586.08531310474
   },
   "misreport_0.10": {
-   "n_sets": 45248,
-   "n_persons": 110142,
-   "n_deaths": 48740,
-   "n_crash_clusters": 44990,
+   "n_sets": 45515,
+   "n_persons": 110815,
+   "n_deaths": 49025,
+   "n_crash_clusters": 45257,
    "converged": true,
-   "max_abs_score": 7.286393710614902e-12,
-   "max_newton_step_over_se": 8.107186114249243e-14,
-   "loglike": -35159.92586872192
+   "max_abs_score": 5.062172903080864e-12,
+   "max_newton_step_over_se": 5.116340146877165e-14,
+   "loglike": -35425.80155485555
   },
   "misreport_0.20": {
-   "n_sets": 45248,
-   "n_persons": 110142,
-   "n_deaths": 48740,
-   "n_crash_clusters": 44990,
+   "n_sets": 45515,
+   "n_persons": 110815,
+   "n_deaths": 49025,
+   "n_crash_clusters": 45257,
    "converged": true,
-   "max_abs_score": 2.394140441452919e-12,
-   "max_newton_step_over_se": 3.841563016754772e-14,
-   "loglike": -36035.929709818185
+   "max_abs_score": 1.5292211941186906e-12,
+   "max_newton_step_over_se": 1.8615063539615114e-14,
+   "loglike": -36259.39019120925
   },
   "complete_restraint_vehicles": {
-   "n_sets": 44097,
-   "n_persons": 107302,
-   "n_deaths": 47490,
-   "n_crash_clusters": 43847,
+   "n_sets": 44356,
+   "n_persons": 107951,
+   "n_deaths": 47766,
+   "n_crash_clusters": 44106,
    "converged": true,
-   "max_abs_score": 1.0436096431476471e-12,
-   "max_newton_step_over_se": 1.8547101493707713e-14,
-   "loglike": -32248.602135581703
+   "max_abs_score": 3.905153977967757e-12,
+   "max_newton_step_over_se": 5.496540729788956e-14,
+   "loglike": -32438.30771692354
   }
  },
- "n_motorcycle_riders": 55341,
- "n_motorcycle_pairs": 4735,
+ "n_motorcycle_riders": 55390,
+ "n_motorcycle_pairs": 4768,
  "helmet_sets": {
-  "sets_discordant_exposure": 336,
-  "persons_exposed": 3586,
-  "deaths_exposed": 1846,
-  "deaths_unexposed": 1586
+  "sets_discordant_exposure": 340,
+  "persons_exposed": 3624,
+  "deaths_exposed": 1864,
+  "deaths_unexposed": 1599
+ },
+ "_provenance": {
+  "module": "nhtsa_stats.analysis.matched",
+  "code_sha256": "3a347e2d9b13595f6b14e0bc895ccbaeb9fd3bca985d1d90fb3e86c7a8813587",
+  "git_commit": "af9ce88",
+  "generated_utc": "2026-11-13T01:41:25Z"
  }
 }

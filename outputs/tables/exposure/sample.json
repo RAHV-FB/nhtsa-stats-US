@@ -26,6 +26,17 @@
   "weighted_qualifying_crashes_per_year"
  ],
  "module": "nhtsa_stats.analysis.exposure",
- "git_commit": "ef704fd",
- "generated_utc": "2026-10-23T03:37:50Z"
+ "git_commit": "af9ce88",
+ "source_sha256": "acbe6b7fa1c233ba8b32e76e5b1cce4335a3944d8e4921e7e6006b69a74facc0",
+ "code_sha256": "9069bd9a0a60cb47ee341d78402c86893784264b7a5ff63a1604770ea8b1fc79",
+ "inputs_sha256": {
+  "data/interim/CRSS/vehicle": "6ae2321cf8f04d0d3926264d90e6de2d0a40e2dee55b9356060c1450d5221da0",
+  "data/interim/CRSS/driverrf": "a382ba2808d9eafc55bc59ccfd3de9e4826cdbb1b8790e6147d4ed795a6b5a47",
+  "data/interim/CRSS/distract": "ef77b204fce3a44f4e5446a6f609093e10bee7a247feb8767a80f8b454291381",
+  "data/interim/CRSS/violatn": "c0fada83d68f7060381649ea35837fae77723e65d493d533de7770deb1d73f2e",
+  "data/interim/CRSS/person": "c3f0d165d363f77b32c74360b9c6e3eba1cd6d070fad9d05d88abd682d2d7771",
+  "data/processed/crss_crash.parquet": "1a31897f37cce3be223cc5abfb823582b68b9f7096a8c38980e9346f3450c6e3"
+ },
+ "package_sha256": "fbdac1b588be76a011931549cc2f2013fc1b6405f88cee1ba0e10db719e3ed6b",
+ "generated_utc": "2026-11-13T01:41:44Z"
 }

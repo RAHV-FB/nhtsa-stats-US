@@ -26,7 +26,13 @@
   "coding_drift_variable"
  ],
  "module": "nhtsa_stats.analysis.trends",
- "git_commit": "27f5a22-dirty",
- "generated_utc": "2026-11-12T12:27:49Z",
+ "git_commit": "af9ce88",
+ "source_sha256": "272d2840dd92807b72d51b9d3d98a7c916e560a0871f3df7f16010da5ed5ddba",
+ "code_sha256": "7e8d14379b7033892554a3e847af0887ad9994bdfa3c6d4d2d22916f5b0475a9",
+ "inputs_sha256": {
+  "data/processed/crss_crash.parquet": "1a31897f37cce3be223cc5abfb823582b68b9f7096a8c38980e9346f3450c6e3"
+ },
+ "package_sha256": "fbdac1b588be76a011931549cc2f2013fc1b6405f88cee1ba0e10db719e3ed6b",
+ "generated_utc": "2026-11-13T01:19:59Z",
  "labels": "adjusted association (statistical accounting)"
 }

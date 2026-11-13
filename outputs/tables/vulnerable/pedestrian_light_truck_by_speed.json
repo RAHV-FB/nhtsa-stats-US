@@ -20,6 +20,14 @@
   "high"
  ],
  "module": "nhtsa_stats.analysis.vulnerable",
- "git_commit": "27f5a22-dirty",
- "generated_utc": "2026-11-12T12:24:56Z"
+ "git_commit": "af9ce88",
+ "source_sha256": "0196d4a559e11206b88c80cfef9479f6b128b799def969c89b94a02ba8a88272",
+ "code_sha256": "ba1c3fb433996d0fbec1973d3c2ef450e875b0507ebe124fe381c03c4abba49c",
+ "inputs_sha256": {
+  "data/interim/CRSS/person": "c3f0d165d363f77b32c74360b9c6e3eba1cd6d070fad9d05d88abd682d2d7771",
+  "data/interim/CRSS/vehicle": "6ae2321cf8f04d0d3926264d90e6de2d0a40e2dee55b9356060c1450d5221da0",
+  "data/processed/crss_crash.parquet": "1a31897f37cce3be223cc5abfb823582b68b9f7096a8c38980e9346f3450c6e3"
+ },
+ "package_sha256": "fbdac1b588be76a011931549cc2f2013fc1b6405f88cee1ba0e10db719e3ed6b",
+ "generated_utc": "2026-11-13T01:43:08Z"
 }

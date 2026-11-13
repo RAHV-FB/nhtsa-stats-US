@@ -15,7 +15,7 @@ exceeding the limit (vs no speeding), the crude fatal risk ratio is
 10.0 (8.3–12.2). Adjusting for
 alcohol alone takes it to 7.0 (5.7–8.5);
 for the road, time, light and driver/vehicle environment alone to
-6.4 (5.4–7.6); for
+6.4 (5.3–7.6); for
 both to 5.2 (4.3–6.3).
 Averaged over every order in which the seven covariate blocks can be added, alcohol accounts
 for 9% (7–11%)
@@ -36,7 +36,7 @@ all seven blocks, including crash configuration, the risk ratio is
 69%
 of the crude log risk ratio. Among crashes with **no alcohol involvement** it is
 6.5 (5.5–7.8) (police-reported
-no alcohol: 8.0 (6.1–10.4)).
+no alcohol: 7.9 (6.1–10.3)).
 It is present by day and by night, in single- and multi-vehicle crashes, on low- and
 high-speed roads, before and after 2020, and with hit-and-run crashes excluded. It would
 require an unmeasured confounder associated with both exceedance and death by a risk ratio of
@@ -45,8 +45,8 @@ each (E-value for the confidence limit) to explain it away.
 
 **The reverse hypothesis fails too.** Alcohol's association is not explained by speeding:
 adjusting for speeding type changes alcohol's risk ratio only from
-6.41 to
-5.62
+6.39 to
+5.60
 (Shapley share of speeding type
 4%).
 The two behaviours overlap in crashes, but each keeps a large association of its own.
@@ -72,9 +72,9 @@ much of the speeding association is specifically alcohol's.
 | All crashes | 10.1% | 0.85% | 7.9% | 8% |
 | Alcohol (imputed): no | 9.7% | 0.74% | 7.8% | 8% |
 | Alcohol (imputed): yes | 16.9% | 2.88% | 11.0% | 17% |
-| Drugs (police): yes | 16.0% | 4.11% | 8.8% | 26% |
-| Night (21–05) | 13.1% | 1.85% | 9.1% | 14% |
-| Single-vehicle crash | 15.3% | 1.84% | 11.1% | 12% |
+| Drugs (police): yes | 16.0% | 4.08% | 8.8% | 26% |
+| Night (21–05) | 13.1% | 1.84% | 9.1% | 14% |
+| Single-vehicle crash | 15.3% | 1.83% | 11.1% | 12% |
 | Snow / ice surface | 36.6% | 0.60% | 32.5% | 2% |
 | Limit 60+ mph | 20.7% | 0.89% | 18.3% | 4% |
 | Severity O/C/B | 9.9% | 0.75% | 7.9% | 8% |
@@ -119,12 +119,12 @@ same population, so changes are not artefacts of sample or non-collapsibility.*
 
 | Model | Standardised RR | RD per 1,000 | Share of crude log-RR retained | Conditional OR |
 |---|---|---|---|---|
-| crude | 10.03 (8.26–12.18) | 44.7 (36.0–53.4) | 1.00 | 10.50 (8.58–12.85) |
-| other_behaviour_only | 6.97 (5.74–8.48) | 30.0 (24.0–36.1) | 0.84 | 7.33 (5.99–8.98) |
-| environment_only | 6.40 (5.35–7.65) | 27.3 (21.3–33.2) | 0.80 | 6.98 (5.75–8.47) |
-| environment_and_other_behaviour | 5.22 (4.34–6.27) | 21.6 (16.6–26.5) | 0.72 | 5.71 (4.67–6.98) |
-| all_blocks | 4.88 (4.12–5.79) | 19.7 (15.1–24.2) | 0.69 | 5.94 (4.83–7.31) |
-| configuration_only | 6.47 (5.42–7.72) | 27.7 (21.6–33.7) | 0.81 | 7.21 (5.90–8.80) |
+| crude | 10.02 (8.26–12.17) | 44.5 (35.9–53.1) | 1.00 | 10.49 (8.58–12.83) |
+| other_behaviour_only | 6.97 (5.74–8.46) | 29.9 (23.9–35.9) | 0.84 | 7.33 (5.99–8.96) |
+| environment_only | 6.39 (5.35–7.62) | 27.1 (21.3–33.0) | 0.80 | 6.96 (5.75–8.44) |
+| environment_and_other_behaviour | 5.21 (4.34–6.25) | 21.4 (16.6–26.3) | 0.72 | 5.70 (4.67–6.95) |
+| all_blocks | 4.87 (4.12–5.77) | 19.5 (15.1–24.0) | 0.69 | 5.92 (4.82–7.27) |
+| configuration_only | 6.48 (5.43–7.73) | 27.7 (21.7–33.7) | 0.81 | 7.22 (5.92–8.80) |
 
 **Shapley shares of the crude log-RR (exceeded the limit, fatal), all seven blocks:**
 
@@ -136,7 +136,7 @@ same population, so changes are not artefacts of sample or non-collapsibility.*
 | road_environment | 1% (-1 to 3%) | -2% | 5% |
 | driver_vehicle_mix | 4% (3–6%) | 2% | 7% |
 | alcohol | 9% (7–11%) | 4% | 16% |
-| configuration | 9% (6–12%) | 3% | 19% |
+| configuration | 9% (6–11%) | 3% | 19% |
 | retained_after_all_blocks | 69% (65–73%) | — | — |
 
 **The same without crash configuration (treating it as a mediator to be left out):**
@@ -166,21 +166,21 @@ remove. Neither number is "the" alcohol share; the Shapley value averages over a
 |---|---|---|
 | crude | 2.36 (1.89–2.96) | 1.00 |
 | other_behaviour_only | 2.04 (1.67–2.50) | 0.83 |
-| environment_only | 2.02 (1.66–2.46) | 0.82 |
-| environment_and_other_behaviour | 1.82 (1.51–2.19) | 0.70 |
-| all_blocks | 2.07 (1.82–2.36) | 0.85 |
+| environment_only | 2.02 (1.65–2.46) | 0.82 |
+| environment_and_other_behaviour | 1.82 (1.51–2.19) | 0.69 |
+| all_blocks | 2.06 (1.81–2.35) | 0.84 |
 | configuration_only | 2.07 (1.80–2.37) | 0.84 |
 
 | Block | Share of crude log-RR |
 |---|---|
 | calendar_area | 3% (-2 to 9%) |
 | time | 3% (2–5%) |
-| light | 2% (1–4%) |
+| light | 3% (1–4%) |
 | road_environment | -4% (-9 to 1%) |
 | driver_vehicle_mix | 4% (2–6%) |
 | alcohol | 9% (6–12%) |
 | configuration | -3% (-17 to 11%) |
-| retained_after_all_blocks | 85% (70–99%) |
+| retained_after_all_blocks | 84% (70–98%) |
 
 **Fatal-or-serious (KA) outcome, exceeded the limit:** crude
 5.09 (4.51–5.75), all blocks
@@ -191,10 +191,10 @@ share 7% (6–8%).
 
 | Block | Share of crude log-RR | Smallest | Largest |
 |---|---|---|---|
-| calendar_area | 1% (0–3%) | 1% | 3% |
+| calendar_area | 1% (0–3%) | 0% | 3% |
 | time | 8% (7–10%) | 2% | 17% |
 | light | 5% (4–6%) | 0% | 13% |
-| road_environment | 3% (2–5%) | -1% | 8% |
+| road_environment | 3% (2–5%) | -1% | 7% |
 | driver_vehicle_mix | -0% (-1 to 0%) | -3% | 1% |
 | speeding_type | 4% (3–5%) | 2% | 7% |
 | configuration | 18% (16–21%) | 12% | 27% |
@@ -221,30 +221,30 @@ strata RRs with a design-based CI and p-value.*
 
 | Split | Stratum | Exposed crashes | Exposed fatal | Adjusted RR | Ratio (2nd / 1st stratum) | p |
 |---|---|---|---|---|---|---|
-| alcohol_imputed | no alcohol | 4,593 | 555 | 6.54 (5.45–7.84) | — | — |
-| alcohol_imputed | alcohol | 1,291 | 316 | 3.29 (2.67–4.05) | 0.50 (0.42–0.61) | 4.6e-09 |
-| alcohol_police | police: no alcohol | 3,341 | 308 | 7.99 (6.14–10.38) | — | — |
-| alcohol_police | police: alcohol | 1,119 | 216 | 3.21 (2.49–4.15) | 0.40 (0.32–0.51) | 6.4e-10 |
-| night | day (06-20) | 3,706 | 461 | 6.22 (4.94–7.83) | — | — |
-| night | night (21-05) | 2,149 | 403 | 4.27 (3.51–5.20) | 0.69 (0.54–0.87) | 0.0023 |
-| vehicles | single vehicle | 3,310 | 464 | 3.44 (2.94–4.02) | — | — |
-| vehicles | multi-vehicle | 2,574 | 407 | 7.70 (5.92–10.02) | 2.24 (1.80–2.79) | 3.2e-09 |
-| speed_environment | limit <= 45 mph | 3,921 | 545 | 6.24 (5.13–7.60) | — | — |
-| speed_environment | limit >= 50 mph | 1,649 | 302 | 3.79 (2.99–4.82) | 0.61 (0.48–0.77) | 9.1e-05 |
-| period | 2016-2019 | 2,432 | 317 | 4.30 (3.40–5.43) | — | — |
-| period | 2020-2024 | 3,452 | 554 | 5.96 (4.94–7.19) | 1.39 (1.13–1.70) | 0.0022 |
-| hit_and_run | hit-and-run excluded | 5,245 | 838 | 5.53 (4.57–6.71) | — | — |
+| alcohol_imputed | no alcohol | 4,611 | 555 | 6.53 (5.45–7.82) | — | — |
+| alcohol_imputed | alcohol | 1,299 | 316 | 3.28 (2.67–4.05) | 0.50 (0.42–0.61) | 5.2e-09 |
+| alcohol_police | police: no alcohol | 3,359 | 308 | 7.93 (6.10–10.31) | — | — |
+| alcohol_police | police: alcohol | 1,127 | 216 | 3.21 (2.49–4.15) | 0.40 (0.32–0.51) | 7.4e-10 |
+| night | day (06-20) | 3,724 | 461 | 6.19 (4.93–7.79) | — | — |
+| night | night (21-05) | 2,157 | 403 | 4.27 (3.51–5.20) | 0.69 (0.55–0.87) | 0.0025 |
+| vehicles | single vehicle | 3,321 | 464 | 3.45 (2.95–4.02) | — | — |
+| vehicles | multi-vehicle | 2,589 | 407 | 7.64 (5.87–9.95) | 2.22 (1.78–2.76) | 6.1e-09 |
+| speed_environment | limit <= 45 mph | 3,942 | 545 | 6.23 (5.12–7.58) | — | — |
+| speed_environment | limit >= 50 mph | 1,653 | 302 | 3.79 (2.99–4.80) | 0.61 (0.48–0.77) | 8.7e-05 |
+| period | 2016-2019 | 2,448 | 317 | 4.30 (3.40–5.42) | — | — |
+| period | 2020-2024 | 3,462 | 554 | 5.94 (4.93–7.17) | 1.38 (1.13–1.69) | 0.0023 |
+| hit_and_run | hit-and-run excluded | 5,267 | 838 | 5.52 (4.56–6.67) | — | — |
 
 * **Without alcohol the association is stronger, not weaker** — the relative excess of
   exceedance is larger where the baseline risk is lower. This contradicts the hypothesis that
   exceedance looks dangerous mainly because of alcohol.
 * The *relative* association is also weaker at night, in single-vehicle crashes and on 50+ mph
   roads, where the baseline risk is already high. On the *absolute* scale the excess is larger
-  where alcohol is present (60
+  where alcohol is present (59
   vs 22 extra fatal
   crashes per 1,000; point estimates, each standardised within its stratum), at night
   (36 vs
-  21) and on 50+ mph
+  20) and on 50+ mph
   roads (29 vs
   19). The
   formal additive contrast for exceedance × alcohol, with its interval, is in
@@ -256,18 +256,18 @@ strata RRs with a design-based CI and p-value.*
 | Split | Stratum | Adjusted RR | p |
 |---|---|---|---|
 | alcohol_imputed | no alcohol | 1.90 (1.55–2.34) | — |
-| alcohol_imputed | alcohol | 1.56 (1.25–1.95) | 0.067 |
-| alcohol_police | police: no alcohol | 2.06 (1.70–2.50) | — |
-| alcohol_police | police: alcohol | 1.63 (1.34–1.99) | 0.019 |
-| night | day (06-20) | 1.70 (1.38–2.11) | — |
-| night | night (21-05) | 1.90 (1.57–2.29) | 0.23 |
-| vehicles | single vehicle | 1.67 (1.43–1.96) | — |
-| vehicles | multi-vehicle | 1.94 (1.51–2.49) | 0.17 |
-| speed_environment | limit <= 45 mph | 2.35 (1.84–3.00) | — |
-| speed_environment | limit >= 50 mph | 1.24 (1.04–1.48) | 2.5e-08 |
-| period | 2016-2019 | 1.55 (1.29–1.88) | — |
-| period | 2020-2024 | 2.01 (1.64–2.47) | 0.00082 |
-| hit_and_run | hit-and-run excluded | 1.88 (1.52–2.32) | — |
+| alcohol_imputed | alcohol | 1.56 (1.25–1.95) | 0.066 |
+| alcohol_police | police: no alcohol | 2.05 (1.69–2.48) | — |
+| alcohol_police | police: alcohol | 1.63 (1.34–1.98) | 0.02 |
+| night | day (06-20) | 1.70 (1.37–2.10) | — |
+| night | night (21-05) | 1.89 (1.57–2.29) | 0.22 |
+| vehicles | single vehicle | 1.67 (1.43–1.95) | — |
+| vehicles | multi-vehicle | 1.93 (1.51–2.48) | 0.18 |
+| speed_environment | limit <= 45 mph | 2.33 (1.83–2.98) | — |
+| speed_environment | limit >= 50 mph | 1.24 (1.04–1.47) | 2.1e-08 |
+| period | 2016-2019 | 1.55 (1.28–1.87) | — |
+| period | 2020-2024 | 2.01 (1.64–2.47) | 0.00075 |
+| hit_and_run | hit-and-run excluded | 1.87 (1.52–2.31) | — |
 
 ## 5. Could differential recording explain the association?
 
@@ -296,7 +296,7 @@ crashes.
 
 **Outcome-dependent recording.** If exceedance in non-fatal crashes is recorded less completely
 than in fatal ones, the crude RR is inflated. Within the no-alcohol stratum the observed crude
-RR of 9.9
+RR of 9.8
 becomes 5.6
 if non-fatal exceedance were recorded only half as completely (fatal sensitivity 0.9), and
 2.2 at
@@ -315,27 +315,27 @@ specification; Model B adds crash type and number of vehicles (crash configurati
 
 | Model | Speeding record | Adjusted RR | 95% low | 95% high | RD per crash | Equivalence bound (%) |
 |---|---|---|---|---|---|---|
-| A | exceeded_limit_or_racing | 5.22 | 4.34 | 6.27 | 0.0216 | 508 |
-| A | too_fast_for_conditions | 1.06 | 0.89 | 1.26 | 0.0003 | 22 |
-| A | speeding_unspecified | 2.62 | 1.91 | 3.59 | 0.0083 | 241 |
-| A | unknown | 1.84 | 1.48 | 2.29 | 0.0043 | 121 |
-| B | exceeded_limit_or_racing | 4.88 | 4.12 | 5.79 | 0.0197 | 463 |
-| B | too_fast_for_conditions | 1.29 | 1.13 | 1.47 | 0.0015 | 44 |
-| B | speeding_unspecified | 2.55 | 1.89 | 3.42 | 0.0078 | 226 |
-| B | unknown | 1.56 | 1.27 | 1.91 | 0.0028 | 85 |
+| A | exceeded_limit_or_racing | 5.21 | 4.34 | 6.25 | 0.0214 | 507 |
+| A | too_fast_for_conditions | 1.05 | 0.89 | 1.26 | 0.0003 | 22 |
+| A | speeding_unspecified | 2.62 | 1.91 | 3.60 | 0.0083 | 241 |
+| A | unknown | 1.82 | 1.46 | 2.27 | 0.0042 | 119 |
+| B | exceeded_limit_or_racing | 4.87 | 4.12 | 5.77 | 0.0195 | 461 |
+| B | too_fast_for_conditions | 1.28 | 1.13 | 1.46 | 0.0014 | 43 |
+| B | speeding_unspecified | 2.55 | 1.90 | 3.43 | 0.0078 | 227 |
+| B | unknown | 1.55 | 1.27 | 1.90 | 0.0028 | 84 |
 
 The *equivalence bound* is the smallest symmetric margin, in percent on the risk-ratio scale,
 within which the 90% interval (two one-sided 5% tests) lies; only a small bound would support
 a claim of "no meaningful association", and a large bound means the data cannot show
 equivalence. For "too fast for conditions" the adjusted RR is
-1.06
+1.05
 (0.89–1.26)
 in Model A, with an equivalence bound of
 22%,
-and 1.29
-(1.13–1.47)
+and 1.28
+(1.13–1.46)
 in Model B, with a bound of
-44%.
+43%.
 "Weakly associated" is therefore the supportable description: the association is small next to
 that of exceedance
 (5.2
@@ -352,23 +352,23 @@ is **infeasible**, not benign: exceedance is recorded in only
 of crashes, which is less than the false-positive rate that specificity implies, so the
 corrected count of exposed non-fatal crashes would be negative. Across the feasible cells
 (specificity 1.00) the bias-corrected Model-A ratio for exceedance ranges from
-1.59
-to 7.62,
+1.58
+to 7.61,
 so the exceedance association stays above one wherever the grid can be computed. For "too fast
 for conditions" the corrected ratio ranges from
 0.25
-to 1.64:
+to 1.63:
 recording error within the grid is enough to move it on either side of one, so its direction
 is not identified.
 
 **Effect modification by crash configuration (exploratory follow-up added after the red-team
 review).** The pooled Model-A ratios above average over very different crash configurations
 (`severity/fatal_effect_modification`; adjusted fatal risk ratios within single-vehicle and
-within multi-vehicle crashes). For exceeding the limit the ratio is 3.35 (2.82–3.97) in single-vehicle and
-10.06 (7.87–12.88) in multi-vehicle crashes (ratio of ratios
-3.0, homogeneity p 4.2e-12), against a pooled
-5.22. For "too fast for conditions" the ratios are
-1.05 (0.89–1.24) and 1.08 (0.81–1.44) (homogeneity p 0.85), so the
+within multi-vehicle crashes). For exceeding the limit the ratio is 3.35 (2.83–3.97) in single-vehicle and
+9.98 (7.78–12.79) in multi-vehicle crashes (ratio of ratios
+3.0, homogeneity p 7.7e-12), against a pooled
+5.21. For "too fast for conditions" the ratios are
+1.04 (0.88–1.23) and 1.08 (0.81–1.44) (homogeneity p 0.84), so the
 weak association shows no detectable dependence on the configuration split. The relative association of exceeding
 the limit is larger in multi-vehicle crashes, where the baseline fatal risk is low, so the pooled
 ratio describes neither configuration well. An association conditional on a police-reported crash,
@@ -382,21 +382,21 @@ road type.*
 
 | Posted limit | Interstate crashes | RR interstate vs other | RD |
 |---|---|---|---|
-| <=25 mph | 294 | 0.67 (0.16–2.81) | -0.0009 |
-| 30-35 mph | 755 | 0.64 (0.35–1.18) | -0.0014 |
-| 40-45 mph | 1,569 | 1.28 (0.69–2.36) | 0.0015 |
-| 50-55 mph | 7,595 | 0.58 (0.42–0.80) | -0.0053 |
-| 60-65 mph | 14,816 | 0.54 (0.40–0.74) | -0.0052 |
-| 50-65 mph | 22,411 | 0.57 (0.45–0.73) | -0.0053 |
-| 70+ mph | 16,621 | 0.94 (0.63–1.38) | -0.0007 |
+| <=25 mph | 296 | 0.67 (0.16–2.85) | -0.0009 |
+| 30-35 mph | 760 | 0.64 (0.35–1.16) | -0.0014 |
+| 40-45 mph | 1,579 | 1.28 (0.69–2.36) | 0.0014 |
+| 50-55 mph | 7,607 | 0.58 (0.42–0.80) | -0.0053 |
+| 60-65 mph | 14,830 | 0.54 (0.40–0.74) | -0.0052 |
+| 50-65 mph | 22,437 | 0.57 (0.45–0.73) | -0.0053 |
+| 70+ mph | 16,636 | 0.94 (0.64–1.39) | -0.0007 |
 
 Averaged over limits, interstates have a lower fatal-crash risk than other roads, but the
 average hides a pattern by band: the ratio is below one at 50–65 mph
 (0.57 (0.45–0.73))
 and near one at 70+ mph
-(0.94 (0.63–1.38)),
+(0.94 (0.64–1.39)),
 and the 70+ band differs from the 50–65 band by a ratio of
-1.64 (1.06–2.55)
+1.65 (1.06–2.55)
 (interaction p 0.001).
 Speed-limit bands with few interstate crashes (25 mph and below, 30–35 mph) have wide
 intervals. The interstate advantage therefore weakens at the highest posted limits, which is
@@ -408,11 +408,11 @@ compatible with, but does not show, a role for travel speed.
 
 | Speeding measure | Population | Speeding–alcohol odds ratio | Interval |
 |---|---|---|---|
-| any speeding | CRSS all crashes | 1.90 (1.61–2.23) | 95% CI (design-based) |
-| any speeding | CRSS non-fatal crashes | 1.87 (1.59–2.20) | 95% CI (design-based) |
+| any speeding | CRSS all crashes | 1.89 (1.61–2.22) | 95% CI (design-based) |
+| any speeding | CRSS non-fatal crashes | 1.87 (1.59–2.19) | 95% CI (design-based) |
 | any speeding | CRSS fatal crashes | 1.41 (1.20–1.65) | 95% CI (design-based) |
-| exceeded limit / racing | CRSS all crashes | 4.24 (3.65–4.93) | 95% CI (design-based) |
-| exceeded limit / racing | CRSS non-fatal crashes | 4.05 (3.46–4.74) | 95% CI (design-based) |
+| exceeded limit / racing | CRSS all crashes | 4.25 (3.65–4.94) | 95% CI (design-based) |
+| exceeded limit / racing | CRSS non-fatal crashes | 4.05 (3.46–4.75) | 95% CI (design-based) |
 | exceeded limit / racing | CRSS fatal crashes | 1.71 (1.42–2.05) | 95% CI (design-based) |
 | any speeding | FARS fatal crashes (census; alcohol by multiple imputation) | 2.08 (2.07–2.09) | range over 10 implicates |
 | exceeded limit / racing | FARS fatal crashes (census; alcohol by multiple imputation) | 2.32 (2.31–2.33) | range over 10 implicates |
@@ -420,7 +420,7 @@ compatible with, but does not show, a role for travel speed.
 Within one recording system (CRSS), the speeding–alcohol association is weaker among fatal
 crashes than among all crashes — for exceedance
 1.71
-against 4.24.
+against 4.25.
 Both behaviours raise the chance that a crash is fatal, so a fatal crash without alcohol is more
 likely to have *another* reason to be fatal, such as speeding (collider stratification). FARS
 adds toxicology results and crash investigation to the police report, although speeding remains

@@ -28,6 +28,13 @@
   "share_van"
  ],
  "module": "nhtsa_stats.analysis.vulnerable",
- "git_commit": "27f5a22-dirty",
- "generated_utc": "2026-11-12T12:25:00Z"
+ "git_commit": "af9ce88",
+ "source_sha256": "0196d4a559e11206b88c80cfef9479f6b128b799def969c89b94a02ba8a88272",
+ "code_sha256": "ba1c3fb433996d0fbec1973d3c2ef450e875b0507ebe124fe381c03c4abba49c",
+ "inputs_sha256": {
+  "data/interim/FARS/person": "ab2fbf61917410a498e38958cbe753aa8f1dfa4ff495aad4cc3c68fde67e683c",
+  "data/interim/FARS/vehicle": "702adb3480853493e1f04fbe94ed36a882e70b2f2582030ff09c3c39c1677bfb"
+ },
+ "package_sha256": "fbdac1b588be76a011931549cc2f2013fc1b6405f88cee1ba0e10db719e3ed6b",
+ "generated_utc": "2026-11-13T01:43:12Z"
 }

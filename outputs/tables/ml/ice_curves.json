@@ -1,10 +1,10 @@
 {
  "table": "ml/ice_curves.csv",
  "description": "ICE curves of the boosted model for numeric features (30 crashes)",
- "population": "CRSS police-reported crashes (all severities, national probability sample) with a determinable maximum severity; train 2016-2021, validation 2022, test 2023-2024",
+ "population": "CRSS police-reported crashes (all severities, national probability sample) with a determinable maximum severity (fatal: MAXSEV_IM 9 excluded; ka: MAXSEV_IM 5 and 9 excluded, so ka rows are a subset); train 2016-2021, validation 2022, test 2023-2024",
  "unit": "crash",
  "outcome": "",
- "method": "",
+ "method": "fatal metrics use every crash with a known fatal outcome; ka metrics use only the crashes where ka is known (MAXSEV_IM 5 and 9 excluded), so the two outcomes differ in n",
  "inputs": [
   "data/processed/crss_crash.parquet"
  ],
@@ -18,6 +18,12 @@
   "probability"
  ],
  "module": "nhtsa_stats.models.severity_ml",
- "git_commit": "ef704fd",
- "generated_utc": "2026-10-23T03:44:07Z"
+ "git_commit": "af9ce88",
+ "source_sha256": "1a91ec37672ca5537d660e602d7dc138dad5fabfbc916507a249cfdbb701a783",
+ "code_sha256": "987851fec7eb5c5ab8b9e5f24eee3b9848fdd0334947cf8fe78a78addd598274",
+ "inputs_sha256": {
+  "data/processed/crss_crash.parquet": "1a31897f37cce3be223cc5abfb823582b68b9f7096a8c38980e9346f3450c6e3"
+ },
+ "package_sha256": "fbdac1b588be76a011931549cc2f2013fc1b6405f88cee1ba0e10db719e3ed6b",
+ "generated_utc": "2026-11-13T01:49:07Z"
 }

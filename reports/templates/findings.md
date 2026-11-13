@@ -903,14 +903,14 @@ test years was {{ml/metrics_test|outcome=fatal;stage=pre_crash+circumstance;mode
   with finding 8.
 * **Interactions.** The 13 pre-specified interaction terms of finding 5 add almost nothing to
   prediction (AUROC {{ml/paired_differences|outcome=fatal;stage=pre_crash+circumstance;model=logit_interact;comparison=vs logit_main;metric=auroc|estimate|+.3f}}). Screening the boosted
-  model on 2016–2022 suggested three further interactions. Tested on 2023–2024, two were confirmed
-  (survey-weighted, Holm-adjusted): intersection × head-on collision (ratio of odds ratios
-  {{ml/pattern_confirmation|candidate=junction=intersection x crash_type=mv_head_on (refs non_junction, mv_rear_end)|ratio_of_or|.2f}})
-  and speeding × angle collision
-  ({{ml/pattern_confirmation|candidate=speeding=yes x crash_type=mv_angle (refs no, mv_rear_end)|ratio_of_or|.2f}});
-  a 40–45 mph × pedestrian term was not confirmed (Holm p
-  {{ml/pattern_confirmation|candidate=speed_limit=40-45 x crash_type=pedestrian (refs 30-35, mv_rear_end)|p_holm|.2f}}).
-  All three are exploratory and non-causal.
+  model on 2016–2022 suggested further interactions, which were then tested on 2023–2024
+  (survey-weighted, Holm-adjusted; table below).
+
+{{mdtable:ml/pattern_confirmation|kind=interaction|candidate:Candidate (reference levels):;ratio_of_or:Ratio of odds ratios:.2f;p_holm:Holm p:.2g;verdict:Verdict:}}
+
+The screen's candidates are not stable: after this release's small recoding fixes, it proposed a
+different third candidate from the previous release's (speeding × angle collision, now absent).
+Treat them as exploratory leads, not findings; none is causal.
 
 *Limitations.* Predictive accuracy is not evidence that any input causes fatal outcomes.
 Several "unknown" inputs mostly mark hit-and-run crashes, and imputed alcohol may carry

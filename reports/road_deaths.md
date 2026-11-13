@@ -52,8 +52,8 @@ here where they add the size of an association.
    arterial roads; 23.1% were
    hit-and-runs.
 6. **Vehicle age**: occupants of vehicles 18 or more years old had an adjusted risk of death in a
-   police-reported crash 2.22 (1.99–2.48)
-   times that of occupants of vehicles 0–3 years old (1.76 (1.59–1.94) when the
+   police-reported crash 2.22 (1.99–2.49)
+   times that of occupants of vehicles 0–3 years old (1.76 (1.59–1.95) when the
    crash type and number of vehicles are also held fixed), and their share of occupant deaths rose
    from 18.0% (2016) to
    30.5% (2024).
@@ -154,12 +154,12 @@ depends on NHTSA's undocumented imputation model. The two bases show how much th
 the choice, not a range that contains the truth.
 
 The imputed basis has a further problem. Among untested drivers, an imputed BAC of .08 or more is
-associated with the driver being killed with an adjusted odds ratio of 3.85 (3.61–4.10), against
+associated with the driver being killed with an adjusted odds ratio of 3.82 (3.59–4.07), against
 1.14 (1.10–1.18) for a measured BAC of .08 or more among tested drivers
 (`measurement/imputed_bac_injury`). That is consistent with NHTSA's imputation model using injury
 severity, but it does not show it: the tested drivers are themselves selected on the outcome
-(145,403 of 205,972 were killed, against 77,453 of 280,395 of the imputed group), and adding police-reported alcohol, light,
-area and weekend moves the tested odds ratio to 2.54 (2.42–2.65). Figures built on imputed BAC may therefore
+(145,403 of 206,123 were killed, against 77,453 of 281,252 of the imputed group), and adding police-reported alcohol, light,
+area and weekend moves the tested odds ratio to 2.53 (2.42–2.65). Figures built on imputed BAC may therefore
 depend on a model that uses the outcome, and the measured-BAC figures avoid that dependence but
 describe tested drivers only. The comparison is a diagnostic, not a causal estimate.
 
@@ -280,10 +280,10 @@ misrecorded):
 
 | Scenario | Effectiveness | Lives 2016–2024 | Per year (2016–2024 average) | Per year, low | Per year, high |
 |---|---|---|---|---|---|
-| as_recorded | 65.8% | 62,162 | 6,907 | 6,769 | 7,027 |
-| misreport_5pct | 52.5% | 49,538 | 5,504 | 5,347 | 5,641 |
-| misreport_10pct | 37.9% | 35,769 | 3,974 | 3,792 | 4,130 |
-| misreport_20pct | 4.4% | 4,118 | 458 | 206 | 671 |
+| as_recorded | 66.0% | 62,309 | 6,923 | 6,801 | 7,052 |
+| misreport_5pct | 52.6% | 49,701 | 5,522 | 5,385 | 5,667 |
+| misreport_10pct | 38.1% | 35,948 | 3,994 | 3,828 | 4,158 |
+| misreport_20pct | 4.6% | 4,326 | 481 | 244 | 710 |
 
 The "as recorded" row excludes the 20,998 killed occupants whose belt
 use is unknown (9.8% of passenger-vehicle occupant deaths), who are in
@@ -318,11 +318,11 @@ applied to every seat and age. These are expectations for the people who died, n
 | not_risk_driver | 36,882 | 37.4% |
 
 In CRSS, crashes in which a driver exceeded the limit or was racing had an adjusted risk of being
-fatal 5.22 (4.34–6.27)
+fatal 5.21 (4.34–6.25)
 times that of comparable crashes without speeding; "too fast for conditions" had
-1.06 (0.89–1.26)
+1.05 (0.89–1.26)
 (model A of `reports/findings.md`, finding 3; the speeding-type split is exploratory, and the
-"too fast for conditions" ratio is 1.29
+"too fast for conditions" ratio is 1.28
 when crash configuration is also held fixed, so it is a small association rather than none). Speeding drivers in fatal crashes had no valid
 licence in 24.0% of cases
 (drivers neither speeding nor at any BAC: 10.0%)
@@ -369,12 +369,12 @@ and a speeding conviction in the previous five years in
 
 `speed_limit` is the posted limit for the striking vehicle; `pedestrian_bac` is the pedestrian's
 own imputed blood alcohol (estimated (MI)). In CRSS, the share of struck pedestrians who died rose
-from 2.2%
-on roads limited to 25 mph or less to 33.1%
-at 50–55 mph (adjusted risk ratio 6.6 (4.8–9.0);
-12.2 (9.1–16.5)
+from 2.1%
+on roads limited to 25 mph or less to 32.7%
+at 50–55 mph (adjusted risk ratio 6.7 (4.9–9.2);
+12.5 (9.2–16.9)
 without adjustment for location, light and time of day). The striking vehicle's speed limit is unknown for
-30% of struck pedestrians who survived
+29% of struck pedestrians who survived
 but only 11% of those who died
 (`vulnerable/speed_limit_missingness`), so crude shares who died by limit are not comparable with the adjusted ratios.
 
@@ -398,23 +398,23 @@ but only 11% of those who died
 | role | passenger | 2,713 | 2,611 | 53.2% |
 
 In fatal crashes, among rider–passenger pairs on the same motorcycle, a helmet was associated with a
-31% (20–40%)
+30% (20–39%)
 reduction in the risk of death (`reduction_1_minus_rr`, double pair comparison). Applied to the
 18,789 unhelmeted
-motorcyclists killed, about 641
-a year on average over 2016–2024 (417–835)
+motorcyclists killed, about 625
+a year on average over 2016–2024 (421–821)
 would have been expected to survive with a helmet (model-based); this excludes the
 1,665 deaths with unknown helmet use.
 
 Treat this figure with more caution than the seat-belt one:
 
 * **It is fragile to misreporting** (`matched/helmet_misreporting_dpc`). If 5% of helmeted-coded survivors
-  were in fact unhelmeted the reduction would be 4% (-9 to 14%);
-  it vanishes at about 6%
+  were in fact unhelmeted the reduction would be 3% (-10 to 14%);
+  it vanishes at about 5%
   survivor misreporting, or 5%
   of unhelmeted-coded deaths who were truly helmeted.
 * **It rests on few pairs and covers few of the deaths** (`matched/helmet_pair_coverage`). Only
-  455 operator–passenger pairs differ in
+  459 operator–passenger pairs differ in
   helmet use. 16% of the unhelmeted motorcyclist deaths were in
   an operator–passenger pair of any kind (not only the discordant pairs) and 84% were on single-rider motorcycles, so
   applying the estimate to all unhelmeted deaths assumes that riders with a passenger are representative of solo riders.
@@ -435,11 +435,11 @@ partly reflect the vehicle itself):
 | Vehicle age | Crude rate | Crude RR | Adjusted RR, model A | Adjusted RR, model B |
 |---|---|---|---|---|
 | 0-3 | 0.097% | 1.00 | 1.00 (1.00–1.00) | 1.00 (1.00–1.00) |
-| 4-7 | 0.134% | 1.38 | 1.25 (1.13–1.40) | 1.18 (1.06–1.32) |
-| 8-12 | 0.161% | 1.66 | 1.35 (1.22–1.49) | 1.21 (1.09–1.34) |
-| 13-17 | 0.269% | 2.77 | 1.81 (1.62–2.01) | 1.52 (1.37–1.67) |
-| 18+ | 0.419% | 4.32 | 2.22 (1.99–2.48) | 1.76 (1.59–1.94) |
-| unknown | 0.407% | 4.20 | 2.09 (1.03–4.22) | 2.19 (1.18–4.04) |
+| 4-7 | 0.133% | 1.38 | 1.26 (1.13–1.40) | 1.19 (1.06–1.33) |
+| 8-12 | 0.161% | 1.66 | 1.35 (1.22–1.50) | 1.21 (1.09–1.35) |
+| 13-17 | 0.268% | 2.77 | 1.81 (1.63–2.02) | 1.52 (1.37–1.68) |
+| 18+ | 0.418% | 4.33 | 2.22 (1.99–2.49) | 1.76 (1.59–1.95) |
+| unknown | 0.405% | 4.18 | 2.10 (1.04–4.24) | 2.20 (1.20–4.06) |
 
 Share of passenger-vehicle occupants killed (known model year) by vehicle age, FARS:
 

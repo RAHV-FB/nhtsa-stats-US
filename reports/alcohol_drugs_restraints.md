@@ -25,8 +25,8 @@ census counts and shares), **estimated** (CRSS design-based), **adjusted associa
    result, had a measured BAC and had both police fields known. For them the odds ratio between
    BAC ≥ .08 and a psychoactive drug is 1.44 (1.40–1.49) by toxicology and
    3.5 (3.4–3.6) by police report; among the
-   31,791 surviving drivers in the same kind of set it is
-   2.05 (1.93–2.18) by toxicology against
+   31,870 surviving drivers in the same kind of set it is
+   2.06 (1.93–2.19) by toxicology against
    4.1 (3.9–4.4) by police report. Pairing one police field with one
    toxicology result gives values in between
    (1.7 and 1.9 for killed
@@ -48,27 +48,27 @@ census counts and shares), **estimated** (CRSS design-based), **adjusted associa
    the 4
    states that test at least half of both killed and surviving drivers for both alcohol and
    drugs, a driver in a fatal crash with BAC ≥ .08 had
-   2.17 (1.82–2.58)
+   2.16 (1.82–2.57)
    times the odds of being the one who died, and a driver with any psychoactive drug
-   1.28 (1.13–1.44)
+   1.28 (1.14–1.45)
    times, mutually adjusted. This is the comparison of the two in this project made where testing is least
    selective (drug-tested: 69%–88% of killed and 51%–80% of surviving drivers in these states) — and
    it is conditional on a fatal crash, on being tested, and on four small states.
 5. **Restraint acts at a different stage from the behaviours, and its protection depends on
    how the crash happened.** Within the same vehicle, belted front-seat occupants' risk of
    death relative to unbelted ones is
-   0.34 (0.32–0.36)
+   0.34 (0.32–0.35)
    when the driver was not speeding and
    0.34 (0.32–0.36)
-   when the driver was speeding: overall, no detectable difference (p = 0.88). But speeding drivers' crashes are
+   when the driver was speeding: overall, no detectable difference (p = 0.96). But speeding drivers' crashes are
    concentrated in single-vehicle crashes, where belts protect more, and within crash
    configuration belts are *somewhat less* protective with a speeding driver (exploratory
-   follow-up; ratio of risk ratios 1.10 to 1.24 across four layering schemes, 1.24 (1.13–1.35) with single/multi-vehicle
+   follow-up; ratio of risk ratios 1.10 to 1.23 across four layering schemes, 1.23 (1.13–1.34) with single/multi-vehicle
    and rollover crossed).
    For a driver at BAC ≥ .08 the overall within-vehicle ratio is slightly lower
    (0.32 (0.30–0.34)),
-   but within crash configuration there is no detectable contrast (p = 0.90;
-   0.99 (0.91–1.09)).
+   but within crash configuration there is no detectable contrast (p = 0.95;
+   1.00 (0.91–1.09)).
    Belt protection also differs by *kind of impact* (single- vs multi-vehicle crash, rollover
    or not). Across crashes, by contrast, the unbelted risk ratio in CRSS falls from
    46 to
@@ -94,10 +94,10 @@ like a marker of the crashes in which impaired drivers are involved?
 
 | | Killed drivers | Surviving drivers |
 |---|---|---|
-| Drivers | 222,856 | 263,511 |
+| Drivers | 222,856 | 264,519 |
 | Drug-tested | 61.6% | 18.5% |
 | BAC-tested | 65.2% | 23.0% |
-| Drug-tested if police noted drugs | 94.0% | 82.5% |
+| Drug-tested if police noted drugs | 94.0% | 82.6% |
 | Drug-tested if police noted no drugs | 58.2% | 17.7% |
 | Drug-tested if BAC ≥ .08 measured | 85.4% | 57.3% |
 | Drug-tested in 2016 / 2024 | 63.7% / 55.1% | 20.8% / 14.7% |
@@ -163,10 +163,10 @@ result.
 
 | Measure | Drivers | Alcohol-positive | Drug-positive | Both | Odds ratio | Drug prevalence ratio (alcohol-positive vs negative) |
 |---|---|---|---|---|---|---|
-| toxicology: BAC >= .08 and any psychoactive drug | 31,791 | 15% | 35% | 7% | 2.05 (1.93–2.18) | 1.53 (1.48–1.58) |
-| police report: alcohol and drugs both recorded | 31,791 | 22% | 26% | 11% | 4.13 (3.90–4.36) | 2.59 (2.50–2.69) |
-| cross: police alcohol and toxicology drug | 31,791 | 22% | 35% | 12% | 2.66 (2.52–2.80) | 1.77 (1.72–1.82) |
-| cross: toxicology BAC >= .08 and police drugs | 31,791 | 15% | 26% | 6% | 2.59 (2.43–2.77) | 1.91 (1.83–1.98) |
+| toxicology: BAC >= .08 and any psychoactive drug | 31,870 | 15% | 35% | 7% | 2.06 (1.93–2.19) | 1.53 (1.48–1.58) |
+| police report: alcohol and drugs both recorded | 31,870 | 22% | 26% | 11% | 4.12 (3.90–4.36) | 2.59 (2.50–2.68) |
+| cross: police alcohol and toxicology drug | 31,870 | 22% | 35% | 12% | 2.66 (2.52–2.81) | 1.77 (1.72–1.83) |
+| cross: toxicology BAC >= .08 and police drugs | 31,870 | 15% | 26% | 6% | 2.60 (2.44–2.77) | 1.91 (1.83–1.99) |
 
 *(Woolf intervals ignore the clustering of drivers within crashes; they are indicative.)*
 
@@ -226,7 +226,7 @@ between 1.7 and
 negative (7.8) and all
 unknown positive (2.1) —
 differ widely. Model-A adjusted ratios are
-4.29 (3.07–6.01) (complete case) and
+4.30 (3.07–6.02) (complete case) and
 2.97 (2.23–3.96) (unknown as no); their
 narrow intervals reflect sampling error only and say nothing about which allocation of the
 unknowns is right. Because testing and recording depend on severity (§2), the plausible
@@ -237,7 +237,7 @@ and non-fatal crashes (`drugs/crss_bounds_nondifferential`), the range narrows b
 close: proportional to the known prevalence (the same multiplier k in both), the crude ratio
 lies between
 7.8 and
-19.1;
+19.0;
 with the same absolute prevalence among unknown fatal and non-fatal crashes, between
 1.7 and
 7.8;
@@ -276,8 +276,8 @@ and period.*
 
 | Sample | BAC ≥ .08 | Any psychoactive drug | Alcohol × drug (product) | Drivers |
 |---|---|---|---|---|
-| States testing ≥ 50% of killed and surviving drivers for both | 2.17 (1.82–2.58) | 1.28 (1.13–1.44) | 0.65 (0.47–0.89) | 7,845 |
-| All states (selectively tested survivors) | 1.40 (1.35–1.46) | 1.17 (1.14–1.20) | 0.87 (0.82–0.94) | 164,399 |
+| States testing ≥ 50% of killed and surviving drivers for both | 2.16 (1.82–2.57) | 1.28 (1.14–1.45) | 0.64 (0.47–0.89) | 7,860 |
+| All states (selectively tested survivors) | 1.40 (1.35–1.46) | 1.17 (1.14–1.20) | 0.87 (0.81–0.93) | 164,499 |
 
 *What it estimates.* Among drivers involved in a crash in which somebody died, whether the
 driver was the one who died. This mixes Stage B (impaired drivers' crashes are more often
@@ -307,30 +307,30 @@ unbelted):
 
 | Split | Stratum | Pairs | RR belted vs unbelted | Ratio of RRs (2nd vs 1st stratum), 95% CI | p (heterogeneity) |
 |---|---|---|---|---|---|
-| all | all vehicles | 90,240 | 0.34 (0.33–0.35) | — | — |
-| driver speeding (any) | driver not speeding | 71,376 | 0.34 (0.32–0.36) | — | — |
-| driver speeding (any) | driver speeding | 16,457 | 0.34 (0.32–0.36) | 1.01 (0.93–1.09) | 0.88 |
-| driver exceeded limit | driver not speeding | 71,376 | 0.34 (0.32–0.36) | — | — |
-| driver exceeded limit | driver exceeded limit / racing | 6,969 | 0.36 (0.33–0.39) | 1.06 (0.96–1.17) | 0.26 |
-| driver BAC >= .08 (MI) | driver BAC < .08 | 77,920 | 0.35 (0.34–0.37) | — | — |
-| driver BAC >= .08 (MI) | driver BAC >= .08 | 12,320 | 0.32 (0.30–0.34) | 0.90 (0.83–0.97) | 0.0099 |
-| driver speeding and alcohol | neither | 65,111 | 0.35 (0.33–0.37) | — | — |
-| driver speeding and alcohol | both | 5,597 | 0.34 (0.30–0.37) | 0.96 (0.86–1.07) | 0.47 |
-| vehicles in crash | multi-vehicle | 60,288 | 0.44 (0.42–0.46) | — | — |
-| vehicles in crash | single vehicle | 29,952 | 0.27 (0.26–0.29) | 0.61 (0.57–0.66) | 3.5e-38 |
-| time | day | 61,345 | 0.35 (0.33–0.37) | — | — |
-| time | night | 28,702 | 0.33 (0.31–0.35) | 0.93 (0.86–1.00) | 0.055 |
+| all | all vehicles | 90,667 | 0.34 (0.33–0.35) | — | — |
+| driver speeding (any) | driver not speeding | 71,670 | 0.34 (0.32–0.35) | — | — |
+| driver speeding (any) | driver speeding | 16,582 | 0.34 (0.32–0.36) | 1.00 (0.93–1.08) | 0.96 |
+| driver exceeded limit | driver not speeding | 71,670 | 0.34 (0.32–0.35) | — | — |
+| driver exceeded limit | driver exceeded limit / racing | 7,007 | 0.36 (0.33–0.39) | 1.06 (0.96–1.17) | 0.26 |
+| driver BAC >= .08 (MI) | driver BAC < .08 | 78,274 | 0.35 (0.34–0.37) | — | — |
+| driver BAC >= .08 (MI) | driver BAC >= .08 | 12,393 | 0.32 (0.30–0.34) | 0.90 (0.83–0.98) | 0.012 |
+| driver speeding and alcohol | neither | 65,375 | 0.35 (0.33–0.37) | — | — |
+| driver speeding and alcohol | both | 5,638 | 0.33 (0.30–0.37) | 0.96 (0.86–1.07) | 0.44 |
+| vehicles in crash | multi-vehicle | 60,556 | 0.44 (0.42–0.46) | — | — |
+| vehicles in crash | single vehicle | 30,111 | 0.27 (0.25–0.28) | 0.61 (0.57–0.66) | 1.1e-39 |
+| time | day | 61,659 | 0.35 (0.33–0.36) | — | — |
+| time | night | 28,815 | 0.33 (0.31–0.35) | 0.93 (0.87–1.00) | 0.067 |
 
 Overall, there is no detectable difference in the within-vehicle belt risk ratio whether or not the
-driver was speeding (p = 0.88; exceeding the limit, p = 0.26), and it is slightly lower with a driver at BAC ≥ .08
+driver was speeding (p = 0.96; exceeding the limit, p = 0.26), and it is slightly lower with a driver at BAC ≥ .08
 (p 0.01).
 The BAC ≥ .08 splits use NHTSA-imputed BAC (MI) for untested drivers. Among untested
 drivers an imputed BAC of .08 or more is associated with being killed with an adjusted odds ratio of
-3.85 (3.61–4.10), against 1.14 (1.10–1.18) for a measured BAC among tested drivers
+3.82 (3.59–4.07), against 1.14 (1.10–1.18) for a measured BAC among tested drivers
 (`measurement/imputed_bac_injury`), which is consistent with the imputation model using injury
 severity but does not show it: the tested drivers are themselves selected on the outcome
-(145,403 of 205,972 were killed, against 77,453 of 280,395 of the imputed group), and with police-reported alcohol, light, area
-and weekend added the tested odds ratio is 2.54 (2.42–2.65). BAC-based splits therefore may depend on a model
+(145,403 of 206,123 were killed, against 77,453 of 281,252 of the imputed group), and with police-reported alcohol, light, area
+and weekend added the tested odds ratio is 2.53 (2.42–2.65). BAC-based splits therefore may depend on a model
 that uses the outcome, and measured-BAC results avoid that dependence but describe tested drivers
 only. This is a diagnostic, not a causal estimate.
 
@@ -341,31 +341,31 @@ behaviour to that without it, pooled across layers, >1 means belts protect less)
 
 | Driver behaviour | Layers | Ratio of RRs (95% CI) |
 |---|---|---|
-| Speeding (any), by single/multi-vehicle | single vs multi-vehicle | 1.17 (1.07–1.27) |
-| Speeding (any), by rollover | rollover vs not | 1.10 (1.02–1.19) |
-| Speeding (any), by crash type | crash type | 1.22 (1.10–1.34) |
+| Speeding (any), by single/multi-vehicle | single vs multi-vehicle | 1.17 (1.08–1.27) |
+| Speeding (any), by rollover | rollover vs not | 1.10 (1.01–1.19) |
+| Speeding (any), by crash type | crash type | 1.22 (1.10–1.35) |
 | Exceeded limit / racing, by crash type | crash type | 1.35 (1.16–1.57) |
-| BAC ≥ .08, by single/multi-vehicle | single vs multi-vehicle | 1.03 (0.95–1.13) |
-| BAC ≥ .08, by crash type | crash type | 0.99 (0.91–1.09) |
+| BAC ≥ .08, by single/multi-vehicle | single vs multi-vehicle | 1.04 (0.95–1.13) |
+| BAC ≥ .08, by crash type | crash type | 1.00 (0.91–1.09) |
 
 So the earlier unstratified conclusion that the belt effect does not vary with the driver's speeding
 does not hold within crash configuration: across the four layering schemes belts are somewhat less
-protective when the driver was speeding (ratio of RRs 1.10 to 1.24; the crash-type scheme pools only 3 of
-its 8 crash types), while the BAC contrast shows no detectable difference (p = 0.68). This is an exploratory follow-up, not
+protective when the driver was speeding (ratio of RRs 1.10 to 1.23; the crash-type scheme pools only 3 of
+its 8 crash types), while the BAC contrast shows no detectable difference (p = 0.66). This is an exploratory follow-up, not
 multiplicity-adjusted, and the layers are pooled as if independent. Belt protection also differs by the *kind of impact*.
 By crash type (FARS, within-vehicle double-pair comparison, `matched/belt_by_crash_type`):
 
 | Stratum | Pairs | RR belted vs unbelted | Risk reduction |
 |---|---|---|---|
-| single vehicle, rollover first | 4,561 | 0.16 | 84% (82–87%) |
-| single vehicle, no rollover first | 18,089 | 0.31 | 69% (67–71%) |
-| multi-vehicle, angle | 25,972 | 0.49 | 51% (47–54%) |
-| multi-vehicle, head-on | 14,143 | 0.46 | 54% (50–58%) |
-| multi-vehicle, rear-end | 9,749 | 0.35 | 65% (60–70%) |
-| multi-vehicle, sideswipe | 4,337 | 0.34 | 66% (58–72%) |
-| other (multi-vehicle other, non-motorist) | 13,389 | 0.32 | 68% (61–74%) |
-| vehicle rolled over (any crash type) | 18,003 | 0.23 | 77% (76–78%) |
-| vehicle did not roll over | 72,237 | 0.43 | 57% (55–58%) |
+| single vehicle, rollover first | 4,578 | 0.16 | 84% (82–87%) |
+| single vehicle, no rollover first | 18,225 | 0.30 | 70% (68–71%) |
+| multi-vehicle, angle | 26,084 | 0.49 | 51% (47–54%) |
+| multi-vehicle, head-on | 14,211 | 0.46 | 54% (50–58%) |
+| multi-vehicle, rear-end | 9,804 | 0.35 | 65% (60–70%) |
+| multi-vehicle, sideswipe | 4,354 | 0.34 | 66% (59–72%) |
+| other (multi-vehicle other, non-motorist) | 13,411 | 0.32 | 68% (61–75%) |
+| vehicle rolled over (any crash type) | 18,101 | 0.23 | 77% (76–79%) |
+| vehicle did not roll over | 72,566 | 0.43 | 57% (55–59%) |
 
 Belts are associated with a larger reduction in single-vehicle crashes
 (73%)
@@ -381,11 +381,11 @@ averages over crash types in which the protection differs substantially.
 
 | Model | Unbelted vs belted RR | Risk difference | Share of crude log-RR retained |
 |---|---|---|---|
-| crude | 46.3 (41.0–52.3) | 0.0425 (0.0380–0.0471) | 1.00 |
-| + crash environment | 33.6 (29.9–37.7) | 0.0306 (0.0266–0.0346) | 0.92 |
-| + person and vehicle | 36.0 (31.9–40.5) | 0.0327 (0.0282–0.0372) | 0.93 |
-| + driver's own speeding and alcohol | 28.1 (24.7–31.9) | 0.0258 (0.0216–0.0299) | 0.87 |
-| + crash configuration | 18.8 (17.0–20.8) | 0.0174 (0.0149–0.0199) | 0.77 |
+| crude | 46.1 (40.8–52.1) | 0.0423 (0.0378–0.0468) | 1.00 |
+| + crash environment | 33.5 (29.8–37.6) | 0.0305 (0.0265–0.0344) | 0.92 |
+| + person and vehicle | 35.8 (31.8–40.3) | 0.0325 (0.0281–0.0370) | 0.93 |
+| + driver's own speeding and alcohol | 27.9 (24.6–31.8) | 0.0256 (0.0215–0.0298) | 0.87 |
+| + crash configuration | 18.8 (17.0–20.8) | 0.0173 (0.0148–0.0198) | 0.77 |
 
 The across-crash risk ratio falls from
 46 to
@@ -415,16 +415,16 @@ directions: a fraction g of deaths coded unbelted may truly have been belted. Cr
 | Belted survivors truly unbelted (f) | Unbelted deaths truly belted (g) | RR belted vs unbelted | Risk reduction |
 |---|---|---|---|
 | 0.00 | 0.00 | 0.34 (0.33–0.35) | 66% (65–67%) |
-| 0.05 | 0.00 | 0.48 (0.46–0.49) | 52% (51–54%) |
-| 0.10 | 0.00 | 0.62 (0.61–0.64) | 38% (36–39%) |
-| 0.20 | 0.00 | 0.96 (0.93–0.98) | 4% (2–7%) |
-| 0.00 | 0.05 | 0.42 (0.41–0.44) | 58% (56–59%) |
+| 0.05 | 0.00 | 0.47 (0.46–0.49) | 53% (51–54%) |
+| 0.10 | 0.00 | 0.62 (0.60–0.63) | 38% (37–40%) |
+| 0.20 | 0.00 | 0.95 (0.93–0.98) | 5% (2–7%) |
+| 0.00 | 0.05 | 0.42 (0.41–0.43) | 58% (57–59%) |
 | 0.05 | 0.05 | 0.56 (0.55–0.58) | 44% (42–45%) |
-| 0.10 | 0.05 | 0.72 (0.70–0.74) | 28% (26–30%) |
+| 0.10 | 0.05 | 0.72 (0.70–0.73) | 28% (27–30%) |
 | 0.20 | 0.05 | 1.07 (1.05–1.09) | -7% (-9 to -5%) |
-| 0.00 | 0.10 | 0.51 (0.49–0.52) | 49% (48–51%) |
-| 0.05 | 0.10 | 0.66 (0.64–0.67) | 34% (33–36%) |
-| 0.10 | 0.10 | 0.82 (0.80–0.84) | 18% (16–20%) |
+| 0.00 | 0.10 | 0.50 (0.49–0.52) | 50% (48–51%) |
+| 0.05 | 0.10 | 0.65 (0.64–0.67) | 35% (33–36%) |
+| 0.10 | 0.10 | 0.82 (0.80–0.83) | 18% (17–20%) |
 | 0.20 | 0.10 | 1.19 (1.16–1.21) | -19% (-21 to -16%) |
 
 The belt effect is estimated to disappear if about
@@ -445,12 +445,12 @@ occurred in an operator-passenger pair with complete information (whether or not
 in pairs that identify the matched-pair odds ratio; most are on single-rider motorcycles
 (84%),
 where no within-motorcycle comparison exists. The helmeted-versus-unhelmeted risk ratio is
-0.69 (0.60–0.79)
+0.70 (0.61–0.81)
 as recorded, but it is far more fragile to misreporting than the belt estimate: with 5% of
 'helmeted' survivors truly unhelmeted it is
-0.96 (0.86–1.09)
+0.97 (0.86–1.10)
 and it reaches one at a misreporting fraction of
-6%.
+5%.
 The helmet association should be read as suggestive only.
 
 **Answer to D.** Among comparable occupants (same vehicle, same crash), belt use is associated

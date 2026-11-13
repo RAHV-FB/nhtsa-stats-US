@@ -23,14 +23,14 @@
   "deaths_pedestrian"
  ],
  "module": "nhtsa_stats.analysis.descriptive",
- "git_commit": "665bc2b-dirty",
+ "git_commit": "af9ce88",
  "source_sha256": "95039bdc8ba05bee29f6b4e4290e20633e775885d009cf7fefa5ab142305b9f8",
- "code_sha256": "43d7faeec528baa99fa8966f638c07326865aabc8146d87dfa0ae400283849e7",
+ "code_sha256": "479377064956d7f5cc9884841ca2bb8948715b5ce86e3c08f2ad4e170a16bf34",
  "inputs_sha256": {
-  "data/processed/crss_crash.parquet": "364251caddea6a8af2ddb2148c228829cbb74b00c24b414a2f1d3fb55409cf3b",
-  "data/processed/fars_crash.parquet": "2f5dac6dd3e55979e1bf1dbb0ece034e3332873c110ea0d9e4a2b4e07f00f13c",
-  "data/processed/fars_person.parquet": "51cb6f8811a432cf314c2eed8d47a37827e85fd906d04722b62dbe5b26693533"
+  "data/processed/crss_crash.parquet": "1a31897f37cce3be223cc5abfb823582b68b9f7096a8c38980e9346f3450c6e3",
+  "data/processed/fars_crash.parquet": "30f4314e8984ce2ba3cd764b561628edf36950705c1fc3bdd16769a417846ddf",
+  "data/processed/fars_person.parquet": "97b40b82c1b47f76bf99a8e05ebaa84e14c4b1ea2ecea3e86be6de4c2189bfa2"
  },
- "package_sha256": "dafbad5c0e26e64d51a7d326703937d1e7aedeb8cf604267822d0fd190ce5ac5",
- "generated_utc": "2026-11-12T20:59:11Z"
+ "package_sha256": "fbdac1b588be76a011931549cc2f2013fc1b6405f88cee1ba0e10db719e3ed6b",
+ "generated_utc": "2026-11-13T00:23:12Z"
 }
