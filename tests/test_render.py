@@ -156,6 +156,23 @@ def test_readme_template_is_written_to_the_root(tmp_path):
     assert (out / "report.md").read_text().endswith("report text\n")
 
 
+def test_docs_templates_are_written_to_docs(tmp_path):
+    tpl = tmp_path / "tpl"
+    (tpl / "docs").mkdir(parents=True)
+    (tpl / "docs" / "guide.md").write_text("doc text\n")
+    (tpl / "report.md").write_text("report text\n")
+    out, root = tmp_path / "reports", tmp_path / "root"
+    out.mkdir()
+    root.mkdir()
+    written = render.render_all(template_dir=tpl, out_dir=out, root_dir=root)
+    doc = root / "docs" / "guide.md"
+    assert doc in written
+    assert doc.read_text().endswith("doc text\n")
+    assert "reports/templates/docs/guide.md" in doc.read_text().splitlines()[0]
+    assert not (out / "guide.md").exists()
+    assert (out / "report.md").read_text().endswith("report text\n")
+
+
 def test_negated_and_empty_filters(tables):
     out = render.render_text("{{mdtable:m/t|factor!=speeding;level=yes|factor::}}")
     assert "speeding" not in out and "alcohol" in out

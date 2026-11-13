@@ -325,6 +325,10 @@ committed tables. Each issue carries the label from §1.
 
 ## 5. Corrections: status after re-computation (November 2026)
 
+*Note (13 November 2026).* The numbers recorded below were recomputed on 12 November 2026, before the
+outcome-recoding fixes of 13 November. The current values, which differ slightly (mostly in the last
+digit), are in `outputs/tables/` and the rendered reports; the conclusions recorded here are unchanged.
+
 The review itself changed nothing. A later pass computed the new output tables that the † items
 needed (30 CSVs under `outputs/tables/`) and applied the corrections for
 `README.md`, `reports/templates/findings.md` and `findings.json`, `reports/templates/road_deaths.md`,

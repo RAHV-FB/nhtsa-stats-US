@@ -188,8 +188,9 @@ policy questions require data that do not exist in this repository.
 * **Victim roles** depend on which vehicle is coded speeding or has a driver at .08 or more; for
   alcohol the assignment changes across imputations and is averaged.
 * **Recording differs by state.** Speeding coding varies between police agencies, and the share
-  of occupants killed whose belt use was not recorded ranges from almost none to about one in six
-  by state (`deaths/states`), so state shares are not strictly comparable.
+  of occupants killed whose belt use was not recorded ranges from almost none to about one in five
+  by state (`deaths/states`, column `restraint_unknown_share`: a maximum of about 21% among the states and about
+  27% including DC), so state shares are not strictly comparable.
 * **Vehicle age.** The rising share of deaths in vehicles 18 or more years old partly reflects the
   ageing of the fleet, which the data do not measure; the adjusted CRSS risk ratio is the evidence
   on risk, and it is an association conditional on a police-reported crash.
@@ -253,8 +254,9 @@ These items were added after the review and the follow-up analyses it prompted; 
 earlier limitation. Where a number is given it is approximate; the named table has the value.
 
 * **Degrees of freedom for small domains.** CRSS intervals use the design degrees of freedom (42),
-  which is standard practice. Rural-only contrasts rest on far fewer primary sampling units (a small
-  number of PSUs, about 12 degrees of freedom in the rural domain), so their intervals may be several percent too
+  which is standard practice. Rural-only contrasts rest on far fewer primary sampling units: the rural
+  domain has 21 PSUs in 9 strata (from the processed CRSS file: `urbanicity == "rural"`, distinct `PSU_VAR` and
+  `PSUSTRAT`), so the degrees of freedom are 21 − 9 = 12, and their intervals may be several percent too
   narrow. The same applies, less severely, to other small domains.
 * **Interaction margins treat level-mixture weights as fixed.** The standardised margins for
   interactions average predictions over the observed mix of factor levels and do not carry the
