@@ -27,7 +27,7 @@
  "module": "nhtsa_stats.analysis.deaths",
  "git_commit": "af9ce88",
  "source_sha256": "a0edccfffe60b2d158c26ea33ae6d086ac5f34a9ff5d8ce231cafde9b3574c46",
- "code_sha256": "ae873977b79074c45c11c3d174e917a24d2eb76f4c7361dcbd4891bfbba5e4c4",
+ "code_sha256": "4168758768c027921b2dc401087bdcacf5d8a4bf3380526a9acf33b0180f0adc",
  "inputs_sha256": {
   "data/interim/FARS/person": "ab2fbf61917410a498e38958cbe753aa8f1dfa4ff495aad4cc3c68fde67e683c",
   "data/interim/FARS/vehicle": "702adb3480853493e1f04fbe94ed36a882e70b2f2582030ff09c3c39c1677bfb",

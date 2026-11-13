@@ -419,8 +419,10 @@ These record what changed in the pipeline; numbers are in the tables named, not 
 * **Sidecar code and input hashes** (`reporting/provenance.py`). Every table's JSON sidecar records
   `code_sha256`, one SHA-256 over the producing module and every `nhtsa_stats` module it imports
   transitively (so a change to a shared helper makes dependent tables stale). Each file is digested
-  as its AST with docstrings removed, so comment, formatting and docstring edits do not make tables
-  stale while any code or string-literal change (sidecar method text included) does; the
+  as a canonical text (comments and docstrings cut out, trailing whitespace stripped, empty lines
+  dropped, indentation kept; no `ast.dump`, so the digest is identical on every Python version),
+  so comment, blank-line and docstring edits do not make tables
+  stale while any code, indentation or string-literal change (sidecar method text included) does; the
   provenance module itself is excluded. One snapshot of all `nhtsa_stats/**/*.py` is taken when
   the process starts and every closure comes from it, so edits during a long run cannot mark old
   results fresh. A syntax or decode error in a closure member raises. The sidecar also records

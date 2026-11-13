@@ -117,7 +117,7 @@ def test_comment_and_docstring_edits_keep_digest_code_edits_change_it(tmp_path):
     root = tmp_path / "tp"
     _make_pkg(root)
     base = _snap(root).code_sha256("tp.analysis.helper")
-    (root / "util.py").write_text('"""Doc."""\n# a comment\n\nU   =   1\n')
+    (root / "util.py").write_text('"""Doc."""\n# a comment\n\nU = 1  \n')
     assert _snap(root).code_sha256("tp.analysis.helper") == base
     (root / "analysis" / "helper.py").write_text(
         '"""Module doc."""\n\n\ndef f():\n    """Function doc."""\n    from tp import util  # c\n'
@@ -131,6 +131,101 @@ def test_comment_and_docstring_edits_keep_digest_code_edits_change_it(tmp_path):
     with_text = _snap(root).code_sha256("tp.analysis.helper")
     (root / "util.py").write_text("U = 1\nMETHOD = 'other text'\n")
     assert _snap(root).code_sha256("tp.analysis.helper") != with_text
+
+
+def _digest(src: str) -> str:
+    return provenance.source_digest(src.encode())
+
+
+_BASE = "def f(x):\n    if x:\n        y = 1\n    z = 'a'\n    return y + z\n"
+
+
+def test_digest_ignores_comment_and_docstring_only_edits():
+    base = _digest(_BASE)
+    commented = (
+        "# header\n"
+        "def f(x):  # trailing\n"
+        "    if x:\n"
+        "        # inside\n"
+        "        y = 1   \n"
+        "\n"
+        "    z = 'a'\n"
+        "    return y + z\n"
+    )
+    assert _digest(commented) == base
+    documented = (
+        '"""Module doc."""\n'
+        "def f(x):\n"
+        '    """Function\n    doc with # hash."""\n'
+        "    if x:\n"
+        "        y = 1\n"
+        "    z = 'a'\n"
+        "    return y + z\n"
+    )
+    assert _digest(documented) == base
+    cls = "class C:\n    '''Doc.'''\n    def m(self):\n        return 1\n"
+    assert _digest(cls) == _digest("class C:\n    def m(self):\n        return 1\n")
+    # non-ASCII text before a docstring on the same line (byte vs character offsets)
+    assert provenance.canonical_source('x = "é"; """d"""\n'.encode()) == 'x = "é"; """d"""\n'
+    assert provenance.canonical_source('def g():\n    """é"""\n    return "é"\n'.encode()) == (
+        'def g():\n    return "é"\n'
+    )
+
+
+def test_digest_changes_with_code_string_and_indentation():
+    base = _digest(_BASE)
+    assert _digest(_BASE.replace("y + z", "y - z")) != base
+    assert _digest(_BASE.replace("'a'", "'b'")) != base
+    assert _digest(_BASE.replace("'a'", "'a '")) != base
+    assert _digest(_BASE.replace("    z = 'a'\n", "        z = 'a'\n")) != base  # into
+    nested = "def f(x):\n    if x:\n        y = 1\n        z = 2\n    return y\n"
+    assert _digest(nested.replace("        z = 2", "    z = 2")) != _digest(nested)  # out of
+    # a string that is not the first statement is code, not a docstring
+    assert _digest("def f():\n    x = 1\n    'not a doc'\n") != _digest("def f():\n    x = 1\n")
+
+
+def test_digest_of_fstrings_does_not_depend_on_tokenization():
+    src = "name = 'a'\nmsg = f'{name!r:>{10}} # not a comment {name}'  # real comment\n"
+    canon = provenance.canonical_source(src.encode())
+    assert canon == "name = 'a'\nmsg = f'{name!r:>{10}} # not a comment {name}'\n"
+    assert _digest(src) == hashlib.sha256(canon.encode()).hexdigest()
+    assert _digest(src.replace("{name}", "{name.upper()}")) != _digest(src)
+
+
+def test_canonical_source_exact_text_is_pinned():
+    """Same text on every interpreter; a mismatch means digests would differ across Pythons."""
+    src = (
+        '"""Module doc."""\r\n'
+        "# comment\n"
+        "import os   \n"
+        "\n"
+        "\n"
+        "class C:\n"
+        '    """Doc\n'
+        "    more.\n"
+        '    """\n'
+        "\n"
+        "    X = f'{os.sep}\\u00e9 # in string'  # trailing\n"
+        "\n"
+        "    def m(self):\n"
+        "        '''Method doc.'''\n"
+        "        if self:\n"
+        "            return 'caf\u00e9'\n"
+        "        return (1,  # why\n"
+        "                2)\n"
+    )
+    expected = (
+        "import os\n"
+        "class C:\n"
+        "    X = f'{os.sep}\\u00e9 # in string'\n"
+        "    def m(self):\n"
+        "        if self:\n"
+        "            return 'caf\u00e9'\n"
+        "        return (1,\n"
+        "                2)\n"
+    )
+    assert provenance.canonical_source(src.encode()) == expected
+    assert _digest(src) == hashlib.sha256(expected.encode("utf-8")).hexdigest()
 
 
 def test_syntax_and_decode_errors_raise(tmp_path):

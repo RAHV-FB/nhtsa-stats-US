@@ -29,7 +29,7 @@
  "module": "nhtsa_stats.analysis.drugs",
  "git_commit": "af9ce88",
  "source_sha256": "663cfcde09df7a860c1426ae167d87dcacb8901b5cb930440e33f245e9eed35b",
- "code_sha256": "e97c5a71eb177b49fa06d66e2ea0c83edf8e0b7befae22834895b2eefe9e8c8d",
+ "code_sha256": "c9f6e1ec312fab6053ca80de28934f8fc4e542f2501249ad7cc4bc51d389d273",
  "inputs_sha256": {
   "data/processed/fars_driver.parquet": "b5ff665422d482118e6f775179b59d8ca90b90501f8ea1d09fa79baa66107d04",
   "data/processed/fars_crash.parquet": "30f4314e8984ce2ba3cd764b561628edf36950705c1fc3bdd16769a417846ddf",

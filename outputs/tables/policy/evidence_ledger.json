@@ -49,7 +49,7 @@
  "module": "nhtsa_stats.simulation.evidence",
  "git_commit": "af9ce88",
  "source_sha256": "ac8c0dd8593406a9ba45e46e32059bc6232931184426bbd2821e83a96228c2ae",
- "code_sha256": "181e05373406a8857c4133879fe6ee943420223bd6237b7f05ce7c67815bfd1a",
+ "code_sha256": "1e402ddaed97cd018784eab65202dfbe1eec0a767dd39a60c1c8b922362e6d0b",
  "inputs_sha256": {
   "data/processed/fars_crash.parquet": "30f4314e8984ce2ba3cd764b561628edf36950705c1fc3bdd16769a417846ddf",
   "data/processed/fars_person.parquet": "97b40b82c1b47f76bf99a8e05ebaa84e14c4b1ea2ecea3e86be6de4c2189bfa2",

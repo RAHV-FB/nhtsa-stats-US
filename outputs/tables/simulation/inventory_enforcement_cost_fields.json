@@ -21,7 +21,7 @@
  "module": "nhtsa_stats.simulation.baseline",
  "git_commit": "af9ce88",
  "source_sha256": "7fa12cd0e2d338d64f7ec7eafaff281667b6486eaa3b6da5b0590d71528262cc",
- "code_sha256": "eb05b24650a448a4ce953b480b192c98ecb0a1e3185c67f75d44cb30e5a1ee5f",
+ "code_sha256": "d7aa9d3d4c8a4cc6278959af059ba115bdae772ec6a0a8e424d31e684cbaaf86",
  "inputs_sha256": {
   "outputs/audit/column_inventory.csv": "007f8b19b18bf3b5baf5a05d5c20ebd3543f7b02701f386da0c85bc0848110cf"
  },

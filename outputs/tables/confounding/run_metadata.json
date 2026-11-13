@@ -279,7 +279,7 @@
  "data_unchanged_during_run": true,
  "_provenance": {
   "module": "nhtsa_stats.analysis.confounding",
-  "code_sha256": "7e367c55e85c48c5d7f63afd3d39e8a52552f3a561a528b8d04aabcd407bcb98",
+  "code_sha256": "ce553f458d9fe6c70a7f42296bf1f5ed8619575ce056c59a7b4e93dd37620b2e",
   "git_commit": "af9ce88",
   "generated_utc": "2026-11-13T01:17:41Z"
  }

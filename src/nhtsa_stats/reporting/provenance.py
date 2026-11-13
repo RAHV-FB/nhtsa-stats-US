@@ -4,9 +4,12 @@
 
 * ``code_sha256``: one digest over the producing module and every ``nhtsa_stats`` module it
   imports (transitively, including imports inside functions), so a change to a shared helper
-  marks dependent tables stale.  A file is digested as its AST with docstrings removed, so
-  comment, blank-line, formatting and docstring edits leave the digest alone while any code or
-  string-literal change (sidecar ``method`` text included) changes it.
+  marks dependent tables stale.  A file is digested as a canonical text (``canonical_source``):
+  comments and docstrings cut out, trailing whitespace stripped, empty lines dropped, leading
+  indentation kept, hashed as UTF-8.  It does not use ``ast.dump``, which differs between Python
+  versions, so the digest is the same on every interpreter.  Comment, blank-line, trailing-space
+  and docstring edits leave it alone while any code, indentation or string-literal change
+  (sidecar ``method`` text included) changes it.
 * One **snapshot** of every ``nhtsa_stats/**/*.py`` is taken per process (``take_snapshot``, called
   first thing by ``cli.main``; lazily on first use otherwise) and every closure is computed from
   it.  Files edited on disk afterwards cannot leak into the recorded hashes, whichever module
@@ -23,7 +26,10 @@ from __future__ import annotations
 
 import ast
 import hashlib
+import io
+import re
 import subprocess
+import tokenize
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -48,24 +54,60 @@ def file_sha256(path: Path) -> str:
 # ---- source digests ------------------------------------------------------------------------
 
 
-def _strip_docstrings(tree: ast.AST) -> ast.AST:
+_LINE = re.compile(r"[^\r\n]*(?:\r\n|\r|\n)|[^\r\n]+")  # the line breaks ``ast`` counts
+
+
+def _docstring_spans(tree: ast.AST) -> list[ast.Expr]:
+    spans = []
     for node in ast.walk(tree):
         if isinstance(node, ast.Module | ast.ClassDef | ast.FunctionDef | ast.AsyncFunctionDef):
-            body = node.body
+            first = node.body[0] if node.body else None
             if (
-                body
-                and isinstance(body[0], ast.Expr)
-                and isinstance(body[0].value, ast.Constant)
-                and isinstance(body[0].value.value, str)
+                isinstance(first, ast.Expr)
+                and isinstance(first.value, ast.Constant)
+                and isinstance(first.value.value, str)
             ):
-                node.body = body[1:] or [ast.Pass()]
-    return tree
+                spans.append(first)
+    return spans
 
 
-def ast_digest(source: bytes) -> str:
-    """SHA-256 of the AST of ``source`` with module/class/function docstrings removed."""
-    tree = _strip_docstrings(ast.parse(source))
-    return hashlib.sha256(ast.dump(tree).encode()).hexdigest()
+def canonical_source(source: bytes) -> str:
+    """Version-independent canonical text of Python ``source``.
+
+    Comments (``tokenize`` COMMENT tokens) and module/class/function docstrings (located by
+    ``ast`` node positions) are cut out, trailing whitespace is stripped from every line, lines
+    that are then empty are dropped, and leading indentation is kept.  Only the text, the AST
+    node positions and the COMMENT token type are used, none of which differ between Python
+    versions (``ast.dump`` and the f-string tokens do).  Raises ``SyntaxError``,
+    ``tokenize.TokenError`` or ``ValueError`` (decode errors) on bad source."""
+    tree = ast.parse(source)
+    encoding, _ = tokenize.detect_encoding(io.BytesIO(source).readline)
+    lines = _LINE.findall(source.decode(encoding))
+    starts, pos = [], 0
+    for line in lines:
+        starts.append(pos)
+        pos += len(line)
+    spans: list[tuple[int, int]] = []
+    for tok in tokenize.generate_tokens(iter(lines).__next__):
+        if tok.type == tokenize.COMMENT:
+            (r0, c0), (r1, c1) = tok.start, tok.end
+            spans.append((starts[r0 - 1] + c0, starts[r1 - 1] + c1))
+    for node in _docstring_spans(tree):
+        assert node.end_lineno is not None and node.end_col_offset is not None
+        # ``col_offset`` counts UTF-8 bytes, ``tokenize`` columns count characters
+        c0 = len(lines[node.lineno - 1].encode()[: node.col_offset].decode())
+        c1 = len(lines[node.end_lineno - 1].encode()[: node.end_col_offset].decode())
+        spans.append((starts[node.lineno - 1] + c0, starts[node.end_lineno - 1] + c1))
+    text = "".join(lines)
+    for a, b in sorted(spans, reverse=True):
+        text = text[:a] + text[b:]
+    kept = [ln for ln in (ln.rstrip() for ln in _LINE.findall(text)) if ln]
+    return "".join(ln + "\n" for ln in kept)
+
+
+def source_digest(source: bytes) -> str:
+    """SHA-256 of the UTF-8 encoding of ``canonical_source(source)``."""
+    return hashlib.sha256(canonical_source(source).encode("utf-8")).hexdigest()
 
 
 def _imports(tree: ast.AST, name: str, is_pkg: bool, package: str) -> frozenset[str]:
@@ -102,8 +144,8 @@ def _read_source(path: Path, name: str, is_pkg: bool, package: str) -> SourceInf
     try:
         data = path.read_bytes()
         tree = ast.parse(data)
-        digest = ast_digest(data)
-    except (OSError, SyntaxError, ValueError) as e:  # ValueError covers UnicodeDecodeError
+        digest = source_digest(data)
+    except (OSError, SyntaxError, tokenize.TokenError, ValueError) as e:  # ValueError: decoding
         return SourceInfo(path, error=f"{type(e).__name__}: {e}")
     return SourceInfo(
         path,
@@ -178,7 +220,7 @@ class Snapshot:
         return src.raw_sha256 if src is not None else None
 
     def package_sha256(self) -> str:
-        """One digest over every file of the package (module names and AST digests)."""
+        """One digest over every file of the package (module names and source digests)."""
         h = hashlib.sha256()
         for name in sorted(self.sources):
             src = self.sources[name]

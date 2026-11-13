@@ -29,7 +29,7 @@
  "module": "nhtsa_stats.analysis.restraint_behaviour",
  "git_commit": "af9ce88",
  "source_sha256": "f71c979096aaf72d0e66f842bfb7d38c9af59e41afa81ab677b24174b2bf0e45",
- "code_sha256": "48569a0e969017a454c46097a9864ee401be9f9f60a5092019ce81f7f3670888",
+ "code_sha256": "cd14c77e3aa224168b1b7095911e9b73931a748a7f69e9ef4364a26392fb617b",
  "inputs_sha256": {
   "data/processed/crss_person.parquet": "145d300272256d566371ce07d81005f71959a9eeab5e00e3066d85abaca91fa8",
   "data/processed/crss_driver.parquet": "86972ed2184a8c4bdedf4f1dc2e02be1c9a961a43afd2b5cde13b97728737588",

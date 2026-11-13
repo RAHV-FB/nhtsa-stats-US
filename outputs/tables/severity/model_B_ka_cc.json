@@ -5471,7 +5471,7 @@
  "ridge": 0.01,
  "_provenance": {
   "module": "nhtsa_stats.analysis.severity",
-  "code_sha256": "1515acd49307c77a660258c136f760cf518836a0873f853c8c4a04391cf7e13f",
+  "code_sha256": "10e1f146a1007abcfe246d05cdad2115b7f6c42ebaa985dc3de296aadd5f3e70",
   "git_commit": "af9ce88",
   "generated_utc": "2026-11-13T00:28:49Z"
  }

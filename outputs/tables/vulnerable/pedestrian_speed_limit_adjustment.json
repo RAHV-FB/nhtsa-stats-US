@@ -29,7 +29,7 @@
  "module": "nhtsa_stats.analysis.vulnerable",
  "git_commit": "af9ce88",
  "source_sha256": "0196d4a559e11206b88c80cfef9479f6b128b799def969c89b94a02ba8a88272",
- "code_sha256": "ba1c3fb433996d0fbec1973d3c2ef450e875b0507ebe124fe381c03c4abba49c",
+ "code_sha256": "0e589cee2e6cae2ce590a236210ddb598aa501b36652bb90978c3af39be79498",
  "inputs_sha256": {
   "data/interim/CRSS/person": "c3f0d165d363f77b32c74360b9c6e3eba1cd6d070fad9d05d88abd682d2d7771",
   "data/interim/CRSS/vehicle": "6ae2321cf8f04d0d3926264d90e6de2d0a40e2dee55b9356060c1450d5221da0",

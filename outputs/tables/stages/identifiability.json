@@ -16,7 +16,7 @@
  "module": "nhtsa_stats.analysis.stages",
  "git_commit": "af9ce88",
  "source_sha256": "aef5835dc132ba3e1b4d3a4ac3d1648885dc688f9824b475e5d1d9970ec9d487",
- "code_sha256": "c012290054135a483801a1c756dfdda40ee3d4d464ed7fb5fd22dfb0d28d5ccf",
+ "code_sha256": "7a0c56bd795a2f29deb3f398ce44b8a7585c1c7bb35f5231635a705d3f37c02f",
  "inputs_sha256": {},
  "package_sha256": "fbdac1b588be76a011931549cc2f2013fc1b6405f88cee1ba0e10db719e3ed6b",
  "generated_utc": "2026-11-13T02:17:53Z"

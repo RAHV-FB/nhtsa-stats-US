@@ -2257,7 +2257,7 @@
  },
  "_provenance": {
   "module": "nhtsa_stats.analysis.person",
-  "code_sha256": "bed1ea442a6b8e137891d60aaba1da6ad04e445e39a4c6edb32731c3b3732387",
+  "code_sha256": "4f45ac8e38e1729b07ab4b4385d013a1ab1a8f9cb647a19d95ef69167ab1f501",
   "git_commit": "af9ce88",
   "generated_utc": "2026-11-13T01:30:28Z"
  }

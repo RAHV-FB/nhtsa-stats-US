@@ -24,7 +24,7 @@
  "module": "nhtsa_stats.analysis.contributions",
  "git_commit": "af9ce88",
  "source_sha256": "a28b4764e16f7312631ccccde8632a583225f7d888a0c9ae6bddff7d6f965762",
- "code_sha256": "d99e4d2eb01574482a2df369b707441bd747a8a8e9440cff14c82ca268fe011e",
+ "code_sha256": "fb6cd401330b9dbdc49bffe2a8e56b6e737f1358009a3fa2af8d00fd39d074b2",
  "inputs_sha256": {
   "data/processed/crss_crash.parquet": "1a31897f37cce3be223cc5abfb823582b68b9f7096a8c38980e9346f3450c6e3",
   "data/processed/fars_crash.parquet": "30f4314e8984ce2ba3cd764b561628edf36950705c1fc3bdd16769a417846ddf",
