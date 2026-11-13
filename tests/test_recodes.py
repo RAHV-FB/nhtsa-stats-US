@@ -72,3 +72,72 @@ def test_prior_suspension_count_is_null_before_2018():
 
 def test_crss_driver_does_not_carry_crash_level_hit_and_run_duplicate():
     assert "hit_and_run" not in dv.CRSS_CRASH_COLS
+
+
+# ---- person-level killed must stay unknown (never a raw recode) ----------------------------
+def _alias_sources(path: str, names: set[str]) -> dict[str, list[str]]:
+    """For every ``<expr>.alias(name)`` in the file, the source of ``<expr>``."""
+    import ast
+    from pathlib import Path
+
+    src = Path(path).read_text()
+    out: dict[str, list[str]] = {}
+    for node in ast.walk(ast.parse(src)):
+        if (
+            isinstance(node, ast.Call)
+            and isinstance(node.func, ast.Attribute)
+            and node.func.attr == "alias"
+            and node.args
+            and isinstance(node.args[0], ast.Constant)
+            and node.args[0].value in names
+        ):
+            out.setdefault(node.args[0].value, []).append(ast.unparse(node.func.value))
+    return out
+
+
+def test_features_and_vulnerable_define_killed_with_person_fatal():
+    import nhtsa_stats.analysis.vulnerable as vu
+    import nhtsa_stats.processing.features as ft
+
+    wanted = {"killed", "killed_cc", "killed_or_serious", "killed_or_serious_cc"}
+    for mod in (ft, vu):
+        found = _alias_sources(mod.__file__, wanted)
+        assert {"killed", "killed_or_serious"} <= set(found), mod.__name__
+        for name, exprs in found.items():
+            for e in exprs:
+                fn = "person_killed_or_serious" if name.startswith("killed_or") else "person_fatal"
+                # either the shared recode, or a copy of the column made from it
+                assert f"h.{fn}(" in e or e.startswith("pl.col('killed"), (mod.__name__, name, e)
+
+
+def test_vulnerable_killed_is_unknown_for_died_prior_and_unknown_severity(monkeypatch):
+    import nhtsa_stats.analysis.vulnerable as vu
+
+    person = pl.DataFrame(
+        {
+            "YEAR": [2022] * 6,
+            "ST_CASE": [1, 2, 3, 4, 5, 6],
+            "VEH_NO": [1] * 6,
+            "PER_NO": [1] * 6,
+            "PER_TYP": [5] * 6,
+            "STR_VEH": [1] * 6,
+            "AGE": [30] * 6,
+            "SEX": [1] * 6,
+            "INJ_SEV": [4, 3, 0, 5, 6, 9],
+            "LOCATION": [1] * 6,
+        }
+    )
+    vehicle = pl.DataFrame(
+        {
+            "YEAR": [2022] * 6,
+            "ST_CASE": [1, 2, 3, 4, 5, 6],
+            "VEH_NO": [1] * 6,
+            "BODY_TYP": [4] * 6,
+            "VSPD_LIM": [35] * 6,
+            "SPEEDREL": [0] * 6,
+        }
+    )
+    monkeypatch.setattr(vu, "load_table", lambda s, t, y, c: person if t == "person" else vehicle)
+    out = vu.build("FARS", (2022,)).sort("case_id")
+    assert out["killed"].to_list() == [1, 0, 0, 0, None, None]
+    assert out["killed_cc"].to_list() == [1, 0, 0, 0, None, None]

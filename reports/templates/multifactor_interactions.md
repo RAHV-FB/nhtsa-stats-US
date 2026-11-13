@@ -73,7 +73,9 @@ Additive interaction is the k-way contrast Σ(−1)^(k−|s|) p_s (for two facto
 p11 − p10 − p01 + p00); multiplicative interaction is the same contrast on the log scale
 (for two factors RR11 / (RR10 · RR01)). Combinations with fewer than 30 sample units or 10
 deaths are withheld with every contrast using them. Holm adjustment across all contrasts of the
-six registered analyses, separately per scale.
+six registered analyses, separately per scale. The family is fixed in advance: a registered
+contrast that cannot be estimated (withheld cells) still counts toward the family size, is treated
+as not rejectable, and shows no p-value.
 
 *How to read the two scales.* A positive additive interaction (contrast > 0) is expected
 whenever two factors each raise risk and combine multiplicatively, so it shows where excess
@@ -242,14 +244,11 @@ only if its Holm p < 0.05):
 
 {{mdtable:multifactor/interactions|registered=True|analysis:Analysis:;contrast:Contrast:;additive_contrast:Additive (per 1,000):cix1000:1;additive_contrast_p_holm:Holm p:.2g;multiplicative_ratio:Ratio of RRs:ci:2;multiplicative_ratio_p_holm:Holm p:.2g;flag:Status:}}
 
-Detected, by this criterion: exceedance × alcohol at crash level (super-additive and
-sub-multiplicative) and for single-vehicle drivers (super-additive only); speeding × night
-(super-additive); alcohol × night and speeding × alcohol at crash level (sub-multiplicative);
-belt non-use × speeding (super-additive, drivers and passengers); belt non-use × alcohol
-(sub-multiplicative for drivers; super-additive and sub-multiplicative for passengers); and,
-in the selected drug-known subset, speeding × unbelted (super-additive) and alcohol × drugs,
-alcohol × unbelted and drugs × unbelted (sub-multiplicative).
-No three-way contrast is detected; the four-way contrast is withheld.
+A contrast is detected on a scale when its Holm-adjusted p < 0.05 within the fixed family of
+registered contrasts; the table lists every registered contrast that is detected on at least one
+scale, with its direction, and every contrast the data withhold.
+
+{{mdtable:multifactor/interactions|registered=True;detected!=|analysis:Analysis:;contrast:Contrast:;detected:Detected:;additive_contrast_p_holm:Additive Holm p:.2g;multiplicative_ratio_p_holm:Multiplicative Holm p:.2g}}
 
 *Distinguishing genuine interaction from high baselines.* Several combinations look
 "unusually deadly" in raw counts simply because each factor has a high risk on its own; the

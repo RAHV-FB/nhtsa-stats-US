@@ -107,8 +107,8 @@ def test_check_features_blocks_post_crash_and_design_vars():
 def test_holm_matches_hand_computation():
     p = np.array([0.01, 0.04, 0.03, np.nan])
     out = person.holm(p)
-    # sorted 0.01, 0.03, 0.04 -> 3*0.01, max(0.03, 2*0.03), max(0.06, 1*0.04)
-    np.testing.assert_allclose(out[:3], [0.03, 0.06, 0.06])
+    # fixed family of 4 (the NaN test counts, p = 1): 4*0.01, 3*0.03, max(0.09, 2*0.04)
+    np.testing.assert_allclose(out[:3], [0.04, 0.09, 0.09])
     assert np.isnan(out[3])
 
 

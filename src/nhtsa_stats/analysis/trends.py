@@ -152,7 +152,7 @@ CRSS_INPUT = "data/processed/crss_crash.parquet"
 FARS_INPUTS = [
     "data/processed/fars_crash.parquet",
     "data/processed/fars_person.parquet",
-    "data/interim/FARS/midrvacc (multiply-imputed driver BAC, 10 implicates)",
+    "data/interim/FARS/midrvacc",
 ]
 LPV_BODIES = LPV_BODY_GROUPS
 

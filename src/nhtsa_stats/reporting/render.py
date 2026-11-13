@@ -19,6 +19,8 @@ Placeholder grammar::
   thousands separators, e.g. ``rnd:-2`` gives ``11,800``), ``x:N`` (ratio such as ``2.2×``),
   ``in10`` (``6 in 10``) and ``oneinN`` (``1 in 4``).
 * A filter value ``a~b`` matches either ``a`` or ``b``.
+* ``key!=value`` excludes the rows where ``key`` equals ``value`` (``a~b`` allowed); a missing
+  cell compares as the empty string, so ``key!=`` keeps the rows where ``key`` is non-empty.
 * ``column`` may be ``min(col)`` or ``max(col)``: the minimum / maximum of ``col`` over all
   rows the filters select (any number of rows).
 
@@ -65,6 +67,8 @@ def _json(path: str):
 
 def _norm(v) -> str:
     """String form used for filter matching: 2016.0 -> '2016', 'yes' -> 'yes'."""
+    if v is None or (isinstance(v, float) and v != v):
+        return ""  # missing cells (empty in the CSV) compare as the empty string
     if isinstance(v, float) and v.is_integer():
         return str(int(v))
     return str(v)
@@ -126,10 +130,13 @@ def _filtered(table: str, filters: str, spec: str) -> pd.DataFrame:
     if filters:
         for f in filters.split(";"):
             k, v = (x.strip() for x in f.split("=", 1))
+            negate = k.endswith("!")
+            k = k.rstrip("!").strip()
             if k not in df.columns:
                 raise RenderError(f"{table}: no column {k!r} (filter in {spec})")
             vals = [x.strip() for x in v.split("~")]  # "a~b" matches either value
-            mask &= df[k].map(_norm).isin(vals)
+            hit = df[k].map(_norm).isin(vals)
+            mask &= ~hit if negate else hit
     return df[mask]
 
 

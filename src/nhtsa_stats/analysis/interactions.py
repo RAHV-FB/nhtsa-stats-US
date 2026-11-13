@@ -44,7 +44,7 @@ import pandas as pd
 from scipy import stats
 
 from nhtsa_stats import config
-from nhtsa_stats.analysis import severity, specs
+from nhtsa_stats.analysis import multiplicity, severity, specs
 from nhtsa_stats.analysis.survey import (
     MarginSet,
     ModelSpec,
@@ -501,26 +501,11 @@ def analyse_triple(
 
 
 def _adjust_p(p: pd.Series, method: str) -> pd.Series:
+    """Holm or Benjamini-Hochberg over ``len(p)`` registered tests (non-finite p stays in the
+    family as p = 1 and is reported as NaN; ``analysis.multiplicity``)."""
     vals = p.to_numpy(float)
-    ok = np.isfinite(vals)
-    out = np.full(len(vals), np.nan)
-    v = vals[ok]
-    m = len(v)
-    order = np.argsort(v)
-    adj = np.empty(m)
-    if method == "holm":
-        running = 0.0
-        for rank, idx in enumerate(order):
-            running = max(running, min(1.0, (m - rank) * v[idx]))
-            adj[idx] = running
-    else:  # Benjamini-Hochberg
-        running = 1.0
-        for rank in range(m - 1, -1, -1):
-            idx = order[rank]
-            running = min(running, v[idx] * m / (rank + 1))
-            adj[idx] = min(running, 1.0)
-    out[ok] = adj
-    return pd.Series(out, index=p.index)
+    adj = multiplicity.holm(vals) if method == "holm" else multiplicity.benjamini_hochberg(vals)
+    return pd.Series(adj, index=p.index)
 
 
 def run_pairs(

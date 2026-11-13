@@ -154,3 +154,9 @@ def test_readme_template_is_written_to_the_root(tmp_path):
     assert (root / "README.md").read_text().endswith("root text\n")
     assert not (out / "README.md").exists()
     assert (out / "report.md").read_text().endswith("report text\n")
+
+
+def test_negated_and_empty_filters(tables):
+    out = render.render_text("{{mdtable:m/t|factor!=speeding;level=yes|factor::}}")
+    assert "speeding" not in out and "alcohol" in out
+    assert render._norm(float("nan")) == "" and render._norm(None) == ""

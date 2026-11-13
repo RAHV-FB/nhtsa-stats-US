@@ -41,7 +41,11 @@ NO_INTERVENTION_DATA = (
 )
 
 
+_TABLES_READ: dict[str, None] = {}  # output tables read by _tab (ordered, de-duplicated)
+
+
 def _tab(module: str, name: str) -> pd.DataFrame | None:
+    _TABLES_READ[f"outputs/tables/{module}/{name}.csv"] = None
     try:
         return load_table(module, name)
     except FileNotFoundError:
@@ -569,6 +573,7 @@ def build_ledger() -> pd.DataFrame:
 
 
 def run() -> dict:
+    _TABLES_READ.clear()
     ledger = build_ledger()
     seg = segment_deaths()
     save_table(
@@ -579,7 +584,11 @@ def run() -> dict:
         population="FARS 2022-2024 (deaths); CRSS 2016-2024 (associations)",
         unit="intervention",
         method="Assembled from descriptive, severity, measurement, interactions, burden and matched outputs",
-        inputs=["outputs/tables/*"],
+        inputs=[
+            "data/processed/fars_crash.parquet",  # segment_deaths
+            "data/processed/fars_person.parquet",
+            *_TABLES_READ,
+        ],
     )
     save_json(seg, MODULE, "segment_deaths")
     out = {"evidence_ledger": ledger, "segment_deaths": seg}

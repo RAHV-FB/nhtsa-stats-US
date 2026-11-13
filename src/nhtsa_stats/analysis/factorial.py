@@ -49,6 +49,7 @@ import pandas as pd
 from scipy import stats
 
 from nhtsa_stats import config
+from nhtsa_stats.analysis import multiplicity
 from nhtsa_stats.analysis.confounding import collapse_cells, known_outcome_domain
 from nhtsa_stats.analysis.survey import (
     Estimate,
@@ -428,17 +429,9 @@ def single_factor_table(res: FactorialResult) -> pd.DataFrame:
 
 
 def holm(p: pd.Series) -> pd.Series:
-    """Holm step-down adjusted p-values (NaN kept as NaN)."""
+    """Holm step-down adjusted p-values over the registered family (``len(p)`` tests).
+
+    A non-estimable contrast (NaN p) stays in the family as a test that cannot be rejected
+    (p = 1 inside the adjustment) and is reported as NaN; see ``analysis.multiplicity``."""
     p = pd.Series(p, dtype=float)
-    ok = p.notna()
-    vals = p[ok].to_numpy()
-    order = np.argsort(vals)
-    m = len(vals)
-    adj = np.empty(m)
-    running = 0.0
-    for rank, idx in enumerate(order):
-        running = max(running, min(1.0, (m - rank) * vals[idx]))
-        adj[idx] = running
-    out = pd.Series(np.nan, index=p.index)
-    out[ok] = adj
-    return out
+    return pd.Series(multiplicity.holm(p.to_numpy()), index=p.index)

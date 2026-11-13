@@ -100,16 +100,11 @@ def cmd_analyze(args: argparse.Namespace) -> None:
     unknown = [n for n in args.modules if n not in ANALYSES]
     if unknown:
         raise SystemExit(f"unknown module(s): {unknown}; see `nhtsa list`")
-    from nhtsa_stats.reporting.io import snapshot_code_sha256
-
     # Always in dependency order, whatever order the modules were named in.
     names = [n for n in ANALYSES if not args.modules or n in args.modules]
     for name in names:
         t0 = time.time()
         mod = importlib.import_module(ANALYSES[name])
-        # Digest of the code as loaded, before run(): edits during a long run cannot make
-        # the tables written by this run look fresh.
-        snapshot_code_sha256(ANALYSES[name])
         log.info("running %s", name)
         mod.run()
         log.info("%s finished in %.0fs", name, time.time() - t0)
@@ -139,7 +134,7 @@ def stale_tables() -> TableStatus:
     import json
 
     from nhtsa_stats import config
-    from nhtsa_stats.reporting.io import current_code_sha256, input_sha256
+    from nhtsa_stats.reporting.provenance import current_code_sha256, input_sha256
 
     stale: list[str] = []
     unhashed: list[str] = []
@@ -194,6 +189,11 @@ def cmd_status(_: argparse.Namespace) -> None:
 
 
 def main(argv: list[str] | None = None) -> None:
+    # One snapshot of the package source, before anything else is imported: every code hash
+    # recorded by this process comes from it, whatever is edited on disk during the run.
+    from nhtsa_stats.reporting.provenance import take_snapshot
+
+    take_snapshot()
     parser = argparse.ArgumentParser(
         prog="nhtsa", description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
     )

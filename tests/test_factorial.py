@@ -123,9 +123,11 @@ def test_missing_values_rejected():
 def test_holm():
     p = pd.Series([0.01, 0.04, np.nan, 0.03])
     adj = fa.holm(p)
-    assert adj[0] == pytest.approx(0.03)
-    assert adj[3] == pytest.approx(0.06)
-    assert adj[1] == pytest.approx(0.06)
+    # Fixed family of 4: the NaN contrast is a test that cannot be rejected (p = 1), not a
+    # dropped one, so m stays 4: 4*.01, 3*.03, 2*.04 (running max), NaN reported.
+    assert adj[0] == pytest.approx(0.04)
+    assert adj[3] == pytest.approx(0.09)
+    assert adj[1] == pytest.approx(0.09)
     assert np.isnan(adj[2])
 
 

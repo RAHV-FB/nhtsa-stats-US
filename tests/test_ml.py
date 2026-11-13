@@ -832,3 +832,59 @@ def test_evaluate_and_thresholds_mask_unknown_outcome_rows():
     assert (t[["n_tp", "n_fp", "n_fn", "n_tn"]].sum(axis=1) == int(known.sum())).all()
     t = thr[thr.outcome == "fatal"]
     assert (t[["n_tp", "n_fp", "n_fn", "n_tn"]].sum(axis=1) == len(df)).all()
+
+    # The thresholds themselves come from the validation rows with a known outcome only.  A
+    # ``ka`` threshold computed over all rows (unknown ka read as 0) would give a 50%-recall
+    # threshold of ~0.476 here instead of ~0.050 (pinned below).
+    for oc in ("fatal", "ka"):
+        d = df[df[oc].notna()]
+        sel = df[oc].notna().to_numpy()
+        pv, yv, wv = p[oc, "pre_crash", "logit_main"][sel], d[oc].to_numpy(), d["WEIGHT"].to_numpy()
+        # brute force: the largest threshold whose weighted recall in the known rows is >= 50%
+        cands = np.unique(pv)[::-1]
+        recall = np.array([(wv * yv)[pv >= c].sum() / (wv * yv).sum() for c in cands])
+        t50 = cands[np.argmax(recall >= 0.5)]
+        got = thr[thr.outcome == oc].set_index("threshold_rule")["threshold"]
+        assert got["50% recall in 2022 (weighted)"] == pytest.approx(t50)
+        for q, rule in ((0.99, "top 1%"), (0.95, "top 5%")):
+            assert got[f"{rule} of 2022 crashes (weighted)"] == pytest.approx(
+                float(ml.weighted_quantile(pv, wv, q)[0])
+            )
+    ka_got = thr[thr.outcome == "ka"].set_index("threshold_rule")["threshold"]
+    assert ka_got["50% recall in 2022 (weighted)"] == pytest.approx(0.0499, abs=5e-4)
+    assert ka_got["top 5% of 2022 crashes (weighted)"] == pytest.approx(0.1813, abs=5e-4)
+    assert ka_got["top 1% of 2022 crashes (weighted)"] == pytest.approx(0.2512, abs=5e-4)
+
+
+def test_temporal_stability_keeps_the_whole_design_and_masks_unknown_outcome_rows(monkeypatch):
+    """The year's PSUs are factorised over every crash (not re-factorised on the rows with a
+    known outcome): a PSU whose crashes all have ``ka`` unknown still counts as a cluster."""
+    df = _eval_frame(n=3000, seed=5)
+    rng = np.random.default_rng(3)
+    df["YEAR"] = rng.choice(list(range(2016, 2025)), len(df))
+    # every crash of one PSU in 2022 has an unknown ka
+    lone = (df["YEAR"] == 2022) & (df["PSU_VAR"] == df.loc[df["YEAR"] == 2022, "PSU_VAR"].iloc[0])
+    df.loc[lone, "ka"] = np.nan
+    stages = {"pre_crash": ml.STAGES["pre_crash"]}
+    monkeypatch.setattr(ml, "STAGES", stages)
+    params = {(oc, "pre_crash"): {} for oc in ml.OUTCOMES}
+    seen = []
+    real = ml.point_and_boot
+
+    def spy(p, y, w, cidx, n_clusters, mult, calibration=True):
+        seen.append((len(y), n_clusters, mult.shape[1], len(cidx)))
+        return real(p, y, w, cidx, n_clusters, mult, calibration)
+
+    monkeypatch.setattr(ml, "point_and_boot", spy)
+    out = ml.temporal_stability(df, params, 10, np.random.default_rng(0))
+    assert len(out)
+    for year in range(2020, 2025):
+        yr = df[df["YEAR"] == year]
+        n_cl = len(yr.groupby(["PSUSTRAT", "PSU_VAR"]))
+        assert any(s[1] == n_cl and s[2] == n_cl for s in seen)
+    yr = df[df["YEAR"] == 2022]
+    full = len(yr.groupby(["PSUSTRAT", "PSU_VAR"]))
+    known = len(yr[yr["ka"].notna()].groupby(["PSUSTRAT", "PSU_VAR"]))
+    assert known < full  # the fixture really loses a PSU if rows were dropped first
+    ka_2022 = [s for s in seen if s[0] == int(yr["ka"].notna().sum())]
+    assert ka_2022 and all(s[1] == full for s in ka_2022)

@@ -213,6 +213,26 @@ def _synthetic_crss(n: int = 3000, seed: int = 3) -> pd.DataFrame:
     )
 
 
+def test_unknown_ka_status_is_shown_separately_not_counted_as_non_ka():
+    crash, person = _synthetic_fars()
+    crss = _synthetic_crss(n=5000)
+    b = e.baseline_from_frames(crash, person, (2022, 2024), crss_crash=crss)
+    win = crss["YEAR"].isin([2022, 2023, 2024])
+    w = crss["WEIGHT"].where(win, 0.0)
+    q = b.quantities
+    unk = q["crss.ka_unknown_crashes_per_year"]
+    assert unk.value == pytest.approx((w * crss["ka"].isna()).sum() / 3)
+    assert unk.value > 0 and "neither KA nor non-KA" in q["crss.ka_crashes_per_year"].note
+    # known KA + known non-KA + unknown = all crashes
+    known_non_ka = (w * (crss["ka"] == 0)).sum() / 3
+    total = q["crss.ka_crashes_per_year"].value + known_non_ka + unk.value
+    assert total == pytest.approx(q["crss.crashes_per_year"].value)
+    ann = b.annual.set_index("YEAR")
+    y = 2023
+    expected = crss.loc[crss["YEAR"] == y, "WEIGHT"][crss["ka"].isna()].sum()
+    assert ann.loc[y, "crss_ka_unknown_crashes"] == pytest.approx(expected)
+
+
 def test_crss_totals_partition_and_outcome_resolution():
     crash, person = _synthetic_fars()
     crss = _synthetic_crss(n=5000)

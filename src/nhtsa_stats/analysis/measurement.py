@@ -806,6 +806,12 @@ def run() -> dict[str, pd.DataFrame]:
             unit=unit,
             outcome=outcome,
             method=method,
-            inputs=["data/processed/*.parquet", "data/interim/FARS/drugs"],
+            inputs=[
+                "data/processed/crss_crash.parquet",
+                "data/processed/crss_person.parquet",
+                "data/processed/fars_crash.parquet",
+                "data/processed/fars_person.parquet",
+                "data/interim/FARS/drugs",
+            ],
         )
     return out

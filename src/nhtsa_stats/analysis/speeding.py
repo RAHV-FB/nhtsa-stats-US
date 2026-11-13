@@ -13,7 +13,7 @@ Method
     The Phase-1 lattice estimator (``confounding``): for every subset of seven covariate blocks
     {calendar/area, time, light, road environment, driver/vehicle mix, the other behaviour,
     crash configuration} a survey logistic model gives the exposure's standardised risk ratio
-    and difference over all crashes.  Reported: sequential tables along several orderings
+    and difference over the crashes where the outcome is known.  Reported: sequential tables along several orderings
     (including "other behaviour first" and "other behaviour last"), exact Shapley shares of the
     crude log-RR with and without the configuration block (a plausible mediator), the range of
     each block's share over orderings, and odds ratios from the same specifications to show
@@ -64,7 +64,11 @@ from nhtsa_stats.reporting.io import save_table
 log = logging.getLogger(__name__)
 MODULE = "speeding"
 POP = cf.POPULATION
-INPUT = ["data/processed/crss_crash.parquet", "data/processed/fars_crash.parquet"]
+INPUT = [
+    "data/processed/crss_crash.parquet",
+    "data/processed/fars_crash.parquet",
+    "data/processed/fars_driver.parquet",
+]
 OUTCOMES = ("fatal", "ka")
 
 ENV_BLOCKS = ("calendar_area", "time", "light", "road_environment", "driver_vehicle_mix")
@@ -779,7 +783,7 @@ def run(cache_dir: Path | None = config.OUTPUT_DIR / "cache") -> dict[str, pd.Da
     out = run_lattices(df, design, cache_dir)
     lat_method = (
         "Survey logistic models for every subset of 7 covariate blocks (exact cell compression); "
-        "standardised RR/RD over all crashes by g-computation; joint Taylor linearisation on the "
+        "standardised RR/RD over the crashes where the outcome is known by g-computation; joint Taylor linearisation on the "
         "25-stratum/67-PSU design (t, 42 df); Shapley shares exact over all orderings"
     )
     _save(

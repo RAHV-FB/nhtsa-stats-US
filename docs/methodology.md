@@ -416,13 +416,18 @@ These record what changed in the pipeline; numbers are in the tables named, not 
   and the trend module.
 * **EMS intervals** (`analysis/stages.py`): crash-to-arrival intervals that are negative or longer
   than 12 hours are set to missing, and the timing tables add a "driver BAC unknown" row.
-* **Sidecar code and input hashes.** Every table's JSON sidecar records `code_sha256`, one SHA-256
-  over the producing module's source and every `nhtsa_stats` module it imports transitively (so a
-  change to a shared helper makes dependent tables stale), taken when the module is loaded for a
-  run, before `run()`, so edits during a long run cannot mark old results fresh. It also records
-  `inputs_sha256` (SHA-256 of each local `data/` input), plus the older `source_sha256` and
-  `package_sha256`. JSON outputs that are dictionaries carry a `_provenance` entry (module,
-  `code_sha256`, git commit, time). `nhtsa status` lists stale tables, tables without a
-  `code_sha256`, and, when the data exist locally, tables whose input data changed.
+* **Sidecar code and input hashes** (`reporting/provenance.py`). Every table's JSON sidecar records
+  `code_sha256`, one SHA-256 over the producing module and every `nhtsa_stats` module it imports
+  transitively (so a change to a shared helper makes dependent tables stale). Each file is digested
+  as its AST with docstrings removed, so comment, formatting and docstring edits do not make tables
+  stale while any code or string-literal change (sidecar method text included) does; the
+  provenance module itself is excluded. One snapshot of all `nhtsa_stats/**/*.py` is taken when
+  the process starts and every closure comes from it, so edits during a long run cannot mark old
+  results fresh. A syntax or decode error in a closure member raises. The sidecar also records
+  `inputs_sha256` (SHA-256 of each local input under `NHTSA_DATA_DIR` / the outputs directory),
+  plus the older `source_sha256` and `package_sha256`. JSON outputs that are dictionaries carry a
+  `_provenance` entry (module, `code_sha256`, git commit, time). `nhtsa status` lists stale
+  tables, tables without a `code_sha256`, and, when the data exist locally, tables whose input
+  data changed.
 * **README.** `README.md` is rendered from `reports/templates/README.md` by `nhtsa analyze report`
   like the reports, and `tests/test_reports_in_sync.py` fails if it is stale.

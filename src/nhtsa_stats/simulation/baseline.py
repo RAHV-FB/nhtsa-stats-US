@@ -745,7 +745,13 @@ def _crss_crash_baseline(
     fatal = _flag(crss[fatal_col], 1).astype(float)
     ones = np.ones(len(crss))
     span = f"{years[0]}-{years[-1]}"
-    note_ka = f"KA = fatal or suspected serious injury, NHTSA-imputed maximum severity ({ka_col})"
+    ka_unknown = crss[ka_col].isna().to_numpy().astype(float)
+    note_ka = (
+        f"KA = fatal or suspected serious injury, NHTSA-imputed maximum severity ({ka_col}); "
+        "crashes whose KA status is unknown (injured with severity unknown, MAXSEV_IM 5, or "
+        "unknown, 9) are neither KA nor non-KA here: they are not counted as KA, so the KA "
+        "total is a lower bound, and they are shown separately (crss.ka_unknown_crashes_per_year)"
+    )
     q: dict[str, Quantity] = {}
 
     def add(name: str, y: np.ndarray, unit: str, rel: Reliability = "high", note: str = "") -> None:
@@ -753,6 +759,14 @@ def _crss_crash_baseline(
 
     add("crss.crashes_per_year", ones, f"police-reported crashes/year (mean {span})")
     add("crss.ka_crashes_per_year", ka, f"KA crashes/year (mean {span})", note=note_ka)
+    add(
+        "crss.ka_unknown_crashes_per_year",
+        ka_unknown,
+        f"crashes/year with unknown KA status (mean {span})",
+        "moderate",
+        "not KA and not non-KA: MAXSEV_IM 5 (injured, severity unknown) or 9 (unknown) in "
+        f"{ka_col}",
+    )
     add(
         "crss.fatal_crashes_per_year",
         fatal,
@@ -791,6 +805,7 @@ def _crss_crash_baseline(
         dom = (crss["YEAR"] == y).to_numpy()
         tot = svy_total(design, ones, dom)
         kat = svy_total(design, ka, dom)
+        unk = svy_total(design, ka_unknown, dom)
         rows.append(
             {
                 "YEAR": y,
@@ -798,6 +813,8 @@ def _crss_crash_baseline(
                 "crss_crashes_se": tot.se,
                 "crss_ka_crashes": kat.estimate,
                 "crss_ka_crashes_se": kat.se,
+                "crss_ka_unknown_crashes": unk.estimate,
+                "crss_ka_unknown_crashes_se": unk.se,
             }
         )
     return ka_part, crash_part, q, pd.DataFrame(rows)
@@ -811,9 +828,15 @@ def _crss_person_baseline(crss_person: pd.DataFrame, years: tuple[int, ...]) -> 
     age_col = "age_im" if "age_im" in crss_person.columns else "age"
     dom = crss_person["YEAR"].isin(years).to_numpy() & unrestrained_lpv_mask(crss_person, age_col)
     ka = _flag(crss_person[ka_col], 1).astype(float)
+    ka_unknown = crss_person[ka_col].isna().to_numpy().astype(float)
     note = (
         "LOW reliability: belt use of surviving occupants is largely self-reported and likely "
         "over-reported, so unrestrained occupants are under-counted"
+    )
+    ka_note = (
+        note + "; persons with unknown injury severity (INJSEV_IM 5 or 9) are neither KA nor "
+        "non-KA: they are not counted as KA (lower bound) and are shown separately "
+        "(crss.ka_unknown_persons_per_year.unrestrained_lpv)"
     )
     return {
         "crss.persons_per_year.unrestrained_lpv": _crss_quantity(
@@ -836,7 +859,18 @@ def _crss_person_baseline(crss_person: pd.DataFrame, years: tuple[int, ...]) -> 
             "unrestrained LPV occupants killed or seriously injured/year",
             src,
             "low",
-            note,
+            ka_note,
+        ),
+        "crss.ka_unknown_persons_per_year.unrestrained_lpv": _crss_quantity(
+            "crss.ka_unknown_persons_per_year.unrestrained_lpv",
+            design,
+            ka_unknown,
+            dom,
+            k,
+            "unrestrained LPV occupants with unknown injury severity/year",
+            src,
+            "low",
+            "neither KA nor non-KA (INJSEV_IM 5 or 9); excluded from the KA count above",
         ),
     }
 
@@ -861,6 +895,15 @@ ASSOCIATION_SPECS: dict[str, tuple[str, dict[str, str], tuple[str, str, str]]] =
     ),
 }
 BELT_PRIMARY = "fatality_risk_reduction_belt_given_fatal_crash"
+# Output tables read_associations() reads (declared as inputs of the tables built from them).
+ASSOCIATION_INPUTS: list[str] = [
+    *dict.fromkeys(
+        f"outputs/tables/severity/{tmpl.format(o=o)}.csv"
+        for o in ("fatal", "ka")
+        for tmpl, _, _ in ASSOCIATION_SPECS.values()
+    ),
+    "outputs/tables/matched/belt_effect.csv",
+]
 
 
 def _read_output(module: str, name: str) -> pd.DataFrame | None:
@@ -1202,8 +1245,7 @@ def run(window: tuple[int, int] = DEFAULT_WINDOW) -> dict[str, Any]:
             "data/processed/fars_person.parquet",
             "data/processed/crss_crash.parquet",
             "data/processed/crss_person.parquet",
-            "outputs/tables/severity/*.csv",
-            "outputs/tables/matched/belt_effect.csv",
+            *ASSOCIATION_INPUTS,
         ],
     }
     meta = {"module": "nhtsa_stats.simulation.baseline"}
@@ -1216,8 +1258,10 @@ def run(window: tuple[int, int] = DEFAULT_WINDOW) -> dict[str, Any]:
         "with provenance (observed / estimated / adjusted_association) and source",
         unit="see 'unit' column",
         method="FARS counts (window mean); CRSS design-based totals (Taylor linearisation, "
-        "t with 42 df; suppressed if n<30, flagged unstable if RSE>30%); associations copied "
-        "from the severity and matched modules",
+        "t with 42 df; suppressed if n<30, flagged unstable if RSE>30%); KA counts include only "
+        "crashes/persons with a known KA status (unknown, MAXSEV_IM/INJSEV_IM 5 or 9, is shown "
+        "separately, not counted as non-KA); associations copied from the severity and matched "
+        "modules",
         extra={**meta, "baseline": base.to_dict()},
         **common,
     )
@@ -1226,7 +1270,8 @@ def run(window: tuple[int, int] = DEFAULT_WINDOW) -> dict[str, Any]:
         MODULE,
         "baseline_partitions",
         description="Overlap structure: annual deaths / fatal crashes (FARS, observed) and KA / "
-        "all crashes (CRSS, estimated) cross-classified by target-segment membership",
+        "all crashes (CRSS, estimated) cross-classified by target-segment membership; KA cells "
+        "count crashes with known KA status only (unknown status is not counted as non-KA)",
         unit="deaths or crashes per year",
         method="Cells = combinations of segments; FARS alcohol membership is the mean over "
         "10 BAC implicates, so cells are expected counts. CRSS cells: design-based SE "
@@ -1241,7 +1286,8 @@ def run(window: tuple[int, int] = DEFAULT_WINDOW) -> dict[str, Any]:
         MODULE,
         "baseline_annual",
         description="Observed FARS deaths and fatal crashes by year and segment; CRSS estimated "
-        "crashes and KA crashes by year (with SE)",
+        "crashes and KA crashes by year (with SE); crashes with unknown KA status (MAXSEV_IM 5 "
+        "or 9) are not counted as KA or as non-KA and are shown in their own column",
         unit="per year",
         extra=meta,
         **common,

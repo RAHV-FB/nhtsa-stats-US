@@ -768,10 +768,8 @@ def _stub_factorial(monkeypatch, p_values):
     monkeypatch.setattr(factorial, "interaction_table", inter)
 
 
-def test_run_analyses_assembly_and_holm_only_for_registered(monkeypatch):
-    n = len(multifactor.ANALYSES)
-    # One p-value per analysis, in order; the registered ones come first in ANALYSES.
-    p = [0.001, 0.01, 0.02, 0.5, 0.04, 0.03] + [0.0001] * (n - 6)
+def _run_stubbed_analyses(monkeypatch, p, selected=(True, True, True), outcome=(1.0, 1.0, 1.0)):
+    """run_analyses with the model stubbed to return ``p`` (one per analysis, in order)."""
     _stub_factorial(monkeypatch, p)
     frame = pd.DataFrame(
         {
@@ -795,6 +793,8 @@ def test_run_analyses_assembly_and_holm_only_for_registered(monkeypatch):
     big = pd.DataFrame(index=range(3))
     for c in frame.columns:
         big[c] = ["x"] * 3
+    for a in multifactor.ANALYSES:  # outcome columns (``ka`` may be unknown, i.e. NaN)
+        big[a.outcome] = list(outcome)
 
     class D:
         def subset(self, mask):
@@ -811,7 +811,7 @@ def test_run_analyses_assembly_and_holm_only_for_registered(monkeypatch):
                 a.population,
                 a.outcome_label,
                 a.frame,
-                lambda d: np.ones(len(d), bool),
+                lambda d: np.asarray(selected, bool),
                 a.factors,
                 a.covariates,
                 a.outcome,
@@ -824,6 +824,14 @@ def test_run_analyses_assembly_and_holm_only_for_registered(monkeypatch):
     out = multifactor.run_analyses(
         {"crash": (big, D()), "driver": (big, D()), "person": (big, D())}
     )
+    return out
+
+
+def test_run_analyses_assembly_and_holm_only_for_registered(monkeypatch):
+    n = len(multifactor.ANALYSES)
+    # One p-value per analysis, in order; the registered ones come first in ANALYSES.
+    p = [0.001, 0.01, 0.02, 0.5, 0.04, 0.03] + [0.0001] * (n - 6)
+    out = _run_stubbed_analyses(monkeypatch, p)
     meta = out["analyses"]
     assert (
         len(meta) == n and meta["n_suppressed_cells"].eq(1).all() and meta["n_events"].eq(7).all()
@@ -874,3 +882,59 @@ def test_add_configuration_replaces_existing_columns_and_takes_vehicle_max(tmp_p
     assert out["veh_rollover"].tolist()[:2] == [1.0, 1.0]  # vehicle-level max over occupants
     assert np.isnan(out["veh_rollover"].iloc[2])
     assert out["crash_type"].tolist() == ["mv_angle", "mv_angle", "sv_rollover_first"]
+
+
+def test_holm_family_is_fixed_when_a_registered_contrast_is_not_estimable(monkeypatch):
+    """A registered contrast with NaN p stays in the family (m = number registered): it cannot be
+    rejected, its own adjusted p is NaN, and the others are adjusted over m, not over m - 1."""
+    n = len(multifactor.ANALYSES)
+    p = [0.001, 0.012, np.nan, 0.5, 0.04, 0.03] + [0.0001] * (n - 6)
+    out = _run_stubbed_analyses(monkeypatch, p)
+    inter_df = out["interactions"]
+    reg = inter_df["registered"]
+    assert reg.sum() == 6
+    adj = inter_df.loc[reg, "additive_contrast_p_holm"].to_numpy()
+    assert np.isnan(adj[2]) and np.isnan(inter_df.loc[reg, "additive_contrast_p"].to_numpy()[2])
+    # sorted finite p: .001, .012, .03, .04, .5 with m = 6 (not 5): 6*.001, 5*.012, 4*.03,
+    # 3*.04 (running max), 2*.5
+    expected = [0.006, 0.06, np.nan, 1.0, 0.12, 0.12]
+    assert adj == pytest.approx(expected, nan_ok=True)
+    # over the 5 estimable tests only, the second would read 4*.012 = .048 and look significant
+    assert adj[1] >= 0.05
+
+
+def test_share_of_frame_and_n_use_the_same_rows(monkeypatch):
+    """share_of_frame counts rows with a known outcome only (``ka`` is unknown for some crashes
+    where ``fatal`` is known), as ``n`` does: selected-and-known / known, not selected / all."""
+    n = len(multifactor.ANALYSES)
+    out = _run_stubbed_analyses(
+        monkeypatch,
+        [0.01] * n,
+        selected=(True, True, False),
+        outcome=(np.nan, 1.0, 0.0),  # row 0 selected but unknown, row 2 known but not selected
+    )
+    assert out["analyses"]["share_of_frame"].to_numpy() == pytest.approx([0.5] * n)  # 1 of 2
+
+
+def test_detected_directions():
+    nan = np.nan
+    df = pd.DataFrame(
+        {
+            "registered": [True, True, True, True, True, True, False],
+            "flag": [nan, nan, nan, nan, "withheld: a combination lacks support", nan, nan],
+            "additive_contrast": [0.02, -0.01, 0.01, 0.0, nan, nan, 0.02],
+            "multiplicative_ratio": [0.5, 1.5, 0.8, 1.0, nan, nan, 0.5],
+            "additive_contrast_p_holm": [0.01, 0.2, 0.049, 0.001, nan, nan, nan],
+            "multiplicative_ratio_p_holm": [0.01, 0.03, 0.5, 0.5, nan, nan, nan],
+        }
+    )
+    got = multifactor.detected_directions(df).tolist()
+    assert got == [
+        "super-additive and sub-multiplicative",
+        "super-multiplicative",
+        "super-additive",
+        "",
+        "withheld",
+        "",
+        "",
+    ]

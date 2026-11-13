@@ -21,7 +21,7 @@ Method
     model (exposure + blocks in S) is fitted and the exposure's *standardised* risk ratio is
     computed from predictive margins: the weighted mean predicted risk with every crash set
     to "exposed" divided by the same with every crash set to "reference" (g-computation over
-    the observed covariate distribution of all crashes).  Unlike odds ratios, standardised
+    the observed covariate distribution of the crashes where the outcome is known).  Unlike odds ratios, standardised
     risk ratios are collapsible, so a change between nested models reflects the covariates,
     not non-collapsibility.  With all 2^k subsets available:
 
@@ -896,7 +896,7 @@ def _meta(description: str, method: str, outcome: str = "fatal; ka") -> dict:
 
 LATTICE_METHOD = (
     "Survey-weighted logistic models (exposure + every subset of covariate blocks; ridge 0.01 on "
-    "mean-1 weights; exact cell compression); standardised predictive margins over all crashes; "
+    "mean-1 weights; exact cell compression); standardised predictive margins over the crashes where the outcome is known; "
     "risk ratio = margin(all exposed) / margin(all reference); Taylor-linearised influence summed "
     "within 67 PSUs / 25 strata, t with 42 df; shares and Shapley values by the delta method "
     "across models"

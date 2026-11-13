@@ -1852,20 +1852,20 @@ def licence_trend_table(deaths: pl.DataFrame, drivers: pl.DataFrame) -> pl.DataF
 # Inputs actually read: the death frame uses every FARS file below; the driver frame (licence and
 # record tables) only person, vehicle, veh_aux and miper.
 _INPUTS_DEATH = [
-    "FARS person (INJ_SEV, PER_TYP, AGE, SEX, LOCATION, STR_VEH)",
-    "FARS per_aux",
-    "FARS vehicle (L_STATUS, PREV_*, MOD_YEAR, VSPD_LIM)",
-    "FARS veh_aux",
-    "FARS accident (LGT_COND)",
-    "FARS acc_aux",
-    "FARS midrvacc",
-    "FARS miper",
+    "data/interim/FARS/person",  # INJ_SEV, PER_TYP, AGE, SEX, LOCATION, STR_VEH
+    "data/interim/FARS/per_aux",
+    "data/interim/FARS/vehicle",  # L_STATUS, PREV_*, MOD_YEAR, VSPD_LIM
+    "data/interim/FARS/veh_aux",
+    "data/interim/FARS/accident",  # LGT_COND
+    "data/interim/FARS/acc_aux",
+    "data/interim/FARS/midrvacc",
+    "data/interim/FARS/miper",
 ]
 _INPUTS_DRIVERS = [
-    "FARS person (PER_TYP)",
-    "FARS vehicle (L_STATUS, PREV_*)",
-    "FARS veh_aux (A_SPVEH)",
-    "FARS miper",
+    "data/interim/FARS/person",  # PER_TYP
+    "data/interim/FARS/vehicle",  # L_STATUS, PREV_*
+    "data/interim/FARS/veh_aux",  # A_SPVEH
+    "data/interim/FARS/miper",
 ]
 _DRIVER_TABLES = {
     "prior_dwi_by_state",

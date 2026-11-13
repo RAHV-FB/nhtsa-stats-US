@@ -349,6 +349,14 @@ def run() -> dict[str, pd.DataFrame]:
             "bias_sensitivity",
             description="Attributable fractions after QBA bias factors for differential ascertainment",
             outcome="fatal",
-            **common,
+            **{
+                **common,
+                # also read back by bias_sensitivity (QBA-shrunk risk ratios)
+                "inputs": [
+                    *common["inputs"],
+                    "outputs/tables/measurement/qba_grid.csv",
+                    "outputs/tables/severity/fatal_crude_vs_adjusted.csv",
+                ],
+            },
         )
     return out

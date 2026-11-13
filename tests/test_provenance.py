@@ -6,9 +6,10 @@ import hashlib
 import json
 
 import pandas as pd
+import pytest
 
 from nhtsa_stats import cli, config
-from nhtsa_stats.reporting import io
+from nhtsa_stats.reporting import io, provenance
 
 
 def _make_pkg(root):
@@ -25,39 +26,44 @@ def _make_pkg(root):
     (root / "analysis" / "solo.py").write_text("X = 1\n")
 
 
+def _snap(root):
+    return provenance.Snapshot(root, "tp")
+
+
 def test_file_sha256(tmp_path):
     f = tmp_path / "a.py"
     f.write_bytes(b"x = 1\n")
-    assert io.file_sha256(f) == hashlib.sha256(b"x = 1\n").hexdigest()
+    assert provenance.file_sha256(f) == hashlib.sha256(b"x = 1\n").hexdigest()
 
 
-def test_module_source_sha256_matches_file_and_handles_unknown():
-    path = io.module_source_path("nhtsa_stats.reporting.io")
-    assert path is not None and path.name == "io.py"
-    assert io.module_source_sha256("nhtsa_stats.reporting.io") == io.file_sha256(path)
-    assert io.module_source_sha256("nhtsa_stats.analysis.no_such_module") is None
+def test_real_snapshot_has_modules_and_raw_hash():
+    snap = provenance.take_snapshot()
+    name = "nhtsa_stats.reporting.io"
+    assert snap.sources[name].path.name == "io.py"
+    assert snap.source_sha256(name) == provenance.file_sha256(snap.sources[name].path)
+    assert snap.source_sha256("nhtsa_stats.analysis.no_such_module") is None
+    assert snap.code_sha256("nhtsa_stats.analysis.no_such_module") is None
 
 
-def test_package_sha256_depends_on_paths_and_contents(tmp_path):
-    (tmp_path / "pkg").mkdir()
-    (tmp_path / "pkg" / "a.py").write_text("a = 1\n")
-    (tmp_path / "b.py").write_text("b = 2\n")
-    (tmp_path / "ignored.txt").write_text("not python")
-    base = io.package_sha256(tmp_path)
-    assert base == io.package_sha256(tmp_path)
-    (tmp_path / "ignored.txt").write_text("changed")
-    assert io.package_sha256(tmp_path) == base
-    (tmp_path / "b.py").write_text("b = 3\n")
-    changed = io.package_sha256(tmp_path)
+def test_package_sha256_ignores_comments_but_not_code_or_paths(tmp_path):
+    root = tmp_path / "tp"
+    _make_pkg(root)
+    base = _snap(root).package_sha256()
+    assert base == _snap(root).package_sha256()
+    (root / "util.py").write_text("# comment\nU = 1\n")
+    assert _snap(root).package_sha256() == base
+    (root / "util.py").write_text("U = 3\n")
+    changed = _snap(root).package_sha256()
     assert changed != base
-    (tmp_path / "b.py").rename(tmp_path / "c.py")
-    assert io.package_sha256(tmp_path) != changed
+    (root / "util.py").rename(root / "util2.py")
+    assert _snap(root).package_sha256() != changed
 
 
 def test_module_closure_follows_relative_absolute_and_lazy_imports(tmp_path):
     root = tmp_path / "tp"
     _make_pkg(root)
-    assert io.module_closure("tp.analysis.mod", root) == [
+    snap = _snap(root)
+    assert snap.closure("tp.analysis.mod") == [
         "tp",
         "tp.analysis",
         "tp.analysis.helper",
@@ -65,52 +71,168 @@ def test_module_closure_follows_relative_absolute_and_lazy_imports(tmp_path):
         "tp.other",
         "tp.util",
     ]
-    assert io.module_closure("tp.analysis.solo", root) == ["tp", "tp.analysis", "tp.analysis.solo"]
-    assert io.module_closure("tp.analysis.nope", root) == []
+    assert snap.closure("tp.analysis.solo") == ["tp", "tp.analysis", "tp.analysis.solo"]
+    assert snap.closure("tp.analysis.nope") == []
 
 
 def test_code_sha256_changes_with_imported_helper_only_for_dependents(tmp_path):
     root = tmp_path / "tp"
     _make_pkg(root)
-    mod, solo = io.code_sha256("tp.analysis.mod", root), io.code_sha256("tp.analysis.solo", root)
+    s0 = _snap(root)
+    mod, solo = s0.code_sha256("tp.analysis.mod"), s0.code_sha256("tp.analysis.solo")
     assert mod and solo and mod != solo
-    assert io.code_sha256("tp.analysis.nope", root) is None
+    assert s0.code_sha256("tp.analysis.nope") is None
     (root / "util.py").write_text("U = 2\n")  # transitive, lazy import
-    assert io.code_sha256("tp.analysis.mod", root) != mod
-    assert io.code_sha256("tp.analysis.solo", root) == solo
-    mod2 = io.code_sha256("tp.analysis.mod", root)
+    s1 = _snap(root)
+    assert s1.code_sha256("tp.analysis.mod") != mod
+    assert s1.code_sha256("tp.analysis.solo") == solo
     (root / "analysis" / "mod.py").write_text(
-        "from . import helper\nimport tp.other  # noqa\n# x\n"
+        "from . import helper\nimport tp.other  # noqa\nZ = 1\n"
     )
-    assert io.code_sha256("tp.analysis.mod", root) != mod2
+    assert _snap(root).code_sha256("tp.analysis.mod") != s1.code_sha256("tp.analysis.mod")
 
 
-def test_real_modules_depend_on_shared_helpers():
-    closure = io.module_closure("nhtsa_stats.analysis.severity")
-    assert "nhtsa_stats.analysis.severity" in closure
-    assert "nhtsa_stats.reporting.io" in closure and "nhtsa_stats.config" in closure
+def test_edit_after_snapshot_does_not_change_recorded_hash(tmp_path):
+    root = tmp_path / "tp"
+    _make_pkg(root)
+    snap = _snap(root)
+    before = snap.code_sha256("tp.analysis.mod")
+    (root / "util.py").write_text("U = 99\n")  # edited while the run is in progress
+    (root / "analysis" / "mod.py").write_text("raise SystemExit\n")
+    assert snap.code_sha256("tp.analysis.mod") == before
+    assert len(snap.closure("tp.analysis.mod")) == 6
+    assert _snap(root).code_sha256("tp.analysis.mod") != before
 
 
-def test_snapshot_is_used_instead_of_current_source(monkeypatch):
-    monkeypatch.setattr(io, "_CODE_SNAPSHOTS", {})
-    monkeypatch.setitem(io._CODE_SNAPSHOTS, "nhtsa_stats.x", "snap")
-    assert io.current_code_sha256("nhtsa_stats.x") == "snap"
-    snap = io.snapshot_code_sha256("nhtsa_stats.reporting.io")
-    assert snap == io.code_sha256("nhtsa_stats.reporting.io")
+def test_process_snapshot_is_taken_once(monkeypatch):
+    monkeypatch.setattr(provenance, "_SNAPSHOT", None)
+    first = provenance.take_snapshot()
+    assert provenance.take_snapshot() is first
+    assert provenance.current_code_sha256("nhtsa_stats.reporting.io") == first.code_sha256(
+        "nhtsa_stats.reporting.io"
+    )
+
+
+def test_comment_and_docstring_edits_keep_digest_code_edits_change_it(tmp_path):
+    root = tmp_path / "tp"
+    _make_pkg(root)
+    base = _snap(root).code_sha256("tp.analysis.helper")
+    (root / "util.py").write_text('"""Doc."""\n# a comment\n\nU   =   1\n')
+    assert _snap(root).code_sha256("tp.analysis.helper") == base
+    (root / "analysis" / "helper.py").write_text(
+        '"""Module doc."""\n\n\ndef f():\n    """Function doc."""\n    from tp import util  # c\n'
+        "    return util.U\n"
+    )
+    assert _snap(root).code_sha256("tp.analysis.helper") == base
+    (root / "util.py").write_text("U = 2\n")
+    assert _snap(root).code_sha256("tp.analysis.helper") != base
+    # a string literal that is not a docstring (e.g. sidecar method text) counts as code
+    (root / "util.py").write_text("U = 1\nMETHOD = 'text'\n")
+    with_text = _snap(root).code_sha256("tp.analysis.helper")
+    (root / "util.py").write_text("U = 1\nMETHOD = 'other text'\n")
+    assert _snap(root).code_sha256("tp.analysis.helper") != with_text
+
+
+def test_syntax_and_decode_errors_raise(tmp_path):
+    root = tmp_path / "tp"
+    _make_pkg(root)
+    (root / "util.py").write_text("def broken(:\n")
+    snap = _snap(root)  # the snapshot itself succeeds; the closure that needs util raises
+    assert snap.code_sha256("tp.analysis.solo")
+    with pytest.raises(provenance.ProvenanceError, match=r"tp\.util"):
+        snap.code_sha256("tp.analysis.mod")
+    (root / "util.py").write_bytes(b"U = '\xff\xfe'\n# coding: utf-8\n")
+    with pytest.raises(provenance.ProvenanceError):
+        _snap(root).code_sha256("tp.analysis.mod")
+
+
+def test_real_closure_has_lazy_imports_and_excludes_provenance():
+    snap = provenance.take_snapshot()
+    for mod in ("nhtsa_stats.analysis.severity", "nhtsa_stats.reporting.io"):
+        closure = snap.closure(mod)
+        assert mod in closure
+        assert "nhtsa_stats.config" in closure
+        assert "nhtsa_stats.reporting.provenance" not in closure
+    assert "nhtsa_stats.reporting.io" in snap.closure("nhtsa_stats.analysis.severity")
+    assert snap.closure("nhtsa_stats.reporting.provenance") == []
+
+
+def test_toy_provenance_module_is_excluded(tmp_path):
+    root = tmp_path / "tp"
+    _make_pkg(root)
+    (root / "reporting").mkdir()
+    (root / "reporting" / "__init__.py").write_text("")
+    (root / "reporting" / "provenance.py").write_text("P = 1\n")
+    (root / "analysis" / "solo.py").write_text("from tp.reporting import provenance\n")
+    snap = _snap(root)
+    assert snap.closure("tp.analysis.solo") == [
+        "tp",
+        "tp.analysis",
+        "tp.analysis.solo",
+        "tp.reporting",
+    ]
+    before = snap.code_sha256("tp.analysis.solo")
+    (root / "reporting" / "provenance.py").write_text("P = 2\n")
+    assert _snap(root).code_sha256("tp.analysis.solo") == before
 
 
 def test_input_sha256_files_dirs_and_globs(tmp_path, monkeypatch):
-    monkeypatch.setattr(config, "PROJECT_ROOT", tmp_path)
-    monkeypatch.setattr(io, "_INPUT_HASHES", {})
-    (tmp_path / "data").mkdir()
-    (tmp_path / "data" / "a.parquet").write_bytes(b"aaa")
-    (tmp_path / "data" / "sub").mkdir()
-    (tmp_path / "data" / "sub" / "b.bin").write_bytes(b"bbb")
-    out = io.inputs_sha256(
-        ["data/a.parquet", "data/sub", "data/*.parquet", "FARS person (text)", "data/missing"]
-    )
-    assert set(out) == {"data/a.parquet", "data/sub", "data/*.parquet"}
+    monkeypatch.setattr(config, "DATA_DIR", tmp_path / "d")
+    monkeypatch.setattr(config, "TABLES_DIR", tmp_path / "o" / "tables")
+    monkeypatch.setattr(config, "OUTPUT_DIR", tmp_path / "o")
+    monkeypatch.setattr(provenance, "_INPUT_HASHES", {})
+    d = tmp_path / "d"
+    (d / "sub").mkdir(parents=True)
+    (d / "a.parquet").write_bytes(b"aaa")
+    (d / "sub" / "b.bin").write_bytes(b"bbb")
+    (tmp_path / "o" / "tables" / "m").mkdir(parents=True)
+    (tmp_path / "o" / "tables" / "m" / "t.csv").write_bytes(b"x\n1\n")
+    specs = [
+        "data/a.parquet",
+        "data/sub",
+        "data/*.parquet",
+        "outputs/tables/m/t.csv",
+        "outputs/tables/m/*",
+        "FARS person (text)",
+        "data/missing",
+        "outputs/tables/m/missing.csv",
+    ]
+    out = provenance.inputs_sha256(specs)
+    assert set(out) == set(specs[:5])
     assert out["data/a.parquet"] != out["data/sub"]
+    before = out["outputs/tables/m/t.csv"]
+    (tmp_path / "o" / "tables" / "m" / "t.csv").write_bytes(b"x\n2\n")  # outputs are not cached
+    assert provenance.input_sha256("outputs/tables/m/t.csv") != before
+
+
+def test_cli_main_takes_the_snapshot_first(monkeypatch):
+    monkeypatch.setattr(provenance, "_SNAPSHOT", None)
+    cli.main(["list"])
+    assert provenance._SNAPSHOT is not None
+
+
+def test_declared_inputs_are_real_paths_and_cover_known_reads():
+    """Descriptive strings in ``inputs`` are never hashed; a declared path must be a path."""
+    import re
+    from pathlib import Path
+
+    src = Path(provenance.__file__).resolve().parents[1]
+    bad = []
+    for f in src.rglob("*.py"):
+        for m in re.finditer(r'"((?:data|outputs)/[^"\n]*)"', f.read_text()):
+            if "{" not in m.group(1) and re.match(
+                r"(?:data|outputs)/[\w/.*]+ \(", m.group(1)
+            ):  # "path (what we use)"
+                bad.append(f"{f.name}: {m.group(1)}")
+    assert not bad, bad
+    from nhtsa_stats.analysis import burden, speeding
+    from nhtsa_stats.simulation import baseline
+
+    assert "data/processed/fars_driver.parquet" in speeding.INPUT
+    assert "outputs/tables/severity/fatal_crude_vs_adjusted.csv" in baseline.ASSOCIATION_INPUTS
+    assert (
+        burden
+    )  # imported for the bias_sensitivity inputs (outputs/tables/measurement/qba_grid.csv)
 
 
 def _write(ns_name, tmp_path, monkeypatch, inputs=None):
@@ -128,18 +250,18 @@ def _write(ns_name, tmp_path, monkeypatch, inputs=None):
 
 
 def test_save_table_and_json_record_hashes_and_status_flags_changes(tmp_path, monkeypatch):
-    monkeypatch.setattr(io, "_CODE_SNAPSHOTS", {})
-    monkeypatch.setattr(io, "_INPUT_HASHES", {})
+    monkeypatch.setattr(provenance, "_INPUT_HASHES", {})
     data = tmp_path / "proj" / "data"
     data.mkdir(parents=True)
     (data / "in.parquet").write_bytes(b"v1")
-    monkeypatch.setattr(config, "PROJECT_ROOT", tmp_path / "proj")
+    monkeypatch.setattr(config, "DATA_DIR", data)
     side = _write("nhtsa_stats.reporting.io", tmp_path / "tables", monkeypatch, ["data/in.parquet"])
     meta = json.loads(side.read_text())
-    code = io.code_sha256("nhtsa_stats.reporting.io")
+    snap = provenance.take_snapshot()
+    code = snap.code_sha256("nhtsa_stats.reporting.io")
     assert meta["code_sha256"] == code
-    assert meta["source_sha256"] == io.module_source_sha256("nhtsa_stats.reporting.io")
-    assert meta["package_sha256"] == io.package_sha256()
+    assert meta["source_sha256"] == snap.source_sha256("nhtsa_stats.reporting.io")
+    assert meta["package_sha256"] == snap.package_sha256()
     assert set(meta["inputs_sha256"]) == {"data/in.parquet"}
     j = json.loads((side.parent / "j.json").read_text())
     assert j["x"] == 1 and j["_provenance"]["code_sha256"] == code
@@ -155,7 +277,7 @@ def test_save_table_and_json_record_hashes_and_status_flags_changes(tmp_path, mo
 
     meta["code_sha256"] = code
     side.write_text(json.dumps(meta))
-    monkeypatch.setattr(io, "_INPUT_HASHES", {})
+    monkeypatch.setattr(provenance, "_INPUT_HASHES", {})
     (data / "in.parquet").write_bytes(b"v2")
     assert cli.stale_tables().inputs_changed == ["m/t.csv"]
 

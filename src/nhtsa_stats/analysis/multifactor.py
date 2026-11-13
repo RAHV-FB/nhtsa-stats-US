@@ -743,6 +743,27 @@ def speeding_alcohol_strata_configuration(
 
 
 # --------------------------------------------------------------------------------------
+def detected_directions(inter_df: pd.DataFrame, alpha: float = 0.05) -> pd.Series:
+    """Text column ``detected``: the direction of each registered contrast that is detected
+    (Holm-adjusted p < ``alpha``) on the additive and/or multiplicative scale, joined with
+    " and "; ``withheld`` where the table withholds the contrast; empty otherwise."""
+
+    def one(r) -> str:
+        if not r["registered"]:
+            return ""
+        if str(r.get("flag") or "").startswith("withheld"):
+            return "withheld"
+        found = []
+        add, mult = r.get("additive_contrast", np.nan), r.get("multiplicative_ratio", np.nan)
+        if r["additive_contrast_p_holm"] < alpha and add != 0:
+            found.append("super-additive" if add > 0 else "sub-additive")
+        if r["multiplicative_ratio_p_holm"] < alpha and mult != 1:
+            found.append("super-multiplicative" if mult > 1 else "sub-multiplicative")
+        return " and ".join(found)
+
+    return inter_df.apply(one, axis=1).astype(object)
+
+
 def run_analyses(frames: dict) -> dict[str, pd.DataFrame]:
     margins, inter, singles, meta = [], [], [], []
     for a in ANALYSES:
@@ -750,6 +771,10 @@ def run_analyses(frames: dict) -> dict[str, pd.DataFrame]:
         mask = a.select(df)
         sub, sd = df.loc[mask].reset_index(drop=True), design.subset(mask)
         res = factorial.fit_factorial(sub, sd, a.factors, a.covariates, a.outcome)
+        # n and share are counted over the same rows: those with a known outcome (``ka`` is
+        # unknown for MAXSEV_IM 5 where ``fatal`` is known), selected / all in the frame.
+        known = df[a.outcome].notna().to_numpy()
+        share = float((mask & known).sum() / known.sum()) if known.any() else float("nan")
         for tab, sink in (
             (factorial.margins_table(res), margins),
             (factorial.interaction_table(res), inter),
@@ -770,7 +795,7 @@ def run_analyses(frames: dict) -> dict[str, pd.DataFrame]:
                 "covariates": ",".join(a.covariates),
                 "n": res.n_rows,
                 "n_events": res.n_events,
-                "share_of_frame": float(mask.mean()),
+                "share_of_frame": share,
                 "n_params": res.meta["n_params"],
                 "converged": res.meta["converged"],
                 "n_suppressed_cells": len(res.suppressed),
@@ -783,6 +808,7 @@ def run_analyses(frames: dict) -> dict[str, pd.DataFrame]:
     for col in ("additive_contrast_p", "multiplicative_ratio_p"):
         inter_df[col + "_holm"] = np.nan
         inter_df.loc[reg, col + "_holm"] = factorial.holm(inter_df.loc[reg, col]).to_numpy()
+    inter_df["detected"] = detected_directions(inter_df)
     return {
         "margins": pd.concat(margins, ignore_index=True),
         "interactions": inter_df,

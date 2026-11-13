@@ -111,7 +111,7 @@ from sklearn.ensemble import HistGradientBoostingClassifier, RandomForestClassif
 from sklearn.linear_model import LogisticRegression
 
 from nhtsa_stats import config
-from nhtsa_stats.analysis import data, specs
+from nhtsa_stats.analysis import data, multiplicity, specs
 from nhtsa_stats.analysis.interactions import PAIRS
 from nhtsa_stats.analysis.survey import (
     ModelSpec,
@@ -129,12 +129,19 @@ MODULE_PATH = "nhtsa_stats.models.severity_ml"
 MODEL_DIR = config.MODELS_DIR / MODULE
 OUTCOMES: tuple[str, ...] = ("fatal", "ka")
 OUTCOME_DEFINITIONS = {
-    "fatal": "MAXSEV_IM 4 (K) vs 0-3 (O/C/B/A); 5/6/8 excluded",
-    "ka": "MAXSEV_IM 3-4 (K or A) vs 0-2 (O/C/B); 5/6/8 excluded",
+    "fatal": "MAXSEV_IM 4 (K) vs 0-3 (O/C/B/A) and 5/6/8 (coded 0: no crash death is possible); "
+    "only 9 (unknown) is excluded",
+    "ka": "MAXSEV_IM 3-4 (K or A) vs 0-2 (O/C/B) and 6/8 (coded 0); 5 (injured, severity "
+    "unknown: a serious injury is possible) and 9 are unknown and excluded",
 }
+OUTCOME_NOTE = (
+    "fatal metrics use every crash with a known fatal outcome; ka metrics use only the crashes "
+    "where ka is known (MAXSEV_IM 5 and 9 excluded), so the two outcomes differ in n"
+)
 POPULATION = (
     "CRSS police-reported crashes (all severities, national probability sample) with a "
-    "determinable maximum severity; train 2016-2021, validation 2022, test 2023-2024"
+    "determinable maximum severity (fatal: MAXSEV_IM 9 excluded; ka: MAXSEV_IM 5 and 9 "
+    "excluded, so ka rows are a subset); train 2016-2021, validation 2022, test 2023-2024"
 )
 N_BOOT = 200
 N_JOBS = 2
@@ -1162,17 +1169,21 @@ def temporal_stability(
                 "hgb": fit_hgb(pre, train, outcome, params, stage),
             }
             for year in range(2020, 2025):
-                ev = df[(df["YEAR"] == year).to_numpy() & known]
+                # Domain estimation as in ``evaluate``: the design (strata, PSUs) is built from
+                # every crash of the year; rows with an unknown outcome are masked, not dropped.
+                yr = df[(df["YEAR"] == year).to_numpy()]
                 cidx, cl_stratum = cluster_index(
-                    ev["PSUSTRAT"].to_numpy(), ev["PSU_VAR"].to_numpy()
+                    yr["PSUSTRAT"].to_numpy(), yr["PSU_VAR"].to_numpy()
                 )
                 mult = rao_wu_multipliers(cl_stratum, n_boot, rng)
+                d = yr[outcome].notna().to_numpy()
+                ev = yr[d]
                 for name, m in models.items():
                     gs, _, point, reps = point_and_boot(
                         m.predict(ev),
                         ev[outcome].to_numpy(),
                         ev["WEIGHT"].to_numpy(),
-                        cidx,
+                        cidx[d],
                         len(cl_stratum),
                         mult,
                     )
@@ -1837,15 +1848,9 @@ def _verdict(r: Any) -> str:
 
 
 def holm(p: np.ndarray) -> np.ndarray:
-    p = np.asarray(p, dtype=float)
-    o = np.argsort(p)
-    m = len(p)
-    adj = np.empty(m)
-    running = 0.0
-    for rank, i in enumerate(o):
-        running = max(running, (m - rank) * p[i])
-        adj[i] = min(1.0, running)
-    return adj
+    """Holm step-down over the registered tests; a non-estimable test counts as p = 1 and is
+    reported as NaN (``analysis.multiplicity``)."""
+    return multiplicity.holm(p)
 
 
 # --------------------------------------------------------------------------------------
@@ -2640,6 +2645,7 @@ def _figures(
 # --------------------------------------------------------------------------------------
 def _save(df: pd.DataFrame, name: str, description: str, **kw: Any) -> None:
     extra = {"module": MODULE_PATH, **kw.pop("extra", {})}
+    kw["method"] = f"{kw['method']}; {OUTCOME_NOTE}" if kw.get("method") else OUTCOME_NOTE
     save_table(
         df,
         MODULE,

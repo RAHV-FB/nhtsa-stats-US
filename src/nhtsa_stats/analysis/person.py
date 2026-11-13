@@ -83,7 +83,7 @@ import polars as pl
 from scipy import stats
 
 from nhtsa_stats import config
-from nhtsa_stats.analysis import data, specs
+from nhtsa_stats.analysis import data, multiplicity, specs
 from nhtsa_stats.analysis.severity import crude_table, factor_contrasts, observed_levels
 from nhtsa_stats.analysis.survey import (
     Estimate,
@@ -108,7 +108,10 @@ MIN_RESTRAINT_AGE = 8
 # for levels with zero events (e.g. occupants in pedestrian crashes) while shrinking any level
 # with >= 1,000 persons by well under 1%.
 RIDGE = 0.01
-INPUT = "data/processed/crss_person.parquet (+ young/older_driver from crss_crash.parquet)"
+INPUTS = [
+    "data/processed/crss_person.parquet",
+    "data/processed/crss_crash.parquet",  # young/older_driver flags
+]
 
 # Crash-level columns of the PRE_CRASH set that the person file does not carry.
 CRASH_ONLY_COLS: tuple[str, ...] = ("young_driver", "older_driver")
@@ -818,7 +821,7 @@ def _save(
         unit="person",
         outcome=outcome,
         method=method,
-        inputs=[INPUT],
+        inputs=INPUTS,
         extra=extra,
     )
 
@@ -979,20 +982,9 @@ def run(outcomes: Sequence[str] = OUTCOMES, interactions: bool = True) -> dict:
 
 
 def holm(p: np.ndarray) -> np.ndarray:
-    """Holm step-down adjusted p-values (NaN-safe)."""
-    p = np.asarray(p, dtype=float)
-    out = np.full_like(p, np.nan)
-    ok = np.isfinite(p)
-    pv = p[ok]
-    m = len(pv)
-    order = np.argsort(pv)
-    adj = np.empty(m)
-    running = 0.0
-    for rank, idx in enumerate(order):
-        running = max(running, min(1.0, (m - rank) * pv[idx]))
-        adj[idx] = running
-    out[ok] = adj
-    return out
+    """Holm step-down over the registered tests; a non-estimable test counts as p = 1 and is
+    reported as NaN (``analysis.multiplicity``)."""
+    return multiplicity.holm(p)
 
 
 def key_numbers(results: dict) -> dict:

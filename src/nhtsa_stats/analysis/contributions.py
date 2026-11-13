@@ -46,6 +46,7 @@ log = logging.getLogger(__name__)
 MODULE = "contributions"
 INPUT = [
     "data/processed/crss_crash.parquet",
+    "data/processed/fars_crash.parquet",
     "data/processed/fars_driver.parquet",
     "data/processed/fars_person.parquet",
 ]
@@ -1063,6 +1064,6 @@ def run(n_boot: int = 200) -> dict[str, pd.DataFrame]:
         unit="factor",
         outcome="fatal",
         method="Assembled from nested_models, predictive, burden_shapley, fars_overlap_summary and restraint_behaviour/crss_unbelted_nested",
-        inputs=INPUT,
+        inputs=[*INPUT, "outputs/tables/restraint_behaviour/crss_unbelted_nested.csv"],
     )
     return out

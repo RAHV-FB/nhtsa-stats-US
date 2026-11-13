@@ -250,7 +250,11 @@ def run() -> dict[str, pd.DataFrame]:
         unit="person killed",
         method="Census shares; alcohol groups as expected counts over 10 BAC implicates; deaths "
         "in crashes with no driver BAC implicate are a separate 'unknown' row, not 'no BAC >= .08'",
-        inputs=["FARS person (raw DOA, LAG_HRS, LAG_MINS)", "data/processed/fars_person.parquet"],
+        inputs=[
+            "data/interim/FARS/person",
+            "data/processed/fars_person.parquet",
+            "data/processed/fars_driver.parquet",
+        ],
     )
     save_table(
         out["ems_availability"],
@@ -262,7 +266,7 @@ def run() -> dict[str, pd.DataFrame]:
         method="Clock-time differences; unknown codes excluded; a negative difference counts as a "
         "midnight crossing (+24 h) only if the wrapped interval is <= 12 h, otherwise (clock "
         "error) and any interval > 12 h the interval is treated as missing",
-        inputs=["FARS accident (raw NOT_*, ARR_*, HOSP_*)"],
+        inputs=["data/interim/FARS/accident"],
     )
     save_table(
         out["identifiability"],
